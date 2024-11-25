@@ -1,0 +1,474 @@
+<html><head><base href="https://websim.ai" />
+    <title>Realm of Dragons &amp; Dungeons</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap');
+
+        body {
+            font-family: 'MedievalSharp', cursive;
+            background-image: url('https://wallpapercave.com/wp/wp4325537.jpg');
+            background-size: cover;
+            background-attachment: fixed;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #d4af37;
+        }
+        .container {
+            background-color: rgba(20, 20, 20, 0.8);
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+            padding: 20px;
+            width: 95%;
+            max-width: 1400px;
+            border: 2px solid #d4af37;
+            display: flex;
+            flex-direction: column;
+        }
+        .game-area {
+            display: flex;
+            gap: 20px;
+        }
+        .chat-area {
+            flex: 2;
+        }
+        .side-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .stats-area, .quest-area, .journal-area {
+            background-color: rgba(30, 30, 30, 0.7);
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid #d4af37;
+        }
+        .chat-box {
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #d4af37;
+            padding: 10px;
+            margin-bottom: 20px;
+            background-color: rgba(30, 30, 30, 0.7);
+            scrollbar-width: thin;
+            scrollbar-color: #d4af37 #2c2c2c;
+        }
+        .chat-box::-webkit-scrollbar {
+            width: 8px;
+        }
+        .chat-box::-webkit-scrollbar-track {
+            background: #2c2c2c;
+        }
+        .chat-box::-webkit-scrollbar-thumb {
+            background-color: #d4af37;
+            border-radius: 20px;
+            border: 2px solid #2c2c2c;
+        }
+        .input-area {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        #user-input {
+            padding: 10px;
+            font-size: 16px;
+            background-color: #2c2c2c;
+            border: 1px solid #d4af37;
+            color: #d4af37;
+            font-family: 'MedievalSharp', cursive;
+        }
+        #send-button, .action-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #d4af37;
+            color: #2c2c2c;
+            border: none;
+            cursor: pointer;
+            font-family: 'MedievalSharp', cursive;
+            transition: all 0.3s ease;
+        }
+        #send-button:hover, .action-button:hover {
+            background-color: #c19b2e;
+        }
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 18px;
+        }
+        .user {
+            background-color: rgba(212, 175, 55, 0.2);
+            text-align: right;
+            border-right: 3px solid #d4af37;
+        }
+        .gm {
+            background-color: rgba(70, 130, 180, 0.2);
+            border-left: 3px solid #4682b4;
+        }
+        .system {
+            background-color: rgba(178, 34, 34, 0.2);
+            font-style: italic;
+            text-align: center;
+            border: 1px dashed #b22222;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #d4af37;
+            text-shadow: 2px 2px 4px #000;
+        }
+        h1 {
+            font-size: 2.5em;
+        }
+        h2 {
+            font-size: 1.8em;
+        }
+        #dice {
+            font-size: 60px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: transform 0.5s ease, opacity 0.3s ease;
+            cursor: pointer;
+        }
+        #dice:hover {
+            transform: scale(1.1);
+        }
+        #dice.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .stat {
+            margin-bottom: 10px;
+        }
+        .stat-name {
+            font-weight: bold;
+        }
+        .inventory-item, .quest-item, .journal-entry {
+            background-color: rgba(70, 130, 180, 0.1);
+            border: 1px solid #4682b4;
+            border-radius: 5px;
+            padding: 5px;
+            margin-bottom: 5px;
+        }
+        .scene-image {
+            width: 100%;
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Realm of Dragons &amp; Dungeons</h1>
+        <div id="dice" title="Click to roll when prompted">🎲</div>
+        <div class="game-area">
+            <div class="chat-area">
+                <div id="chat-box" class="chat-box"></div>
+                <div class="input-area">
+                    <input type="text" id="user-input" placeholder="Speak thy action, brave adventurer...">
+                    <button id="send-button">Send</button>
+                    <div id="action-buttons" class="action-buttons"></div>
+                </div>
+            </div>
+            <div class="side-panel">
+                <div class="stats-area">
+                    <h2>Hero's Attributes</h2>
+                    <div id="stats"></div>
+                    <h2>Inventory</h2>
+                    <div id="inventory"></div>
+                </div>
+                <div class="quest-area">
+                    <h2>Quests</h2>
+                    <div id="quests"></div>
+                </div>
+                <div class="journal-area">
+                    <h2>Journal</h2>
+                    <div id="journal"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const chatBox = document.getElementById('chat-box');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+        const diceElement = document.getElementById('dice');
+        const statsElement = document.getElementById('stats');
+        const inventoryElement = document.getElementById('inventory');
+        const questsElement = document.getElementById('quests');
+        const journalElement = document.getElementById('journal');
+        const actionButtonsElement = document.getElementById('action-buttons');
+
+        let playerState = {
+            health: 100,
+            mana: 50,
+            gold: 20,
+            stats: {
+                strength: 10,
+                dexterity: 8,
+                intelligence: 12,
+                charisma: 9
+            },
+            inventory: ['Short Sword', 'Health Potion', 'Torch'],
+            quests: [],
+            journal: []
+        };
+
+        let turnCount = 0;
+        let journalEntryCount = 0;
+
+        function updatePlayerState() {
+            statsElement.innerHTML = `
+                <div class="stat"><span class="stat-name">Health:</span> ${playerState.health}</div>
+                <div class="stat"><span class="stat-name">Mana:</span> ${playerState.mana}</div>
+                <div class="stat"><span class="stat-name">Gold:</span> ${playerState.gold}</div>
+                <div class="stat"><span class="stat-name">Strength:</span> ${playerState.stats.strength}</div>
+                <div class="stat"><span class="stat-name">Dexterity:</span> ${playerState.stats.dexterity}</div>
+                <div class="stat"><span class="stat-name">Intelligence:</span> ${playerState.stats.intelligence}</div>
+                <div class="stat"><span class="stat-name">Charisma:</span> ${playerState.stats.charisma}</div>
+            `;
+
+            inventoryElement.innerHTML = playerState.inventory.map(item => 
+                `<div class="inventory-item">${item}</div>`
+            ).join('');
+
+            questsElement.innerHTML = playerState.quests.map(quest => 
+                `<div class="quest-item">${quest}</div>`
+            ).join('');
+
+            journalElement.innerHTML = playerState.journal.map(entry => 
+                `<div class="journal-entry">${entry}</div>`
+            ).join('');
+        }
+
+        function addMessage(message, type, imageUrl = null) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', type);
+            messageElement.textContent = message;
+
+            if (imageUrl) {
+                const imageElement = document.createElement('img');
+                imageElement.src = imageUrl;
+                imageElement.alt = "Scene visualization";
+                imageElement.classList.add('scene-image');
+                messageElement.appendChild(imageElement);
+            }
+
+            chatBox.appendChild(messageElement);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function updateActionButtons(actions) {
+            actionButtonsElement.innerHTML = '';
+            actions.forEach(action => {
+                const button = document.createElement('button');
+                button.textContent = action;
+                button.classList.add('action-button');
+                button.addEventListener('click', () => sendMessage(action));
+                actionButtonsElement.appendChild(button);
+            });
+        }
+
+        let waitingForRoll = false;
+
+        function rollDice() {
+            if (!waitingForRoll) return;
+            
+            diceElement.classList.add('disabled');
+            diceElement.style.transform = 'rotate(360deg)';
+            setTimeout(() => {
+                diceElement.style.transform = 'rotate(0deg)';
+            }, 500);
+
+            fetch('/api/diceroll', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ sides: 20 }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                const rollResult = data.result;
+                addMessage(`Thou hast rolled a ${rollResult}!`, 'system');
+                waitingForRoll = false;
+                sendRollResultToGM(rollResult);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                addMessage('The dice of fate refuse to roll. Try again, brave one.', 'system');
+                diceElement.classList.remove('disabled');
+            });
+        }
+
+        async function sendMessage(message = null) {
+            const userMessage = message || userInput.value.trim();
+            if (userMessage) {
+                addMessage(userMessage, 'user');
+                userInput.value = '';
+
+                try {
+                    const response = await fetch('/api/gamemaster', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ 
+                            message: userMessage,
+                            playerState: playerState
+                        }),
+                    });
+                    const data = await response.json();
+                    
+                    // Generate scene image
+                    const imageUrl = await generateSceneImage(data.response);
+                    
+                    // Add GM message with image
+                    addMessage(data.response, 'gm', imageUrl);
+
+                    if (data.response.toLowerCase().includes('roll the dice')) {
+                        waitingForRoll = true;
+                        diceElement.classList.remove('disabled');
+                        addMessage('Click the dice to roll!', 'system');
+                    }
+
+                    if (data.stateChanges) {
+                        Object.assign(playerState, data.stateChanges);
+                        updatePlayerState();
+                    }
+
+                    if (data.actions) {
+                        updateActionButtons(data.actions);
+                    }
+
+                    turnCount++;
+                    if (turnCount % 5 === 0) {
+                        summarizeAndAddToJournal();
+                    }
+
+                } catch (error) {
+                    console.error('Error:', error);
+                    addMessage('A dark force hath interfered. Pray, try again.', 'system');
+                }
+            }
+        }
+
+        async function sendRollResultToGM(rollResult) {
+            try {
+                const response = await fetch('/api/gamemaster', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        message: `Dice roll result: ${rollResult}`,
+                        playerState: playerState
+                    }),
+                });
+                const data = await response.json();
+                
+                // Generate scene image
+                const imageUrl = await generateSceneImage(data.response);
+                
+                // Add GM message with image
+                addMessage(data.response, 'gm', imageUrl);
+
+                if (data.stateChanges) {
+                    Object.assign(playerState, data.stateChanges);
+                    updatePlayerState();
+                }
+
+                if (data.actions) {
+                    updateActionButtons(data.actions);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage('The Gamemaster is momentarily distracted. Please wait.', 'system');
+            }
+        }
+
+        async function generateSceneImage(description) {
+            try {
+                const response = await fetch('/api/generate-image', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ description: description }),
+                });
+                const data = await response.json();
+                return data.imageUrl;
+            } catch (error) {
+                console.error('Error generating image:', error);
+                return null;
+            }
+        }
+
+        async function summarizeAndAddToJournal() {
+            try {
+                const response = await fetch('/api/summarize', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        chatLog: Array.from(chatBox.children).map(msg => msg.textContent).join('\n')
+                    }),
+                });
+                const data = await response.json();
+                playerState.journal.push(data.summary);
+                journalEntryCount++;
+
+                if (journalEntryCount % 10 === 0) {
+                    summarizeJournal();
+                }
+
+                updatePlayerState();
+            } catch (error) {
+                console.error('Error summarizing chat:', error);
+            }
+        }
+
+        async function summarizeJournal() {
+            try {
+                const response = await fetch('/api/summarize-journal', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        journal: playerState.journal
+                    }),
+                });
+                const data = await response.json();
+                playerState.journal = [data.summary];
+                updatePlayerState();
+            } catch (error) {
+                console.error('Error summarizing journal:', error);
+            }
+        }
+
+        sendButton.addEventListener('click', () => sendMessage());
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        diceElement.addEventListener('click', rollDice);
+
+        // Initial setup
+        updatePlayerState();
+        sendMessage("Let our adventure begin!"); // This will trigger the initial GM message and scene
+    </script>
+</body></html>
