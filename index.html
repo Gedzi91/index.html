@@ -1,0 +1,537 @@
+<html><head><base href="https://give.thanks/">
+<style>
+@font-face {
+    font-family: 'Exposure';
+    src: url('https://file.garden/ZxWsiWA7WCEI6WK0/ExposureTrial%5B-50%5D.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+:root {
+    --tan: #D2B48C;
+    --black: #000000;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Exposure', sans-serif;
+}
+
+body {
+    background-color: var(--tan);
+    color: var(--black);
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+.logo {
+    font-size: 3rem;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.form-container {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2rem;
+    border-radius: 10px;
+    backdrop-filter: blur(5px);
+    margin-bottom: 2rem;
+}
+
+textarea {
+    width: 100%;
+    min-height: 150px;
+    padding: 1rem;
+    border: 2px solid var(--black);
+    background: transparent;
+    color: var(--black);
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    border-radius: 5px;
+    resize: vertical;
+}
+
+button {
+    background: var(--black);
+    color: var(--tan);
+    border: none;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: transform 0.2s;
+}
+
+button:hover {
+    transform: translateY(-2px);
+}
+
+.thanks-container {
+    display: grid;
+    gap: 1rem;
+}
+
+.thank-you-note {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1.5rem;
+    border-radius: 5px;
+    backdrop-filter: blur(5px);
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 1rem;
+}
+
+.username {
+    color: var(--black);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.user-search {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid var(--black);
+    background: transparent;
+    color: var(--black);
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    border-radius: 5px;
+}
+
+.user-suggestions {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 5px;
+    max-height: 200px;
+    overflow-y: auto;
+    display: none;
+    position: absolute;
+    width: calc(100% - 4rem);
+    z-index: 1000;
+    border: 2px solid var(--black);
+    margin-top: -1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.user-suggestion {
+    padding: 0.8rem 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.user-suggestion:last-child {
+    border-bottom: none;
+}
+
+.user-suggestion:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.user-suggestion img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.user-suggestion span {
+    font-size: 1rem;
+    color: var(--black);
+}
+
+.actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.comment-form {
+    margin-top: 1rem;
+    display: none;
+}
+
+.comment-form.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 600px) {
+    .logo {
+        font-size: 2rem;
+    }
+    
+    .container {
+        padding: 1rem;
+    }
+}
+</style>
+<script>
+let lastMessageId = 0;
+
+async function createMessageTable() {
+    const query = `CREATE TABLE IF NOT EXISTS thanks (
+        id INTEGER PRIMARY KEY,
+        message TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        user_id TEXT,
+        username TEXT,
+        mentioned_username TEXT
+    )`;
+    await fetch('/api/v1/sql/?' + new URLSearchParams({sql: query}));
+    
+    const commentsQuery = `CREATE TABLE IF NOT EXISTS comments (
+        id INTEGER PRIMARY KEY,
+        thanks_id INTEGER,
+        message TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        user_id TEXT,
+        username TEXT
+    )`;
+    await fetch('/api/v1/sql/?' + new URLSearchParams({sql: commentsQuery}));
+}
+
+async function searchUsers(query) {
+    if (!query) return [];
+    try {
+        // Remove @ if present at the start of query
+        query = query.replace(/^@/, '');
+        const response = await fetch(`/api/v1/feed/search/${query}`);
+        const data = await response.json();
+        
+        // Extract unique users from the feed data
+        const users = data.feed.data
+            .map(item => item.site?.owner)
+            .filter(user => user && user.username)
+            // Remove duplicates
+            .filter((user, index, self) => 
+                index === self.findIndex(u => u.username === user.username)
+            );
+            
+        return users;
+    } catch (error) {
+        console.error('Error searching users:', error);
+        return [];
+    }
+}
+
+async function fetchMessages() {
+    const query = `
+        SELECT t.*, 
+        (SELECT COUNT(*) FROM comments c WHERE c.thanks_id = t.id) as comment_count 
+        FROM thanks t 
+        WHERE t.id > ${lastMessageId} 
+        ORDER BY t.id DESC
+    `;
+    const results = await fetch('/api/v1/sql/?' + new URLSearchParams({sql: query}));
+    const data = await results.json();
+    
+    if (data.length > 0) {
+        const thanksContainer = document.getElementById('thanks-container');
+        
+        data.forEach(row => {
+            if (row.id > lastMessageId) {
+                const thankYouNote = createThankYouElement(row);
+                thanksContainer.insertBefore(thankYouNote, thanksContainer.firstChild);
+                lastMessageId = row.id;
+            }
+        });
+    }
+}
+
+async function fetchComments(thanksId) {
+    const query = `SELECT * FROM comments WHERE thanks_id = ${thanksId} ORDER BY id DESC`;
+    const results = await fetch('/api/v1/sql/?' + new URLSearchParams({sql: query}));
+    return await results.json();
+}
+
+function createThankYouElement(row) {
+    const thankYouNote = document.createElement('div');
+    thankYouNote.className = 'thank-you-note';
+    
+    const userInfo = document.createElement('div');
+    userInfo.className = 'user-info';
+    
+    const userLink = document.createElement('a');
+    userLink.href = `https://websim.ai/@${row.username}`;
+    const userAvatar = document.createElement('img');
+    userAvatar.src = `https://images.websim.ai/avatar/${row.username}`;
+    userAvatar.alt = `${row.username}'s avatar`;
+    userAvatar.className = 'user-avatar';
+    userLink.appendChild(userAvatar);
+    
+    const usernameLink = document.createElement('a');
+    usernameLink.href = `https://websim.ai/@${row.username}`;
+    usernameLink.className = 'username';
+    usernameLink.textContent = `@${row.username}`;
+    
+    userInfo.appendChild(userLink);
+    userInfo.appendChild(usernameLink);
+    
+    if (row.mentioned_username) {
+        const mentionedText = document.createElement('span');
+        mentionedText.textContent = ' thanking ';
+        const mentionedLink = document.createElement('a');
+        mentionedLink.href = `https://websim.ai/@${row.mentioned_username}`;
+        mentionedLink.className = 'username';
+        mentionedLink.textContent = `@${row.mentioned_username}`;
+        userInfo.appendChild(mentionedText);
+        userInfo.appendChild(mentionedLink);
+    }
+    
+    const messageContent = document.createElement('div');
+    messageContent.textContent = row.message;
+    
+    const actions = document.createElement('div');
+    actions.className = 'actions';
+    
+    const commentButton = document.createElement('button');
+    commentButton.textContent = `Comments ${row.comment_count ? `(${row.comment_count})` : ''}`;
+    commentButton.onclick = async () => {
+        const existingForm = thankYouNote.querySelector('.comment-form');
+        if (existingForm) {
+            existingForm.classList.toggle('active');
+            if (existingForm.classList.contains('active')) {
+                const comments = await fetchComments(row.id);
+                const commentsContainer = existingForm.querySelector('.comments-container');
+                commentsContainer.innerHTML = '';
+                comments.forEach(comment => {
+                    const commentEl = document.createElement('div');
+                    commentEl.className = 'thank-you-note';
+                    commentEl.innerHTML = `
+                        <div class="user-info">
+                            <a href="https://websim.ai/@${comment.username}">
+                                <img src="https://images.websim.ai/avatar/${comment.username}" class="user-avatar">
+                            </a>
+                            <a href="https://websim.ai/@${comment.username}" class="username">@${comment.username}</a>
+                        </div>
+                        <div>${comment.message}</div>
+                    `;
+                    commentsContainer.appendChild(commentEl);
+                });
+            }
+        } else {
+            const commentForm = document.createElement('div');
+            commentForm.className = 'comment-form active';
+            commentForm.innerHTML = `
+                <textarea placeholder="Add a comment..." required></textarea>
+                <button type="submit">Comment</button>
+                <div class="comments-container"></div>
+            `;
+            
+            commentForm.querySelector('button').onclick = async (e) => {
+                e.preventDefault();
+                const textarea = commentForm.querySelector('textarea');
+                const message = textarea.value.trim();
+                if (message) {
+                    const user = await window.websim.getUser();
+                    if (user) {
+                        await insertComment(row.id, message, user.id, user.username);
+                        textarea.value = '';
+                        const comments = await fetchComments(row.id);
+                        const commentsContainer = commentForm.querySelector('.comments-container');
+                        commentsContainer.innerHTML = '';
+                        comments.forEach(comment => {
+                            const commentEl = document.createElement('div');
+                            commentEl.className = 'thank-you-note';
+                            commentEl.innerHTML = `
+                                <div class="user-info">
+                                    <a href="https://websim.ai/@${comment.username}">
+                                        <img src="https://images.websim.ai/avatar/${comment.username}" class="user-avatar">
+                                    </a>
+                                    <a href="https://websim.ai/@${comment.username}" class="username">@${comment.username}</a>
+                                </div>
+                                <div>${comment.message}</div>
+                            `;
+                            commentsContainer.appendChild(commentEl);
+                        });
+                    }
+                }
+            };
+            
+            thankYouNote.appendChild(commentForm);
+            const comments = await fetchComments(row.id);
+            const commentsContainer = commentForm.querySelector('.comments-container');
+            comments.forEach(comment => {
+                const commentEl = document.createElement('div');
+                commentEl.className = 'thank-you-note';
+                commentEl.innerHTML = `
+                    <div class="user-info">
+                        <a href="https://websim.ai/@${comment.username}">
+                            <img src="https://images.websim.ai/avatar/${comment.username}" class="user-avatar">
+                        </a>
+                        <a href="https://websim.ai/@${comment.username}" class="username">@${comment.username}</a>
+                    </div>
+                    <div>${comment.message}</div>
+                `;
+                commentsContainer.appendChild(commentEl);
+            });
+        }
+    };
+    
+    actions.appendChild(commentButton);
+    
+    thankYouNote.appendChild(userInfo);
+    thankYouNote.appendChild(messageContent);
+    thankYouNote.appendChild(actions);
+    
+    return thankYouNote;
+}
+
+async function insertComment(thanksId, message, userId, username) {
+    const query = `INSERT INTO comments (thanks_id, message, user_id, username) VALUES (${thanksId}, '${message.replace(/'/g, "''")}', '${userId}', '${username}')`;
+    await fetch('/api/v1/sql/?' + new URLSearchParams({sql: query}));
+}
+
+async function initialFetch() {
+    const query = `
+        SELECT t.*, 
+        (SELECT COUNT(*) FROM comments c WHERE c.thanks_id = t.id) as comment_count 
+        FROM thanks t 
+        ORDER BY t.id DESC
+    `;
+    const results = await fetch('/api/v1/sql/?' + new URLSearchParams({sql: query}));
+    const data = await results.json();
+    
+    const thanksContainer = document.getElementById('thanks-container');
+    thanksContainer.innerHTML = '';
+    
+    data.forEach(row => {
+        const thankYouNote = createThankYouElement(row);
+        thanksContainer.appendChild(thankYouNote);
+        lastMessageId = Math.max(lastMessageId, row.id);
+    });
+}
+
+async function insertMessage(message, userId, username, mentionedUsername = null) {
+    const query = `INSERT INTO thanks (message, user_id, username, mentioned_username) VALUES ('${message.replace(/'/g, "''")}', '${userId}', '${username}', ${mentionedUsername ? `'${mentionedUsername}'` : 'NULL'})`;
+    await fetch('/api/v1/sql/?' + new URLSearchParams({sql: query}));
+}
+
+document.addEventListener('DOMContentLoaded', async function() {
+    await createMessageTable();
+    await initialFetch();
+    
+    setInterval(() => fetchMessages(), 1000);
+    
+    const userSearch = document.createElement('input');
+    userSearch.type = 'text';
+    userSearch.placeholder = 'Search for a user to thank (optional)';
+    userSearch.className = 'user-search';
+    
+    const userSuggestions = document.createElement('div');
+    userSuggestions.className = 'user-suggestions';
+    
+    const form = document.getElementById('thank-form');
+    form.insertBefore(userSearch, form.firstChild);
+    form.insertBefore(userSuggestions, userSearch.nextSibling);
+    
+    let selectedUsername = null;
+    
+    userSearch.addEventListener('input', async function() {
+        const query = this.value.trim();
+        if (query.length >= 1) {
+            const users = await searchUsers(query);
+            userSuggestions.innerHTML = '';
+            
+            if (users.length === 0) {
+                userSuggestions.innerHTML = '<div class="user-suggestion">No users found</div>';
+                userSuggestions.style.display = 'block';
+                return;
+            }
+            
+            users.forEach(user => {
+                const suggestion = document.createElement('div');
+                suggestion.className = 'user-suggestion';
+                suggestion.innerHTML = `
+                    <img src="https://images.websim.ai/avatar/${user.username}" 
+                         alt="${user.username}'s avatar"
+                         class="user-avatar">
+                    <span>@${user.username}</span>
+                `;
+                suggestion.onclick = () => {
+                    userSearch.value = `@${user.username}`;
+                    selectedUsername = user.username;
+                    userSuggestions.style.display = 'none';
+                };
+                userSuggestions.appendChild(suggestion);
+            });
+            userSuggestions.style.display = 'block';
+        } else {
+            userSuggestions.style.display = 'none';
+            selectedUsername = null;
+        }
+    });
+    
+    document.addEventListener('click', function(e) {
+        if (!userSearch.contains(e.target) && !userSuggestions.contains(e.target)) {
+            userSuggestions.style.display = 'none';
+        }
+    });
+    
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const textarea = form.querySelector('textarea');
+        const thankYouText = textarea.value.trim();
+        
+        if (thankYouText) {
+            const user = await window.websim.getUser();
+            if (user) {
+                await insertMessage(thankYouText, user.id, user.username, selectedUsername);
+                textarea.value = '';
+                userSearch.value = '';
+                selectedUsername = null;
+            } else {
+                alert('Please sign in to share your gratitude!');
+            }
+        }
+    });
+});
+</script>
+</head>
+<body>
+    <div class="container">
+        <h1 class="logo">give thanks</h1>
+        
+        <div class="form-container">
+            <form id="thank-form">
+                <textarea placeholder="Who would you like to thank?" required></textarea>
+                <button type="submit">Share Gratitude</button>
+            </form>
+        </div>
+        
+        <div id="thanks-container" class="thanks-container">
+            <!-- Thank you notes will be added here -->
+        </div>
+    </div>
+</body>
+</html>
