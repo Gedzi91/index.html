@@ -1,0 +1,540 @@
+<html><head><base href="https://night.synth"><title>Night Synth - Advanced Controls</title>
+<style>
+  body {
+    font-family: 'Courier New', monospace;
+    background-color: #000011;
+    color: #3366aa;
+    margin: 0;
+    padding: 20px;
+    overflow: hidden;
+  }
+  .container {
+    max-width: 1000px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+  h1 {
+    text-align: center;
+    font-size: 3em;
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px #3366aa;
+  }
+  .keyboard {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  .key {
+    width: 40px;
+    height: 150px;
+    background-color: #000922;
+    border: 1px solid #3366aa;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+    padding-bottom: 5px;
+  }
+  .key.black {
+    width: 25px;
+    height: 90px;
+    background-color: #000011;
+    margin: 0 -12px;
+    z-index: 1;
+  }
+  .key:hover { background-color: #001144; }
+  .key.black:hover { background-color: #000033; }
+  .key.active { background-color: #002266; transform: translateY(3px); }
+  .key.black.active { background-color: #000055; }
+  #background-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+  }
+  .instructions {
+    text-align: center;
+    margin-top: 15px;
+    font-style: italic;
+    font-size: 0.9em;
+  }
+  .controls {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .control {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 10px;
+  }
+  .control label { margin-bottom: 5px; }
+  .slider {
+    -webkit-appearance: none;
+    width: 150px;
+    height: 8px;
+    border-radius: 4px;
+    background: #000922;
+    outline: none;
+    opacity: 0.7;
+    transition: opacity .2s;
+  }
+  .slider:hover { opacity: 1; }
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #3366aa;
+    cursor: pointer;
+  }
+  .slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #3366aa;
+    cursor: pointer;
+  }
+  select {
+    background-color: #000922;
+    color: #3366aa;
+    border: 1px solid #3366aa;
+    padding: 5px;
+    font-family: 'Courier New', monospace;
+  }
+  #octave-display {
+    text-align: center;
+    font-size: 1.1em;
+    margin-bottom: 10px;
+  }
+  #randomize-button {
+    display: block;
+    margin: 20px auto;
+    padding: 10px 20px;
+    font-size: 1em;
+    background-color: #000922;
+    color: #3366aa;
+    border: 1px solid #3366aa;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  #randomize-button:hover {
+    background-color: #001144;
+  }
+  .lock-button {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #000922;
+    border: 2px solid #3366aa;
+    cursor: pointer;
+    margin-left: 5px;
+    transition: all 0.3s ease;
+  }
+  .lock-button.locked {
+    background-color: #3366aa;
+    box-shadow: 0 0 10px #3366aa;
+  }
+</style>
+</head>
+<body>
+<canvas id="background-canvas"></canvas>
+<div class="container">
+  <h1>Night Synth</h1>
+  <div id="octave-display">Current Octave: 4</div>
+  <div class="controls">
+    <div class="control">
+      <label for="waveform">Waveform</label>
+      <select id="waveform">
+        <option value="sawtooth">Sawtooth</option>
+        <option value="square">Square</option>
+        <option value="triangle">Triangle</option>
+        <option value="sine">Sine</option>
+      </select>
+      <div class="lock-button" data-control="waveform"></div>
+    </div>
+    <div class="control">
+      <label for="cutoff">Cutoff</label>
+      <input type="range" min="20" max="20000" value="5000" class="slider" id="cutoff">
+      <div class="lock-button" data-control="cutoff"></div>
+    </div>
+    <div class="control">
+      <label for="resonance">Resonance</label>
+      <input type="range" min="0" max="30" value="5" class="slider" id="resonance">
+      <div class="lock-button" data-control="resonance"></div>
+    </div>
+    <div class="control">
+      <label for="attack">Attack</label>
+      <input type="range" min="0.01" max="2" value="0.1" step="0.01" class="slider" id="attack">
+      <div class="lock-button" data-control="attack"></div>
+    </div>
+    <div class="control">
+      <label for="decay">Decay</label>
+      <input type="range" min="0.01" max="2" value="0.1" step="0.01" class="slider" id="decay">
+      <div class="lock-button" data-control="decay"></div>
+    </div>
+    <div class="control">
+      <label for="sustain">Sustain</label>
+      <input type="range" min="0" max="1" value="0.5" step="0.01" class="slider" id="sustain">
+      <div class="lock-button" data-control="sustain"></div>
+    </div>
+    <div class="control">
+      <label for="release">Release</label>
+      <input type="range" min="0.01" max="5" value="0.5" step="0.01" class="slider" id="release">
+      <div class="lock-button" data-control="release"></div>
+    </div>
+    <div class="control">
+      <label for="glide">Glide</label>
+      <input type="range" min="0" max="1" value="0" step="0.01" class="slider" id="glide">
+      <div class="lock-button" data-control="glide"></div>
+    </div>
+    <div class="control">
+      <label for="echo">Echo</label>
+      <input type="range" min="0" max="1" value="0.3" step="0.01" class="slider" id="echo">
+      <div class="lock-button" data-control="echo"></div>
+    </div>
+    <div class="control">
+      <label for="detune">Detune</label>
+      <input type="range" min="-100" max="100" value="0" step="1" class="slider" id="detune">
+      <div class="lock-button" data-control="detune"></div>
+    </div>
+    <div class="control">
+      <label for="vibrato">Vibrato</label>
+      <input type="range" min="0" max="20" value="0" step="0.1" class="slider" id="vibrato">
+      <div class="lock-button" data-control="vibrato"></div>
+    </div>
+    <div class="control">
+      <label for="volume">Volume</label>
+      <input type="range" min="0" max="1" value="0.7" step="0.01" class="slider" id="volume">
+      <div class="lock-button" data-control="volume"></div>
+    </div>
+    <div class="control">
+      <label for="modulation">Modulation</label>
+      <input type="range" min="0" max="100" value="0" step="1" class="slider" id="modulation">
+      <div class="lock-button" data-control="modulation"></div>
+    </div>
+    <div class="control">
+      <label for="harmonics">Harmonics</label>
+      <input type="range" min="1" max="10" value="1" step="1" class="slider" id="harmonics">
+      <div class="lock-button" data-control="harmonics"></div>
+    </div>
+  </div>
+  <button id="randomize-button">Randomize Controls</button>
+  <div class="keyboard" id="keyboard">
+    <div class="key" data-note="a">A</div>
+    <div class="key black" data-note="w">W</div>
+    <div class="key" data-note="s">S</div>
+    <div class="key black" data-note="e">E</div>
+    <div class="key" data-note="d">D</div>
+    <div class="key" data-note="f">F</div>
+    <div class="key black" data-note="t">T</div>
+    <div class="key" data-note="g">G</div>
+    <div class="key black" data-note="y">Y</div>
+    <div class="key" data-note="h">H</div>
+    <div class="key black" data-note="u">U</div>
+    <div class="key" data-note="j">J</div>
+    <div class="key" data-note="k">K</div>
+    <div class="key black" data-note="o">O</div>
+    <div class="key" data-note="l">L</div>
+    <div class="key black" data-note="p">P</div>
+    <div class="key" data-note=";">;</div>
+    <div class="key" data-note="'">'</div>
+  </div>
+  <p class="instructions">Use keys A-L and W-P for white and black keys. Z lowers octave, X raises octave.</p>
+</div>
+
+<script>
+const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+const masterGain = audioContext.createGain();
+masterGain.gain.setValueAtTime(0.7, audioContext.currentTime);
+
+const echo = audioContext.createDelay(1);
+const echoGain = audioContext.createGain();
+echoGain.gain.setValueAtTime(0.3, audioContext.currentTime);
+
+masterGain.connect(echo);
+echo.connect(echoGain);
+echoGain.connect(audioContext.destination);
+masterGain.connect(audioContext.destination);
+
+const analyser = audioContext.createAnalyser();
+analyser.fftSize = 2048;
+const bufferLength = analyser.frequencyBinCount;
+const dataArray = new Uint8Array(bufferLength);
+
+masterGain.connect(analyser);
+
+const backgroundCanvas = document.getElementById('background-canvas');
+const bgCtx = backgroundCanvas.getContext('2d');
+
+let oscillators = {};
+let lastFrequency = null;
+let currentOctave = 4;
+
+const baseFrequencies = {
+  'A': 261.6, 'W': 277.2, 'S': 293.7, 'E': 311.1, 'D': 329.6, 'F': 349.2,
+  'T': 370.0, 'G': 392.0, 'Y': 415.3, 'H': 440.0, 'U': 466.2, 'J': 493.9,
+  'K': 523.3, 'O': 554.4, 'L': 587.3, 'P': 622.3, ';': 659.3, "'": 698.5
+};
+
+const controls = {
+  waveform: document.getElementById('waveform'),
+  cutoff: document.getElementById('cutoff'),
+  resonance: document.getElementById('resonance'),
+  attack: document.getElementById('attack'),
+  decay: document.getElementById('decay'),
+  sustain: document.getElementById('sustain'),
+  release: document.getElementById('release'),
+  glide: document.getElementById('glide'),
+  echo: document.getElementById('echo'),
+  detune: document.getElementById('detune'),
+  vibrato: document.getElementById('vibrato'),
+  volume: document.getElementById('volume'),
+  modulation: document.getElementById('modulation'),
+  harmonics: document.getElementById('harmonics')
+};
+
+const octaveDisplay = document.getElementById('octave-display');
+
+function getAdjustedFrequency(baseFrequency) {
+  return baseFrequency * Math.pow(2, currentOctave - 4);
+}
+
+function createSynthSound(frequency) {
+  const oscillator = audioContext.createOscillator();
+  const gainNode = audioContext.createGain();
+  const filter = audioContext.createBiquadFilter();
+
+  oscillator.type = controls.waveform.value;
+  oscillator.detune.setValueAtTime(parseFloat(controls.detune.value), audioContext.currentTime);
+  
+  const glideTime = parseFloat(controls.glide.value);
+  if (lastFrequency !== null && glideTime > 0) {
+    oscillator.frequency.setValueAtTime(lastFrequency, audioContext.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(frequency, audioContext.currentTime + glideTime);
+  } else {
+    oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+  }
+  
+  lastFrequency = frequency;
+
+  filter.type = 'lowpass';
+  filter.frequency.value = controls.cutoff.value;
+  filter.Q.value = controls.resonance.value;
+
+  const attack = parseFloat(controls.attack.value);
+  const decay = parseFloat(controls.decay.value);
+  const sustain = parseFloat(controls.sustain.value);
+  const release = parseFloat(controls.release.value);
+
+  gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+  gainNode.gain.linearRampToValueAtTime(1, audioContext.currentTime + attack);
+  gainNode.gain.linearRampToValueAtTime(sustain, audioContext.currentTime + attack + decay);
+
+  const vibratoFreq = parseFloat(controls.vibrato.value);
+  if (vibratoFreq > 0) {
+    const vibrato = audioContext.createOscillator();
+    const vibratoGain = audioContext.createGain();
+    vibrato.frequency.setValueAtTime(vibratoFreq, audioContext.currentTime);
+    vibratoGain.gain.setValueAtTime(5, audioContext.currentTime);
+    vibrato.connect(vibratoGain);
+    vibratoGain.connect(oscillator.frequency);
+    vibrato.start();
+  }
+
+  // Add modulation
+  const modulationAmount = parseFloat(controls.modulation.value);
+  if (modulationAmount > 0) {
+    const modulator = audioContext.createOscillator();
+    const modulatorGain = audioContext.createGain();
+    modulator.frequency.setValueAtTime(frequency * 0.5, audioContext.currentTime);
+    modulatorGain.gain.setValueAtTime(modulationAmount, audioContext.currentTime);
+    modulator.connect(modulatorGain);
+    modulatorGain.connect(oscillator.frequency);
+    modulator.start();
+  }
+
+  // Add harmonics
+  const harmonicsCount = parseInt(controls.harmonics.value);
+  if (harmonicsCount > 1) {
+    for (let i = 2; i <= harmonicsCount; i++) {
+      const harmonic = audioContext.createOscillator();
+      const harmonicGain = audioContext.createGain();
+      harmonic.frequency.setValueAtTime(frequency * i, audioContext.currentTime);
+      harmonicGain.gain.setValueAtTime(1 / (i * 2), audioContext.currentTime);
+      harmonic.connect(harmonicGain);
+      harmonicGain.connect(filter);
+      harmonic.start();
+    }
+  }
+    
+  oscillator.connect(filter);
+  filter.connect(gainNode);
+  gainNode.connect(masterGain);
+
+  oscillator.start();
+
+  return { oscillator, gainNode, filter };
+}
+
+function noteOn(note) {
+  if (!oscillators[note] && baseFrequencies[note.toUpperCase()]) {
+    const adjustedFrequency = getAdjustedFrequency(baseFrequencies[note.toUpperCase()]);
+    oscillators[note] = createSynthSound(adjustedFrequency);
+    document.querySelector(`.key[data-note="${note}"]`)?.classList.add('active');
+  }
+}
+
+function noteOff(note) {
+  if (oscillators[note]) {
+    const release = parseFloat(controls.release.value);
+    const releaseTime = audioContext.currentTime + release;
+    oscillators[note].gainNode.gain.cancelScheduledValues(audioContext.currentTime);
+    oscillators[note].gainNode.gain.setValueAtTime(oscillators[note].gainNode.gain.value, audioContext.currentTime);
+    oscillators[note].gainNode.gain.linearRampToValueAtTime(0, releaseTime);
+    oscillators[note].oscillator.stop(releaseTime);
+    delete oscillators[note];
+    document.querySelector(`.key[data-note="${note}"]`)?.classList.remove('active');
+  }
+}
+
+document.addEventListener('keydown', event => {
+  const key = event.key.toLowerCase();
+  if (baseFrequencies[key.toUpperCase()] && !event.repeat) noteOn(key);
+  else if (key === 'z') {
+    currentOctave = Math.max(0, currentOctave - 1);
+    octaveDisplay.textContent = `Current Octave: ${currentOctave}`;
+  }
+  else if (key === 'x') {
+    currentOctave = Math.min(8, currentOctave + 1);
+    octaveDisplay.textContent = `Current Octave: ${currentOctave}`;
+  }
+});
+
+document.addEventListener('keyup', event => {
+  const key = event.key.toLowerCase();
+  if (baseFrequencies[key.toUpperCase()]) noteOff(key);
+});
+
+document.querySelectorAll('.key').forEach(key => {
+  key.addEventListener('mousedown', () => noteOn(key.dataset.note));
+  key.addEventListener('mouseup', () => noteOff(key.dataset.note));
+  key.addEventListener('mouseleave', () => noteOff(key.dataset.note));
+});
+
+function updateVolume() {
+  const volumeLevel = parseFloat(controls.volume.value);
+  masterGain.gain.setValueAtTime(volumeLevel, audioContext.currentTime);
+}
+
+function updateControl(control) {
+  if (control === controls.volume) {
+    updateVolume();
+  } else if (control === controls.echo) {
+    echo.delayTime.setValueAtTime(0.3, audioContext.currentTime);
+    echoGain.gain.setValueAtTime(parseFloat(control.value), audioContext.currentTime);
+  }
+  
+  Object.values(oscillators).forEach(({ oscillator, filter, gainNode }) => {
+    if (control === controls.waveform) oscillator.type = control.value;
+    if (control === controls.cutoff) filter.frequency.setValueAtTime(parseFloat(control.value), audioContext.currentTime);
+    if (control === controls.resonance) filter.Q.setValueAtTime(parseFloat(control.value), audioContext.currentTime);
+    if (control === controls.detune) oscillator.detune.setValueAtTime(parseFloat(control.value), audioContext.currentTime);
+    if (control === controls.vibrato) {
+      const vibratoFreq = parseFloat(control.value);
+      if (vibratoFreq > 0 && !oscillator.vibratoOscillator) {
+        const vibrato = audioContext.createOscillator();
+        const vibratoGain = audioContext.createGain();
+        vibrato.frequency.setValueAtTime(vibratoFreq, audioContext.currentTime);
+        vibratoGain.gain.setValueAtTime(5, audioContext.currentTime);
+        vibrato.connect(vibratoGain);
+        vibratoGain.connect(oscillator.frequency);
+        vibrato.start();
+        oscillator.vibratoOscillator = vibrato;
+      } else if (oscillator.vibratoOscillator) {
+        oscillator.vibratoOscillator.frequency.setValueAtTime(vibratoFreq, audioContext.currentTime);
+      }
+    }
+    // Add modulation and harmonics update logic here
+  });
+}
+
+Object.values(controls).forEach(control => {
+  control.addEventListener('input', () => updateControl(control));
+});
+
+const lockButtons = document.querySelectorAll('.lock-button');
+lockButtons.forEach(button => {
+  button.addEventListener('click', () => {
+    button.classList.toggle('locked');
+  });
+});
+
+function randomizeControls() {
+  Object.entries(controls).forEach(([key, control]) => {
+    const lockButton = document.querySelector(`.lock-button[data-control="${key}"]`);
+    if (!lockButton.classList.contains('locked')) {
+      if (control.type === 'range') {
+        control.value = Math.random() * (control.max - control.min) + parseFloat(control.min);
+      } else if (control.tagName === 'SELECT') {
+        const options = control.options;
+        control.selectedIndex = Math.floor(Math.random() * options.length);
+      }
+      updateControl(control);
+    }
+  });
+}
+
+document.getElementById('randomize-button').addEventListener('click', randomizeControls);
+
+function resizeCanvas() {
+  backgroundCanvas.width = window.innerWidth;
+  backgroundCanvas.height = window.innerHeight;
+}
+
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+function drawBackgroundAnimation() {
+  requestAnimationFrame(drawBackgroundAnimation);
+  analyser.getByteTimeDomainData(dataArray);
+  
+  bgCtx.fillStyle = 'rgba(0, 0, 17, 0.1)';
+  bgCtx.fillRect(0, 0, backgroundCanvas.width, backgroundCanvas.height);
+
+  bgCtx.lineWidth = 2;
+  bgCtx.strokeStyle = 'rgba(51, 102, 170, 0.5)';
+  bgCtx.beginPath();
+  
+  const sliceWidth = backgroundCanvas.width * 1.0 / bufferLength;
+  let x = 0;
+  
+  for (let i = 0; i < bufferLength; i++) {
+    const v = (dataArray[i] / 128.0) - 1;
+    const y = (v * backgroundCanvas.height / 4) + (backgroundCanvas.height / 2);
+    
+    if (i === 0) {
+      bgCtx.moveTo(x, y);
+    } else {
+      bgCtx.lineTo(x, y);
+    }
+    
+    x += sliceWidth;
+  }
+  
+  bgCtx.lineTo(backgroundCanvas.width, backgroundCanvas.height / 2);
+  bgCtx.stroke();
+}
+
+drawBackgroundAnimation();
+</script>
+</body></html>
