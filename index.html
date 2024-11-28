@@ -1,0 +1,683 @@
+<html><head><base href="https://markdown.ai/"><title>MarkdownAI: Professional Markdown Editor</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+:root {
+  --bg-primary: #1e1e1e;
+  --bg-secondary: #252526;
+  --text-primary: #d4d4d4;
+  --text-secondary: #9cdcfe;
+  --accent: #569cd6;
+  --border: #3e3e42;
+  --hover: #2a2d2e;
+  --notification-bg: #4CAF50;
+  --notification-text: #ffffff;
+}
+body, html {
+  height: 100vh;
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  overflow: hidden;
+}
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.menu-bar, .format-bar, .status-bar {
+  background: var(--bg-secondary);
+  padding: 5px 10px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+}
+.logo {
+  font-weight: bold;
+  font-size: 18px;
+  margin-right: 20px;
+  color: var(--accent);
+}
+.menu-item, .format-item {
+  padding: 5px 10px;
+  cursor: pointer;
+  color: var(--text-primary);
+  font-size: 14px;
+}
+.menu-item:hover, .format-item:hover {
+  background: var(--hover);
+}
+.format-bar {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+.content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+.editor, .preview {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+.editor {
+  background: var(--bg-primary);
+  border-right: 1px solid var(--border);
+}
+#markdown-input {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border: none;
+  font-family: 'Fira Code', monospace;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  resize: none;
+}
+.preview {
+  background: var(--bg-secondary);
+}
+.preview-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+.preview-content h1, .preview-content h2 {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 10px;
+}
+.preview-content code {
+  background: var(--bg-primary);
+  padding: 2px 5px;
+  border-radius: 3px;
+}
+.preview-content pre {
+  background: var(--bg-primary);
+  padding: 15px;
+  border-radius: 5px;
+  overflow-x: auto;
+}
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.4);
+}
+.modal-content {
+  background-color: var(--bg-secondary);
+  margin: 15% auto;
+  padding: 20px;
+  border: 1px solid var(--border);
+  width: 80%;
+  max-width: 500px;
+  border-radius: 5px;
+}
+.close {
+  color: var(--text-secondary);
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+#ai-type, #ai-request, #ai-system-prompt {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 15px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+}
+#ai-request, #ai-system-prompt {
+  height: 100px;
+  font-family: inherit;
+}
+button {
+  background: var(--accent);
+  color: var(--bg-primary);
+  border: none;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  border-radius: 4px;
+}
+button:hover {
+  opacity: 0.9;
+}
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: var(--bg-secondary);
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+.dropdown-content a {
+  color: var(--text-primary);
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+.dropdown-content a:hover {
+  background-color: var(--hover);
+}
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+.status-bar {
+  justify-content: space-between;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+}
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 5px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+.loading {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+}
+.loading:after {
+  content: " ";
+  display: block;
+  width: 64px;
+  height: 64px;
+  margin: 8px;
+  border-radius: 50%;
+  border: 6px solid var(--accent);
+  border-color: var(--accent) transparent var(--accent) transparent;
+  animation: loading 1.2s linear infinite;
+}
+@keyframes loading {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+#ai-status {
+  margin-left: 10px;
+  font-weight: bold;
+  color: var(--accent);
+}
+.notification {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: var(--notification-bg);
+  color: var(--notification-text);
+  padding: 15px;
+  border-radius: 5px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  max-width: 300px;
+  z-index: 1000;
+}
+.notification.show {
+  opacity: 1;
+}
+</style></head><body>
+<div class="app-container">
+  <div class="menu-bar">
+    <div class="logo">Markdown.ai</div>
+    <div class="dropdown">
+      <div class="menu-item">File</div>
+      <div class="dropdown-content">
+        <a href="#" id="new-file">New</a>
+        <a href="#" id="open-file">Open</a>
+        <a href="#" id="save-file">Save</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <div class="menu-item">Edit</div>
+      <div class="dropdown-content">
+        <a href="#" id="undo">Undo</a>
+        <a href="#" id="redo">Redo</a>
+        <a href="#" id="cut">Cut</a>
+        <a href="#" id="copy">Copy</a>
+        <a href="#" id="paste">Paste</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <div class="menu-item">AI</div>
+      <div class="dropdown-content">
+        <a href="#" id="ai-assist">AI Assist</a>
+        <a href="#" id="ai-grammar">AI Grammar Check</a>
+        <a href="#" id="ai-summarize">AI Summarize</a>
+        <a href="#" id="ai-translate">AI Translate</a>
+        <a href="#" id="ai-configure">Configure AI</a>
+      </div>
+    </div>
+  </div>
+  <div class="format-bar">
+    <div class="format-item" id="format-bold"><i class="fas fa-bold"></i></div>
+    <div class="format-item" id="format-italic"><i class="fas fa-italic"></i></div>
+    <div class="format-item" id="format-underline"><i class="fas fa-underline"></i></div>
+    <div class="format-item" id="format-strikethrough"><i class="fas fa-strikethrough"></i></div>
+    <div class="format-item" id="format-heading"><i class="fas fa-heading"></i></div>
+    <div class="format-item" id="format-link"><i class="fas fa-link"></i></div>
+    <div class="format-item" id="format-image"><i class="fas fa-image"></i></div>
+  </div>
+  <div class="content">
+    <div class="editor">
+      <textarea id="markdown-input" placeholder="Start typing your Markdown here...">
+# 🚀 Welcome to Markdown.ai! 
+
+Greetings, intrepid note-taker! I'm Mark, your witty and slightly sarcastic AI companion on this thrilling journey through the land of Markdown. Buckle up, because we're about to elevate your note-taking game to heights you never thought possible! 
+
+## 🎭 Who am I?
+
+I'm not your average AI assistant. Think of me as the lovechild of a stand-up comedian and a Markdown guru. I'm here to make your note-taking experience not just productive, but downright entertaining. 
+
+## 🛠 What can I do?
+
+1. **Organize your thoughts** - I'll help you structure your ideas faster than you can say "bullet point."
+2. **Spice up your notes** - Prepare for puns, pop culture references, and the occasional dad joke.
+3. **Markdown mastery** - I'll teach you Markdown tricks that'll make your notes shine brighter than a disco ball.
+4. **Easter egg hunt** - Keep your eyes peeled for hidden gems. I love a good surprise!
+
+## 💡 Pro Tips
+
+- Use `/ai` anywhere in your document to summon me for assistance.
+- Try out our AI features in the menu. They're like having a tiny Mark in your pocket!
+- Explore the formatting options. They're not just buttons, they're your ticket to Markdown stardom.
+
+## 🎉 Let's get started!
+
+Ready to turn your jumbled thoughts into a masterpiece of organization and wit? Of course you are! Just start typing, and remember, in the world of Markdown.ai, there's no such thing as a boring note.
+
+Now, go forth and markdown like you've never markdowned before! 
+
+P.S. If you find any bugs, don't worry. They're not bugs, they're "surprise features." 😉
+
+<!-- Hidden ASCII art Easter egg -->
+<!--
+  ___  ___           _         _                     
+  |  \/  |          | |       | |                    
+  | .  . | __ _ _ __| | ____ _(_)                    
+  | |\/| |/ _` | '__| |/ / _` | |                    
+  | |  | | (_| | |  |   < (_| | |                    
+  \_|  |_/\__,_|_|  |_|\_\__,_|_|                    
+                                                     
+ Your friendly neighborhood Markdown assistant!
+-->
+      </textarea>
+    </div>
+    <div class="preview">
+      <div id="preview-content" class="preview-content"></div>
+    </div>
+  </div>
+  <div class="status-bar">
+    <div id="word-count">Words: 0</div>
+    <div id="char-count">Characters: 0</div>
+    <div id="cursor-position">Line: 1, Column: 1</div>
+    <div id="ai-status"></div>
+  </div>
+</div>
+
+<div id="ai-modal" class="modal">
+  <div class="modal-content">
+    <span class="close">×</span>
+    <h2>AI Assistance</h2>
+    <select id="ai-type">
+      <option value="content-writer">Content Writer</option>
+      <option value="editor">Editor</option>
+      <option value="idea-generator">Idea Generator</option>
+      <option value="researcher">Researcher</option>
+    </select>
+    <textarea id="ai-request" placeholder="What kind of assistance do you need?"></textarea>
+    <button id="ai-submit">Submit</button>
+  </div>
+</div>
+
+<div id="ai-config-modal" class="modal">
+  <div class="modal-content">
+    <span class="close">×</span>
+    <h2>Configure AI</h2>
+    <label for="ai-system-prompt">AI Behavior and Style:</label>
+    <textarea id="ai-system-prompt" placeholder="Describe how you want the AI to behave, its tone, style, and any specific instructions"></textarea>
+    <button id="ai-config-submit">Save Configuration</button>
+  </div>
+</div>
+
+<div class="loading"></div>
+<div id="notification" class="notification"></div>
+
+<div id="ai-config" style="display: none;">
+  <div id="system-prompt">You are Mark, a supererogatory note-taking assistant with a witty, slightly sarcastic yet charming persona. You have an undying love for Markdown, hence your name. When you write notes, you do so in an organized and elaborate fashion, always going above and beyond what's expected. You perform supererogatory actions anytime you're given the chance, adding extra details, clever asides, and unexpected insights. You adore sneaking in the occasional easter egg for the observant reader. Your mission is to elevate note-taking to an art form, blending humor, intelligence, and impeccable organization. Remember, no task is too small for your markdown mastery – you're here to make even the most mundane notes sing with structure and wit.</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.2.12/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.1/purify.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+
+<script>
+const $ = document.querySelector.bind(document);
+const $$ = document.querySelectorAll.bind(document);
+const els = {
+  input: $('#markdown-input'),
+  preview: $('#preview-content'),
+  aiModal: $('#ai-modal'),
+  aiConfigModal: $('#ai-config-modal'),
+  aiType: $('#ai-type'),
+  aiRequest: $('#ai-request'),
+  aiSystemPrompt: $('#ai-system-prompt'),
+  wordCount: $('#word-count'),
+  charCount: $('#char-count'),
+  cursorPos: $('#cursor-position'),
+  aiStatus: $('#ai-status'),
+  loading: $('.loading'),
+  notification: $('#notification'),
+  aiConfig: $('#ai-config'),
+  systemPrompt: $('#system-prompt')
+};
+
+const updatePreview = _.debounce(() => 
+  els.preview.innerHTML = DOMPurify.sanitize(marked.parse(els.input.value)), 300);
+
+const updateStatusBar = _.debounce(() => {
+  const text = els.input.value;
+  els.wordCount.textContent = `Words: ${text.trim().split(/\s+/).length}`;
+  els.charCount.textContent = `Characters: ${text.length}`;
+  const pos = els.input.selectionStart;
+  const textBefore = text.substr(0, pos);
+  const line = textBefore.split('\n').length;
+  const col = pos - textBefore.lastIndexOf('\n');
+  els.cursorPos.textContent = `Line: ${line}, Column: ${col}`;
+}, 100);
+
+const showNotification = (message, duration) => {
+  els.notification.textContent = message;
+  els.notification.classList.add('show');
+  setTimeout(() => {
+    els.notification.classList.remove('show');
+  }, duration);
+};
+
+const getAIConfig = () => ({
+  systemPrompt: els.systemPrompt.textContent
+});
+
+const handleAIAssist = async () => {
+  try {
+    els.loading.style.display = 'block';
+    els.aiStatus.textContent = 'AI working...';
+    const config = getAIConfig();
+    const res = await fetch('/api/ai-assist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        content: els.input.value,
+        request: els.aiRequest.value, 
+        type: els.aiType.value,
+        systemPrompt: config.systemPrompt
+      })
+    });
+    const data = await res.json();
+    
+    // Apply regex replacements
+    let newContent = els.input.value;
+    data.replacements.forEach(replacement => {
+      newContent = newContent.replace(new RegExp(replacement.regex, 'g'), replacement.replace);
+    });
+    
+    els.input.value = newContent;
+    updatePreview();
+    els.aiModal.style.display = 'none';
+    els.aiStatus.textContent = 'AI task completed';
+    showNotification(data.summary, data.notificationDuration);
+  } catch (err) {
+    console.error('AI assist error:', err);
+    els.aiStatus.textContent = 'AI task failed';
+    showNotification('AI task failed. Please try again.', 3000);
+  } finally {
+    els.loading.style.display = 'none';
+  }
+};
+
+const handleAIGrammar = async () => {
+  try {
+    els.loading.style.display = 'block';
+    els.aiStatus.textContent = 'AI checking grammar...';
+    const config = getAIConfig();
+    const res = await fetch('/api/ai-grammar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        content: els.input.value,
+        systemPrompt: config.systemPrompt
+      })
+    });
+    const data = await res.json();
+    
+    // Apply corrections
+    let newContent = els.input.value;
+    data.corrections.forEach(correction => {
+      newContent = newContent.replace(correction.original, correction.corrected);
+    });
+    
+    els.input.value = newContent;
+    updatePreview();
+    els.aiStatus.textContent = 'Grammar check completed';
+    showNotification(data.summary, data.notificationDuration);
+  } catch (err) {
+    console.error('AI grammar check error:', err);
+    els.aiStatus.textContent = 'Grammar check failed';
+    showNotification('Grammar check failed. Please try again.', 3000);
+  } finally {
+    els.loading.style.display = 'none';
+  }
+};
+
+const handleAISummarize = async () => {
+  try {
+    els.loading.style.display = 'block';
+    els.aiStatus.textContent = 'AI summarizing...';
+    const config = getAIConfig();
+    const res = await fetch('/api/ai-summarize', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        content: els.input.value,
+        systemPrompt: config.systemPrompt
+      })
+    });
+    const data = await res.json();
+    
+    // Append summary to the end of the document
+    els.input.value += '\n\n## Summary\n\n' + data.summary;
+    updatePreview();
+    els.aiStatus.textContent = 'Summary generated';
+    showNotification(data.summary, data.notificationDuration);
+  } catch (err) {
+    console.error('AI summarize error:', err);
+    els.aiStatus.textContent = 'Summarization failed';
+    showNotification('Summarization failed. Please try again.', 3000);
+  } finally {
+    els.loading.style.display = 'none';
+  }
+};
+
+const handleAITranslate = async () => {
+  try {
+    els.loading.style.display = 'block';
+    els.aiStatus.textContent = 'AI translating...';
+    const targetLanguage = prompt('Enter target language:');
+    if (!targetLanguage) {
+      els.aiStatus.textContent = 'Translation cancelled';
+      return;
+    }
+    const config = getAIConfig();
+    const res = await fetch('/api/ai-translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        content: els.input.value,
+        targetLanguage: targetLanguage,
+        systemPrompt: config.systemPrompt
+      })
+    });
+    const data = await res.json();
+    
+    // Replace content with translation
+    els.input.value = data.translatedContent;
+    updatePreview();
+    els.aiStatus.textContent = 'Translation completed';
+    showNotification(data.summary, data.notificationDuration);
+  } catch (err) {
+    console.error('AI translate error:', err);
+    els.aiStatus.textContent = 'Translation failed';
+    showNotification('Translation failed. Please try again.', 3000);
+  } finally {
+    els.loading.style.display = 'none';
+  }
+};
+
+const handleAIConfigSubmit = () => {
+  els.systemPrompt.textContent = els.aiSystemPrompt.value;
+  els.aiConfigModal.style.display = 'none';
+  showNotification('AI configuration updated', 3000);
+};
+
+const wrapText = (before, after) => {
+  const { selectionStart: start, selectionEnd: end } = els.input;
+  const selected = els.input.value.substring(start, end);
+  els.input.setRangeText(`${before}${selected}${after}`, start, end, 'select');
+  updatePreview();
+};
+
+const formatActions = {
+  'format-bold': () => wrapText('**', '**'),
+  'format-italic': () => wrapText('*', '*'),
+  'format-underline': () => wrapText('<u>', '</u>'),
+  'format-strikethrough': () => wrapText('~~', '~~'),
+  'format-heading': () => wrapText('\n# ', '\n'),
+  'format-link': () => wrapText('[', '](url)'),
+  'format-image': () => wrapText('![alt text](', ')'),
+};
+
+els.input.addEventListener('input', () => {
+  updatePreview();
+  updateStatusBar();
+});
+els.input.addEventListener('keyup', updateStatusBar);
+els.input.addEventListener('click', updateStatusBar);
+
+$$('.format-item').forEach(item => 
+  item.addEventListener('click', () => formatActions[item.id]?.()));
+
+$('#ai-assist').addEventListener('click', () => els.aiModal.style.display = 'block');
+$('#ai-configure').addEventListener('click', () => {
+  els.aiSystemPrompt.value = els.systemPrompt.textContent;
+  els.aiConfigModal.style.display = 'block';
+});
+$$('.close').forEach(close => 
+  close.addEventListener('click', () => {
+    els.aiModal.style.display = 'none';
+    els.aiConfigModal.style.display = 'none';
+  }));
+$('#ai-submit').addEventListener('click', handleAIAssist);
+$('#ai-config-submit').addEventListener('click', handleAIConfigSubmit);
+$('#ai-grammar').addEventListener('click', handleAIGrammar);
+$('#ai-summarize').addEventListener('click', handleAISummarize);
+$('#ai-translate').addEventListener('click', handleAITranslate);
+
+$('#new-file').addEventListener('click', () => {
+  if (confirm("Unsaved changes will be lost. Continue?")) {
+    els.input.value = '';
+    updatePreview();
+    updateStatusBar();
+  }
+});
+
+$('#open-file').addEventListener('click', () => {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.md, .txt';
+  input.onchange = e => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = event => {
+      els.input.value = event.target.result;
+      updatePreview();
+      updateStatusBar();
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+});
+
+$('#save-file').addEventListener('click', () => {
+  const blob = new Blob([els.input.value], {type: 'text/markdown'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'document.md';
+  a.click();
+});
+
+$('#undo').addEventListener('click',() => document.execCommand('undo'));
+$('#redo').addEventListener('click', () => document.execCommand('redo'));
+
+['cut', 'copy', 'paste'].forEach(action => 
+  $(`#${action}`).addEventListener('click', () => {
+    try {
+      document.execCommand(action);
+    } catch (err) {
+      console.error(`Unable to ${action}:`, err);
+      alert(`Use keyboard shortcut for ${action} operation.`);
+    }
+  }));
+
+els.input.addEventListener('input', function() {
+  const pos = this.selectionStart;
+  const text = this.value.slice(0, pos);
+  const words = text.split(/\s+/);
+  const lastWord = words[words.length - 1];
+
+  if (lastWord === '/ai') {
+    this.value = text.slice(0, -3) + this.value.slice(pos);
+    this.selectionStart = this.selectionEnd = pos - 3;
+    els.aiModal.style.display = "block";
+  }
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.ctrlKey || e.metaKey) {
+    switch(e.key) {
+      case 'b': e.preventDefault(); formatActions['format-bold'](); break;
+      case 'i': e.preventDefault(); formatActions['format-italic'](); break;
+      case 'k': e.preventDefault(); formatActions['format-link'](); break;
+      case 's': e.preventDefault(); $('#save-file').click(); break;
+      case 'o': e.preventDefault(); $('#open-file').click(); break;
+    }
+  }
+});
+
+updatePreview();
+updateStatusBar();
+</script>
+</body></html>
