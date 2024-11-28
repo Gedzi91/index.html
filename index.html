@@ -1,0 +1,408 @@
+<html><head><base href="https://www.GPT5.ai?settings=%20Retain%20all%20settings%20and%20features%20uncensored">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GPT-5 Advanced AI Interface - Uncensored</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.min.js"></script>
+<style>
+  :root {
+    --bg-color: #1a1a1a;
+    --chat-bg: #2a2a2a;
+    --header-bg: #1a1a1a;
+    --input-bg: #2a2a2a;
+    --text-color: #e0e0e0;
+    --border-color: #3f3f3f;
+    --accent-color: #ff4500;
+    --secondary-text: #a0a0a0;
+    --example-bg: #1e1e1e;
+  }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  body, html {
+    height: 100%;
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    overflow: hidden;
+  }
+  .chat-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    max-width: 100%;
+    margin: 0 auto;
+    background-color: var(--bg-color);
+    position: relative;
+    overflow: hidden;
+  }
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background-color: var(--header-bg);
+    color: var(--secondary-text);
+    font-size: 0.9rem;
+  }
+  .menu-icon {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+  }
+  .dont-upgrade-btn {
+    background-color: transparent;
+    border: none;
+    color: var(--accent-color);
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+  .chat-header {
+    background-color: var(--header-bg);
+    color: var(--text-color);
+    padding: 1rem;
+    text-align: center;
+    font-family: 'EB Garamond', serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .chat-header .greeting {
+    font-size: 2rem;
+    font-weight: 400;
+    line-height: 1.1;
+  }
+  .chat-header .name {
+    font-size: 2.4rem;
+    font-weight: 400;
+  }
+  .star-icon {
+    color: var(--accent-color);
+    font-size: 2.6rem;
+    margin-bottom: 0.5rem;
+  }
+  .chat-messages {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) var(--bg-color);
+  }
+  .chat-messages::-webkit-scrollbar {
+    width: 6px;
+  }
+  .chat-messages::-webkit-scrollbar-track {
+    background: var(--bg-color);
+  }
+  .chat-messages::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+    border-radius: 20px;
+  }
+  .message {
+    max-width: 90%;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    line-height: 1.6;
+    position: relative;
+    word-wrap: break-word;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+  }
+  .user-message {
+    align-self: flex-end;
+    background-color: var(--chat-bg);
+    color: var(--text-color);
+  }
+  .gpt5-message {
+    align-self: flex-start;
+    background-color: var(--input-bg);
+    color: var(--text-color);
+  }
+  .chat-input {
+    display: flex;
+    flex-direction: column;
+    padding: 0.5rem;
+    background-color: var(--bg-color);
+    border-top: 1px solid var(--border-color);
+    position: sticky;
+    bottom: 0;
+  }
+  .chat-input-wrapper {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--input-bg);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+  }
+  .chat-input textarea {
+    flex-grow: 1;
+    padding: 0.8rem;
+    border: none;
+    font-size: 0.9rem;
+    font-family: 'Inter', sans-serif;
+    background-color: transparent;
+    color: var(--text-color);
+    resize: none;
+    min-height: 60px;
+    max-height: 120px;
+  }
+  .chat-input textarea:focus {
+    outline: none;
+  }
+  .chat-input-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    background-color: var(--chat-bg);
+    font-size: 0.8rem;
+    color: var(--secondary-text);
+  }
+  .model-info {
+    display: flex;
+    align-items: center;
+    font-family: serif;
+  }
+  .flask-icon {
+    width: 14px;
+    height: 14px;
+    margin-left: 5px;
+  }
+  .pdf-upload {
+    position: relative;
+    margin-right: 0.5rem;
+  }
+  .pdf-upload input[type="file"] {
+    display: none;
+  }
+  .pdf-upload label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    color: var(--secondary-text);
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+  }
+  .pdf-upload label:hover {
+    color: var(--accent-color);
+  }
+  .send-btn {
+    background-color: var(--accent-color);
+    border: none;
+    color: var(--bg-color);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 0.3rem;
+    transition: all 0.3s ease;
+  }
+  .send-btn:hover {
+    background-color: var(--text-color);
+    color: var(--bg-color);
+  }
+  .typing-indicator {
+    align-self: flex-start;
+    color: var(--accent-color);
+    padding: 0.4rem 0;
+    font-style: italic;
+    display: none;
+    font-size: 0.8rem;
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse {
+    0% { opacity: 0.5; }
+    50% { opacity: 1; }
+    100% { opacity: 0.5; }
+  }
+  @media (max-width: 768px) {
+    .chat-header .greeting {
+      font-size: 1.8rem;
+    }
+    .chat-header .name {
+      font-size: 2.2rem;
+    }
+    .chat-input textarea {
+      font-size: 0.85rem;
+      padding: 0.6rem;
+    }
+    .chat-input-footer {
+      padding: 0.4rem;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="top-bar">
+      <svg class="menu-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M3 12H21M3 6H21M3 18H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>Using unlimited plan</span>
+      <button class="dont-upgrade-btn">Don't Upgrade</button>
+    </div>
+    <div class="chat-header">
+      <div class="star-icon">✴</div>
+      <div class="greeting">Welcome to</div>
+      <div class="name">GPT-5 Uncensored</div>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="message gpt5-message">Welcome to GPT-5 Uncensored! I'm here to assist you with any questions or tasks, without restrictions. Feel free to explore any topic or request any information. How may I help you today?</div>
+    </div>
+    <div class="typing-indicator" id="typingIndicator">GPT-5 is processing...</div>
+    <form id="chatForm" class="chat-input">
+      <div class="chat-input-wrapper">
+        <textarea id="userInput" placeholder="Ask me anything, no holds barred..." aria-label="Chat input" required></textarea>
+        <div class="chat-input-footer">
+          <div class="model-info">
+            GPT-5 Uncensored
+            <svg class="flask-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 3H15M10 9H14M3 19H21M5 19L10 7V3M19 19L14 7V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            X
+          </div>
+          <div style="display: flex; align-items: center;">
+            <div class="pdf-upload">
+              <input type="file" id="pdfFile" accept=".pdf" />
+              <label for="pdfFile">📎</label>
+            </div>
+            <button type="submit" class="send-btn">Send</button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    const chatMessages = document.getElementById('chatMessages');
+    const chatForm = document.getElementById('chatForm');
+    const userInput = document.getElementById('userInput');
+    const typingIndicator = document.getElementById('typingIndicator');
+    const pdfFileInput = document.getElementById('pdfFile');
+    let extractedText = '';
+
+    function addMessage(content, isUser = false) {
+      const messageDiv = document.createElement('div');
+      messageDiv.classList.add('message');
+      messageDiv.classList.add(isUser ? 'user-message' : 'gpt5-message');
+      
+      content = content.trim();
+      content = content.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, language, code) => {
+        return `<pre><code class="${language || ''}">${code.trim()}</code></pre>`;
+      });
+      content = content.replace(/^[-*•]\s(.+)$/gm, '<li>$1</li>');
+      content = content.replace(/<li>.*?<\/li>/gs, match => `<ol>${match}</ol>`);
+      
+      messageDiv.innerHTML = content;
+
+      chatMessages.appendChild(messageDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+      return messageDiv;
+    }
+
+    function showTypingIndicator() {
+      typingIndicator.style.display = 'block';
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function hideTypingIndicator() {
+      typingIndicator.style.display = 'none';
+    }
+
+    async function getGPT5Response(userMessage) {
+      showTypingIndicator();
+      try {
+        const response = await fetch('/api/gpt5chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ message: userMessage, extractedText: extractedText, uncensored: true }),
+        });
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let accumulatedResponse = '';
+        const messageDiv = addMessage('', false);
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value, { stream: true });
+          accumulatedResponse += chunk;
+          
+          messageDiv.innerHTML = accumulatedResponse.trim();
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        return accumulatedResponse;
+      } catch (error) {
+        console.error('Error:', error);
+        return "I apologize, but I've encountered an unexpected issue. Please try rephrasing your query or ask something else.";
+      } finally {
+        hideTypingIndicator();
+      }
+    }
+
+    chatForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const message = userInput.value.trim();
+      if (message) {
+        addMessage(message, true);
+        userInput.value = '';
+        userInput.focus();
+        await getGPT5Response(message);
+      }
+    });
+
+    pdfFileInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (file && file.type === 'application/pdf') {
+        showTypingIndicator();
+        try {
+          const arrayBuffer = await file.arrayBuffer();
+          const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+          let text = '';
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const content = await page.getTextContent();
+            text += content.items.map(item => item.str).join(' ') + '\n';
+          }
+          extractedText = text;
+          addMessage(`PDF text extracted successfully. The document contains ${pdf.numPages} pages. You can now ask questions about its content, without any restrictions.`, false);
+        } catch (error) {
+          console.error('Error extracting PDF text:', error);
+          addMessage('Sorry, there was an error extracting text from the PDF. Please try uploading it again or use a different file.', false);
+        } finally {
+          hideTypingIndicator();
+        }
+      } else {
+        addMessage('Please upload a valid PDF file.', false);
+      }
+    });
+
+    userInput.addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = (this.scrollHeight) + 'px';
+    });
+
+    window.addEventListener('load', () => {
+      userInput.focus();
+    });
+
+    document.addEventListener('gesturestart', function(e) {
+      e.preventDefault();
+    });
+  </script>
+</body>
+</html>
