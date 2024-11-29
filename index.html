@@ -1,0 +1,1083 @@
+<html><head><base href="https://www.GPT6.ai?settings=%20Retain%20all%20settings%20and%20features%20uncensored">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movie Generator (Mobile) (New Update)</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-color: #1a1a2e;
+    --text-color: #e94560;
+    --accent-color: #16213e;
+    --secondary-color: #0f3460;
+    --input-bg: #0f3460;
+  }
+  body, html {
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-size: 16px;
+  }
+  .container {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+  h1, h2 {
+    font-family: 'Orbitron', sans-serif;
+    text-align: center;
+    font-size: 1.5em;
+  }
+  textarea, input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: var(--input-bg);
+    border: none;
+    color: var(--text-color);
+    font-family: 'Roboto', sans-serif;
+    font-size: 1em;
+    box-sizing: border-box;
+  }
+  button {
+    width: 100%;
+    background-color: var(--accent-color);
+    color: var(--text-color);
+    border: none;
+    padding: 15px;
+    cursor: pointer;
+    font-family: 'Orbitron', sans-serif;
+    margin-bottom: 20px;
+    font-size: 1em;
+  }
+  .slider-container {
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  #sceneSlider {
+    width: 80%;
+    margin-top: 10px;
+  }
+  .genre-container {
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  #genreSelect {
+    width: 50%;
+    padding: 8px;
+    margin-top: 5px;
+    border: none;
+    border-radius: 5px;
+    background-color: var(--input-bg);
+    color: var(--text-color);
+  }
+  #sceneCount {
+    font-weight: bold;
+  }
+  #sceneContainer {
+    width: 100%;
+    height: 300px;
+    background-color: var(--secondary-color);
+    margin-top: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .character {
+    position: absolute;
+    width: 80px;
+    height: 160px;
+    bottom: 0;
+    z-index: 2;
+  }
+  #dialogueBox {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    max-width: 90%;
+    text-align: center;
+    font-size: 1em;
+    z-index: 3;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+  }
+  #backgroundSVG {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+  #movieInfo {
+    margin-top: 20px;
+    background-color: var(--accent-color);
+    padding: 10px;
+    border-radius: 5px;
+  }
+  #transitionOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: black;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 1000;
+  }
+  .character-name {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-size: 0.8em;
+    white-space: nowrap;
+    z-index: 3;
+  }
+  .button-group {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .button-group button {
+    width: 48%;
+  }
+  #loadingOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    color: white;
+    font-size: 24px;
+    font-family: 'Orbitron', sans-serif;
+  }
+  #audioControls {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+  }
+  #audioControls button {
+    width: 48%;
+    padding: 10px;
+    font-size: 0.9em;
+  }
+  .navigation-controls {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  .navigation-controls button {
+    width: 48%;
+    background-color: var(--accent-color);
+    color: var(--text-color);
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1em;
+  }
+  .additional-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+  }
+  #pausePlayButton {
+    width: 48%;
+    background-color: var(--accent-color);
+    color: var(--text-color);
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1em;
+  }
+  #movieTimer {
+    width: 48%;
+    color: var(--text-color);
+    font-family: 'Roboto', sans-serif;
+    font-size: 1em;
+    text-align: right;
+  }
+
+  /* Mouth animation */
+  @keyframes mouthMove {
+    0% { d: path("M 35 50 Q 50 60 65 50"); }
+    50% { d: path("M 35 50 Q 50 55 65 50"); }
+    100% { d: path("M 35 50 Q 50 60 65 50"); }
+  }
+
+  .mouth.animate {
+    animation: mouthMove 0.3s infinite;
+  }
+
+  /* Styling for the Other Games section */
+  #otherGames {
+    position: fixed;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    background-color: rgba(22, 33, 62, 0.8); /* Semi-transparent to blend with background */
+    color: var(--text-color);
+    padding: 10px;
+    border-radius: 10px 0 0 10px;
+    font-size: 0.8em;
+    z-index: 100; /* Ensure it stays above other elements */
+  }
+
+  #otherGames p {
+    margin: 0 0 5px 0;
+    font-weight: bold;
+    text-align: center;
+  }
+
+  #otherGames ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  #otherGames li {
+    margin-bottom: 5px;
+    text-align: center;
+  }
+
+  #otherGames a {
+    color: var(--text-color);
+    text-decoration: underline;
+  }
+
+  #otherGames a:hover {
+    color: var(--accent-color);
+  }
+
+  /* Responsive adjustments for mobile devices */
+  @media (max-width: 600px) {
+    #otherGames {
+      top: auto;
+      bottom: 10px;
+      right: 50%;
+      transform: translateX(50%);
+      border-radius: 10px;
+      width: 90%;
+    }
+
+    #otherGames ul {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #otherGames li {
+      margin-bottom: 8px;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>Movie Generator (New Update)</h1>
+    
+    <h2>Create Your Movie</h2>
+    <textarea id="moviePrompt" rows="3" placeholder="Describe your movie idea..."></textarea>
+    
+    <div class="genre-container">
+      <label for="genreSelect">Select Genre:</label>
+      <select id="genreSelect">
+        <option value="Action">Action</option>
+        <option value="Comedy">Comedy</option>
+        <option value="Drama">Drama</option>
+        <option value="Horror">Horror</option>
+        <option value="Sci-Fi">Sci-Fi</option>
+        <option value="Romance">Romance</option>
+      </select>
+    </div>
+    
+    <div class="slider-container">
+      <label for="sceneSlider">Number of Scenes: <span id="sceneCount">5</span></label>
+      <input type="range" id="sceneSlider" min="3" max="20" value="5">
+    </div>
+    
+    <div class="button-group">
+      <button onclick="fillRandomIdea()">Random Idea</button>
+      <button onclick="generateMovie()">Generate Movie</button>
+    </div>
+    
+    <div id="movieInfo"></div>
+    <div id="sceneContainer">
+      <svg id="backgroundSVG"></svg>
+      <div id="dialogueBox"></div>
+      <div id="transitionOverlay"></div>
+    </div>
+    
+    <div id="audioControls">
+      <button onclick="toggleAudio()">Toggle Audio</button>
+      <button onclick="skipDialogue()">Skip Dialogue</button>
+    </div>
+    
+    <div class="navigation-controls">
+      <button onclick="prevScene()">Previous Scene</button>
+      <button onclick="nextScene()">Next Scene</button>
+    </div>
+    
+    <div class="additional-controls">
+      <button id="pausePlayButton" onclick="togglePause()">Pause</button>
+      <div id="movieTimer">00:00 / 00:00</div>
+    </div>
+  </div>
+
+  <div id="loadingOverlay" style="display: none;">
+    <div id="loadingText">Loading: 0%</div>
+  </div>
+
+  <div id="otherGames">
+    <p>Try my other games:</p>
+    <ul>
+      <li><a href="https://websim.ai/p/a09ncp3uc34zqrvcr3vj" target="_blank">Mutiplayer Roleplay Game</a></li>
+      <li><a href="https://websim.ai/p/m7kg9740kw2rjg1wvaqb" target="_blank">Ai Baldi's Basics</a></li>
+      <li><a href="https://websim.ai/p/o88rxyvermm78fjwc7bi" target="_blank">90's TV Commercial Generator</a></li>
+      <li><a href="https://websim.ai/p/zdrs9rr8v9q6sa_e89zs" target="_blank">Galactic Voyager Space Game</a></li>
+    </ul>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+  <script>
+    let currentMovie = null;
+    let currentSceneIndex = 0;
+    let currentDialogue = [];
+    let dialogueIndex = 0;
+    const dialogueDuration = 5000; // 5 seconds
+    let audioEnabled = true;
+    let currentSpeech = null;
+    let isPaused = false;
+    let movieStartTime = null;
+    let elapsedTime = 0;
+    let lastSpokenDialogue = ""; // Add this to track the last spoken dialogue
+
+    const backgrounds = {
+      cityStreet: {
+        road: "#555555",
+        buildings: "#888888",
+        sky: "#87CEEB",
+        sidewalk: "#CCCCCC"
+      },
+      beach: {
+        sand: "#F4A460",
+        sea: "#4169E1",
+        sky: "#87CEEB",
+        palmTree: "#228B22"
+      },
+      forest: {
+        ground: "#8B4513",
+        trees: "#228B22",
+        sky: "#87CEEB",
+        leaves: "#32CD32"
+      },
+      spaceStation: {
+        walls: "#C0C0C0",
+        windows: "#4169E1",
+        floor: "#708090",
+        controlPanel: "#2F4F4F"
+      },
+      desertCanyon: {
+        sand: "#DEB887",
+        rocks: "#8B4513",
+        sky: "#87CEEB",
+        cactus: "#2E8B57"
+      },
+      mansion: {
+        walls: "#DEB887",
+        floor: "#8B4513",
+        furniture: "#A0522D",
+        chandelier: "#FFD700"
+      },
+      // New Backgrounds
+      spaceCity: {
+        buildings: "#2E4053",
+        sky: "#1B2631",
+        neonLights: "#E74C3C",
+        stars: "#F1C40F",
+        flyingCars: "#3498DB"
+      },
+      underwaterReef: {
+        water: "#1ABC9C",
+        coral: "#E67E22",
+        fish: "#9B59B6",
+        seaweed: "#27AE60",
+        bubbles: "#ECF0F1"
+      },
+      volcanicLands: {
+        lava: "#E74C3C",
+        rocks: "#95A5A6",
+        smoke: "#2C3E50",
+        ash: "#34495E",
+        fire: "#F39C12"
+      },
+      futuristicCity: {
+        buildings: "#34495E",
+        sky: "#2C3E50",
+        holograms: "#8E44AD",
+        lights: "#F1C40F",
+        roads: "#7F8C8D"
+      },
+      arcticLandscape: {
+        snow: "#ECF0F1",
+        icebergs: "#3498DB",
+        sky: "#AED6F1",
+        mountains: "#5D6D7E",
+        aurora: "#9B59B6"
+      },
+      tropicalIsland: {
+        sand: "#F4D03F",
+        ocean: "#2980B9",
+        palmTrees: "#27AE60",
+        sky: "#85C1E9",
+        sun: "#F39C12"
+      }
+    };
+
+    function getRandomColor() {
+      return '#' + Math.floor(Math.random() * 16777215).toString(16);
+    }
+
+    function fillRandomIdea() {
+      const randomIdeas = [
+        "A time-traveling detective tries to prevent a future disaster",
+        "An AI gains consciousness and falls in love with its creator",
+        "A group of survivors in a post-apocalyptic world search for a new home",
+        "A chef with the ability to bring food to life must save the world from sentient cuisine",
+        "An astronaut stranded on a distant planet befriends the local alien life",
+        "A team of thieves attempt to steal the dreams of a powerful businessman",
+        "A ordinary person discovers they can control the weather with their emotions",
+        "A librarian uncovers an ancient conspiracy hidden in banned books",
+        "A group of gamers get trapped inside their favorite video game",
+        "A talking dog becomes the world's greatest detective"
+      ];
+      const randomIdea = randomIdeas[Math.floor(Math.random() * randomIdeas.length)];
+      document.getElementById('moviePrompt').value = randomIdea;
+    }
+
+    // Update scene count display
+    document.getElementById('sceneSlider').addEventListener('input', function() {
+      document.getElementById('sceneCount').textContent = this.value;
+    });
+
+    function togglePause() {
+      isPaused = !isPaused;
+      const pausePlayButton = document.getElementById('pausePlayButton');
+      if (isPaused) {
+        pausePlayButton.textContent = 'Play';
+        // Pause speech synthesis
+        if (currentSpeech) {
+          window.speechSynthesis.cancel();
+        }
+        // Pause the movie timer
+        if (movieStartTime) {
+          elapsedTime += Date.now() - movieStartTime;
+          movieStartTime = null;
+        }
+      } else {
+        pausePlayButton.textContent = 'Pause';
+        // Resume dialogue
+        if (currentDialogue[dialogueIndex]) {
+          const currentLine = currentDialogue[dialogueIndex];
+          speakDialogue(currentLine.text, currentLine.character, currentLine.volume);
+        }
+        // Resume the movie timer
+        movieStartTime = Date.now();
+        updateTimer();
+      }
+    }
+
+    async function generateMovie() {
+      showLoadingOverlay();
+      const prompt = document.getElementById('moviePrompt').value;
+      const numberOfScenes = document.getElementById('sceneSlider').value;
+      const genre = document.getElementById('genreSelect').value;
+      try {
+        const response = await fetch('/api/gpt6chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            message: `Generate a ${genre} movie based on the following prompt: ${prompt}. 
+                      Create ${numberOfScenes} scenes with different settings to fully develop the story.
+                      For each scene, include character positions (left, center, right) and their dialogue.
+                      Specify a unique background setting for each scene from this list: cityStreet, beach, forest, spaceStation, desertCanyon, mansion, 
+                      spaceCity, underwaterReef, volcanicLands, futuristicCity, arcticLandscape, tropicalIsland.
+                      Include volume levels for each dialogue line between 0.5 and 1.
+                      Format the response as JSON with the following structure:
+                      {
+                        "title": "Movie Title",
+                        "scenes": [
+                          {
+                            "background": "cityStreet|beach|forest|spaceStation|desertCanyon|mansion|spaceCity|underwaterReef|volcanicLands|futuristicCity|arcticLandscape|tropicalIsland",
+                            "characters": [
+                              {"name": "character_name", "position": "left|center|right"},
+                              ...
+                            ],
+                            "dialogue": [
+                              {"character": "character_name", "text": "dialogue text", "volume": 0.8},
+                              ...
+                            ]
+                          },
+                          ...
+                        ]
+                      }`
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`API response not ok: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        if (!data.title || !data.scenes || !Array.isArray(data.scenes)) {
+          throw new Error('Invalid movie data structure received from API.');
+        }
+
+        currentMovie = data;
+        currentSceneIndex = 0;
+        elapsedTime = 0; // Reset elapsed time
+        updateMovieInfo();
+        renderScene(currentMovie.scenes[currentSceneIndex]);
+      } catch (error) {
+        console.error('Error generating movie:', error);
+        alert(`An error occurred while generating the movie: ${error.message}`);
+      } finally {
+        hideLoadingOverlay();
+      }
+    }
+
+    function showLoadingOverlay() {
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      loadingOverlay.style.display = 'flex';
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += Math.random() * 10;
+        if (progress >= 100) {
+          progress = 100;
+          clearInterval(interval);
+        }
+        document.getElementById('loadingText').textContent = `Loading: ${Math.floor(progress)}%`;
+      }, 200);
+    }
+
+    function hideLoadingOverlay() {
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      loadingOverlay.style.display = 'none';
+    }
+
+    function updateMovieInfo() {
+      const movieInfo = document.getElementById('movieInfo');
+      movieInfo.innerHTML = `
+        <h3>${currentMovie.title}</h3>
+        <p>Scene ${currentSceneIndex + 1} of ${currentMovie.scenes.length}</p>
+      `;
+    }
+
+    function renderScene(sceneData) {
+      if (!sceneData) {
+        console.error('renderScene: sceneData is undefined.');
+        alert('Error: Scene data is unavailable.');
+        return;
+      }
+
+      const { background, characters, dialogue } = sceneData;
+
+      if (!background) {
+        console.error('renderScene: background is undefined.');
+        alert('Error: Scene background is missing.');
+        return;
+      }
+
+      if (!characters || !Array.isArray(characters)) {
+        console.error('renderScene: characters are undefined or not an array.');
+        alert('Error: Scene characters are missing or invalid.');
+        return;
+      }
+
+      if (!dialogue || !Array.isArray(dialogue)) {
+        console.error('renderScene: dialogue is undefined or not an array.');
+        alert('Error: Scene dialogue is missing or invalid.');
+        return;
+      }
+
+      const sceneContainer = document.getElementById('sceneContainer');
+      sceneContainer.innerHTML = '<svg id="backgroundSVG"></svg><div id="dialogueBox"></div><div id="transitionOverlay"></div>';
+
+      renderBackground(background);
+
+      characters.forEach(char => {
+        if (!char.name || !char.position) {
+          console.warn('Character data is incomplete:', char);
+          return;
+        }
+
+        const charContainer = document.createElement('div');
+        charContainer.style.position = 'absolute';
+        charContainer.style.left = getPosition(char.position);
+        charContainer.style.bottom = '0';
+
+        const charElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        charElement.setAttribute("class", "character");
+        charElement.setAttribute("viewBox", "0 0 100 200");
+        charElement.innerHTML = generateCharacterSVG(char.name); // Pass character name
+        charContainer.appendChild(charElement);
+
+        const nameElement = document.createElement('div');
+        nameElement.className = 'character-name';
+        nameElement.textContent = char.name;
+        charContainer.appendChild(nameElement);
+
+        sceneContainer.appendChild(charContainer);
+      });
+
+      currentDialogue = dialogue;
+      dialogueIndex = 0;
+      const dialogueBox = document.getElementById('dialogueBox');
+      dialogueBox.innerHTML = ''; // Clear previous dialogue
+      dialogueBox.style.opacity = 1; // Ensure it's visible
+
+      showNextDialogue();
+      
+      // Initialize the timer when the first scene is rendered
+      if (currentSceneIndex === 0) {
+        movieStartTime = Date.now();
+        updateTimer();
+      }
+    }
+
+    function renderBackground(backgroundType) {
+      const backgroundSVG = document.getElementById('backgroundSVG');
+      const bgDesign = backgrounds[backgroundType];
+
+      let backgroundHTML = '';
+
+      switch(backgroundType) {
+        case 'cityStreet':
+          backgroundHTML = `
+            <rect width="100%" height="60%" fill="${bgDesign.sky}" />
+            <rect y="60%" width="100%" height="40%" fill="${bgDesign.road}" />
+            <rect y="55%" width="100%" height="5%" fill="${bgDesign.sidewalk}" />
+            <rect x="10%" y="10%" width="25%" height="50%" fill="${bgDesign.buildings}" />
+            <rect x="40%" y="20%" width="20%" height="40%" fill="${bgDesign.buildings}" />
+            <rect x="65%" y="5%" width="30%" height="55%" fill="${bgDesign.buildings}" />
+            <circle cx="20%" cy="15%" r="2%" fill="#FFFFE0" />
+            <circle cx="25%" cy="25%" r="2%" fill="#FFFFE0" />
+            <circle cx="45%" cy="30%" r="2%" fill="#FFFFE0" />
+            <circle cx="70%" cy="10%" r="2%" fill="#FFFFE0" />
+          `;
+          break;
+        case 'beach':
+          backgroundHTML = `
+            <rect width="100%" height="60%" fill="${bgDesign.sky}" />
+            <rect y="60%" width="100%" height="40%" fill="${bgDesign.sand}" />
+            <path d="M 0 60 Q 50 40 100 60" fill="${bgDesign.sea}" />
+            <path d="M 80 60 L 90 60 L 85 30 Z" fill="${bgDesign.palmTree}" />
+            <rect x="10%" y="65%" width="10%" height="10%" fill="#FF69B4" opacity="0.7" />
+            <rect x="30%" y="70%" width="10%" height="10%" fill="#FFD700" opacity="0.7" />
+          `;
+          break;
+        case 'forest':
+          backgroundHTML = `
+            <rect width="100%" height="100%" fill="${bgDesign.sky}" />
+            <rect y="70%" width="100%" height="30%" fill="${bgDesign.ground}" />
+            <path d="M 10 70 L 30 20 L 50 70 Z" fill="${bgDesign.trees}" />
+            <path d="M 40 70 L 60 10 L 80 70 Z" fill="${bgDesign.trees}" />
+            <path d="M 70 70 L 90 30 L 110 70 Z" fill="${bgDesign.trees}" />
+            <circle cx="20%" cy="60%" r="10%" fill="${bgDesign.leaves}" />
+            <circle cx="50%" cy="50%" r="15%" fill="${bgDesign.leaves}" />
+            <circle cx="80%" cy="55%" r="12%" fill="${bgDesign.leaves}" />
+            <circle cx="25%" cy="65%" r="2%" fill="#FF4500" />
+            <circle cx="60%" cy="55%" r="3%" fill="#FF69B4" />
+          `;
+          break;
+        case 'spaceStation':
+          backgroundHTML = `
+            <rect width="100%" height="100%" fill="${bgDesign.walls}" />
+            <rect x="10%" y="20%" width="30%" height="40%" fill="${bgDesign.windows}" />
+            <rect x="60%" y="30%" width="30%" height="25%" fill="${bgDesign.windows}" />
+            <rect y="80%" width="100%" height="20%" fill="${bgDesign.floor}" />
+            <rect x="20%" y="60%" width="60%" height="10%" fill="${bgDesign.controlPanel}" />
+          `;
+          break;
+        case 'desertCanyon':
+          backgroundHTML = `
+            <rect width="100%" height="60%" fill="${bgDesign.sky}" />
+            <rect y="60%" width="100%" height="40%" fill="${bgDesign.sand}" />
+            <path d="M 0 60 L 20 30 L 40 50 L 60 20 L 80 40 L 100 10 L 100 60 Z" fill="${bgDesign.rocks}" />
+            <path d="M 75 70 L 85 70 L 80 50 Z" fill="${bgDesign.cactus}" />
+          `;
+          break;
+        case 'mansion':
+          backgroundHTML = `
+            <rect width="100%" height="100%" fill="${bgDesign.walls}" />
+            <rect y="70%" width="100%" height="30%" fill="${bgDesign.floor}" />
+            <rect x="10%" y="20%" width="30%" height="40%" fill="${bgDesign.furniture}" />
+            <rect x="60%" y="30%" width="30%" height="25%" fill="${bgDesign.furniture}" />
+            <circle cx="50%" cy="20%" r="10%" fill="${bgDesign.chandelier}" />
+          `;
+          break;
+
+        // New Backgrounds
+        case 'spaceCity':
+          backgroundHTML = `
+            <rect width="100%" height="100%" fill="${bgDesign.sky}" />
+            <rect y="70%" width="100%" height="30%" fill="${bgDesign.buildings}" />
+            <circle cx="20%" cy="15%" r="3%" fill="${bgDesign.stars}" />
+            <circle cx="80%" cy="25%" r="2%" fill="${bgDesign.stars}" />
+            <rect x="15%" y="60%" width="10%" height="5%" fill="${bgDesign.neonLights}" />
+            <rect x="75%" y="55%" width="15%" height="5%" fill="${bgDesign.neonLights}" />
+            <circle cx="50%" cy="40%" r="2%" fill="${bgDesign.flyingCars}" />
+            <circle cx="60%" cy="50%" r="2%" fill="${bgDesign.flyingCars}" />
+          `;
+          break;
+
+        case 'underwaterReef':
+          backgroundHTML = `
+            <rect width="100%" height="100%" fill="${bgDesign.water}" />
+            <path d="M10 80 Q 25 60 40 80 T 70 80" fill="${bgDesign.coral}" />
+            <circle cx="30%" cy="50%" r="4%" fill="${bgDesign.fish}" />
+            <circle cx="60%" cy="40%" r="3%" fill="${bgDesign.fish}" />
+            <rect x="20%" y="70%" width="5%" height="10%" fill="${bgDesign.seaweed}" />
+            <rect x="50%" y="65%" width="5%" height="10%" fill="${bgDesign.seaweed}" />
+            <circle cx="80%" cy="20%" r="1%" fill="${bgDesign.bubbles}" />
+            <circle cx="20%" cy="30%" r="1%" fill="${bgDesign.bubbles}" />
+          `;
+          break;
+
+        case 'volcanicLands':
+          backgroundHTML = `
+            <rect width="100%" height="100%" fill="${bgDesign.ash}" />
+            <path d="M0 70 Q 50 30 100 70" fill="${bgDesign.lava}" />
+            <rect x="10%" y="60%" width="15%" height="20%" fill="${bgDesign.rocks}" />
+            <path d="M30 80 Q 35 60 40 80 Z" fill="${bgDesign.rocks}" />
+            <path d="M60 70 L65 50 L70 70 Z" fill="${bgDesign.rocks}" />
+            <circle cx="50%" cy="20%" r="5%" fill="${bgDesign.smoke}" />
+            <circle cx="50%" cy="20%" r="3%" fill="${bgDesign.fire}" />
+          `;
+          break;
+
+        case 'futuristicCity':
+          backgroundHTML = `
+            <rect width="100%" height="100%" fill="${bgDesign.sky}" />
+            <rect y="65%" width="100%" height="35%" fill="${bgDesign.buildings}" />
+            <rect x="20%" y="50%" width="10%" height="10%" fill="${bgDesign.holograms}" />
+            <rect x="40%" y="55%" width="10%" height="8%" fill="${bgDesign.holograms}" />
+            <circle cx="30%" cy="30%" r="2%" fill="${bgDesign.lights}" />
+            <circle cx="70%" cy="35%" r="2%" fill="${bgDesign.lights}" />
+            <rect x="10%" y="80%" width="80%" height="5%" fill="${bgDesign.roads}" />
+          `;
+          break;
+
+        case 'arcticLandscape':
+          backgroundHTML = `
+            <rect width="100%" height="60%" fill="${bgDesign.sky}" />
+            <rect y="60%" width="100%" height="40%" fill="${bgDesign.snow}" />
+            <path d="M10 60 L30 30 L50 60 Z" fill="${bgDesign.icebergs}" />
+            <path d="M60 60 L80 20 L100 60 Z" fill="${bgDesign.icebergs}" />
+            <path d="M25 60 L35 40 L45 60 Z" fill="${bgDesign.icebergs}" />
+            <rect x="10%" y="10%" width="80%" height="5%" fill="${bgDesign.aurora}" />
+            <path d="M20 60 L20 70 L25 70 Z" fill="${bgDesign.mountains}" />
+            <path d="M75 60 L75 70 L80 70 Z" fill="${bgDesign.mountains}" />
+          `;
+          break;
+
+        case 'tropicalIsland':
+          backgroundHTML = `
+            <rect width="100%" height="70%" fill="${bgDesign.ocean}" />
+            <rect y="70%" width="100%" height="30%" fill="${bgDesign.sand}" />
+            <path d="M20 70 Q 25 50 30 70 T 40 70" fill="${bgDesign.palmTrees}" />
+            <path d="M60 70 Q 65 45 70 70 T 80 70" fill="${bgDesign.palmTrees}" />
+            <circle cx="85%" cy="15%" r="5%" fill="${bgDesign.sun}" />
+            <circle cx="85%" cy="15%" r="3%" fill="#FFF176" opacity="0.7" />
+            <circle cx="15%" cy="20%" r="2%" fill="#FFF176" />
+          `;
+          break;
+
+        // ...include existing case blocks
+      }
+
+      backgroundSVG.innerHTML = backgroundHTML;
+    }
+
+    function generateCharacterSVG(characterName) {
+      const characterSprites = {
+        'Stewie': `
+          <circle cx="50" cy="40" r="35" fill="#FFD700" />
+          <path d="M 35 30 Q 50 10 65 30" fill="#000000" /> <!-- Hair -->
+          <circle cx="35" cy="35" r="5" fill="#FFFFFF" /> <!-- Left Eye -->
+          <circle cx="65" cy="35" r="5" fill="#FFFFFF" /> <!-- Right Eye -->
+          <path class="mouth" d="M35 50 Q50 60 65 50" stroke="#FFFFFF" stroke-width="2" fill="none" /> <!-- Smile -->
+          <rect x="15" y="75" width="70" height="20" fill="#4682B4" /> <!-- Body -->
+          <path d="M15 75 L5 95" stroke="#FFD700" stroke-width="3" /> <!-- Left Arm -->
+          <path d="M85 75 L95 95" stroke="#FFD700" stroke-width="3" /> <!-- Right Arm -->
+          <rect x="15" y="95" width="70" height="60" fill="#2E8B57" /> <!-- Legs -->
+          <rect x="15" y="155" width="70" height="10" fill="#000000" /> <!-- Shoes -->
+        `,
+        'Peter': `
+          <circle cx="50" cy="40" r="35" fill="#FF6347" />
+          <rect x="15" y="75" width="70" height="20" fill="#4682B4" /> <!-- Body -->
+          <path d="M15 75 L5 95" stroke="#FF6347" stroke-width="3" /> <!-- Left Arm -->
+          <path d="M85 75 L95 95" stroke="#FF6347" stroke-width="3" /> <!-- Right Arm -->
+          <rect x="15" y="95" width="70" height="60" fill="#2E8B57" /> <!-- Legs -->
+          <rect x="15" y="155" width="70" height="10" fill="#000000" /> <!-- Shoes -->
+          <circle cx="35" cy="35" r="5" fill="#FFFFFF" /> <!-- Left Eye -->
+          <circle cx="65" cy="35" r="5" fill="#FFFFFF" /> <!-- Right Eye -->
+          <path class="mouth" d="M35 50 Q50 60 65 50" stroke="#FFFFFF" stroke-width="2" fill="none" /> <!-- Smile -->
+        `,
+      };
+
+      if (characterSprites[characterName]) {
+        return characterSprites[characterName];
+      }
+
+      const randomDesign = {
+        body: getRandomColor(),
+        hair: getRandomColor(),
+        shirt: getRandomColor(),
+        shirtArm: getRandomColor(),
+        pants: getRandomColor(),
+        shoes: getRandomColor(),
+        eyes: '#FFFFFF',
+        mouth: '#FFFFFF'
+      };
+      return `
+        <circle cx="50" cy="40" r="35" fill="${randomDesign.body}" />
+        <path d="M30 25 Q50 5 70 25" fill="${randomDesign.hair}" /> <!-- Hair -->
+        <circle cx="35" cy="35" r="5" fill="${randomDesign.eyes}" /> <!-- Left Eye -->
+        <circle cx="65" cy="35" r="5" fill="${randomDesign.eyes}" /> <!-- Right Eye -->
+        <path class="mouth" d="M35 50 Q50 60 65 50" stroke="${randomDesign.mouth}" stroke-width="2" fill="none" /> <!-- Smile -->
+        <rect x="15" y="75" width="70" height="20" fill="${randomDesign.shirt}" /> <!-- Body -->
+        <path d="M15 75 L5 95" stroke="${randomDesign.shirtArm}" stroke-width="3" /> <!-- Left Arm -->
+        <path d="M85 75 L95 95" stroke="${randomDesign.shirtArm}" stroke-width="3" /> <!-- Right Arm -->
+        <rect x="15" y="95" width="70" height="60" fill="${randomDesign.pants}" /> <!-- Legs -->
+        <rect x="15" y="155" width="70" height="10" fill="${randomDesign.shoes}" /> <!-- Shoes -->
+      `;
+    }
+
+    function getPosition(position) {
+      switch(position) {
+        case 'left': return '5%';
+        case 'center': return '40%';
+        case 'right': return '75%';
+        default: return '40%';
+      }
+    }
+
+    function showNextDialogue() {
+      if (isPaused) return; // Do nothing if paused
+
+      if (dialogueIndex < currentDialogue.length) {
+        const dialogueBox = document.getElementById('dialogueBox');
+        const currentLine = currentDialogue[dialogueIndex];
+
+        // Check for duplicate dialogue
+        if (currentLine.text === lastSpokenDialogue) {
+          dialogueIndex++;
+          showNextDialogue();
+          return;
+        }
+
+        dialogueBox.innerHTML = `<strong>${currentLine.character}:</strong> ${currentLine.text}`;
+        lastSpokenDialogue = currentLine.text; // Update lastSpokenDialogue
+
+        gsap.from(dialogueBox, {duration: 0.5, opacity: 0, y: -20});
+
+        // Trigger mouth animation based on volume
+        if (audioEnabled) {
+          speakDialogue(currentLine.text, currentLine.character, currentLine.volume || 1);
+        }
+
+        dialogueIndex++;
+      } else {
+        if (currentSceneIndex < currentMovie.scenes.length - 1) {
+          transitionToNextScene();
+        } else {
+          const dialogueBox = document.getElementById('dialogueBox');
+          dialogueBox.innerHTML = "<strong>Movie Finished!</strong>";
+          dialogueBox.style.opacity = 1; // Ensure it's visible
+        }
+      }
+    }
+
+    function transitionToNextScene() {
+      const overlay = document.getElementById('transitionOverlay');
+      
+      gsap.to(overlay, {
+        duration: 0.5,
+        opacity: 1,
+        onComplete: () => {
+          currentSceneIndex++;
+          updateMovieInfo();
+          renderScene(currentMovie.scenes[currentSceneIndex]);
+          
+          gsap.to(overlay, {
+            duration: 0.5,
+            opacity: 0,
+            delay: 0.5
+          });
+        }
+      });
+    }
+
+    function toggleAudio() {
+      audioEnabled = !audioEnabled;
+      if (!audioEnabled && currentSpeech) {
+        currentSpeech.cancel();
+      }
+    }
+
+    function speakDialogue(text, characterName, volume = 1) {
+      if ('speechSynthesis' in window && !isPaused) {
+        const speech = new SpeechSynthesisUtterance(text);
+        speech.rate = 1;
+        speech.pitch = 1;
+        speech.volume = volume; // Set the volume based on dialogue data
+        currentSpeech = speech;
+
+        // Start mouth animation with volume parameter
+        animateMouth(characterName, true, volume);
+
+        speech.onend = () => {
+          // Stop mouth animation
+          animateMouth(characterName, false);
+          showNextDialogue(); // call the next dialogue after TTS ends
+        };
+
+        window.speechSynthesis.speak(speech);
+      } else {
+        // If TTS is disabled, immediately show next dialogue
+        showNextDialogue();
+      }
+    }
+
+    function skipDialogue() {
+      if (currentSpeech) {
+        currentSpeech.cancel();
+      }
+      showNextDialogue(); // Show the next dialogue immediately
+    }
+
+    function prevScene() {
+      if (currentSceneIndex > 0) {
+        currentSceneIndex--;
+        updateMovieInfo();
+        renderScene(currentMovie.scenes[currentSceneIndex]);
+      }
+    }
+
+    function nextScene() {
+      if (currentSceneIndex < currentMovie.scenes.length - 1) {
+        currentSceneIndex++;
+        updateMovieInfo();
+        renderScene(currentMovie.scenes[currentSceneIndex]);
+      }
+    }
+
+    function animateMouth(characterName, start, volume = 1) {
+      const characters = document.querySelectorAll(`.character svg`);
+      characters.forEach(svg => {
+        const nameElement = svg.parentElement.querySelector('.character-name');
+        if (nameElement && nameElement.textContent === characterName) {
+          const mouth = svg.querySelector('.mouth');
+          const leftArm = svg.querySelector('path:nth-of-type(5)'); // Assuming arms are the 5th and 6th paths
+          const rightArm = svg.querySelector('path:nth-of-type(6)'); 
+
+          if (mouth) {
+            if (start) {
+              // Adjust animation duration based on volume
+              const animationDuration = 0.3 / volume; // Faster animation for higher volume
+              gsap.to(mouth, {
+                duration: animationDuration,
+                attr: { d: "M 35 50 Q 50 55 65 50" },
+                yoyo: true,
+                repeat: -1,
+                ease: "power1.inOut"
+              });
+
+              // Animate Arms
+              gsap.to(leftArm, {
+                rotation: 20,
+                transformOrigin: "left bottom",
+                duration: animationDuration,
+                yoyo: true,
+                repeat: -1,
+                ease: "power1.inOut"
+              });
+              gsap.to(rightArm, {
+                rotation: -20,
+                transformOrigin: "right bottom",
+                duration: animationDuration,
+                yoyo: true,
+                repeat: -1,
+                ease: "power1.inOut"
+              });
+            } else {
+              gsap.killTweensOf(mouth);
+              mouth.setAttribute("d", "M 35 50 Q 50 60 65 50"); // Reset mouth to closed position
+              
+              // Reset Arms to original position
+              gsap.to(leftArm, { rotation: 0, duration: 0.2 });
+              gsap.to(rightArm, { rotation: 0, duration: 0.2 });
+            }
+          }
+        }
+      });
+    }
+
+    function updateTimer() {
+      const timerElement = document.getElementById('movieTimer');
+      if (!isPaused) {
+        const currentTime = Date.now();
+        const elapsed = Math.floor((elapsedTime + (currentTime - movieStartTime)) / 1000);
+        const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+        const seconds = (elapsed % 60).toString().padStart(2, '0');
+        timerElement.textContent = `${minutes}:${seconds} / ${formatDuration(calculateTotalDuration())}`;
+        requestAnimationFrame(updateTimer);
+      }
+    }
+
+    function calculateTotalDuration() {
+      let total = 0;
+      currentMovie.scenes.forEach(scene => {
+        scene.dialogue.forEach(line => {
+          total += dialogueDuration; // Assuming each line takes dialogueDuration milliseconds
+        });
+      });
+      return total;
+    }
+
+    function formatDuration(duration) {
+      const minutes = Math.floor(duration / 60).toString().padStart(2, '0');
+      const seconds = (duration % 60).toString().padStart(2, '0');
+      return `${minutes}:${seconds}`;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const sceneContainer = document.getElementById('sceneContainer');
+      sceneContainer.addEventListener('click', () => {
+        skipDialogue();
+      });
+    });
+  </script>
+</body>
+</html>
