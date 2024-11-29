@@ -1,0 +1,270 @@
+<html><head><base href="https://websim.ai/dungeons-of-landia">
+<title>Dungeons of Landia - RPG - Expansion</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap');
+body,button,input,select,textarea{font-family:'MedievalSharp',cursive;color:#d4af37;}
+body{background:#000;margin:0;padding:20px;display:flex;justify-content:center;align-items:center;min-height:100vh;}
+.container{background:rgba(20,20,20,0.8);border-radius:10px;box-shadow:0 0 20px rgba(212,175,55,0.5);padding:20px;width:90%;border:2px solid #d4af37;}
+.game-area{display:flex;gap:20px;}
+.chat-area{flex:2;}
+.player-info,.modal-content,.chat-box,.modal input,.modal select,#user-input{background:rgba(30,30,30,0.7);border:1px solid #d4af37;color:#d4af37;}
+.player-info,.modal-content{border-radius:10px;}
+.player-info{flex:1;padding:1vw;}
+.chat-box{height:400px;overflow-y:auto;padding:10px;margin-bottom:20px;scrollbar-width:thin;scrollbar-color:#d4af37 #2c2c2c;}
+.chat-box::-webkit-scrollbar{width:8px;background:#2c2c2c;}
+.chat-box::-webkit-scrollbar-thumb{background:#d4af37;border-radius:20px;border:2px solid #2c2c2c;}
+.input-area{display:flex;flex-direction:column;gap:10px;}
+#user-input{flex-grow:1;padding:10px;font-size:16px;}
+#send-button,.action-button,.modal button{padding:10px 20px;font-size:16px;background:#d4af37;color:#2c2c2c;border:none;cursor:pointer;transition:all 0.3s ease;}
+#send-button:hover,.action-button:hover,.modal button:hover{background:#c19b2e;}
+.message{margin-bottom:10px;padding:10px;border-radius:5px;font-size:18px;}
+.user{background:rgba(212,175,55,0.2);text-align:right;border-right:3px solid #d4af37;}
+.gm{background:rgba(70,130,180,0.2);border-left:3px solid #4682b4;}
+.system{background:rgba(178,34,34,0.2);font-style:italic;text-align:center;border:1px dashed #b22222;}
+h1,h2,h3{text-align:center;color:#d4af37;text-shadow:2px 2px 4px #000;}
+h1{font-size:2.5em;}
+h2{font-size:1.8em;}
+h3{font-size:1.5em;}
+.stat{margin-bottom:10px;display:block !important;}
+.stat-name{font-weight:bold;color:#4682b4;}
+#inventory{list-style-type:none;padding:0;}
+#inventory li{margin-bottom:5px;}
+.modal{display:none;position:fixed;z-index:1;left:0;top:0;width:100%;height:100%;overflow:auto;background:rgba(0,0,0,0.8);}
+.modal-content{margin:1% auto;width:80%;max-width:600px;padding:3% calc(22% + -59px);}
+.close{color:#aaa;float:right;font-size:28px;font-weight:bold;cursor:pointer;}
+.close:hover,.close:focus{color:#d4af37;}
+.modal input,.modal select,.modal textarea{width:100%;padding:10px;margin:10px 0;}
+#character-portrait{width:200px;height:auto;background:#1c1c1c;margin:10px auto;border:1px solid #d4af37;display:flex;justify-content:center;align-items:center;font-style:italic;}
+#generate-portrait,#upload-portrait{display:block;margin:10px auto;color:black;}
+#gold,#character-description{text-align:center;font-size:1.2em;margin:10px 0 20px;}
+#gold{color:#ffd700;}
+#character-description{color:#4682b4;}
+.action-buttons{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;}
+#stats{margin-top:20px;}
+@keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+.loading{display:inline-block;width:30px;height:30px;border:3px solid #d4af37;border-radius:50%;border-top-color:transparent;animation:spin 1s linear infinite;}
+#character-name{width:96%;}
+#clear-chat,#update-stats{margin-top:10px;padding:3px;width:100%;cursor:pointer;}
+#clear-chat{background:#800000;color:#fff;}
+#update-stats{background:orange;color:black;padding:10px;}
+.switch{position:relative;display:inline-block;width:60px;height:34px;}
+.switch input{opacity:0;width:0;height:0;}
+.slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:#ccc;transition:.4s;}
+.slider:before{position:absolute;content:"";height:26px;width:26px;left:4px;bottom:4px;background-color:white;transition:.4s;}
+input:checked + .slider{background-color:#800000;}
+input:checked + .slider:before{transform:translateX(26px);}
+.slider.round{border-radius:34px;}
+.slider.round:before{border-radius:50%;}
+#create-character,#load-character{display:inline-block;width:calc(50% - 5px);}
+#game-version{text-align:right;color:#d4af37;font-size:0.8em;margin-top:10px;}
+::selection{background:black;color:#d4af37;}
+.tooltip{position:relative;display:inline-block;cursor:help;}
+.tooltip .tooltiptext{visibility:hidden;width:200px;background-color:#555;color:#fff;text-align:center;border-radius:6px;padding:5px;position:absolute;z-index:1;bottom:125%;left:50%;margin-left:-100px;opacity:0;transition:opacity 0.3s;}
+.tooltip:hover .tooltiptext{visibility:visible;opacity:1;}
+.select-container{display:flex;align-items:center;}
+.select-container select{flex-grow:1;}
+.select-container .tooltip{margin-left:10px;}
+#tooltip-race,#tooltip-class{width:300px;font-size:small;text-align:left;white-space:nowrap;}
+#tooltip-race div,#tooltip-class div{margin-bottom:2px;}
+#gm-guidelines-button{position:fixed;top:10px;left:10px;z-index:1000;}
+#gm-guidelines-modal textarea{width:100%;height:200px;margin-bottom:10px;}
+#health-bar-container{width:100%;background-color:#ddd;margin-bottom:10px;border-radius:5px;overflow:hidden;}
+#health-bar{width:100%;height:20px;background-color:#4CAF50;text-align:center;line-height:20px;color:white;transition:width 0.5s ease-in-out;}
+</style>
+</head>
+<body>
+<img id="floating" src="https://i.imgur.com/pd3DJ49.jpg" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 9999;">
+<button id="gm-guidelines-button">GM Guidelines</button>
+<div class="container" style="max-width: none;">
+<h1>Dungeons of Landia</h1>
+<div class="game-area">
+<div class="chat-area">
+<div id="chat-box" class="chat-box"></div>
+<div class="input-area">
+<input type="text" id="user-input" placeholder="Speak thy action, brave adventurer...">
+<button id="send-button">Send</button>
+<div class="action-buttons">
+<button class="action-button" id="action-1"></button>
+<button class="action-button" id="action-2"></button>
+<button class="action-button" id="action-3"></button>
+<button class="action-button" id="action-4"></button>
+</div>
+<button id="clear-chat">Clear Chat - Use when GM doesn't responds, then write again</button>
+<button id="update-stats">Update character sheet and fix all stats</button>
+</div>
+</div>
+<div class="player-info">
+<h2>Character Sheet</h2>
+<div id="character-description"></div>
+<div id="character-portrait">No portrait generated</div>
+<button id="generate-portrait">Generate Portrait</button>
+<button id="upload-portrait">Upload Portrait</button>
+<div id="health-bar-container">
+  <div id="health-bar">100%</div>
+</div>
+<div id="stats"></div>
+<h3>Inventory</h3>
+<ul id="inventory"></ul>
+<div id="gold"></div>
+</div>
+</div>
+<div id="game-version">v 1.0</div>
+</div>
+<div id="character-creation-modal" class="modal">
+<div class="modal-content">
+<span class="close">×</span>
+<h2>Create Your Character</h2>
+<input type="text" id="character-name" placeholder="Enter character name">
+<select id="character-gender">
+<option value="">Select Gender</option>
+<option value="male">Male</option>
+<option value="female">Female</option>
+<option value="non-binary">Non-Binary</option>
+</select>
+<div class="select-container">
+<select id="character-race">
+<option value="">Select Race</option>
+<option value="human">Human</option>
+<option value="elf">Elf</option>
+<option value="dwarf">Dwarf</option>
+<option value="orc">Orc</option>
+<option value="lizardman">Lizardman</option>
+<option value="vampire">Vampire</option>
+<option value="golem">Golem</option>
+<option value="gnome">Gnome</option>
+<option value="halfling">Halfling</option>
+</select>
+<span class="tooltip">?<span class="tooltiptext" id="tooltip-race">
+<div id="human">Human: +2 CHA, +1 WIS</div>
+<div id="elf">Elf: +2 DEX, +2 INT, -2 STR, -1 CON</div>
+<div id="dwarf">Dwarf: +3 CON, -2 DEX, -1 CHA</div>
+<div id="orc">Orc: +2 STR, +1 CON, -2 INT, -2 CHA</div>
+<div id="lizardman">Lizardman: +1 CON, +1 DEX, +1 WIS, -2 INT, -1 CHA</div>
+<div id="vampire">Vampire: +2 CHA, +1 DEX, -4 WIS, -1 CON</div>
+<div id="golem">Golem: +2 STR, +2 CON, -2 INT, -4 CHA</div>
+<div id="gnome">Gnome: +4 INT, +2 DEX, -2 CON, -2 CHA, -3 STR</div>
+<div id="halfling">Halfling: +2 DEX, +2 CHA, -1 CON, -1 INT, -2 STR</div>
+</span></span>
+</div>
+<div class="select-container">
+<select id="character-class">
+<option value="">Select Class</option>
+<option value="barbarian">Barbarian</option>
+<option value="bard">Bard</option>
+<option value="cleric">Cleric</option>
+<option value="druid">Druid</option>
+<option value="fighter">Fighter</option>
+<option value="monk">Monk</option>
+<option value="paladin">Paladin</option>
+<option value="ranger">Ranger</option>
+<option value="rogue">Rogue</option>
+<option value="sorcerer">Sorcerer</option>
+<option value="warlock">Warlock</option>
+<option value="wizard">Wizard</option>
+</select>
+<span class="tooltip">?<span class="tooltiptext" id="tooltip-class">
+<div>Barbarian: High STR and CON</div>
+<div>Bard: Jack of all trades, high CHA</div>
+<div>Cleric: High WIS, support and healing</div>
+<div>Druid: Nature magic, shape-shifting</div>
+<div>Fighter: Versatile warrior</div>
+<div>Monk: Unarmed combat, high DEX</div>
+<div>Paladin: Holy warrior, high STR and CHA</div>
+<div>Ranger: Wilderness expert, high DEX and WIS</div>
+<div>Rogue: Stealth and skill expertise</div>
+<div>Sorcerer: Innate magic, high CHA</div>
+<div>Warlock: Pact magic, high CHA</div>
+<div>Wizard: Arcane magic, high INT</div>
+</span></span>
+</div>
+<select id="campaign-select">
+<option value="random">Random campaign</option>
+<option value="mysterious-plague">Mysterious Plague</option>
+<option value="missing-nobles">Missing Nobles</option>
+<option value="haunted-village">Haunted Village</option>
+<option value="bandit-uprising">Bandit Uprising</option>
+<option value="ancient-ruins">Ancient Ruins</option>
+<option value="political-intrigue">Political Intrigue</option>
+<option value="dragon-threat">Dragon Threat</option>
+<option value="cursed-artifact">Cursed Artifact</option>
+<option value="lost-expedition">Lost Expedition</option>
+<option value="merchant-caravan">Merchant Caravan</option>
+<option value="rebellion">Rebellion</option>
+<option value="prophecy">Prophecy</option>
+<option value="seaside-terror">Seaside Terror</option>
+<option value="festival-sabotage">Festival Sabotage</option>
+<option value="hidden-cult">Hidden Cult</option>
+<option value="elemental-chaos">Elemental Chaos</option>
+<option value="magical-academy">Magical Academy</option>
+<option value="royal-escort">Royal Escort</option>
+<option value="giant-invasion">Giant Invasion</option>
+</select>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;">
+<span>Hard Mode <span class="tooltip">?<span class="tooltiptext" id="tooltip-hardmode">In Hard Mode, you start with lower stats and face tougher challenges. Only for experienced adventurers!</span></span></span>
+<label class="switch">
+<input type="checkbox" id="hard-mode">
+<span class="slider round"></span>
+</label>
+</div>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;margin-bottom:12px;">
+<span>Text to Speech</span>
+<label class="switch">
+<input type="checkbox" id="tts-mode" checked="">
+<span class="slider round"></span>
+</label>
+</div>
+<button id="create-character">Create Character</button>
+<button id="load-character">Load Character</button>
+</div>
+</div>
+<div id="gm-guidelines-modal" class="modal" style="display: block;">
+<div class="modal-content">
+<span class="close">×</span>
+<h2>GM Guidelines</h2>
+<textarea id="gm-guidelines-text" style="background-color: rgba(30,30,30,0.7);"></textarea>
+<button id="apply-guidelines">Apply Guidelines</button>
+</div>
+</div>
+<div id="like-modal" class="modal">
+<div class="modal-content">
+<h2>If you're enjoying Dungeons of Landia click the ♡ to give it a Like</h2>
+<button id="close-like-modal">Close</button>
+</div>
+</div>
+<script>
+const e={chatBox:document.getElementById('chat-box'),userInput:document.getElementById('user-input'),sendButton:document.getElementById('send-button'),stats:document.getElementById('stats'),inventory:document.getElementById('inventory'),modal:document.getElementById('character-creation-modal'),closeButton:document.getElementsByClassName('close')[0],createCharacterButton:document.getElementById('create-character'),loadCharacterButton:document.getElementById('load-character'),generatePortraitButton:document.getElementById('generate-portrait'),uploadPortraitButton:document.getElementById('upload-portrait'),characterPortrait:document.getElementById('character-portrait'),gold:document.getElementById('gold'),characterDescription:document.getElementById('character-description'),actionButtons:Array.from(document.getElementsByClassName('action-button')),clearChatButton:document.getElementById('clear-chat'),hardModeToggle:document.getElementById('hard-mode'),ttsModeToggle:document.getElementById('tts-mode'),campaignSelect:document.getElementById('campaign-select'),gmGuidelinesButton:document.getElementById('gm-guidelines-button'),gmGuidelinesModal:document.getElementById('gm-guidelines-modal'),gmGuidelinesText:document.getElementById('gm-guidelines-text'),applyGuidelinesButton:document.getElementById('apply-guidelines'),updateStatsButton:document.getElementById('update-stats'),healthBar:document.getElementById('health-bar')},l=[300,900,2700,6500,14000,23000,34000,48000,64000,85000,100000,120000,140000,165000,195000,225000,265000,305000,355000],c=["Mysterious Plague","Missing Nobles","Haunted Village","Bandit Uprising","Ancient Ruins","Political Intrigue","Dragon Threat","Cursed Artifact","Lost Expedition","Merchant Caravan","Rebellion","Prophecy","Seaside Terror","Festival Sabotage","Hidden Cult","Elemental Chaos","Magical Academy","Royal Escort","Giant Invasion"];let p={name:"",gender:"",race:"",class:"",level:1,experience:0,energy:100,health:100,maxHealth:100,stats:{Strength:10,Dexterity:10,Constitution:10,Intelligence:10,Wisdom:10,Charisma:10},inventory:[],gold:0,hardMode:false,ttsMode:true,campaign:""},gmGuidelines="";window.onload=()=>e.modal.style.display="block";e.closeButton.onclick=()=>e.modal.style.display="none";window.onclick=(t)=>{if(t.target==e.modal)e.modal.style.display="none";if(t.target==e.gmGuidelinesModal)e.gmGuidelinesModal.style.display="none"};e.generatePortraitButton.onclick=async function(){if(p.race&&p.class&&p.gender){e.characterPortrait.innerHTML="Generating portrait...";try{const t=await fetch('/api/generate-portrait',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({race:p.race,class:p.class,gender:p.gender,description:"close, near face portrait"}),});const a=await t.json();e.characterPortrait.innerHTML=a.image?`<img src="${a.image}" alt="Character Portrait" style="max-width: 100%; max-height: 100%;">`:"Failed to generate portrait"}catch(t){console.error('Error:',t);e.characterPortrait.innerHTML="Error generating portrait"}}else{alert("Please create your character before generating a portrait.")}};e.uploadPortraitButton.onclick=function(){const t=document.createElement('input');t.type='file';t.accept='image/*';t.onchange=function(a){const n=a.target.files[0];if(n){const r=new FileReader();r.onload=function(a){e.characterPortrait.innerHTML=`<img src="${a.target.result}" alt="Uploaded Character Portrait" style="max-width: 100%; max-height: 100%;">`;p.portraitURL=a.target.result;saveCharacter()};r.readAsDataURL(n)}};t.click()};function g(t,a){const n={barbarian:['Great Axe','Leather Armor','Healing Potion'],bard:['Lute','Dagger','Light Armor','Charm Potion'],cleric:['Mace','Shield','Chain Mail','Holy Symbol'],druid:['Wooden Staff','Leather Armor','Herb Pouch'],fighter:['Longsword','Shield','Chain Mail','Healing Potion'],monk:['Quarterstaff','Monk Robes','Meditation Beads'],paladin:['Longsword','Shield','Plate Armor','Holy Symbol'],ranger:['Longbow','Quiver of Arrows','Leather Armor','Trap Kit'],rogue:['Shortsword','Dagger','Leather Armor','Thieves\' Tools'],sorcerer:['Arcane Focus','Dagger','Robes','Mana Potion'],warlock:['Arcane Focus','Leather Armor','Grimoire','Eldritch Charm'],wizard:['Spellbook','Wand','Robes','Scroll of Magic Missile']},r={human:'Versatile Tool',elf:'Elven Cloak',dwarf:'Pick Axe',orc:'Crude Whetstone',lizardman:'Ancient Idol',vampire:'Blood Vial',golem:'Elemental Core',gnome:'Magical Beans', halfling:'Halfling Pipe'};return[...n[t],r[a]]}e.createCharacterButton.onclick=function(){const t=document.getElementById('character-name').value,a=document.getElementById('character-gender').value,n=document.getElementById('character-race').value,r=document.getElementById('character-class').value,i=e.hardModeToggle.checked,s=e.ttsModeToggle.checked,d=e.campaignSelect.value;if(t&&a&&n&&r){p={...p,name:t,gender:a,race:n,class:r,hardMode:i,ttsMode:s,campaign:d,energy:100,health:100,maxHealth:100};const o=i?5:10;Object.keys(p.stats).forEach(t=>p.stats[t]=o);const m={human:()=>{p.stats.Charisma+=2;p.stats.Wisdom+=1},elf:()=>{p.stats.Dexterity+=2;p.stats.Intelligence+=2;p.stats.Strength-=2;p.stats.Constitution-=1},dwarf:()=>{p.stats.Constitution+=3;p.stats.Dexterity-=2;p.stats.Charisma-=1},orc:()=>{p.stats.Strength+=2;p.stats.Constitution+=1;p.stats.Intelligence-=2;p.stats.Charisma-=2},lizardman:()=>{p.stats.Constitution+=1;p.stats.Dexterity+=1;p.stats.Wisdom+=1;p.stats.Intelligence-=2;p.stats.Charisma-=1},vampire:()=>{p.stats.Charisma+=2;p.stats.Dexterity+=1;p.stats.Constitution-=1;p.stats.Wisdom-=4},golem:()=>{p.stats.Strength+=2;p.stats.Constitution+=2;p.stats.Intelligence-=2;p.stats.Charisma-=4},gnome:()=>{p.stats.Intelligence+=4;p.stats.Dexterity+=2;p.stats.Constitution-=2;p.stats.Charisma-=2;p.stats.Strength-=3},halfling:()=>{p.stats.Dexterity+=2;p.stats.Charisma+=2;p.stats.Constitution-=1;p.stats.Intelligence-=1;p.stats.Strength-=2}};m[n]();p.inventory=g(r,n);p.gold=Math.floor(Math.random()*50)+50;u();e.modal.style.display="none";const y=d==="random"?c[Math.floor(Math.random()*c.length)]:d.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase());h(`Welcome, ${t} the ${a} ${n} ${r}! Your adventure begins in the realm of Landia, a land of magic and mystery. As you step into this world, you find yourself in the midst of a great commotion. The kingdom is abuzz with news of ${y}. ${i?'The air feels heavy with danger, and you sense that your journey will be fraught with peril. ':''}`)}else{alert("Please fill in all fields before creating your character.")}};function u(){e.characterDescription.textContent=`${p.name} the ${p.race} ${p.class}`;const healthPercentage = Math.round((p.health / p.maxHealth) * 100);e.healthBar.style.width=`${healthPercentage}%`;e.healthBar.textContent=`${healthPercentage}%`;e.stats.innerHTML=`
+<div class="stat"><span class="stat-name">Level:</span> ${p.level}</div>
+<div class="stat"><span class="stat-name">Experience:</span> ${p.experience} / ${l[p.level-1]||"Max"}</div>
+<div class="stat"><span class="stat-name">Energy:</span> ${p.energy}%</div>
+${Object.entries(p.stats).map(([t,a])=>`<div class="stat"><span class="stat-name">${t}:</span> ${a}</div>`).join('')}
+`;e.inventory.innerHTML=p.inventory.map(t=>`<li>${t}</li>`).join('');e.gold.textContent=`Gold: ${p.gold}`;if(p.portraitURL){e.characterPortrait.innerHTML=`<img src="${p.portraitURL}" alt="Character Portrait" style="max-width: 100%; max-height: 100%;">`}}function o(t){p.experience+=t;while(p.level<20&&p.experience>=l[p.level-1]){p.level++;for(let a=0;a<3;a++){const n=Object.keys(p.stats);const r=n[Math.floor(Math.random()*n.length)];p.stats[r]++}m(`Congratulations! You've reached level ${p.level}!`,'system')}u()}function m(t,a){const n=document.createElement('div');n.classList.add('message',a);n.textContent=t;e.chatBox.appendChild(n);e.chatBox.scrollTop=e.chatBox.scrollHeight;if(a==='gm'&&p.ttsMode){y(t)}}function y(t){const a=new SpeechSynthesisUtterance(t);a.rate=1.2;a.pitch=0.8;a.volume=0.8;window.speechSynthesis.speak(a)}function updateHealth(damage){p.health=Math.max(0,Math.min(p.maxHealth,p.health-damage));u();if(p.health<=0){gameOver()}}function gameOver(){m("Your health has reached 0. Game Over!",'system');setTimeout(()=>{if(confirm("Would you like to start a new game?")){e.modal.style.display="block"}},1000)}async function f(t){if(t){m(t,'user');e.userInput.value='';v();const a=document.createElement('div');a.classList.add('message','gm');a.innerHTML='<div class="loading"></div>';e.chatBox.appendChild(a);e.chatBox.scrollTop=e.chatBox.scrollHeight;try{const n=await fetch('/api/gamemaster',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:t,playerData:p,gmGuidelines:gmGuidelines}),});const r=await n.json();e.chatBox.removeChild(a);m(r.response,'gm');if(r.playerData){p={...p,...r.playerData};u()}if(r.experienceGained){o(r.experienceGained)}if(r.damage){updateHealth(r.damage)}d(r.actions||[])}catch(n){console.error('Error:',n);e.chatBox.removeChild(a);m('A dark force hath interfered. Pray, try again.','system')}}}function v(){e.actionButtons.forEach(t=>t.style.display='none')}function d(t){e.actionButtons.forEach((a,n)=>{if(t[n]){a.textContent=t[n];a.style.display='block';a.onclick=()=>f(t[n])}else{a.style.display='none'}})}async function h(t){v();const a=document.createElement('div');a.classList.add('message','gm');a.innerHTML='<div class="loading"></div>';e.chatBox.appendChild(a);e.chatBox.scrollTop=e.chatBox.scrollHeight;try{const n=await fetch('/api/gamemaster',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:t,playerData:p,gmGuidelines:gmGuidelines}),});const r=await n.json();e.chatBox.removeChild(a);m(r.response,'gm');if(r.playerData){p={...p,...r.playerData};u()}if(r.experienceGained){o(r.experienceGained)}if(r.damage){updateHealth(r.damage)}d(r.actions||[])}catch(n){console.error('Error:',n);e.chatBox.removeChild(a);m('A dark force hath interfered. Pray, try again.','system')}}e.sendButton.addEventListener('click',()=>f(e.userInput.value.trim()));e.userInput.addEventListener('keypress',(t)=>{if(t.key==='Enter')f(e.userInput.value.trim())});e.clearChatButton.addEventListener('click',()=>{const t=e.chatBox.querySelectorAll('.message.gm, .message.user, .message.system');t.forEach(t=>t.remove())});e.loadCharacterButton.onclick=function(){const t=document.cookie.split('; ').find(t=>t.startsWith('playerData='));if(t){p=JSON.parse(decodeURIComponent(t.split('=')[1]));if(!p.hasOwnProperty('energy')){p.energy=100;}if(!p.hasOwnProperty('health')){p.health=100;p.maxHealth=100;}u();e.modal.style.display="none";m('Character loaded successfully!','system')}else{alert('No saved character found.')}};function saveCharacter(){document.cookie=`playerData=${encodeURIComponent(JSON.stringify(p))}; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/`}setInterval(saveCharacter,60000);u();e.gmGuidelinesButton.onclick=function(){e.gmGuidelinesModal.style.display="block"};e.applyGuidelinesButton.onclick=function(){gmGuidelines=e.gmGuidelinesText.value;e.gmGuidelinesModal.style.display="none";m("GM Guidelines updated successfully!",'system')};document.querySelectorAll('.modal .close').forEach(t=>{t.onclick=function(){t.closest('.modal').style.display='none'}});e.updateStatsButton.addEventListener('click', () => f("update stats"));
+(async()=>{
+const r=await fetch('https://docs.google.com/document/d/e/2PACX-1vTJnozyKD9VGJMXCY_BWloKxipPkcxMTb7lPlITmJwHpLZZwGXd8NPRm0N6J1iUTBAmbrzxAVWP0S4v/pub');
+document.getElementById('gm-guidelines-text').value=(new DOMParser().parseFromString(await r.text(),'text/html')).querySelector('.doc-content').innerText;
+})();
+
+setTimeout(() => {
+    document.getElementById('apply-guidelines').click();
+}, 2000);
+
+const floatingImg = document.getElementById('floating');
+floatingImg.addEventListener('click', removeFloatingImage);
+
+function removeFloatingImage() {
+    floatingImg.remove();
+}
+
+setTimeout(removeFloatingImage, 30000);
+
+setTimeout(() => {
+    const likeModal = document.getElementById('like-modal');
+    likeModal.style.display = "block";
+    
+    const closeLikeModal = document.getElementById('close-like-modal');
+    closeLikeModal.onclick = function() {
+        likeModal.style.display = "none";
+    }
+}, 300000);
+
+</script>
+</body></html>
