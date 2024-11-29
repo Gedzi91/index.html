@@ -1,0 +1,2089 @@
+<html><head><base href="https://websim.ai/">
+<link rel="stylesheet" href="/style.css">
+<style>
+#welcome-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.welcome-content {
+  background-color: #1a1a1a; /* Dark background */
+  color: #ffffff; /* Light text */
+  padding: 20px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.rules-list {
+  overflow-y: auto;
+  padding-right: 10px;
+  margin-bottom: 20px;
+  flex: 1;
+}
+
+.rules-list a {
+  color: #a98cff; /* Light purple for links */
+}
+
+.rules-list a:hover {
+  color: #c4b0ff; /* Lighter purple on hover */
+}
+
+#welcome-close {
+  position: sticky;
+  bottom: 0;
+  background-color: #6d47b9;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 10px;
+  width: 100%;
+}
+
+#welcome-close:hover {
+  background-color: #553694;
+}
+
+/* Update scrollbar styling for dark mode */
+.rules-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.rules-list::-webkit-scrollbar-track {
+  background: #2d2d2d; /* Darker track */
+  border-radius: 4px;
+}
+
+.rules-list::-webkit-scrollbar-thumb {
+  background: #6d47b9;
+  border-radius: 4px;
+}
+
+.rules-list::-webkit-scrollbar-thumb:hover {
+  background: #553694;
+}
+
+/* Style headings in dark mode */
+.welcome-content h2,
+.welcome-content h3 {
+  color: #ffffff;
+  margin-bottom: 15px;
+}
+
+/* Style list items in dark mode */
+.welcome-content ul {
+  color: #e0e0e0; /* Slightly dimmed white for better readability */
+}
+
+/* Style paragraphs in dark mode */
+.welcome-content p {
+  color: #e0e0e0;
+}
+</style>
+</head>
+<body>
+<button class="options-button">⚙️</button>
+<div class="options-menu" style="display: none;">
+  <div class="option-row">
+    <span>Mute Sounds</span>
+    <label class="switch">
+      <input type="checkbox" id="mute-sounds">
+      <span class="slider"></span>
+    </label>
+  </div>
+  <div class="option-row">
+    <span>Mute Music</span>
+    <label class="switch">
+      <input type="checkbox" id="mute-music">
+      <span class="slider"></span>
+    </label>
+  </div>
+  <div class="option-row">
+    <span>Sound Volume</span>
+    <input type="range" id="sound-volume" min="0" max="1" step="0.05" class="volume-slider">
+  </div>
+  <div class="option-row">
+    <span>Music Volume</span>
+    <input type="range" id="music-volume" min="0" max="1" step="0.05" class="volume-slider">
+  </div>
+  <div class="option-row">
+    <span>Pixel Perfect</span>
+    <label class="switch">
+      <input type="checkbox" id="pixel-perfect">
+      <span class="slider"></span>
+    </label>
+  </div>
+</div>
+<div id="loading-screen">
+  <img src="https://files.catbox.moe/hlag3w.png" alt="Club Cosiwi loading screen" class="loading-image">
+  <button id="play-button" class="play-button">Play</button>
+  <div class="loading-bar-container">
+    <div class="loading-bar"></div>
+  </div>
+  <div class="loading-error">If you have a problem while loading, please refresh the page.</div>
+  <div class="promo-container" style="display: none;">
+    <div class="promo-text">Game created by Tenog01 - Check out my other work!</div>
+    <div class="promo-images">
+      <img src="/selfpromo1.png" alt="Character commissions advertisement showing prices and examples" class="promo-image">
+      <img src="/selfpromo2.webp" alt="Pixel art game screenshot with a character jumping in a desert landscape" class="promo-image">
+    </div>
+    <a href="https://x.com/tenog01" target="_blank" class="twitter-button">
+      <span>@Tenog01 on Twitter</span>
+      <span class="twitter-icon">𝕏</span>
+    </a>
+  </div>
+</div>
+<div id="game-area">
+  <div id="game-wrapper">
+    <div id="game-container">
+      <img src="/BACKGROUND0.png" id="background-decoration" alt="Background image">
+      <img src="/FOREGROUND0.png" id="foreground-decoration" alt="Foreground image">
+    </div>
+    <div id="speech-bubbles"></div>
+  </div>
+</div>
+<div class="controls">
+  <button id="hanger-button">👕</button>
+  <button id="mute-list-button">🔇</button>
+  <input type="text" id="message" placeholder="Say something..." maxlength="100" autocorrect="on" autocomplete="on" spellcheck="true">
+  <button id="send">Send</button>
+  <div style="position: relative;">
+    <button id="emote-toggle" class="emote-button">😀</button>
+    <div class="emote-menu">
+      <button class="emote-grid-button" data-action="sound">🔊</button>
+      <button class="emote-grid-button" data-action="jump">⬆️</button>
+      <button class="emote-grid-button" data-action="grow">📈</button>
+      <button class="emote-grid-button">❌</button>
+      <button class="emote-grid-button">❌</button>
+      <button class="emote-grid-button">❌</button>
+      <button class="emote-grid-button">❌</button>
+      <button class="emote-grid-button">❌</button>
+      <button class="emote-grid-button">❌</button>
+    </div>
+  </div>
+</div>
+<div class="chat-history" style="display: none;"></div>
+<div class="customizer-popup" style="display: none;">
+  <div class="customizer-header">
+    <span></span>
+    <button class="close-customizer">×</button>
+  </div>
+  <div class="preview-container">
+    <div class="preview-character">
+      <img src="/idle.png" alt="Character base" class="preview-base">
+      <img src="/clothing-default.png" alt="Character clothing" class="preview-clothing">
+      <img alt="Character hat" class="preview-hat" style="display: none;">
+    </div>
+    <div class="customizer-section">
+      <button class="arrow-btn" id="prev-hat">←</button>
+      <button class="arrow-btn" id="next-hat">→</button>
+    </div>
+    <div class="customizer-section">
+      <button class="arrow-btn" id="prev-clothing">←</button>
+      <button class="arrow-btn" id="next-clothing">→</button>
+    </div>
+  </div>
+  <div class="stats-container">
+    <div class="stat-row">
+      <span>Time in room:</span>
+      <span>0m 0s</span>
+    </div>
+    <div class="stat-row">
+      <span>Players online:</span>
+      <span>0</span>
+    </div>
+  </div>
+</div>
+<div id="welcome-popup" style="display: none;">
+  <div class="welcome-content">
+    <h2>👋 Welcome to Club Cosiwi!</h2>
+    <div class="rules-list">
+      <p>Hey there! Here are some quick rules to keep our virtual hangout awesome:</p>
+      <ul>
+        <li>💬 Keep chat friendly and respectful</li>
+        <li>💖 Be kind to fellow players</li>
+        <li>🎮 Have fun and make friends!</li>
+        <li>🔇 Use the mute button to manage your experience</li>
+      </ul>
+      <div class="mute-info">
+        <h3>Managing Your Experience</h3>
+        <p>If someone's behavior is bothering you:</p>
+        <ul>
+          <li>Click the 🔇 button in the bottom left to see all players</li>
+          <li>Use the mute button next to a player's name to hide them</li>
+          <li>Unmute them anytime to see them again</li>
+        </ul>
+      </div>
+      <p class="report-note">While advanced moderation features are work-in-progress, please use the mute button if someone is bothering you. For serious issues, take a screenshot and report in the websim.ai Discord: <a href="https://discord.gg/websim" target="_blank">discord.gg/websim</a></p>
+    </div>
+    <button id="welcome-close">Got it!</button>
+  </div>
+</div>
+<div class="mute-list" style="display: none;"></div>
+
+<script>
+const debug = false;
+
+function isAllowedCharacter(char) {
+  const allowedChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~ÁÉÍÓÚÑÜáéíóúñü¡¿¢£¥©®±÷×µ§°ß¤ª ';
+  return allowedChars.includes(char);
+}
+
+let soundsMuted = localStorage.getItem('soundsMuted') === 'true';
+let musicMuted = localStorage.getItem('musicMuted') === 'true';
+let soundVolume = parseFloat(localStorage.getItem('soundVolume'));
+if (isNaN(soundVolume)) {
+  soundVolume = 0.5; 
+}
+let musicVolume = parseFloat(localStorage.getItem('musicVolume'));
+if (isNaN(musicVolume)) {
+  musicVolume = 0.5; 
+}
+const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+let music;
+let watersplashSound = null;
+let talkSound = null;
+let tiwiWaterSound = null;
+let OGrowSound = null;
+let DSALARMGSound = null;
+let isDSALARMGPlaying = false;
+let playerEnterSound = null;
+
+let profanityList = [];
+let profanityPattern = null;
+let instabanList = [];
+let instabanPattern = null;
+
+// Escape special characters for safe use in regular expressions
+function escapeRegExp(text) {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// Create a flexible pattern to detect profanity, allowing substitutions and separators
+function createFlexiblePattern(word) {
+  const substitutions = {
+    a: '[a@4]',
+    b: '[b8]',
+    c: '[c(\\[]',
+    e: '[e3]',
+    g: '[g9]',
+    i: '[i1|!]',
+    l: '[l1|!]',
+    o: '[o0]',
+    s: '[s5$]',
+    t: '[t7+]',
+    z: '[z2]'
+  };
+
+  // Escape the word and build a pattern allowing flexible substitutions and separators
+  const escapedWord = escapeRegExp(word);
+  return escapedWord
+    .split('')
+    .map(char => substitutions[char.toLowerCase()] || escapeRegExp(char)) // Apply substitutions where applicable
+    .map(char => `${char}+`) // Allow repeated characters
+    .join('[\\s\\-\\*\'"\\.,]*'); // Allow separators like spaces, hyphens, asterisks, etc.
+}
+
+// Compile the profanity list into a single regular expression
+function compileProfanityPattern() {
+  const patterns = profanityList.map(createFlexiblePattern).join('|');
+  profanityPattern = new RegExp(`\\b(${patterns})(s|ers)?\\b`, 'gi'); // Match plural forms or suffixes
+}
+
+// Compile the instaban list into a single regular expression
+function compileInstabanPattern() {
+  const patterns = instabanList.map(createFlexiblePattern).join('|');
+  instabanPattern = new RegExp(`\\b(${patterns})(s|ers)?\\b`, 'gi'); // Match plural forms or suffixes
+}
+
+// Load the profanity filter list from a file and compile the pattern
+async function loadProfanityFilter() {
+  try {
+    const response = await fetch('/profanefilterwords.txt'); // Fetch the file
+    const base64Data = await response.text();
+    const decodedData = atob(base64Data); // Decode base64 content
+    profanityList = decodedData
+      .split('\n')
+      .map(word => word.trim().toLowerCase()) // Clean up and normalize words
+      .filter(word => word.length > 0 && /^[a-z0-9]+$/i.test(word)); // Ensure valid words
+    compileProfanityPattern();
+    // Warm up the profanity filter to prevent lag during gameplay
+    filterProfanity('This is a test message to warm up the regex.');
+  } catch (error) {
+    console.error('Failed to load profanity filter:', error);
+  }
+}
+
+// Load the instaban filter list from a file and compile the pattern
+async function loadInstabanFilter() {
+  try {
+    const response = await fetch('/instabanwords.txt'); // Fetch the file
+    const base64Data = await response.text();
+    const decodedData = atob(base64Data); // Decode base64 content
+    instabanList = decodedData
+      .split('\n')
+      .map(word => word.trim().toLowerCase()) // Clean up and normalize words
+      .filter(word => word.length > 0 && /^[a-z0-9]+$/i.test(word)); // Ensure valid words
+    compileInstabanPattern();
+    // Warm up the instaban filter
+    isInstabanWord('This is a test message to warm up the regex.');
+  } catch (error) {
+    console.error('Failed to load instaban filter:', error);
+  }
+}
+
+// Normalize text by removing accents and converting to lowercase
+function normalizeText(text) {
+  return text
+    .normalize('NFD') // Decompose accented characters
+    .replace(/[\u0300-\u036f]/g, '') // Remove diacritical marks
+    .toLowerCase();
+}
+
+// Filter profanity from a given text
+function filterProfanity(text) {
+  if (!text || !profanityPattern) return text;
+
+  let originalText = text;
+  let normalizedText = normalizeText(text);
+
+  // Match profanity in the normalized text
+  let matches = normalizedText.match(profanityPattern);
+  if (!matches) return originalText;
+
+  // Replace matched words with asterisks in the original text
+  matches.forEach(match => {
+    let stars = '*'.repeat(match.length);
+    let pattern = new RegExp(escapeRegExp(match), 'gi');
+    originalText = originalText.replace(pattern, stars);
+  });
+
+  return originalText;
+}
+
+// Check if text contains any instaban words
+function isInstabanWord(text) {
+  if (!text || !instabanPattern) return false;
+
+  let normalizedText = normalizeText(text);
+
+  // Match instaban words in the normalized text
+  let matches = normalizedText.match(instabanPattern);
+  return matches !== null;
+}
+
+let mutedPlayers = new Set(JSON.parse(localStorage.getItem('mutedPlayers') || '[]'));
+const muteList = document.createElement('div');
+muteList.className = 'mute-list';
+document.querySelector('.controls').appendChild(muteList);
+
+const clothing = [
+  { id: 'none', src: '' },
+  { id: 'default', src: '/clothing-default.png' },
+  { id: '000', src: '/clothing-000.png' },
+  { id: '001', src: '/clothing-001.png' },
+  { id: '002', src: '/clothing-002.png' },
+  { id: '003', src: '/clothing-003.png' },
+  { id: '004', src: '/clothing-004.png' },
+  { id: '005', src: '/clothing-005.png' },
+  { id: '006', src: '/clothing-006.png' },
+  { id: '007', src: '/clothing-007.png' }, 
+  { id: '008', src: '/clothing-008.png' },
+  { id: '009', src: '/clothing-009.png' },
+  { id: '010', src: '/clothing-010.png' },
+  { id: '011', src: '/clothing-011.png' },
+  { id: '012', src: '/clothing-012.png' },
+  { id: '013', src: '/clothing-013.png' },
+  { id: '014', src: '/clothing-014.png' },
+  { id: '015', src: '/clothing-015.png' },
+];
+
+const hats = [
+  { id: 'none', src: '' },
+  { id: '000', src: '/hat-000.png' },
+  { id: '001', src: '/hat-001.png' },
+  { id: '002', src: '/hat-002.png' },
+  { id: '003', src: '/hat-003.png' },
+  { id: '004', src: '/hat-004.png' },
+  { id: '005', src: '/hat-005.png' },
+  { id: '006', src: '/hat-006.png' },
+  { id: '007', src: '/hat-007.png' },
+  { id: '008', src: '/hat-008.png' },
+  { id: '009', src: '/hat-009.png' },
+  { id: '010', src: '/hat-010.png' },
+  { id: '011', src: '/hat-011.png' },
+  { id: '012', src: '/hat-012.png' },
+  { id: '013', src: '/hat-013.png' },
+  { id: '014', src: '/hat-014.png' },
+  { id: '015', src: '/hat-015.png' },
+  { id: '016', src: '/hat-016.png' },
+  { id: '017', src: '/hat-017.png' },
+  { id: '018', src: '/hat-018.png' },
+  { id: '019', src: '/hat-019.png' },
+  { id: '020', src: '/hat-020.png' },
+  { id: '021', src: '/hat-021.png' },
+  { id: '022', src: '/hat-022.png' },
+  { id: '023', src: '/hat-023.png' },
+  { id: '024', src: '/hat-024.png' },
+  { id: '025', src: '/hat-025.png' },
+  { id: '026', src: '/hat-026.png' },
+  { id: '027', src: '/hat-027.png' },
+  { id: '028', src: '/hat-028.png' },
+  { id: '029', src: '/hat-029.png' },
+  { id: '030', src: '/hat-030.png' },
+  { id: '031', src: '/hat-031.png' },
+  { id: '032', src: '/hat-032.png' },
+  { id: '033', src: '/hat-033.png' },
+  { id: '034', src: '/hat-034.png' },
+  { id: '035', src: '/hat-035.png' },
+];
+
+const sprites = [
+  '/idle.png',
+  '/talk.png',
+  '/walkframe1-14fps.png',
+  '/clothing-default.png',
+  '/clothing-000.png',
+  '/clothing-001.png',
+  '/clothing-002.png',
+  '/clothing-003.png',
+  '/clothing-004.png',
+  '/clothing-005.png',
+  '/clothing-006.png',
+  '/clothing-007.png', 
+  '/clothing-008.png',
+  '/clothing-009.png',
+  '/clothing-010.png',
+  '/clothing-011.png',
+  '/clothing-012.png',
+  '/clothing-013.png',
+  '/clothing-014.png',
+  '/clothing-015.png',
+  '/hat-000.png',
+  '/hat-001.png',
+  '/hat-002.png',
+  '/hat-003.png', 
+  '/hat-004.png',
+  '/hat-005.png',
+  '/hat-006.png',
+  '/hat-007.png',
+  '/hat-008.png',
+  '/hat-009.png',
+  '/hat-010.png',
+  '/hat-011.png',
+  '/hat-012.png',
+  '/hat-013.png',
+  '/hat-014.png',
+  '/hat-015.png',
+  '/hat-016.png',
+  '/hat-017.png',
+  '/hat-018.png',
+  '/hat-019.png',
+  '/hat-020.png',
+  '/hat-021.png',
+  '/hat-022.png',
+  '/hat-023.png',
+  '/hat-024.png',
+  '/hat-025.png',
+  '/hat-026.png',
+  '/hat-027.png',
+  '/hat-028.png',
+  '/hat-029.png',
+  '/hat-030.png',
+  '/hat-031.png',
+  '/hat-032.png',
+  '/hat-033.png',
+  '/hat-034.png',
+  '/hat-035.png',
+  '/wallcollision.png',
+  '/watercollision.png',
+  '/BACKGROUND0.png',
+  '/FOREGROUND0.png',
+  '/lifebuoy.png'
+];
+
+const audioFiles = [
+  '/tiwi.mp3',
+  '/mus_lobby1.ogg',  
+  '/watersplash.ogg',
+  '/talk.ogg',
+  '/tiwiwater.mp3',
+  '/O_KGROW.ogg',
+  '/DSALARMG.ogg',
+  '/playerEnter.wav'
+];
+
+let loadedSprites = 0;
+const totalSprites = sprites.length;
+
+const viewportWidth = 720;
+const viewportHeight = 405;
+
+function preloadSprites() {
+  return new Promise((resolve, reject) => {
+    const images = [];
+    let loadCount = 0;
+    let audioBuffers = {};
+    const totalAssets = sprites.length + audioFiles.length;
+    const loadingBar = document.querySelector('.loading-bar');
+    const imagesBySrc = {};
+
+    const checkAllLoaded = () => {
+      loadCount++;
+      const progress = (loadCount / totalAssets) * 100;
+      loadingBar.style.width = `${progress}%`;
+      
+      if (loadCount === totalAssets) {
+        resolve({images, audioBuffers, imagesBySrc});
+      }
+    };
+
+    audioFiles.forEach((file) => {
+      fetch(file)
+        .then(response => response.arrayBuffer())
+        .then(buffer => audioContext.decodeAudioData(buffer))
+        .then(decodedBuffer => {
+          audioBuffers[file] = decodedBuffer;
+          checkAllLoaded();
+        })
+        .catch(err => {
+          console.error(`Failed to load audio ${file}:`, err);
+          checkAllLoaded();
+        });
+    });
+
+    sprites.forEach((src, index) => {
+      images[index] = new Image();
+      images[index].onload = checkAllLoaded;
+      images[index].onerror = (err) => {
+        console.error(`Failed to load sprite ${src}:`, err);
+        checkAllLoaded();
+      };
+      images[index].src = src;
+      imagesBySrc[src] = images[index];
+    });
+
+    setTimeout(() => {
+      if (loadCount < totalAssets) {
+        reject(new Error('Loading timed out'));
+      }
+    }, 10000);
+  });
+}
+
+document.getElementById('play-button').addEventListener('click', async () => {
+  // Hide play button
+  document.getElementById('play-button').style.display = 'none';
+  
+  // Show loading elements
+  document.querySelector('.loading-bar-container').style.display = 'block';
+  document.querySelector('.loading-error').style.display = 'block';
+
+  // Hide initial loading image and show promo content
+  document.querySelector('.loading-image').style.display = 'none';
+  document.querySelector('.promo-container').style.display = 'block';
+
+  try {
+    const {images, audioBuffers, imagesBySrc} = await preloadSprites();
+    await loadProfanityFilter();
+    await loadInstabanFilter();
+    const loadingScreen = document.getElementById('loading-screen');
+    loadingScreen.style.opacity = '0';
+    setTimeout(() => {
+      loadingScreen.style.display = 'none';
+      initializeGame(audioBuffers, imagesBySrc);
+    }, 0);
+  } catch (error) {
+    console.error('Failed to load game:', error);
+    const loadingError = document.querySelector('.loading-error');
+    loadingError.style.color = '#ff4444';
+    loadingError.textContent = 'Failed to load game assets. Please refresh the page.';
+  }
+});
+
+function initializeGame(audioBuffers, imagesBySrc) {
+  document.getElementById('welcome-popup').style.display = 'flex';
+
+  document.getElementById('welcome-close').addEventListener('click', () => {
+    document.getElementById('welcome-popup').style.display = 'none';
+  });
+  
+  let roomJoinTime = new Date();
+  const room = new WebsimSocket();
+  const gameContainer = document.getElementById('game-container');
+  const gameWrapper = document.getElementById('game-wrapper');
+  const gameArea = document.getElementById('game-area');
+  
+  const messageInput = document.getElementById('message');
+  const sendButton = document.getElementById('send');
+  const emoteToggle = document.getElementById('emote-toggle');
+  const emoteMenu = document.querySelector('.emote-menu');
+
+  music = new Audio('/mus_lobby1.ogg');
+  music.loop = true;
+  music.volume = musicMuted ? 0 : musicVolume;
+  let musicPlaying = false;
+
+  document.addEventListener('click', () => {
+    if (!musicPlaying) {
+      music.play();
+      musicPlaying = true;
+    }
+  }, { once: true });
+  
+  watersplashSound = audioBuffers['/watersplash.ogg'];
+  const tiwiSound = audioBuffers['/tiwi.mp3'];
+  talkSound = audioBuffers['/talk.ogg'];
+  tiwiWaterSound = audioBuffers['/tiwiwater.mp3'];
+  OGrowSound = audioBuffers['/O_KGROW.ogg'];
+  DSALARMGSound = audioBuffers['/DSALARMG.ogg'];
+  playerEnterSound = audioBuffers['/playerEnter.wav'];
+  let growSoundSource = null;
+
+  let isMoving = false;
+
+  const chatHistory = document.createElement('div');
+  chatHistory.className = 'chat-history';
+  document.querySelector('.controls').appendChild(chatHistory);
+
+  function updateMuteList() {
+    muteList.innerHTML = '';
+    Object.entries(room.party.peers).forEach(([clientId, {username}]) => {
+      if (clientId === room.party.client.id) return;
+      
+      const item = document.createElement('div');
+      item.className = 'mute-list-item';
+      
+      const usernameSpan = document.createElement('span');
+      usernameSpan.className = 'mute-list-username';
+      usernameSpan.textContent = username;
+      
+      const toggleButton = document.createElement('button');
+      toggleButton.className = 'mute-toggle';
+      toggleButton.textContent = mutedPlayers.has(clientId) ? '🔇 Unmute' : '🔇 Mute'; // Updated icons
+      if (mutedPlayers.has(clientId)) toggleButton.classList.add('muted');
+      
+      toggleButton.onclick = () => {
+        if (mutedPlayers.has(clientId)) {
+          mutedPlayers.delete(clientId);
+          toggleButton.textContent = '🔇 Mute';  // Updated icon
+          toggleButton.classList.remove('muted');
+          if (room.party.peers[clientId]) {
+            createPlayer(clientId, room.party.peers[clientId].username);
+          }
+        } else {
+          mutedPlayers.add(clientId);
+          toggleButton.textContent = '🔇 Unmute';  // Updated icon
+          toggleButton.classList.add('muted');
+          if (players[clientId]) {
+            players[clientId].element.remove();
+            delete players[clientId];
+          }
+        }
+        localStorage.setItem('mutedPlayers', JSON.stringify([...mutedPlayers]));
+      };
+      
+      item.appendChild(usernameSpan);
+      item.appendChild(toggleButton);
+      muteList.appendChild(item);
+    });
+  }
+
+  const muteListButton = document.getElementById('mute-list-button');
+  muteListButton.addEventListener('click', () => {
+    muteList.style.display = muteList.style.display === 'none' ? 'block' : 'none';
+    updateMuteList();
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!muteList.contains(e.target) && !muteListButton.contains(e.target)) {
+      muteList.style.display = 'none';
+    }
+  });
+
+  function playSound(buffer) {
+    if (!buffer || soundsMuted) return;
+    
+    const source = audioContext.createBufferSource();
+    source.buffer = buffer;
+    const gainNode = audioContext.createGain();
+    gainNode.gain.value = soundVolume;
+    source.connect(gainNode).connect(audioContext.destination);
+    source.playbackRate.value = 1;
+    source.start(0);
+  }
+
+  let soundPressCount = 0;
+  let lastSoundPress = 0;
+  const SOUND_COOLDOWN = 1000;
+  const MAX_SOUND_PRESSES = 6;
+  const RESET_COOLDOWN = 7000;
+
+  emoteToggle.addEventListener('click', () => {
+    emoteMenu.style.display = emoteMenu.style.display === 'grid' ? 'none' : 'grid';
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!emoteMenu.contains(e.target) && !emoteToggle.contains(e.target)) {
+      emoteMenu.style.display = 'none';
+    }
+  });
+  
+  emoteMenu.addEventListener('click', (e) => {
+    const button = e.target.closest('.emote-grid-button');
+    if (!button) return;
+
+    const action = button.dataset.action;
+    const currentPlayer = players[room.party.client.id];
+    
+    // Update grow action handling
+    if (action === 'grow') {
+      if (currentPlayer && !currentPlayer.isGrowing && !currentPlayer.onGrowCooldown) {
+        currentPlayer.isGrowing = true;
+        button.textContent = '⏳'; // Show cooldown indicator
+        button.disabled = true;
+
+        startGrowEffect(currentPlayer, true);
+
+        // Longer duration - 16 seconds
+        setTimeout(() => {
+          endGrowEffect(currentPlayer, true);
+          currentPlayer.isGrowing = false;
+          
+          // Add 10 second cooldown
+          currentPlayer.onGrowCooldown = true;
+          setTimeout(() => {
+            currentPlayer.onGrowCooldown = false;
+            button.textContent = '📈'; // Reset button
+            button.disabled = false;
+          }, 16000);
+        }, 16000);
+        
+        room.send({ type: 'grow' });
+      }
+    } else if (action === 'sound') {
+      const isPlayerInWater = currentPlayer?.isInWater;
+      
+      if (soundPressCount >= MAX_SOUND_PRESSES) {
+        const now = Date.now();
+        const timeSinceLastPress = now - lastSoundPress;
+        if (timeSinceLastPress < RESET_COOLDOWN) {
+          button.textContent = '⏳';
+          setTimeout(() => button.textContent = '🔊', RESET_COOLDOWN - timeSinceLastPress);
+          return;
+        }
+        soundPressCount = 0;
+      }
+
+      if (Date.now() - lastSoundPress < SOUND_COOLDOWN) return;
+
+      playSound(isPlayerInWater ? tiwiWaterSound : tiwiSound);
+      room.send({ type: 'play_sound' });
+      
+      soundPressCount++;
+      lastSoundPress = Date.now();
+      
+      button.textContent = '🎵';
+      setTimeout(() => button.textContent = '🔊', 200);
+    }
+    
+    else if (action === 'jump') {
+      if (currentPlayer && !currentPlayer.element.classList.contains('jumping')) {
+        const element = currentPlayer.element;
+        let removedClasses = [];
+        if (element.classList.contains('developer-rainbow')) {
+          element.classList.remove('developer-rainbow');
+          removedClasses.push('developer-rainbow');
+        }
+        if (element.classList.contains('faker-effect')) {
+          element.classList.remove('faker-effect');
+          removedClasses.push('faker-effect');
+        }
+        element.classList.add('jumping');
+        setTimeout(() => {
+          element.classList.remove('jumping');
+          // Restore removed classes
+          removedClasses.forEach(cls => element.classList.add(cls));
+        }, 500);
+        room.send({ type: 'jump' });
+      }
+    }
+  });
+
+  function startGrowEffect(player, isLocalPlayer) {
+    // Cancel any water animation
+    player.element.classList.remove('floating');
+    const lifebuoy = player.element.querySelector('.lifebuoy');
+    if (lifebuoy) {
+      lifebuoy.style.display = 'none';
+    }
+
+    if (isLocalPlayer) {
+      // Pause the music
+      music.pause();
+
+      // Play OGrowSound in loop
+      player.growSoundSource = audioContext.createBufferSource();
+      player.growSoundSource.buffer = OGrowSound;
+      player.growSoundSource.loop = true;
+
+      // Set the loop point
+      const loopPoint = 529028 / OGrowSound.sampleRate; // Convert sample number to seconds
+      player.growSoundSource.loopStart = loopPoint;
+      player.growSoundSource.loopEnd = OGrowSound.duration;
+
+      // Connect and play
+      const gainNode = audioContext.createGain();
+      gainNode.gain.value = soundsMuted ? 0 : soundVolume;
+      player.growSoundSource.connect(gainNode).connect(audioContext.destination);
+      player.growSoundSource.start(0);
+
+      // Animate scaling up with longer duration
+      animateScale(player.element, 1, 1.5, 2000); // 2 second scale up
+    } else {
+      // For other players, play DSALARMG.ogg once
+      if (!isDSALARMGPlaying && !soundsMuted) {
+        isDSALARMGPlaying = true;
+        let source = audioContext.createBufferSource();
+        source.buffer = DSALARMGSound;
+        source.loop = false;
+
+        // Connect and play
+        const gainNode = audioContext.createGain();
+        gainNode.gain.value = soundVolume;
+        source.connect(gainNode).connect(audioContext.destination);
+        source.start(0);
+
+        // When the sound ends, set isDSALARMGPlaying to false
+        source.onended = () => {
+          isDSALARMGPlaying = false;
+        };
+      }
+
+      // Animate scaling up with longer duration
+      animateScale(player.element, 1, 1.5, 2000); // 2 second scale up
+    }
+  }
+
+  function endGrowEffect(player, isLocalPlayer) {
+    if (isLocalPlayer) {
+      // Stop OGrowSound
+      if (player.growSoundSource) {
+        player.growSoundSource.stop();
+        player.growSoundSource.disconnect();
+        player.growSoundSource = null;
+      }
+
+      // Resume music
+      music.play();
+
+      // Animate scaling back down
+      animateScale(player.element, 1.5, 1, 2000); // 2 second scale down
+    } else {
+      // Animate scaling back down
+      animateScale(player.element, 1.5, 1, 2000); // 2 second scale down
+    }
+
+    // Reapply water animation if player is in water after the scale down animation completes
+    setTimeout(() => {
+      if (player.isInWater) {
+        player.element.classList.add('floating');
+        const lifebuoy = player.element.querySelector('.lifebuoy');
+        if (lifebuoy) {
+          lifebuoy.style.display = 'block';
+        }
+      }
+    }, 2000);
+  }
+
+  function animateScale(element, fromScale, toScale, duration) {
+    const startTime = performance.now();
+    function animate() {
+      const elapsed = performance.now() - startTime;
+      const t = Math.min(elapsed / duration, 1);
+      const scale = fromScale + (toScale - fromScale) * t;
+      
+      // Scale all effects together by applying scale to main element
+      element.style.transform = `scale(${scale})`;
+      element.style.transformOrigin = 'bottom center';
+      
+      // Preserve animations on the element itself
+      const currentClasses = element.className;
+      if (currentClasses.includes('floating')) {
+        element.style.animation = 'float 1s ease-in-out infinite';
+      }
+      if (currentClasses.includes('developer-rainbow')) {
+        element.style.animation = 'rainbow 5s linear infinite';
+      }
+      if (currentClasses.includes('faker-effect')) {
+        element.style.animation = 'faker-hue 1s linear infinite';
+      }
+
+      // Scale the lifebuoy proportionally
+      const lifebuoy = element.querySelector('.lifebuoy');
+      if (lifebuoy) {
+        lifebuoy.style.transform = `scale(${scale})`;
+        lifebuoy.style.transformOrigin = 'center center';
+      }
+
+      if (t < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        // Clean up when animation completes
+        if (scale === 1) {
+          element.style.transform = '';
+          if (lifebuoy) {
+            lifebuoy.style.transform = '';
+          }
+        }
+      }
+    }
+    animate();
+  }
+
+  let players = {};
+  let positions = {};
+  let flips = {};
+  let initialAppearanceRequested = false;
+
+  let localAppearance = {
+    clothing: 0,
+    hat: 0
+  };
+
+  let currentClothing = 0;
+  let currentHat = 0;
+
+  const savedAppearance = localStorage.getItem('localAppearance');
+  if (savedAppearance) {
+    try {
+      const parsedAppearance = JSON.parse(savedAppearance);
+      localAppearance.clothing = parsedAppearance.clothing || 0;
+      localAppearance.hat = parsedAppearance.hat || 0;
+    } catch (e) {
+      console.error('Failed to parse saved appearance:', e);
+    }
+  }
+
+  let cameraX = 0;
+  let cameraY = 0;
+  let targetCameraX = 0;
+  let targetCameraY = 0;
+
+  function lerp(a, b, t) {
+    return a + (b - a) * t;
+  }
+
+  function updateCamera() {
+    const localPlayer = players[room.party.client.id];
+    if (!localPlayer) return;
+
+    const playerX = parseFloat(localPlayer.element.style.left) + 32;
+    const playerY = parseFloat(localPlayer.element.style.top) + 32;
+
+    targetCameraX = playerX - viewportWidth / 2;
+    targetCameraY = playerY - viewportHeight / 2;
+
+    targetCameraX = Math.max(0, Math.min(targetCameraX, 1280 - viewportWidth));
+    targetCameraY = Math.max(0, Math.min(targetCameraY, 1280 - viewportHeight));
+
+    cameraX = lerp(cameraX, targetCameraX, 0.1);
+    cameraY = lerp(cameraY, targetCameraY, 0.1);
+  }
+
+  function gameLoop() {
+    updateCamera();
+    gameContainer.style.transform = `translate(${-cameraX}px, ${-cameraY}px)`;
+    document.getElementById('speech-bubbles').style.transform = `translate(${-cameraX}px, ${-cameraY}px)`;
+    requestAnimationFrame(gameLoop);
+  }
+
+  function resizeGameArea() {
+    const gameArea = document.getElementById('game-area');
+    const wrapper = document.getElementById('game-wrapper');
+    const containerAspectRatio = viewportWidth / viewportHeight;
+    const windowAspectRatio = gameArea.clientWidth / gameArea.clientHeight;
+    
+    let scale;
+    if (windowAspectRatio > containerAspectRatio) {
+      scale = gameArea.clientHeight / viewportHeight;
+    } else {
+      scale = gameArea.clientWidth / viewportWidth;
+    }
+    
+    wrapper.style.transform = `translate(-50%, -50%) scale(${scale})`;
+    wrapper.style.position = 'absolute';
+    wrapper.style.left = '50%';
+    wrapper.style.top = '50%';
+    wrapper.style.transformOrigin = 'center';
+  }
+
+  window.addEventListener('resize', resizeGameArea);
+  resizeGameArea();
+  cameraX = 0;
+  cameraY = 0;
+  gameLoop();
+
+  let wallCollisionCanvas = document.createElement('canvas');
+  wallCollisionCanvas.width = 1280;
+  wallCollisionCanvas.height = 1280;
+  let wallCollisionContext = wallCollisionCanvas.getContext('2d');
+  wallCollisionContext.drawImage(imagesBySrc['/wallcollision.png'], 0, 0);
+  let wallCollisionData = wallCollisionContext.getImageData(0, 0, 1280, 1280);
+
+  let waterCollisionCanvas = document.createElement('canvas');
+  waterCollisionCanvas.width = 1280;
+  waterCollisionCanvas.height = 1280;
+  let waterCollisionContext = waterCollisionCanvas.getContext('2d');
+  waterCollisionContext.drawImage(imagesBySrc['/watercollision.png'], 0, 0);
+  let waterCollisionData = waterCollisionContext.getImageData(0, 0, 1280, 1280);
+
+  if (debug) {
+    let wallDebugCanvas = document.createElement('canvas');
+    wallDebugCanvas.width = 1280;
+    wallDebugCanvas.height = 1280;
+    wallDebugCanvas.style.position = 'absolute';
+    wallDebugCanvas.style.top = '0';
+    wallDebugCanvas.style.left = '0';
+    wallDebugCanvas.style.pointerEvents = 'none';
+    wallDebugCanvas.style.zIndex = '999';
+    let wallDebugCtx = wallDebugCanvas.getContext('2d');
+    
+    for (let y = 0; y < 1280; y++) {
+      for (let x = 0; x < 1280; x++) {
+        const index = (y * 1280 + x) * 4;
+        if (wallCollisionData.data[index] === 255) {
+          wallDebugCtx.fillStyle = 'rgba(255,0,0,0.3)';
+          wallDebugCtx.fillRect(x, y, 1, 1);
+        }
+      }
+    }
+    gameContainer.appendChild(wallDebugCanvas);
+
+    let waterDebugCanvas = document.createElement('canvas');
+    waterDebugCanvas.width = 1280;
+    waterDebugCanvas.height = 1280;
+    waterDebugCanvas.style.position = 'absolute';
+    waterDebugCanvas.style.top = '0';
+    waterDebugCanvas.style.left = '0';
+    waterDebugCanvas.style.pointerEvents = 'none';
+    waterDebugCanvas.style.zIndex = '999';
+    let waterDebugCtx = waterDebugCanvas.getContext('2d');
+    
+    for (let y = 0; y < 1280; y++) {
+      for (let x = 0; x < 1280; x++) {
+        const index = (y * 1280 + x) * 4;
+        if (waterCollisionData.data[index] === 255) {
+          waterDebugCtx.fillStyle = 'rgba(0,0,255,0.3)';
+          waterDebugCtx.fillRect(x, y, 1, 1);
+        }
+      }
+    }
+    gameContainer.appendChild(waterDebugCanvas);
+  }
+  
+  function isPositionBlocked(x, y) {
+    const xi = Math.floor(x);
+    const yi = Math.floor(y); 
+    if (xi < 0 || xi >= 1280 || yi < 0 || yi >= 1280) {
+      return true;
+    }
+    const index = (yi * 1280 + xi) * 4;
+    const r = wallCollisionData.data[index];
+    if (r === 255) {
+      return true;
+    }
+    return false;
+  }
+
+  function isPositionInWater(x, y) {
+    const xi = Math.floor(x);
+    const yi = Math.floor(y);
+    if (xi < 0 || xi >= 1280 || yi < 0 || yi >= 1280) {
+      return false;
+    }
+    const index = (yi * 1280 + xi) * 4;
+    const r = waterCollisionData.data[index];
+    if (r === 255) {
+      return true;
+    }
+    return false;
+  }
+
+  function createPlayer(clientId, username, position) {
+    const player = document.createElement('div');
+    player.className = 'player';
+    
+    const storedPosition = positions[clientId];
+    let x = 720;
+    let y = 720;
+    
+    if (position) {
+      x = position.x;
+      y = position.y;
+    } else if (storedPosition) {
+      x = storedPosition.x;
+      y = storedPosition.y;
+    }
+    
+    player.style.left = x + 'px';
+    player.style.top = y + 'px';
+    player.style.zIndex = Math.floor(y);
+
+    const avatar = document.createElement('img');
+    avatar.src = '/idle.png';
+    avatar.alt = 'Player character';
+    avatar.draggable = false;
+    avatar.className = 'base';
+    
+    const clothingImg = document.createElement('img');
+    clothingImg.src = '/clothing-default.png';
+    clothingImg.alt = 'Player clothing';
+    clothingImg.draggable = false;
+    clothingImg.className = 'clothing';
+    clothingImg.style.display = 'block';
+    
+    const hatImg = document.createElement('img');
+    hatImg.src = '/hat-000.png';
+    hatImg.alt = 'Player hat';
+    hatImg.className = 'hat';
+    hatImg.draggable = false;
+    hatImg.style.display = 'none';
+
+    const lifebuoyImg = document.createElement('img');
+    lifebuoyImg.src = '/lifebuoy.png';
+    lifebuoyImg.alt = 'Lifebuoy';
+    lifebuoyImg.className = 'lifebuoy';
+    lifebuoyImg.style.display = 'none';
+
+    const usernameEl = document.createElement('div');
+    usernameEl.className = 'username';
+    usernameEl.textContent = username;
+    
+    if (username === 'Tenog01') {
+      const subtitle = document.createElement('div');
+      subtitle.className = 'subtitle';
+      subtitle.textContent = 'Developer';
+      player.appendChild(subtitle);
+      player.classList.add('developer-rainbow');
+    } else if (username === 'saltgoddamn') {
+      const subtitle = document.createElement('div');
+      subtitle.className = 'subtitle';
+      subtitle.textContent = 'BBQ';
+      player.appendChild(subtitle);
+      player.classList.add('developer-rainbow');
+    } else if (username === 'choripaty') {
+      const subtitle = document.createElement('div');
+      subtitle.className = 'subtitle';
+      subtitle.textContent = "Dev's Cousin";
+      player.appendChild(subtitle); 
+      player.classList.add('developer-rainbow');
+    } else if (username.toLowerCase().startsWith('tenog') && username !== 'Tenog01') {
+      const subtitle = document.createElement('div');
+      subtitle.className = 'subtitle';
+      subtitle.textContent = 'Faker';
+      player.appendChild(subtitle);
+      player.classList.add('faker-effect');
+    }
+    
+    if (clientId === room.party.client.id) {
+      const localIndicator = document.createElement('div');
+      localIndicator.className = 'local-indicator';
+      player.appendChild(localIndicator);
+    }
+    
+    player.appendChild(avatar);
+    player.appendChild(clothingImg);
+    player.appendChild(hatImg);
+    player.appendChild(lifebuoyImg);
+    player.appendChild(usernameEl);
+    
+    players[clientId] = {
+      element: player,
+      username,
+      state: 'idle',
+      talkTimeout: null,
+      moveTimeout: null,
+      clothing: clientId === room.party.client.id ? localAppearance.clothing : 0,
+      hat: clientId === room.party.client.id ? localAppearance.hat : 0,
+      isMoving: false,
+      isInWater: false,
+      isGrowing: false,
+      onGrowCooldown: false,
+      growSoundSource: null,
+      growSoundPlaying: false,
+      bubble: null
+    };
+    
+    gameContainer.appendChild(player);
+    
+    if (clientId === room.party.client.id) {
+      room.send({
+        type: 'move',
+        x: x,
+        y: y,
+      });
+      room.send({
+        type: 'appearance',
+        clothing: localAppearance.clothing,
+        hat: localAppearance.hat
+      });
+    }
+  }
+
+  room.party.subscribe((peers) => {
+    const previousPeers = Object.keys(players);
+    const currentPeers = Object.keys(peers);
+    
+    // Check for new players that weren't previously in the room
+    currentPeers.forEach(clientId => {
+      if (!previousPeers.includes(clientId)) {
+        // Add joined message to chat for new players
+        if (!mutedPlayers.has(clientId)) {
+          const username = peers[clientId].username;
+          addToHistory('System', `${username} has entered Club Cosiwi!`);
+          // Play sound for other players (not the joining player)
+          if (clientId !== room.party.client.id) {
+            playSound(playerEnterSound);
+            playSound(talkSound);
+          }
+        }
+      }
+    });
+
+    // Rest of the existing onPeersChanged code
+    Object.keys(players).forEach(clientId => {
+      if (!currentPeers.includes(clientId)) {
+        if (players[clientId] && players[clientId].element) {
+          players[clientId].element.remove();
+          
+          if (players[clientId].talkTimeout) {
+            clearTimeout(players[clientId].talkTimeout);
+          }
+          if (players[clientId].moveTimeout) {
+            clearTimeout(players[clientId].moveTimeout);
+          }
+          if (players[clientId].bubble) {
+            if (players[clientId].bubble.timeout) {
+              clearTimeout(players[clientId].bubble.timeout);
+            }
+            if (players[clientId].bubble.animationFrameId) {
+              cancelAnimationFrame(players[clientId].bubble.animationFrameId);
+            }
+            players[clientId].bubble.element.remove();
+          }
+        }
+        
+        delete players[clientId];
+        delete positions[clientId];
+        delete flips[clientId];
+      }
+    });
+    
+    Object.entries(peers).forEach(([clientId, {username}]) => {
+      if (!players[clientId] && !mutedPlayers.has(clientId)) {
+        createPlayer(clientId, username, positions[clientId]);
+      }
+    });
+    
+    if (!initialAppearanceRequested) {
+      room.send({
+        type: 'request_positions_and_appearance'
+      });
+      initialAppearanceRequested = true;
+    }
+  });
+
+  room.onmessage = (event) => {
+    const data = event.data;
+    if (mutedPlayers.has(data.clientId)) return;
+    if (data.type === 'talk') {
+      const player = players[data.clientId];
+      if (player) {
+        // Destroy existing speech bubble if any
+        if (player.bubble) {
+          if (player.bubble.timeout) {
+            clearTimeout(player.bubble.timeout);
+          }
+          if (player.bubble.animationFrameId) {
+            cancelAnimationFrame(player.bubble.animationFrameId);
+          }
+          player.bubble.element.remove();
+        }
+
+        addToHistory(player.username, data.message);
+        
+        if (player.talkTimeout) {
+          clearTimeout(player.talkTimeout);
+        }
+        
+        const bubble = document.createElement('div');
+        bubble.className = 'speech-bubble';
+        bubble.textContent = data.message;
+        document.getElementById('speech-bubbles').appendChild(bubble);
+        
+        // Function to update bubble position
+        const updateBubblePosition = () => {
+          const playerLeft = parseFloat(player.element.style.left) + 32;
+          const playerTop = parseFloat(player.element.style.top);
+          bubble.style.left = playerLeft + 'px';
+          bubble.style.top = playerTop + 'px';
+        };
+
+        // Initial position
+        updateBubblePosition();
+        
+        // Create animation frame loop for this bubble
+        let animationFrameId;
+        const animateBubble = () => {
+          updateBubblePosition();
+          animationFrameId = requestAnimationFrame(animateBubble);
+        };
+        animationFrameId = requestAnimationFrame(animateBubble);
+
+        player.bubble = {
+          element: bubble,
+          animationFrameId: animationFrameId
+        };
+        
+        const avatar = player.element.querySelector('img.base');
+        if (player.state !== 'walking') {
+          player.state = 'talking';
+          avatar.src = '/talk.png';
+        }
+
+        const minDuration = 3000;
+        const maxDuration = 15000;
+        const durationPerChar = 200;
+        const duration = Math.min(Math.max(data.message.length * durationPerChar, minDuration), maxDuration);
+        
+        bubble.style.animation = `fadeOut ${duration/1000}s forwards`;
+        
+        player.talkTimeout = setTimeout(() => {
+          // Cancel the animation frame when bubble is removed
+          cancelAnimationFrame(animationFrameId);
+          bubble.remove();
+          player.bubble = null;
+          if (player.state === 'talking') {
+            player.state = 'idle';
+            avatar.src = '/idle.png';
+          }
+        }, duration);
+        
+        if (data.clientId !== room.party.client.id) {
+          playSound(talkSound);
+        }
+      }
+    } else if (data.type === 'move') {
+      positions[data.clientId] = { 
+        x: data.x, 
+        y: data.y 
+      };
+      flips[data.clientId] = data.flip;
+      
+      const player = players[data.clientId];
+      if (player) {
+        if (player.moveTimeout) {
+          clearTimeout(player.moveTimeout);
+        }
+        
+        player.state = 'walking';
+        
+        const baseImg = player.element.querySelector('img.base');
+        baseImg.style.animation = 'walk 0.5s steps(1) infinite';
+        
+        player.element.classList.toggle('flip', data.flip);
+        
+        player.element.style.left = data.x + 'px';
+        player.element.style.top = data.y + 'px';
+        player.element.style.zIndex = Math.floor(data.y);
+        
+        player.moveTimeout = setTimeout(() => {
+          baseImg.style.animation = '';
+          if (player.state === 'walking') {
+            player.state = 'idle';
+            baseImg.src = '/idle.png';
+          } else if (player.state === 'talking') {
+            baseImg.src = '/talk.png';
+          }
+        }, 1000);
+        
+        const inWater = isPositionInWater(data.x + 32, data.y + 32);
+        player.element.classList.toggle('floating', inWater && !player.isGrowing);
+        const lifebuoy = player.element.querySelector('.lifebuoy');
+        if (lifebuoy) {
+          lifebuoy.style.display = inWater && !player.isGrowing ? 'block' : 'none';
+        }
+        
+        if (data.clientId === room.party.client.id) {
+          player.isMoving = true;
+          player.isInWater = inWater;
+        }
+      }
+    } else if (data.type === 'appearance') {
+      const player = players[data.clientId];
+      if (player) {
+        player.clothing = data.clothing;
+        player.hat = data.hat;
+
+        const clothingImg = player.element.querySelector('img.clothing');
+        const hatImg = player.element.querySelector('img.hat');
+        
+        if (data.clothing > 0) {
+          clothingImg.src = clothing[data.clothing].src;
+          clothingImg.style.display = 'block';
+        } else {
+          clothingImg.style.display = 'none';
+        }
+        
+        if (data.hat > 0) {
+          hatImg.src = hats[data.hat].src;
+          hatImg.style.display = 'block';
+        } else {
+          hatImg.style.display = 'none';
+        }
+        
+      }
+    } else if (data.type === 'request_positions_and_appearance') {
+      if (positions[room.party.client.id]) {
+        room.send({
+          type: 'move',
+          x: positions[room.party.client.id].x,
+          y: positions[room.party.client.id].y,
+          flip: flips[room.party.client.id] || false
+        });
+      }
+      
+      room.send({
+        type: 'appearance',
+        clothing: localAppearance.clothing,
+        hat: localAppearance.hat
+      });
+    } else if (data.type === 'play_sound') {
+      const player = players[data.clientId];
+      if (player) {
+        // Destroy existing speech bubble if any
+        if (player.bubble) {
+          if (player.bubble.timeout) {
+            clearTimeout(player.bubble.timeout);
+          }
+          if (player.bubble.animationFrameId) {
+            cancelAnimationFrame(player.bubble.animationFrameId);
+          }
+          player.bubble.element.remove();
+        }
+
+        if (data.clientId !== room.party.client.id) {
+          const inWater = isPositionInWater(
+            parseFloat(player.element.style.left) + 32,
+            parseFloat(player.element.style.top) + 32
+          );
+          playSound(inWater ? tiwiWaterSound : tiwiSound);
+        }
+        
+        const bubble = document.createElement('div');
+        bubble.className = 'speech-bubble';
+        bubble.textContent = player.isInWater ? '🦆' : '🔊';
+        document.getElementById('speech-bubbles').appendChild(bubble);
+
+        const updateBubblePosition = () => {
+          const playerLeft = parseFloat(player.element.style.left) + 32;
+          const playerTop = parseFloat(player.element.style.top);
+          bubble.style.left = playerLeft + 'px';
+          bubble.style.top = playerTop + 'px';
+        };
+
+        // Initial position
+        updateBubblePosition();
+        
+        // Create animation frame loop for this bubble
+        let animationFrameId;
+        const animateBubble = () => {
+          updateBubblePosition();
+          animationFrameId = requestAnimationFrame(animateBubble);
+        };
+        animationFrameId = requestAnimationFrame(animateBubble);
+
+        player.bubble = {
+          element: bubble,
+          animationFrameId: animationFrameId
+        };
+        
+        const avatar = player.element.querySelector('img.base');
+        if (player.state !== 'walking') {
+          player.state = 'talking';
+          avatar.src = '/talk.png';
+        }
+        
+        player.talkTimeout = setTimeout(() => {
+          // Cancel the animation frame when bubble is removed
+          cancelAnimationFrame(animationFrameId);
+          bubble.remove();
+          player.bubble = null;
+          if (player.state === 'talking') {
+            player.state = 'idle';
+            avatar.src = '/idle.png';
+          }
+        }, 3000);
+      }
+    } else if (data.type === 'jump') {
+      const player = players[data.clientId];
+      if (player && !player.element.classList.contains('jumping')) {
+        const element = player.element;
+        let removedClasses = [];
+        if (element.classList.contains('developer-rainbow')) {
+          element.classList.remove('developer-rainbow');
+          removedClasses.push('developer-rainbow');
+        }
+        if (element.classList.contains('faker-effect')) {
+          element.classList.remove('faker-effect');
+          removedClasses.push('faker-effect');
+        }
+        element.classList.add('jumping');
+        setTimeout(() => {
+          element.classList.remove('jumping');
+          // Restore removed classes
+          removedClasses.forEach(cls => element.classList.add(cls));
+        }, 500);
+      }
+    } else if (data.type === 'grow') {
+      const player = players[data.clientId];
+      if (player && !player.isGrowing && !player.onGrowCooldown) {
+        // Destroy existing speech bubble if any
+        if (player.bubble) {
+          if (player.bubble.timeout) {
+            clearTimeout(player.bubble.timeout);
+          }
+          if (player.bubble.animationFrameId) {
+            cancelAnimationFrame(player.bubble.animationFrameId);
+          }
+          player.bubble.element.remove();
+        }
+
+        player.isGrowing = true;
+        const isLocalPlayer = data.clientId === room.party.client.id;
+        startGrowEffect(player, isLocalPlayer);
+
+        setTimeout(() => {
+          endGrowEffect(player, isLocalPlayer);
+          player.isGrowing = false;
+          player.onGrowCooldown = true;
+          setTimeout(() => {
+            player.onGrowCooldown = false;
+          }, 16000);
+        }, 16000);
+      }
+    }
+  };
+
+  function handleMove(e) {
+    e.preventDefault();
+    
+    const rect = gameContainer.getBoundingClientRect();
+    const scale = rect.width / 1280;
+    
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    
+    let x = (clientX - rect.left) / scale - 32;
+    let y = (clientY - rect.top) / scale - 32;
+
+    x = Math.max(0, Math.min(1280 - 64, x));
+    y = Math.max(0, Math.min(1280 - 64, y));
+    
+    const currentPlayer = players[room.party.client.id];
+    const currentX = positions[room.party.client.id]?.x || 0;
+    const currentY = positions[room.party.client.id]?.y || 0;
+
+    const steps = 10; 
+    for (let i = 0; i <= steps; i++) {
+      const checkX = currentX + (x - currentX) * (i / steps);
+      const checkY = currentY + (y - currentY) * (i / steps);
+      
+      if (isPositionBlocked(checkX + 32, checkY + 32)) {
+        x = currentX + (x - currentX) * ((i - 1) / steps);
+        y = currentY + (y - currentY) * ((i - 1) / steps);
+        break;
+      }
+    }
+
+    let flipState = x < currentX;
+    if (currentPlayer) {
+      currentPlayer.element.classList.toggle('flip', flipState);
+    }
+    
+    flips[room.party.client.id] = flipState;
+    
+    room.send({
+      type: 'move',
+      x: x,
+      y: y,
+      flip: flipState
+    });
+    
+    if (currentPlayer) {
+      if (!currentPlayer.isMoving) {
+        isMoving = true;
+        currentPlayer.isMoving = true;
+        const baseImg = currentPlayer.element.querySelector('img.base');
+        baseImg.style.animation = 'walk 0.5s steps(1) infinite';
+      }
+      const inWater = isPositionInWater(x + 32, y + 32); 
+      currentPlayer.isInWater = inWater;
+      currentPlayer.element.classList.toggle('floating', inWater && !currentPlayer.isGrowing);
+      const lifebuoy = currentPlayer.element.querySelector('.lifebuoy');
+      if (lifebuoy) {
+        lifebuoy.style.display = inWater && !currentPlayer.isGrowing ? 'block' : 'none';
+      }
+      
+      if (inWater) {
+        playSound(watersplashSound);
+      }
+    }
+  }
+
+  gameContainer.addEventListener('click', handleMove);
+  gameContainer.addEventListener('touchstart', handleMove);
+
+  document.addEventListener('mouseup', () => {
+    const currentPlayer = players[room.party.client.id];
+    if (isMoving) {
+      isMoving = false;
+      if (currentPlayer) {
+        currentPlayer.isMoving = false;
+        const baseImg = currentPlayer.element.querySelector('img.base');
+        baseImg.style.animation = '';
+        baseImg.src = '/idle.png';
+      }
+    }
+  });
+
+  document.addEventListener('touchend', () => {
+    const currentPlayer = players[room.party.client.id];
+    if (isMoving) {
+      isMoving = false;
+      if (currentPlayer) {
+        currentPlayer.isMoving = false;
+        const baseImg = currentPlayer.element.querySelector('img.base');
+        baseImg.style.animation = '';
+        baseImg.src = '/idle.png';
+      }
+    }
+  });
+
+  function sendMessage() {
+    let message = messageInput.value.trim();
+    if (message) {
+      message = message.split('').filter(isAllowedCharacter).join('');
+      // Check for instaban words
+      if (isInstabanWord(message)) {
+        // Kick the user out to the loading screen with a kicked out message
+        room.close();
+        showKickedOutScreen();
+        return;
+      }
+      const filteredMessage = filterProfanity(message);
+      room.send({
+        type: 'talk',
+        message: filteredMessage
+      });
+        
+      messageInput.value = '';
+      messageInput.blur();
+        
+      playSound(talkSound);
+    }
+  }
+
+  function showKickedOutScreen() {
+    const loadingScreen = document.getElementById('loading-screen');
+    loadingScreen.style.display = 'flex';
+    loadingScreen.style.opacity = '1';
+    document.querySelector('.loading-bar-container').style.display = 'none';
+    document.querySelector('.promo-container').style.display = 'none';
+    document.querySelector('.loading-image').style.display = 'block';
+    document.querySelector('.loading-error').style.display = 'block';
+    document.querySelector('.loading-error').style.color = '#ff4444';
+    document.querySelector('.loading-error').textContent = 'You have been kicked out of the room.';
+    document.getElementById('play-button').style.display = 'none';
+  }
+
+  function addToHistory(username, message) {
+    const messageEl = document.createElement('div');
+    messageEl.className = 'chat-history-message';
+    
+    const usernameSpan = document.createElement('span');
+    usernameSpan.className = 'chat-history-username';
+    usernameSpan.textContent = `@${username}:`;
+    
+    messageEl.appendChild(usernameSpan);
+    messageEl.appendChild(document.createTextNode(` ${message}`));
+    
+    chatHistory.appendChild(messageEl);
+    chatHistory.scrollTop = chatHistory.scrollHeight;
+    
+    while (chatHistory.children.length > 50) {
+      chatHistory.removeChild(chatHistory.firstChild);
+    }
+  }
+
+  sendButton.addEventListener('click', sendMessage);
+  messageInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      sendMessage();
+    }
+  });
+
+  messageInput.addEventListener('focus', () => {
+    chatHistory.style.display = 'block';
+  });
+
+  messageInput.addEventListener('blur', () => {
+    chatHistory.style.display = 'none';
+  });
+
+  document.addEventListener('touchstart', (e) => {
+    if (e.touches.length > 1) {
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  document.body.style.overscrollBehavior = 'none';
+
+  function showCustomizer(e, clientId) {
+    const popup = document.querySelector('.customizer-popup');
+    const isLocalPlayer = clientId === room.party.client.id;
+    popup.style.display = 'flex';
+
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const popupWidth = 240;
+    const popupHeight = 400;
+
+    const centerX = (viewportWidth - popupWidth) / 2;
+    const centerY = (viewportHeight - popupHeight) / 2;
+
+    popup.style.left = `${centerX}px`;
+    popup.style.top = `${centerY}px`;
+
+    makeDraggable(popup);
+
+    const headerText = popup.querySelector('.customizer-header span');
+    const player = players[clientId];
+    headerText.textContent = `@${player.username}`;
+
+    const previewClothing = document.querySelector('.preview-clothing');
+    const previewHat = document.querySelector('.preview-hat');
+    
+    if (player.clothing === 0) {
+      previewClothing.style.display = 'none';
+      previewClothing.src = '';
+    } else {
+      previewClothing.src = clothing[player.clothing].src;
+      previewClothing.style.display = 'block';
+    }
+    
+    if (player.hat === 0) {
+      previewHat.style.display = 'none';
+      previewHat.src = '';
+    } else {
+      previewHat.src = hats[player.hat].src;
+      previewHat.style.display = 'block';
+    }
+
+    if (!isLocalPlayer) {
+      currentClothing = player.clothing;
+      currentHat = player.hat;
+    } else {
+      currentClothing = localAppearance.clothing;
+      currentHat = localAppearance.hat;
+    }
+
+    let statsContainer = popup.querySelector('.stats-container');
+    if (!statsContainer) {
+      statsContainer = document.createElement('div');
+      statsContainer.className = 'stats-container';
+      popup.appendChild(statsContainer);
+    }
+
+    const playerJoinTime = isLocalPlayer ? roomJoinTime : new Date(); 
+
+    function updateStats() {
+      const timeElapsed = Math.floor((new Date() - playerJoinTime) / 1000);
+      const minutes = Math.floor(timeElapsed / 60);
+      const seconds = timeElapsed % 60;
+      
+      statsContainer.innerHTML = `
+          <div class="stat-row">
+              <span>${isLocalPlayer ? 'Time in room:' : 'Dialog open for:'}</span>
+              <span>${minutes}m ${seconds}s</span>
+          </div>
+          <div class="stat-row">
+              <span>Players online:</span>
+              <span>${Object.keys(players).length}</span>
+          </div>
+          ${isLocalPlayer ? '' : '<div class="stat-row"><span style="color: #6d47b9;">View only mode</span></div>'}
+      `;
+    }
+
+    updateStats();
+
+    const statsInterval = setInterval(updateStats, 1000);
+
+    const closeButton = popup.querySelector('.close-customizer');
+    const originalCloseHandler = closeButton.onclick;
+    closeButton.onclick = () => {
+        clearInterval(statsInterval);
+        if (originalCloseHandler) originalCloseHandler();
+        popup.style.display = 'none';
+    };
+  }
+
+  function makeDraggable(popup) {
+    const header = popup.querySelector('.customizer-header');
+    let isDragging = false;
+    let currentX;
+    let currentY;
+    let initialX;
+    let initialY;
+
+    function dragStart(e) {
+      if (e.type === 'mousedown') {
+        initialX = e.clientX;
+        initialY = e.clientY;
+      } else {
+        initialX = e.touches[0].clientX;
+        initialY = e.touches[0].clientY;
+      }
+
+      currentX = parseFloat(popup.style.left) || 0;
+      currentY = parseFloat(popup.style.top) || 0;
+      isDragging = true;
+    }
+
+    function drag(e) {
+      if (!isDragging) return;
+      e.preventDefault();
+
+      let x, y;
+      if (e.type === 'mousemove') {
+        x = e.clientX;
+        y = e.clientY;
+      } else {
+        x = e.touches[0].clientX;
+        y = e.touches[0].clientY;
+      }
+
+      const deltaX = x - initialX;
+      const deltaY = y - initialY;
+
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const popupWidth = popup.offsetWidth;
+      const popupHeight = popup.offsetHeight;
+
+      const gameWrapper = document.getElementById('game-wrapper');
+      const wrapperRect = gameWrapper.getBoundingClientRect();
+
+      let newX = currentX + deltaX;
+      let newY = currentY + deltaY;
+
+      newX = Math.max(wrapperRect.left, Math.min(wrapperRect.right - popupWidth, newX));
+      newY = Math.max(wrapperRect.top, Math.min(wrapperRect.bottom - popupHeight, newY));
+
+      popup.style.left = `${newX}px`;
+      popup.style.top = `${newY}px`;
+    }
+
+    function dragEnd() {
+      isDragging = false;
+    }
+
+    header.addEventListener('mousedown', dragStart);
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('mouseup', dragEnd);
+
+    header.addEventListener('touchstart', dragStart);
+    document.addEventListener('touchmove', drag);
+    document.addEventListener('touchend', dragEnd);
+  }
+
+  document.getElementById('prev-clothing').addEventListener('click', () => {
+    currentClothing = (currentClothing - 1 + clothing.length) % clothing.length;
+    updateCustomizerPreview();
+    updatePlayerAppearance();
+  });
+
+  document.getElementById('next-clothing').addEventListener('click', () => {
+    currentClothing = (currentClothing + 1) % clothing.length;
+    updateCustomizerPreview();
+    updatePlayerAppearance();
+  });
+
+  document.getElementById('prev-hat').addEventListener('click', () => {
+    currentHat = (currentHat - 1 + hats.length) % hats.length;
+    updateCustomizerPreview();
+    updatePlayerAppearance();
+  });
+
+  document.getElementById('next-hat').addEventListener('click', () => {
+    currentHat = (currentHat + 1) % hats.length;
+    updateCustomizerPreview();
+    updatePlayerAppearance();
+  });
+
+  document.querySelector('.close-customizer').addEventListener('click', () => {
+    document.querySelector('.customizer-popup').style.display = 'none';
+  });
+  
+  function updateCustomizerPreview() {
+    const previewClothing = document.querySelector('.preview-clothing');
+    const previewHat = document.querySelector('.preview-hat');
+    
+    if (currentClothing > 0) {
+      previewClothing.src = clothing[currentClothing].src;
+      previewClothing.style.display = 'block';
+    } else {
+      previewClothing.style.display = 'none';
+    }
+    
+    if (currentHat === 0) {
+      previewHat.style.display = 'none';
+    } else {
+      previewHat.style.display = 'block';
+      previewHat.src = hats[currentHat].src;
+    }
+  }
+
+  function updatePlayerAppearance() {
+    const player = players[room.party.client.id];
+    if (player) {
+      const clothingImg = player.element.querySelector('img.clothing');
+      const hatImg = player.element.querySelector('img.hat');
+      
+      localAppearance.clothing = currentClothing;
+      localAppearance.hat = currentHat;
+
+      localStorage.setItem('localAppearance', JSON.stringify(localAppearance));
+      
+      if (localAppearance.clothing > 0) {
+        clothingImg.src = clothing[localAppearance.clothing].src;
+        clothingImg.style.display = 'block';
+      } else {
+        clothingImg.style.display = 'none';
+      }
+      
+      if (localAppearance.hat > 0) {
+        hatImg.src = hats[localAppearance.hat].src;
+        hatImg.style.display = 'block';
+      } else {
+        hatImg.style.display = 'none';
+      }
+
+      room.send({
+        type: 'appearance',
+        clothing: localAppearance.clothing,
+        hat: localAppearance.hat
+      });
+      
+      player.clothing = localAppearance.clothing;
+      player.hat = localAppearance.hat;
+    }
+  }
+
+  const optionsButton = document.querySelector('.options-button');
+  const optionsMenu = document.querySelector('.options-menu');
+  const muteSoundsCheckbox = document.getElementById('mute-sounds');
+  const muteMusicCheckbox = document.getElementById('mute-music');
+  const soundVolumeInput = document.getElementById('sound-volume');
+  const musicVolumeInput = document.getElementById('music-volume');
+  const pixelPerfectCheckbox = document.getElementById('pixel-perfect');
+  
+  pixelPerfectCheckbox.checked = localStorage.getItem('pixelPerfect') === 'true';
+  
+  muteSoundsCheckbox.checked = soundsMuted;
+  muteMusicCheckbox.checked = musicMuted;
+  soundVolumeInput.value = soundVolume;
+  musicVolumeInput.value = musicVolume;
+  
+  optionsButton.addEventListener('click', () => {
+    optionsMenu.style.display = optionsMenu.style.display === 'none' ? 'block' : 'none';
+  });
+  
+  document.addEventListener('click', (e) => {
+    if (!optionsMenu.contains(e.target) && !optionsButton.contains(e.target)) {
+      optionsMenu.style.display = 'none';
+    }
+  });
+  
+  muteSoundsCheckbox.addEventListener('change', () => {
+    soundsMuted = muteSoundsCheckbox.checked;
+    localStorage.setItem('soundsMuted', soundsMuted);
+  });
+  
+  muteMusicCheckbox.addEventListener('change', () => {
+    musicMuted = muteMusicCheckbox.checked;
+    localStorage.setItem('musicMuted', musicMuted);
+    music.volume = musicMuted ? 0 : musicVolume;
+  });
+  
+  soundVolumeInput.addEventListener('input', () => {
+    soundVolume = parseFloat(soundVolumeInput.value);
+    localStorage.setItem('soundVolume', soundVolume);
+  });
+  
+  musicVolumeInput.addEventListener('input', () => {
+    musicVolume = parseFloat(musicVolumeInput.value);
+    localStorage.setItem('musicVolume', musicVolume);
+    if (!musicMuted) {
+      music.volume = musicVolume;
+    }
+  });
+  
+  pixelPerfectCheckbox.addEventListener('change', () => {
+    const gameContainer = document.getElementById('game-container');
+    const loadingImage = document.querySelector('.loading-image');
+    
+    localStorage.setItem('pixelPerfect', pixelPerfectCheckbox.checked);
+    
+    if (pixelPerfectCheckbox.checked) {
+      gameContainer.classList.add('pixel-perfect');
+      loadingImage.classList.add('pixel-perfect'); 
+    } else {
+      gameContainer.classList.remove('pixel-perfect');
+      loadingImage.classList.remove('pixel-perfect');
+    }
+  });
+
+  const savedPixelPerfect = localStorage.getItem('pixelPerfect') === 'true';
+  if (savedPixelPerfect) {
+    document.getElementById('game-container').classList.add('pixel-perfect');
+    document.querySelector('.loading-image').classList.add('pixel-perfect');
+  }
+
+  const hangerButton = document.getElementById('hanger-button');
+  hangerButton.addEventListener('click', () => {
+    const currentPlayer = players[room.party.client.id];
+    if (currentPlayer) {
+      showCustomizer(event, room.party.client.id);
+    }
+  });
+}
+</script>
+</body></html>
