@@ -1,0 +1,119 @@
+<html><head><base href="/">
+<style>
+.pokemon-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #98FB98, #228B22);
+  font-family: 'Arial', sans-serif;
+  padding: 20px;
+}
+
+.success-message {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(76, 175, 80, 0.95);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.5s ease-out;
+  z-index: 1000;
+  text-align: center;
+}
+
+.success-content {
+  max-width: 600px;
+}
+
+.pokemon-image {
+  max-width: 300px;
+  height: auto;
+  margin: 20px 0;
+  border-radius: 10px;
+  animation: floatAnimation 3s ease-in-out infinite;
+}
+
+h1 {
+  font-size: 2.5em;
+  margin-bottom: 20px;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+
+.byline {
+  font-size: 1.2em;
+  font-style: italic;
+  color: #e8f5e9;
+  margin-top: 10px;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+  line-height: 1.6;
+}
+
+.youtube-link {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #FF0000;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.youtube-link:hover {
+  background-color: #CC0000;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes floatAnimation {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+</style>
+</head>
+<body>
+<div class="pokemon-container">
+  <div class="success-message">
+    <div class="success-content">
+      <h1>Royal Pear has been added to WebSim!</h1>
+      <img src="/29_Royal_Pear_image.webp" alt="Royal Pear Pokemon - A cartoon creature with a tan body, green leafy appendages, yellow scarf-like decoration, and serious expression" class="pokemon-image" width="300" height="300">
+      <p class="byline">Royal Pear is a content creator who began streaming on Twitch in 2020 before expanding to YouTube. Born on August 10, 2002, he now actively livestreams on YouTube and creates engaging YouTube Shorts, specializing in tier lists and 60-second reviews.</p>
+      <a href="https://www.youtube.com/@RoyalPear" class="youtube-link" target="_blank">Visit RoyalPear's YouTube Account</a>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Add a click handler to dismiss the popup if needed in the future
+  const successMessage = document.querySelector('.success-message');
+  successMessage.addEventListener('click', function() {
+    // Uncomment the following line if you want the popup to be dismissible
+    // successMessage.style.display = 'none';
+  });
+});
+</script>
+</body></html>
