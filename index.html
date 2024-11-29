@@ -1,0 +1,201 @@
+<html><head><base href="https://scp-914-emulator.org" />
+<title>SCP-914 Emulator: The Clockworks</title>
+<style>
+  body {
+    background-color: #0a0a0a;
+    color: #b30000;
+    font-family: 'Courier New', monospace;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+  }
+  .container {
+    background-color: #1a1a1a;
+    border: 2px solid #b30000;
+    border-radius: 10px;
+    padding: 20px;
+    width: 90%;
+    max-width: 800px;
+  }
+  h1, h2 {
+    text-align: center;
+    color: #ff0000;
+    text-shadow: 0 0 10px #ff0000;
+  }
+  .input-area {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+  }
+  textarea {
+    background-color: #0a0a0a;
+    color: #b30000;
+    border: 1px solid #b30000;
+    padding: 10px;
+    margin-bottom: 10px;
+    resize: vertical;
+  }
+  .setting-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  button {
+    background-color: #b30000;
+    color: #0a0a0a;
+    border: none;
+    padding: 10px;
+    margin: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-grow: 1;
+  }
+  button:hover, button.active {
+    background-color: #ff0000;
+    box-shadow: 0 0 10px #ff0000;
+  }
+  #process-button, #reuse-button {
+    width: 100%;
+    font-weight: bold;
+    font-size: 1.2em;
+    margin-top: 10px;
+  }
+  #output-log {
+    background-color: #0a0a0a;
+    border: 1px solid #b30000;
+    padding: 10px;
+    height: 200px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+  }
+  .log-entry {
+    margin-bottom: 10px;
+    padding: 5px;
+    border-bottom: 1px solid #b30000;
+  }
+  .warning {
+    color: #ff0000;
+    text-align: center;
+    font-weight: bold;
+    margin-top: 20px;
+    animation: blink 2s infinite;
+  }
+  @keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+  .wiki {
+    background-color: #0a0a0a;
+    border: 1px solid #b30000;
+    padding: 15px;
+    margin-top: 20px;
+  }
+  .wiki h3 {
+    color: #ff0000;
+    margin-top: 0;
+  }
+  .wiki ul {
+    padding-left: 20px;
+  }
+  .wiki li {
+    margin-bottom: 10px;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>SCP-914: The Clockworks</h1>
+    <div class="input-area">
+      <textarea id="input-item" name="input" rows="4" placeholder="Enter item to process..."></textarea>
+      <div class="setting-buttons">
+        <button class="setting-btn" onclick="setSetting('Rough')">Rough</button>
+        <button class="setting-btn" onclick="setSetting('Coarse')">Coarse</button>
+        <button class="setting-btn active" onclick="setSetting('1:1')">1:1</button>
+        <button class="setting-btn" onclick="setSetting('Fine')">Fine</button>
+        <button class="setting-btn" onclick="setSetting('Very Fine')">Very Fine</button>
+        <button class="setting-btn" onclick="setSetting('Split')">Split</button>
+        <button class="setting-btn" onclick="setSetting('Random')">Random</button>
+      </div>
+      <button id="process-button" onclick="processItem()">Process Item</button>
+      <button id="reuse-button" onclick="reuseOutput()">Reuse Last Output</button>
+    </div>
+    <div id="output-log"></div>
+    <p class="warning">WARNING: Use of SCP-914 may result in unexpected and potentially dangerous outcomes. Proceed with caution.</p>
+    
+    <div class="wiki">
+      <h2>SCP-914 Wiki</h2>
+      <h3>Settings:</h3>
+      <ul>
+        <li><strong>Rough:</strong> Causes severe degradation or simplification of the input.</li>
+        <li><strong>Coarse:</strong> Degrades or simplifies the input, but less severely than Rough.</li>
+        <li><strong>1:1:</strong> Produces an output similar to the input, but with minor alterations.</li>
+        <li><strong>Fine:</strong> Refines or improves the input in various ways.</li>
+        <li><strong>Very Fine:</strong> Significantly alters the input, often producing anomalous or unexpected results.</li>
+        <li><strong>Split:</strong> Attempts to divide the input into multiple related components or objects.</li>
+        <li><strong>Random:</strong> Produces highly unpredictable and chaotic alterations to the input, ranging from subtle changes to complete transformations.</li>
+      </ul>
+      <h3>Buttons:</h3>
+      <ul>
+        <li><strong>Process Item:</strong> Submits the input text to SCP-914 for processing using the selected setting.</li>
+        <li><strong>Reuse Last Output:</strong> Replaces the input text with the most recent output, allowing for iterative processing.</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    let currentSetting = '1:1';
+    let lastOutput = '';
+
+    function setSetting(setting) {
+      currentSetting = setting;
+      document.querySelectorAll('.setting-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelector(`.setting-btn:nth-child(${['Rough', 'Coarse', '1:1', 'Fine', 'Very Fine', 'Split', 'Random'].indexOf(setting) + 1})`).classList.add('active');
+    }
+
+    function processItem() {
+      const input = document.getElementById('input-item').value;
+      if (!input.trim()) {
+        alert('Please enter an item to process.');
+        return;
+      }
+
+      fetch('/api/scp914', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ input, setting: currentSetting }),
+      })
+      .then(response => response.json())
+      .then(result => {
+        const outputLog = document.getElementById('output-log');
+        const logEntry = document.createElement('div');
+        logEntry.className = 'log-entry';
+        lastOutput = result.output;
+        logEntry.innerHTML = `<strong>${currentSetting}:</strong> ${lastOutput}`;
+        outputLog.insertBefore(logEntry, outputLog.firstChild);
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        const outputLog = document.getElementById('output-log');
+        const logEntry = document.createElement('div');
+        logEntry.className = 'log-entry';
+        logEntry.innerHTML = '<strong>Error:</strong> An unexpected error occurred. The SCP Foundation has been notified.';
+        outputLog.insertBefore(logEntry, outputLog.firstChild);
+      });
+    }
+
+    function reuseOutput() {
+      if (lastOutput) {
+        document.getElementById('input-item').value = lastOutput;
+      } else {
+        alert('No previous output to reuse.');
+      }
+    }
+  </script>
+</body></html>
