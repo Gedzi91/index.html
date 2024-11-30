@@ -1,0 +1,1068 @@
+<html><head><base href="." />
+<style>
+body {
+    margin: 0;
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: black;
+}
+
+#game-container {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    overflow: hidden;
+}
+
+.scene {
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    background-size: cover;
+    background-position: center;
+    transition: opacity 0.5s;
+}
+
+#scene1 {
+    background-image: url('/a/5ad3815b-f716-48f1-b728-127349c2c3d3');
+    opacity: 1;
+}
+
+#scene2 {
+    background-image: url('/a/bcf1f8cf-1802-4bc0-bb21-a05233797f4e');
+    opacity: 0;
+}
+
+#scene3 {
+    background-image: url('/a/26ca2013-1372-445e-a9cc-1c5988fdef36');
+    opacity: 0;
+}
+
+.player {
+    width: 64px;
+    height: 64px;
+    position: absolute;
+    bottom: 15%;
+    left: 50px;
+    image-rendering: pixelated;
+    z-index: 2;
+}
+
+.player-name {
+    position: absolute;
+    color: white;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    width: 100%;
+    top: -25px;
+    text-shadow: 1px 1px 2px black;
+    white-space: nowrap;
+}
+
+#controls {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    color: white;
+    font-family: Arial, sans-serif;
+    text-shadow: 1px 1px 2px black;
+    z-index: 3;
+}
+
+#music-info {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    color: white;
+    font-family: Arial, sans-serif;
+    text-align: right;
+    text-shadow: 1px 1px 2px black;
+    z-index: 3;
+}
+
+#start-prompt {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    cursor: pointer;
+    z-index: 3;
+}
+
+.player-container {
+    position: absolute;
+    z-index: 2;
+}
+
+#intro-cutscene {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 10;
+    background: black;
+    cursor: pointer;
+}
+
+#game-container, #controls, #music-info, #start-prompt, #chat-container {
+    visibility: hidden; /* Hide game elements during intro */
+}
+
+#chat-container {
+    position: fixed;
+    left: 20px;
+    top: 80px; /* Positioned below the controls */
+    bottom: auto; /* Remove bottom positioning */
+    width: 300px;
+    height: 200px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    z-index: 3;
+    visibility: hidden; /* Initially hidden like other game elements */
+}
+
+#chat-messages {
+    flex-grow: 1;
+    padding: 10px;
+    overflow-y: auto;
+    color: white;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+}
+
+#chat-input-container {
+    padding: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+#chat-input {
+    width: 100%;
+    padding: 5px;
+    border: none;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.9);
+    color: black;
+    font-family: Arial, sans-serif;
+}
+
+.chat-message {
+    margin-bottom: 5px;
+    word-wrap: break-word;
+}
+
+.chat-username {
+    color: #00ff00;
+    font-weight: bold;
+}
+
+/* Update loading screen styles */
+#loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: black;
+    z-index: 5;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    opacity: 0; /* Start fully transparent */
+    transition: opacity 0.5s ease-in-out; /* Add fade transition */
+}
+
+#loading-animation {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    image-rendering: pixelated;
+    margin-bottom: 20px; /* Space between animation and text */
+}
+
+#loading-text {
+    color: white;
+    font-family: "Comic Sans MS", "Comic Sans", cursive; /* Change font to Comic Sans */
+    font-size: 24px;
+    text-align: center;
+}
+
+.npc {
+    position: absolute;
+    z-index: 2;
+    bottom: 15%;
+    transform: scale(2);
+    cursor: pointer; /* Show pointer cursor on hover */
+}
+
+.npc-sprite {
+    image-rendering: pixelated;
+    height: 64px;
+}
+
+#garnet-npc {
+    right: 100px; /* Position Garnet on the right side of scene 1 */
+    transform: scaleX(-1) scale(2); /* Flip horizontally and make 2x bigger */
+}
+
+#connie-npc {
+    left: 300px; /* Position Connie in a good spot */
+    transform: scale(2); /* Make Connie 2x bigger */
+    transition: left 0.5s, bottom 0.5s; /* Smooth movement when following */
+}
+
+#pearl-npc {
+    left: 100px; /* Position Pearl on the left side of scene 2 */
+    transform: scale(5); /* Make Pearl 5x bigger instead of 2x */
+}
+
+/* Add styles for dialogue system */
+#dialogue-box {
+    position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    max-width: 800px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid white;
+    border-radius: 10px;
+    padding: 20px;
+    color: white;
+    font-family: "Comic Sans MS", "Comic Sans", cursive;
+    font-size: 18px;
+    display: none;
+    z-index: 4;
+}
+
+#dialogue-text {
+    margin-bottom: 15px;
+}
+
+#dialogue-next {
+    background: white;
+    color: black;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    float: right;
+    font-family: "Comic Sans MS", "Comic Sans", cursive;
+}
+
+#dialogue-next:hover {
+    background: #ddd;
+}
+</style>
+</head>
+<body>
+<div id="controls">
+    WASD to move<br>
+    SHIFT to sprint<br>
+    SPACE to jump
+</div>
+<div id="music-info">
+    Now Playing: <span id="current-song"></span>
+</div>
+<div id="game-container">
+    <div id="scene1" class="scene">
+        <div id="garnet-npc" class="npc">
+            <img src="/68396-img-l-1552397875.gif" alt="Garnet idle animation" class="npc-sprite">
+        </div>
+        <div id="connie-npc" class="npc">
+            <img src="/Connie Idle.gif" alt="Connie idle animation" class="npc-sprite">
+        </div>
+    </div>
+    <div id="scene2" class="scene">
+        <div id="pearl-npc" class="npc">
+            <img src="/Pearl Idle 2.gif" alt="Pearl idle animation" class="npc-sprite">
+        </div>
+    </div>
+    <div id="scene3" class="scene"></div>
+    <div id="main-player-container" class="player-container">
+        <img id="steven" class="player" src="/SU Idle.gif" alt="Steven Universe character sprite in idle animation">
+        <div class="player-name"></div>
+    </div>
+</div>
+<div id="start-prompt">
+    Click anywhere to start the game and music!
+</div>
+<div id="chat-container">
+    <div id="chat-messages"></div>
+    <div id="chat-input-container">
+        <input type="text" id="chat-input" placeholder="Press Enter to chat..." maxlength="100">
+    </div>
+</div>
+<div id="dialogue-box">
+    <div id="dialogue-text"></div>
+    <button id="dialogue-next">Next</button>
+</div>
+<div id="intro-cutscene">
+    <img src="/930e3b8c2825aff29b941a73c6f7c4b1.gif" alt="Intro cutscene animation" style="width: 100%; height: 100vh; object-fit: cover;">
+</div>
+<!-- Update loading screen HTML -->
+<div id="loading-screen">
+    <img id="loading-animation" src="/SU Peridot Toilet.gif" alt="Loading animation">
+    <div id="loading-text">Loading...</div>
+</div>
+
+<script>
+const room = new WebsimSocket();
+let username = '';
+const otherPlayers = new Map();
+const introCutscene = document.getElementById('intro-cutscene');
+const chatInput = document.getElementById('chat-input');
+const chatMessages = document.getElementById('chat-messages');
+const gameElements = [
+    document.getElementById('game-container'),
+    document.getElementById('controls'),
+    document.getElementById('music-info'),
+    document.getElementById('start-prompt'),
+    document.getElementById('chat-container')
+];
+
+const npcSprites = {
+    garnet: {
+        idle: '/68396-img-l-1552397875.gif',
+        talking: '/121370-img-l-1576000111.gif'
+    },
+    pearl: {
+        idle: '/Pearl Idle 2.gif',
+        confused: '/Pearl Confused.gif',
+        talking: '/Pearl Talk.gif'
+    },
+    connie: {
+        idle: '/Connie Idle.gif',
+        walking: '/Connie Walk.gif'  // Make sure this is properly set
+    }
+};
+
+const dialogueSystem = {
+    currentStep: 0,
+    isActive: false,
+    dialogue: [
+        {
+            speaker: "Garnet",
+            text: "Hey Steven! How's Beach City going?"
+        },
+        {
+            speaker: "Steven",
+            text: "It's doing good!"
+        }
+    ],
+
+    show() {
+        if (this.isActive) return;
+
+        const dialogueBox = document.getElementById('dialogue-box');
+        const dialogueText = document.getElementById('dialogue-text');
+        const nextButton = document.getElementById('dialogue-next');
+        const garnetSprite = document.querySelector('#garnet-npc img');
+
+        // Change Garnet's sprite to talking animation
+        garnetSprite.src = npcSprites.garnet.talking;
+
+        this.isActive = true;
+        this.currentStep = 0;
+        dialogueBox.style.display = 'block';
+
+        this.updateDialogue();
+
+        nextButton.onclick = () => {
+            this.currentStep++;
+            if (this.currentStep >= this.dialogue.length) {
+                dialogueBox.style.display = 'none';
+                this.isActive = false;
+
+                // Change Garnet's sprite back to idle
+                garnetSprite.src = npcSprites.garnet.idle;
+
+                // Add a small delay before re-enabling movement
+                setTimeout(() => {
+                    requestAnimationFrame(update);
+                }, 100);
+            } else {
+                this.updateDialogue();
+            }
+        };
+    },
+
+    updateDialogue() {
+        const dialogueText = document.getElementById('dialogue-text');
+        const current = this.dialogue[this.currentStep];
+        dialogueText.innerHTML = `<strong>${current.speaker}:</strong> ${current.text}`;
+    }
+};
+
+const pearlDialogue = {
+    currentStep: 0,
+    isActive: false,
+    dialogue: [
+        {
+            speaker: "Pearl",
+            text: "Hey Steven! Have You Seen Garnet Anywhere",
+            sprite: npcSprites.pearl.confused
+        },
+        {
+            speaker: "Steven",
+            text: "Yeah! They Are At The Temple!",
+            sprite: npcSprites.pearl.talking  // Change this to use talking animation
+        },
+        {
+            speaker: "Pearl",
+            text: "Thank Goodness!",
+            sprite: npcSprites.pearl.talking
+        }
+    ],
+
+    show() {
+        if (this.isActive) return;
+
+        const dialogueBox = document.getElementById('dialogue-box');
+        const dialogueText = document.getElementById('dialogue-text');
+        const nextButton = document.getElementById('dialogue-next');
+        const pearlSprite = document.querySelector('#pearl-npc img');
+
+        this.isActive = true;
+        this.currentStep = 0;
+        dialogueBox.style.display = 'block';
+
+        this.updateDialogue();
+
+        nextButton.onclick = () => {
+            this.currentStep++;
+            if (this.currentStep >= this.dialogue.length) {
+                dialogueBox.style.display = 'none';
+                this.isActive = false;
+
+                // Change Pearl's sprite back to idle
+                pearlSprite.src = npcSprites.pearl.idle;
+
+                // Add a small delay before re-enabling movement
+                setTimeout(() => {
+                    requestAnimationFrame(update);
+                }, 100);
+            } else {
+                this.updateDialogue();
+            }
+        };
+    },
+
+    updateDialogue() {
+        const dialogueText = document.getElementById('dialogue-text');
+        const current = this.dialogue[this.currentStep];
+        const pearlSprite = document.querySelector('#pearl-npc img');
+        
+        // Update Pearl's sprite based on current dialogue
+        if (current.sprite) {
+            pearlSprite.src = current.sprite;
+        }
+        
+        dialogueText.innerHTML = `<strong>${current.speaker}:</strong> ${current.text}`;
+    }
+};
+
+// Add Connie's dialogue system
+const connieDialogue = {
+    currentStep: 0,
+    isActive: false,
+    isFollowing: false,
+    dialogue: [
+        {
+            speaker: "Connie",
+            text: "Hey Steven!"
+        },
+        {
+            speaker: "Steven",
+            text: "Hey Connie! Can You Follow Me?"
+        },
+        {
+            speaker: "Connie",  
+            text: "Sure!"
+        }
+    ],
+
+    show() {
+        if (this.isActive) return;
+
+        const dialogueBox = document.getElementById('dialogue-box');
+        const dialogueText = document.getElementById('dialogue-text');
+        const nextButton = document.getElementById('dialogue-next');
+        
+        this.isActive = true;
+        this.currentStep = 0;
+        dialogueBox.style.display = 'block';
+
+        this.updateDialogue();
+
+        nextButton.onclick = () => {
+            this.currentStep++;
+            if (this.currentStep >= this.dialogue.length) {
+                dialogueBox.style.display = 'none';
+                this.isActive = false;
+                this.startFollowing();
+
+                // Add a small delay before re-enabling movement
+                setTimeout(() => {
+                    requestAnimationFrame(update);
+                }, 100);
+            } else {
+                this.updateDialogue();
+            }
+        };
+    },
+
+    updateDialogue() {
+        const dialogueText = document.getElementById('dialogue-text');
+        const current = this.dialogue[this.currentStep];
+        dialogueText.innerHTML = `<strong>${current.speaker}:</strong> ${current.text}`;
+    },
+
+    startFollowing() {
+        this.isFollowing = true;
+        const connieNPC = document.getElementById('connie-npc');
+        connieNPC.classList.add('following');
+        
+        // Start the following behavior
+        this.followUpdate();
+    },
+
+    followUpdate() {
+        if (!this.isFollowing) return;
+
+        const connieNPC = document.getElementById('connie-npc');
+        const targetX = position.x - 100; // Follow slightly behind Steven
+        const targetY = position.y; // Same height as Steven
+
+        // Get the Connie sprite element
+        const connieSprite = connieNPC.querySelector('img');
+
+        // Calculate if Connie needs to move
+        const currentX = parseFloat(connieNPC.style.left) || 0;
+        const distance = Math.abs(targetX - currentX);
+
+        // Only change animation if there's significant movement needed
+        if (distance > 5) {
+            // Only use walking animation when moving
+            connieSprite.src = '/Connie Walk.gif';
+            
+            // Scale based on current scene
+            const scaleAmount = currentScene === 1 ? 10 : 2;
+            // Flip based on movement direction
+            if (targetX > currentX) {
+                connieNPC.style.transform = `scale(${scaleAmount})`;
+            } else {
+                connieNPC.style.transform = `scale(-${scaleAmount}, ${scaleAmount})`;
+            }
+        } else {
+            // If we're not moving, use idle animation
+            connieSprite.src = '/Connie Idle.gif';
+        }
+
+        // Update position
+        connieNPC.style.left = targetX + 'px';
+        connieNPC.style.bottom = targetY + 'px';
+
+        // Move Connie to the current scene if she's not there
+        if (connieNPC.parentElement !== scenes[currentScene]) {
+            connieNPC.parentElement.removeChild(connieNPC);
+            scenes[currentScene].appendChild(connieNPC);
+        }
+
+        // Continue the animation loop
+        requestAnimationFrame(() => this.followUpdate());
+    }
+};
+
+// Add click event listener for Garnet's NPC
+const garnetNPC = document.getElementById('garnet-npc');
+if (garnetNPC) {
+    garnetNPC.addEventListener('click', () => {
+        if (!dialogueSystem.isActive) {
+            dialogueSystem.show();
+        }
+    });
+}
+
+// Add click event listener for Pearl's NPC
+const pearlNPC = document.getElementById('pearl-npc');
+if (pearlNPC) {
+    pearlNPC.addEventListener('click', () => {
+        if (!pearlDialogue.isActive && !dialogueSystem.isActive) {
+            pearlDialogue.show();
+        }
+    });
+}
+
+// Add click event listener for Connie's NPC
+const connieNPC = document.getElementById('connie-npc');
+if (connieNPC) {
+    connieNPC.addEventListener('click', () => {
+        if (!connieDialogue.isActive && !dialogueSystem.isActive && !pearlDialogue.isActive) {
+            connieDialogue.show();
+        }
+    });
+}
+
+// Start game function
+function startGame() {
+    // Hide the intro cutscene
+    introCutscene.style.display = 'none';
+
+    // Show all game elements
+    gameElements.forEach(element => {
+        if (element) {
+            element.style.visibility = 'visible';
+        }
+    });
+}
+
+// Move the initCutscene function after the startGame function
+function initCutscene() {
+    const cutsceneImg = introCutscene.querySelector('img');
+
+    // Allow clicking to skip
+    introCutscene.addEventListener('click', startGame);
+
+    // Wait for GIF to finish playing once
+    cutsceneImg.addEventListener('load', () => {
+        setTimeout(() => {
+            startGame();
+        }, 5000); // Adjust this timeout to match your GIF duration
+    });
+}
+
+async function initMultiplayer() {
+    const user = await window.websim.getUser();
+    username = user.username;
+    document.querySelector('#main-player-container .player-name').textContent = username;
+
+    room.onPeersChanged = (peers) => {
+        const connectedUsernames = Object.values(peers).map(p => p.username);
+        for (const [playerUsername] of otherPlayers) {
+            if (!connectedUsernames.includes(playerUsername)) {
+                const container = document.getElementById(`player-container-${playerUsername}`);
+                if (container) container.remove();
+                otherPlayers.delete(playerUsername);
+
+                // Add leave message
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'chat-message';
+                messageDiv.innerHTML = `<span style="color: #ff4444">${playerUsername} left the game</span>`;
+                chatMessages.appendChild(messageDiv);
+            }
+        }
+
+        Object.values(peers).forEach(peer => {
+            if (peer.username !== username && !otherPlayers.has(peer.username)) {
+                const playerContainer = createPlayerElement(peer.username);
+                otherPlayers.set(peer.username, {
+                    container: playerContainer,
+                    lastUpdate: Date.now()
+                });
+
+                // Add join message
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'chat-message';
+                messageDiv.innerHTML = `<span style="color: #44ff44">${peer.username} joined the game</span>`;
+                chatMessages.appendChild(messageDiv);
+            }
+        });
+
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    };
+}
+
+function createPlayerElement(playerUsername) {
+    const playerContainer = document.createElement('div');
+    playerContainer.id = `player-container-${playerUsername}`;
+    playerContainer.className = 'player-container';
+
+    const playerSprite = document.createElement('img');
+    playerSprite.className = 'player';
+    playerSprite.src = '/SU Idle.gif';
+    playerSprite.alt = 'Other player character sprite';
+
+    const playerName = document.createElement('div');
+    playerName.className = 'player-name';
+    playerName.textContent = playerUsername;
+
+    playerContainer.appendChild(playerSprite);
+    playerContainer.appendChild(playerName);
+    document.getElementById('game-container').appendChild(playerContainer);
+
+    // Initially hide other players
+    playerContainer.style.display = 'none';
+    return playerContainer;
+}
+
+// Chat message handling
+chatInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && chatInput.value.trim()) {
+        // Send chat message
+        room.send({
+            type: 'chat',
+            username: username,
+            message: chatInput.value.trim()
+        });
+        chatInput.value = '';
+    }
+});
+
+// Update the room.onmessage handler to include chat messages
+room.onmessage = (event) => {
+    const data = event.data;
+    if (data.type === 'playerMove' && data.username !== username) {
+        let playerData = otherPlayers.get(data.username);
+
+        if (!playerData) {
+            const container = createPlayerElement(data.username);
+            playerData = {
+                container: container,
+                lastUpdate: Date.now()
+            };
+            otherPlayers.set(data.username, playerData);
+        }
+
+        const container = playerData.container;
+        const sprite = container.querySelector('img');
+
+        sprite.src = data.sprite;
+        container.style.left = data.x + 'px';
+        container.style.bottom = data.y + 'px';
+
+        sprite.style.transform = data.scene === 1 ?
+            (data.facing === 'right' ? 'scale(10)' : 'scale(-10, 10)') :
+            (data.facing === 'right' ? 'scale(2)' : 'scale(-2, 2)');
+
+        container.style.display = data.scene === currentScene ? 'block' : 'none';
+
+        playerData.lastUpdate = Date.now();
+    } else if (data.type === 'chat') {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'chat-message';
+        messageDiv.innerHTML = `<span class="chat-username">${data.username}:</span> ${escapeHtml(data.message)}`;
+        chatMessages.appendChild(messageDiv);
+
+        // Auto-scroll to bottom
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        // Limit number of messages (keep last 50)
+        while (chatMessages.children.length > 50) {
+            chatMessages.removeChild(chatMessages.firstChild);
+        }
+    }
+};
+
+// Helper function to escape HTML to prevent XSS
+function escapeHtml(unsafe) {
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+// Handle cutscene completion and skip
+initCutscene();
+initMultiplayer();
+
+const steven = document.getElementById('steven');
+const container = document.getElementById('game-container');
+const currentSongDisplay = document.getElementById('current-song');
+const startPrompt = document.getElementById('start-prompt');
+const scenes = [
+    document.getElementById('scene1'),
+    document.getElementById('scene2'),
+    document.getElementById('scene3')
+];
+
+let currentScene = 0;
+
+async function fadeAudioOut(duration = 1000) {
+    return new Promise(resolve => {
+        const initialVolume = audio.volume;
+        const steps = 20;
+        const volumeStep = initialVolume / steps;
+        const stepDuration = duration / steps;
+
+        const fadeInterval = setInterval(() => {
+            if (audio.volume > volumeStep) {
+                audio.volume -= volumeStep;
+            } else {
+                audio.volume = 0;
+                clearInterval(fadeInterval);
+                resolve();
+            }
+        }, stepDuration);
+    });
+}
+
+async function fadeAudioIn(duration = 1000) {
+    return new Promise(resolve => {
+        const targetVolume = 0.5;
+        const steps = 20;
+        const volumeStep = targetVolume / steps;
+        const stepDuration = duration / steps;
+
+        audio.volume = 0;
+        const fadeInterval = setInterval(() => {
+            if (audio.volume < targetVolume - volumeStep) {
+                audio.volume += volumeStep;
+            } else {
+                audio.volume = targetVolume;
+                clearInterval(fadeInterval);
+                resolve();
+            }
+        }, stepDuration);
+    });
+}
+
+// Update the changeScene function for better timing
+async function changeScene(newScene) {
+    // Show and fade in loading screen
+    const loadingScreen = document.getElementById('loading-screen');
+    loadingScreen.style.display = 'flex';
+    loadingScreen.offsetHeight; // Force reflow
+    loadingScreen.style.opacity = '1';
+
+    // Fade out music
+    await fadeAudioOut(1000);
+    audio.pause();
+
+    // Wait for 5 seconds
+    await new Promise(resolve => setTimeout(resolve, 5000));
+
+    // Prepare scene change before starting fade out
+    scenes[currentScene].style.opacity = '0';
+    scenes[newScene].style.opacity = '1';
+    currentScene = newScene;
+
+    // Update main player scale
+    if (newScene === 1) {
+        steven.style.transform = facing === 'right' ? 'scale(10)' : 'scale(-10, 10)';
+    } else {
+        steven.style.transform = facing === 'right' ? 'scale(2)' : 'scale(-2, 2)';
+    }
+
+    // Update other players' visibility
+    otherPlayers.forEach((playerData, playerUsername) => {
+        playerData.container.style.display = 'none';
+    });
+
+    // Handle NPC visibility
+    const garnetNPC = document.getElementById('garnet-npc');
+    const pearlNPC = document.getElementById('pearl-npc');
+    const connieNPC = document.getElementById('connie-npc');
+    
+    if (garnetNPC) {
+        garnetNPC.style.display = newScene === 0 ? 'block' : 'none';
+    }
+    if (pearlNPC) {
+        pearlNPC.style.display = newScene === 1 ? 'block' : 'none';
+    }
+    // Only hide Connie if not following
+    if (connieNPC && !connieDialogue.isFollowing) {
+        connieNPC.style.display = newScene === 0 ? 'block' : 'none';
+    }
+
+    // Fade out loading screen
+    loadingScreen.style.opacity = '0';
+
+    // Resume music right away but still fade it in
+    audio.play();
+    fadeAudioIn(1000);
+
+    // Wait for fade out animation to complete then hide loading screen
+    await new Promise(resolve => setTimeout(resolve, 500));
+    loadingScreen.style.display = 'none';
+}
+
+const songs = [
+    'toby fox - UNDERTALE Soundtrack - 77 ASGORE.mp3',
+    'new donk city (daytime) - super mario odyssey.mp3',
+    'Deltarune OST_ 9 - Lancer - Palpe.mp3',
+    'Sudden changes! Sans theme song (Bullet Hell) Phase 1.mp3'
+];
+
+let currentSongIndex = 0;
+const audio = new Audio();
+audio.volume = 0.5;
+
+function playNextSong() {
+    currentSongIndex = (currentSongIndex + Math.floor(Math.random() * (songs.length - 1) + 1)) % songs.length;
+    audio.src = songs[currentSongIndex];
+    audio.play().catch(e => console.log('Audio playback failed:', e));
+    currentSongDisplay.textContent = songs[currentSongIndex].split('.')[0];
+}
+
+audio.addEventListener('ended', playNextSong);
+
+document.addEventListener('click', function initAudio() {
+    startPrompt.style.display = 'none';
+    playNextSong();
+    document.removeEventListener('click', initAudio);
+}, { once: true });
+
+let position = { x: 50, y: window.innerHeight * 0.15 };
+let velocity = { x: 0, y: 0 };
+let isJumping = false;
+let isSprinting = false;
+let facing = 'right';
+
+const SPEED = 5;
+const SPRINT_MULTIPLIER = 1.8;
+const GRAVITY = 0.5;
+const JUMP_FORCE = 12;
+
+const sprites = {
+    idle: '/SU Idle.gif',
+    walking: '/SU Walk.gif',
+    sprinting: '/SU Dash.gif',
+    jumping: '/SU Jump.gif',
+    falling: '/SU Fall.gif'
+};
+
+const spriteImages = {};
+for (let key in sprites) {
+    spriteImages[key] = new Image();
+    spriteImages[key].src = sprites[key];
+}
+
+let currentAnimation = 'idle';
+let lastUpdateTime = 0;
+const ANIMATION_DELAY = 16;
+
+const keys = {};
+
+document.addEventListener('keydown', (e) => {
+    if (dialogueSystem.isActive || pearlDialogue.isActive || connieDialogue.isActive) {
+        // If either dialogue is active, only allow space/enter to progress dialogue
+        if (e.key === ' ' || e.key === 'Enter') {
+            document.getElementById('dialogue-next').click();
+        }
+        return;
+    }
+    keys[e.key.toLowerCase()] = true;
+    updateAnimation();
+});
+
+document.addEventListener('keyup', (e) => {
+    keys[e.key.toLowerCase()] = false;
+    updateAnimation();
+});
+
+function updateAnimation() {
+    let newState = '';
+    if (isJumping) {
+        newState = velocity.y > 0 ? 'jumping' : 'falling';
+    } else if (keys['a'] || keys['d']) {
+        newState = isSprinting ? 'sprinting' : 'walking';
+    } else {
+        newState = 'idle';
+    }
+
+    if (currentAnimation !== newState) {
+        currentAnimation = newState;
+        steven.src = spriteImages[newState].src;
+    }
+}
+
+function update(timestamp) {
+    // If either dialogue is active, don't process any movement
+    if (dialogueSystem.isActive || pearlDialogue.isActive || connieDialogue.isActive) {
+        return;
+    }
+
+    isSprinting = keys['shift'];
+    const moveSpeed = SPEED * (isSprinting ? SPRINT_MULTIPLIER : 1);
+
+    if (keys['a']) {
+        velocity.x = -moveSpeed;
+        facing = 'left';
+        steven.style.transform = currentScene === 1 ? 'scale(-10, 10)' : 'scale(-2, 2)';
+    } else if (keys['d']) {
+        velocity.x = moveSpeed;
+        facing = 'right';
+        steven.style.transform = currentScene === 1 ? 'scale(10)' : 'scale(2)';
+    } else {
+        velocity.x = 0;
+    }
+
+    if (keys[' '] && !isJumping) {
+        velocity.y = JUMP_FORCE;
+        isJumping = true;
+    }
+
+    velocity.y -= GRAVITY;
+    position.x += velocity.x;
+    position.y += velocity.y;
+
+    const groundLevel = window.innerHeight * 0.15;
+    if (position.y < groundLevel) {
+        position.y = groundLevel;
+        velocity.y = 0;
+        isJumping = false;
+    }
+
+    if (position.x < 0) {
+        if (document.getElementById('loading-screen').style.display !== 'flex') {
+            position.x = container.offsetWidth - 65;
+            changeScene((currentScene + 2) % 3);
+        }
+    }
+    if (position.x > container.offsetWidth - 64) {
+        if (document.getElementById('loading-screen').style.display !== 'flex') {
+            position.x = 1;
+            changeScene((currentScene + 1) % 3);
+        }
+    }
+
+    const mainPlayerContainer = document.getElementById('main-player-container');
+    mainPlayerContainer.style.left = position.x + 'px';
+    mainPlayerContainer.style.bottom = position.y + 'px';
+
+    if (timestamp - lastUpdateTime >= ANIMATION_DELAY) {
+        updateAnimation();
+        lastUpdateTime = timestamp;
+
+        // Broadcast player position and state
+        room.send({
+            type: 'playerMove',
+            username: username,
+            x: position.x,
+            y: position.y,
+            facing: facing,
+            sprite: steven.src,
+            scene: currentScene
+        });
+    }
+
+    // Clean up disconnected players
+    const now = Date.now();
+    otherPlayers.forEach((playerData, playerUsername) => {
+        if (now - playerData.lastUpdate > 5000) {
+            playerData.container.remove();
+            otherPlayers.delete(playerUsername);
+        }
+    });
+
+    requestAnimationFrame(update);
+}
+
+requestAnimationFrame(update);
+</script>
+</body></html>
