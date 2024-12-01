@@ -1,0 +1,313 @@
+<html><head><base href="https://dark-prophecy-app.com/"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DarkWeb Prophecy</title>
+<style>
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background-color: #000;
+    color: #0f0;
+    font-family: 'Courier New', monospace;
+    overflow: hidden;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    padding: 20px;
+    box-sizing: border-box;
+    position: relative;
+}
+
+input {
+    background-color: #111;
+    border: 1px solid #0f0;
+    color: #0f0;
+    padding: 10px;
+    margin-bottom: 20px;
+    width: 80%;
+    max-width: 300px;
+    z-index: 2;
+}
+
+button {
+    background-color: #0f0;
+    color: #000;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.result {
+    margin-top: 20px;
+    text-align: center;
+    z-index: 2;
+}
+
+.creepy-text {
+    font-size: 0.8em;
+    opacity: 0.7;
+    margin: 5px 0;
+}
+
+.death-prediction {
+    color: #f00;
+    font-weight: bold;
+    font-size: 1.5em;
+    margin: 20px 0;
+}
+
+.glitch {
+    animation: glitch 0.5s infinite;
+}
+
+@keyframes glitch {
+    0% { transform: translate(2px, 2px); }
+    25% { transform: translate(-2px, -2px); }
+    50% { transform: translate(2px, -2px); }
+    75% { transform: translate(-2px, 2px); }
+    100% { transform: translate(2px, 2px); }
+}
+
+.horror-face {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('https://dark-prophecy-app.com/horror-face.jpg');
+    background-size: cover;
+    background-position: center;
+    display: none;
+    z-index: 3;
+}
+
+.goodbye-message {
+    color: #f00;
+    font-size: 2em;
+    text-align: center;
+    display: none;
+    z-index: 4;
+}
+
+.matrix-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.popup {
+    position: fixed;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #f00;
+    padding: 10px;
+    border: 1px solid #f00;
+    display: none;
+    z-index: 5;
+}
+
+.creepy-video {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    max-width: 400px;
+    display: none;
+    z-index: 4;
+}
+
+#countdown {
+    font-size: 1.5em;
+    color: #f00;
+    margin-top: 20px;
+    z-index: 2;
+}
+
+.error-face {
+    position: fixed;
+    width: 50px;
+    height: 50px;
+    background-image: url('https://dark-prophecy-app.com/error-face.png');
+    background-size: cover;
+    display: none;
+    z-index: 6;
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <canvas id="matrix" class="matrix-bg"></canvas>
+    <input type="text" id="nameInput" placeholder="Enter your name...">
+    <button onclick="analyzeName()">Analyze</button>
+    <div id="result" class="result"></div>
+    <div id="countdown"></div>
+</div>
+
+<div class="horror-face" id="horrorFace"></div>
+<div class="goodbye-message" id="goodbyeMessage">Goodbye. Have a happy death.</div>
+<video class="creepy-video" id="creepyVideo" loop>
+    <source src="https://dark-prophecy-app.com/creepy-dance.mp4" type="video/mp4">
+</video>
+
+<div class="popup" id="popup1">Your data is being harvested...</div>
+<div class="popup" id="popup2">We know your secrets...</div>
+<div class="popup" id="popup3">There's no escape...</div>
+
+<div class="error-face" id="errorFace1"></div>
+<div class="error-face" id="errorFace2"></div>
+<div class="error-face" id="errorFace3"></div>
+
+<script>
+const matrix = document.getElementById('matrix');
+const ctx = matrix.getContext('2d');
+
+matrix.height = window.innerHeight;
+matrix.width = window.innerWidth;
+
+const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
+const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const nums = '0123456789';
+
+const alphabet = katakana + latin + nums;
+
+const fontSize = 16;
+const columns = matrix.width/fontSize;
+
+const rainDrops = [];
+
+for( let x = 0; x < columns; x++ ) {
+    rainDrops[x] = 1;
+}
+
+const draw = () => {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+    ctx.fillRect(0, 0, matrix.width, matrix.height);
+    
+    ctx.fillStyle = '#0F0';
+    ctx.font = fontSize + 'px monospace';
+
+    for(let i = 0; i < rainDrops.length; i++)
+    {
+        const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+        ctx.fillText(text, i*fontSize, rainDrops[i]*fontSize);
+        
+        if(rainDrops[i]*fontSize > matrix.height && Math.random() > 0.975){
+            rainDrops[i] = 0;
+        }
+        rainDrops[i]++;
+    }
+};
+
+setInterval(draw, 30);
+
+function analyzeName() {
+    const name = document.getElementById('nameInput').value;
+    if (!name) return;
+
+    const result = document.getElementById('result');
+    result.innerHTML = '<p class="creepy-text">Analyzing soul data...</p>';
+
+    setTimeout(() => {
+        result.innerHTML += '<p class="creepy-text">Accessing forbidden knowledge...</p>';
+    }, 1000);
+
+    setTimeout(() => {
+        result.innerHTML += '<p class="creepy-text">Consulting the void...</p>';
+    }, 2000);
+
+    setTimeout(() => {
+        const predictions = [
+            "a rusty knife",
+            "the old clock tower",
+            "3:33 AM",
+            "a venomous spider",
+            "the abandoned hospital",
+            "your own reflection"
+        ];
+        const randomPrediction = predictions[Math.floor(Math.random() * predictions.length)];
+        result.innerHTML += `<p class="death-prediction glitch">${randomPrediction}</p>`;
+
+        startCountdown();
+        showRandomPopups();
+        showErrorFaces();
+
+        setTimeout(() => {
+            document.body.classList.add('glitch');
+            setTimeout(() => {
+                const horrorFace = document.getElementById('horrorFace');
+                horrorFace.style.display = 'block';
+                setTimeout(() => {
+                    horrorFace.style.display = 'none';
+                    document.body.innerHTML = '';
+                    const goodbyeMessage = document.getElementById('goodbyeMessage');
+                    goodbyeMessage.style.display = 'block';
+                    document.body.appendChild(goodbyeMessage);
+                    
+                    const video = document.getElementById('creepyVideo');
+                    video.style.display = 'block';
+                    video.play();
+                }, 500);
+            }, 2000);
+        }, 3000);
+    }, 3000);
+}
+
+function startCountdown() {
+    const countdownElement = document.getElementById('countdown');
+    let time = 60;
+    const timer = setInterval(() => {
+        countdownElement.textContent = time;
+        time--;
+        if (time < 0) {
+            clearInterval(timer);
+        }
+    }, 1000);
+}
+
+function showRandomPopups() {
+    const popups = [
+        document.getElementById('popup1'),
+        document.getElementById('popup2'),
+        document.getElementById('popup3')
+    ];
+
+    setInterval(() => {
+        const popup = popups[Math.floor(Math.random() * popups.length)];
+        popup.style.display = 'block';
+        popup.style.top = Math.random() * window.innerHeight + 'px';
+        popup.style.left = Math.random() * window.innerWidth + 'px';
+        setTimeout(() => {
+            popup.style.display = 'none';
+        }, 2000);
+    }, 3000);
+}
+
+function showErrorFaces() {
+    const errorFaces = [
+        document.getElementById('errorFace1'),
+        document.getElementById('errorFace2'),
+        document.getElementById('errorFace3')
+    ];
+
+    errorFaces.forEach(face => {
+        setInterval(() => {
+            face.style.display = 'block';
+            face.style.top = Math.random() * window.innerHeight + 'px';
+            face.style.left = Math.random() * window.innerWidth + 'px';
+            setTimeout(() => {
+                face.style.display = 'none';
+            }, 500);
+        }, Math.random() * 10000 + 5000);
+    });
+}
+</script>
+</body>
+</html>
