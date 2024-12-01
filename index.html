@@ -1,0 +1,293 @@
+<html><head><base href="https://enigma.ai"><title>Enigma - Hack Everything</title><style>
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Courier New', monospace;
+  background-color: #000;
+  color: #0f0;
+}
+
+#container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  perspective: 1000px;
+}
+
+#scene {
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  animation: rotate 20s infinite linear;
+}
+
+@keyframes rotate {
+  from { transform: rotateY(0deg); }
+  to { transform: rotateY(360deg); }
+}
+
+#input-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#target-input {
+  width: 300px;
+  padding: 10px;
+  font-size: 16px;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid #0f0;
+  color: #0f0;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+#hack-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background: rgba(0, 255, 0, 0.2);
+  border: 1px solid #0f0;
+  color: #0f0;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+#hack-button:hover {
+  background: rgba(0, 255, 0, 0.4);
+}
+
+#progress-container {
+  width: 300px;
+  height: 20px;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid #0f0;
+  margin-top: 10px;
+  display: none;
+}
+
+#progress-bar {
+  width: 0%;
+  height: 100%;
+  background: #0f0;
+  transition: width 0.5s;
+}
+
+#matrix-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 1s;
+}
+
+.matrix-column {
+  position: absolute;
+  top: -100%;
+  width: 20px;
+  font-size: 20px;
+  text-align: center;
+  animation: fall 10s infinite linear;
+}
+
+@keyframes fall {
+  to { transform: translateY(200vh); }
+}
+
+.cube {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  transform-style: preserve-3d;
+}
+
+.cube-face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 255, 0, 0.1);
+  border: 1px solid #0f0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+}
+
+.front  { transform: rotateY(0deg) translateZ(50px); }
+.right  { transform: rotateY(90deg) translateZ(50px); }
+.back   { transform: rotateY(180deg) translateZ(50px); }
+.left   { transform: rotateY(-90deg) translateZ(50px); }
+.top    { transform: rotateX(90deg) translateZ(50px); }
+.bottom { transform: rotateX(-90deg) translateZ(50px); }
+
+#data-window {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px;
+  height: 400px;
+  background: rgba(0, 0, 0, 0.9);
+  border: 2px solid #0f0;
+  padding: 20px;
+  display: none;
+  overflow: auto;
+  z-index: 1001;
+}
+
+#completion-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.9);
+  border: 2px solid #0f0;
+  padding: 20px;
+  text-align: center;
+  z-index: 1002;
+  display: none;
+}
+</style></head><body>
+<div id="container">
+  <div id="scene"></div>
+  <div id="input-container">
+    <input type="text" id="target-input" placeholder="Enter target website to hack">
+    <button id="hack-button">Initiate Hack</button>
+    <div id="progress-container">
+      <div id="progress-bar"></div>
+    </div>
+  </div>
+  <div id="matrix-container"></div>
+  <div id="data-window"></div>
+  <div id="completion-modal">
+    <p>Hacking complete. Data downloading.</p>
+    <p>Insert USB device to store data.</p>
+  </div>
+</div>
+
+<script>
+const scene = document.getElementById('scene');
+const input = document.getElementById('target-input');
+const hackButton = document.getElementById('hack-button');
+const matrixContainer = document.getElementById('matrix-container');
+const progressContainer = document.getElementById('progress-container');
+const progressBar = document.getElementById('progress-bar');
+const dataWindow = document.getElementById('data-window');
+const completionModal = document.getElementById('completion-modal');
+
+// Create 3D cube environment
+for (let i = 0; i < 20; i++) {
+  const cube = document.createElement('div');
+  cube.className = 'cube';
+  cube.style.left = `${Math.random() * 100}%`;
+  cube.style.top = `${Math.random() * 100}%`;
+  cube.style.transform = `translateZ(${-Math.random() * 1000}px)`;
+  
+  ['front', 'back', 'left', 'right', 'top', 'bottom'].forEach(face => {
+    const el = document.createElement('div');
+    el.className = `cube-face ${face}`;
+    el.textContent = 'ENIGMA';
+    cube.appendChild(el);
+  });
+  
+  scene.appendChild(cube);
+}
+
+// Matrix effect
+function createMatrixEffect() {
+  matrixContainer.innerHTML = '';
+  for (let i = 0; i < 50; i++) {
+    const column = document.createElement('div');
+    column.className = 'matrix-column';
+    column.style.left = `${i * 2}%`;
+    column.style.animationDelay = `${Math.random() * 10}s`;
+    for (let j = 0; j < 50; j++) {
+      const char = document.createElement('div');
+      char.textContent = String.fromCharCode(33 + Math.floor(Math.random() * 94));
+      column.appendChild(char);
+    }
+    matrixContainer.appendChild(column);
+  }
+}
+
+function initiateHack() {
+  const target = input.value;
+  if (target) {
+    input.value = `Hacking ${target}...`;
+    input.disabled = true;
+    hackButton.disabled = true;
+    matrixContainer.style.opacity = 1;
+    progressContainer.style.display = 'block';
+    createMatrixEffect();
+    
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += 100 / 90; // 45 seconds * 2 (for smoother animation)
+      progressBar.style.width = `${Math.min(progress, 100)}%`;
+      
+      if (progress >= 100) {
+        clearInterval(interval);
+        setTimeout(showDataWindow, 1000);
+      }
+    }, 500);
+  }
+}
+
+function showDataWindow() {
+  dataWindow.style.display = 'block';
+  dataWindow.innerHTML = generateTechnicalData();
+  setTimeout(() => {
+    completionModal.style.display = 'block';
+  }, 2000);
+}
+
+function generateTechnicalData() {
+  const data = [
+    "Encrypted Files:",
+    "user_data.enc",
+    "financial_records.enc",
+    "server_logs.enc",
+    "",
+    "Network Vulnerabilities:",
+    "SQL Injection: High",
+    "XSS: Medium",
+    "CSRF: Low",
+    "",
+    "System Information:",
+    "OS: Linux 5.4.0-42-generic",
+    "Kernel: x86_64 GNU/Linux",
+    "CPU: Intel(R) Xeon(R) CPU E5-2680 v3 @ 2.50GHz",
+    "RAM: 64GB DDR4",
+    "",
+    "Open Ports:",
+    "22 - SSH",
+    "80 - HTTP",
+    "443 - HTTPS",
+    "3306 - MySQL"
+  ];
+  
+  return data.map(line => `<div>${line}</div>`).join('');
+}
+
+hackButton.addEventListener('click', initiateHack);
+
+input.addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') {
+    initiateHack();
+  }
+});
+
+// Initial matrix creation
+createMatrixEffect();
+</script>
+</body></html>
