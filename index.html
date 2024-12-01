@@ -1,0 +1,1772 @@
+<html><head><base href="."><title>Homer's Donut Shop</title><style>
+body {
+  background: linear-gradient(180deg, #1e90ff 0%, #87CEEB 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  overflow: hidden;
+  position: relative;
+}
+
+.cloud {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50px;
+  animation: float linear infinite;
+  filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.2));
+}
+
+.cloud::before,
+.cloud::after {
+  content: '';
+  position: absolute;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+}
+
+.cloud::before {
+  width: 50px;
+  height: 50px;
+  top: -20px;
+  left: 10px;
+}
+
+.cloud::after {
+  width: 60px;
+  height: 60px;
+  top: -30px;
+  right: 10px;
+}
+
+@keyframes float {
+  from {
+    transform: translateX(100vw);
+  }
+  to {
+    transform: translateX(-200px);
+  }
+}
+
+.bg-donut {
+  position: absolute;
+  font-size: 40px;
+  opacity: 0.2;
+  animation: spin linear infinite;
+  pointer-events: none;
+  will-change: transform; /* Optimize performance */
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+#homer {
+  width: 200px;
+  height: 200px;
+  cursor: pointer;
+  transition: transform 0.3s;
+  position: relative;
+  z-index: 2;
+}
+
+#score {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  font-size: 24px;
+  color: #333;
+  z-index: 2;
+  background: linear-gradient(180deg, #FFD700 0%, #FFA500 100%);
+  padding: 10px 20px;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+#bartbucks-earnings {
+  position: fixed;
+  top: 140px; /* Changed from 110px to 140px to be under factory earnings */
+  left: 20px;
+  font-size: 18px;
+  color: #666;
+}
+
+#bartbucks-per-second {
+  position: fixed;
+  top: 170px; /* Position under other stats */
+  left: 20px;
+  font-size: 18px;
+  color: #666;
+}
+
+#multiplier-info {
+  position: fixed;
+  top: 80px;
+  left: 20px;
+  font-size: 18px;
+  color: #666;
+}
+
+#factory-earnings {
+  display: none;
+  position: fixed;
+  top: 110px;
+  left: 20px;
+  font-size: 18px;
+  color: #666;
+}
+
+#casino-button {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-270px); /* Changed from 170px to -270px to move left of Shop */
+  padding: 10px 20px;
+  background: linear-gradient(180deg, #800080 0%, #4B0082 100%);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 18px;
+  z-index: 2;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+#shop-button {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-160px); /* No change needed, stays in current position */
+  padding: 10px 20px;
+  background: linear-gradient(180deg, #FFD700 0%, #FFA500 100%);
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 18px;
+  z-index: 2;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+#mail-button {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50px); /* Centered relative to other buttons */
+  padding: 10px 20px;
+  background: linear-gradient(180deg, #4169E1 0%, #1E90FF 100%);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 18px;
+  z-index: 2;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+#hire-button {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(60px); /* Half of total width of buttons + spacing */
+  padding: 10px 20px;
+  background: linear-gradient(180deg, #32CD32 0%, #228B22 100%);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 18px;
+  z-index: 2;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+#research-button {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(170px); /* Position right of other buttons */
+  padding: 10px 20px;
+  background: linear-gradient(180deg, #9C27B0 0%, #673AB7 100%);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 18px;
+  z-index: 2;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: none;
+}
+
+#research-menu {
+  position: fixed;
+  top: 70px;
+  right: 20px;
+  width: 300px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 10px;
+  padding: 20px;
+  display: none;
+  max-height: 80vh;
+  overflow-y: auto;
+  z-index: 2;
+}
+
+.research-item {
+  margin-bottom: 15px;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.research-progress {
+  width: 100%;
+  height: 20px;
+  background: #eee;
+  border-radius: 10px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, #9C27B0 0%, #673AB7 100%);
+  transition: width 0.5s;
+}
+
+#casino-menu {
+  position: fixed;
+  top: 70px;
+  right: 20px;
+  width: 300px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 10px;
+  padding: 20px;
+  display: none;
+  max-height: 80vh;
+  overflow-y: auto;
+  z-index: 2;
+}
+
+.casino-game {
+  border-bottom: 1px solid #ddd;
+  padding: 15px 0;
+}
+
+.slot-machine {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.slot {
+  width: 60px;
+  height: 60px;
+  border: 2px solid #gold;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  background: #fff;
+}
+
+.casino-button {
+  background: #800080;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin: 5px;
+}
+
+#current-number {
+  font-size: 24px;
+  margin: 10px 0;
+  font-weight: bold;
+}
+
+#shop-menu {
+  position: fixed;
+  top: 70px;
+  right: 20px; /* Changed from left: 200px to right: 20px */
+  width: 300px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 10px;
+  padding: 20px;
+  display: none;
+  max-height: 80vh;
+  overflow-y: auto;
+  z-index: 2;
+}
+
+#hire-menu {
+  position: fixed;
+  top: 70px;
+  right: 20px; /* Changed from left: 400px to right: 20px */
+  width: 300px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 10px;
+  padding: 20px;
+  display: none;
+  max-height: 80vh;
+  overflow-y: auto;
+  z-index: 2;
+}
+
+.worker-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.worker-info {
+  flex-grow: 1;
+}
+
+.worker-name {
+  font-weight: bold;
+  color: #333;
+}
+
+.worker-stats {
+  color: #666;
+  font-size: 0.9em;
+}
+
+#mail-menu {
+  position: fixed;
+  top: 70px;
+  right: 20px; /* Changed from left: 300px to right: 20px */
+  width: 300px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 10px;
+  padding: 20px;
+  display: none;
+  max-height: 80vh;
+  overflow-y: auto;
+  z-index: 2;
+}
+
+.mail-item {
+  border-bottom: 1px solid #ddd;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.mail-sender {
+  font-weight: bold;
+  color: #333;
+}
+
+.mail-content {
+  color: #666;
+  margin-top: 5px;
+}
+
+.mail-time {
+  font-size: 12px;
+  color: #999;
+  margin-top: 5px;
+}
+
+.unread {
+  background: #e3f2fd;
+}
+
+.shop-category {
+  margin-bottom: 20px;
+}
+
+.shop-category h2 {
+  color: #333;
+  border-bottom: 2px solid #FFD700;
+  padding-bottom: 5px;
+}
+
+.shop-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.shop-item button {
+  background: #4CAF50;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.shop-item button:hover {
+  animation: pulse 0.5s infinite;
+}
+
+.shop-item button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+#donut {
+  position: absolute;
+  font-size: 30px;
+  pointer-events: none;
+  opacity: 0;
+  transition: all 0.5s;
+}
+
+.flying {
+  animation: fly 1s ease-out;
+}
+
+@keyframes fly {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(100px, -100px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+#speech-bubble {
+  position: fixed;
+  background: white;
+  border-radius: 20px;
+  padding: 15px;
+  max-width: 200px;
+  min-width: 120px;
+  text-align: center;
+  display: none;
+  left: 50%;
+  top: 20%;
+  transform: translateX(-50%);
+  filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.2));
+  z-index: 2;
+}
+
+#speech-bubble:after {
+  content: '';
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  border: 10px solid transparent;
+  border-top-color: white;
+}
+
+.shop-item.owned {
+  background: #e8f5e9;
+}
+
+.factory {
+  position: absolute;
+  bottom: 0;
+  right: 50px;
+  width: 200px;
+  height: 150px;
+  display: none;
+  z-index: 2;
+}
+
+.donut-shop {
+  position: absolute;
+  bottom: 0;
+  right: 280px; /* Position next to factory */
+  width: 200px;
+  height: 150px;
+  display: none;
+  z-index: 2;
+}
+
+.laboratory {
+  position: absolute;
+  bottom: 0;
+  right: 1160px; /* Position further left of other buildings */
+  width: 200px;
+  height: 200px;
+  display: none;
+  z-index: 2;
+}
+
+.billboard {
+  position: absolute;
+  bottom: 0;
+  right: 500px;
+  width: 200px;
+  height: 150px;
+  display: none;
+  z-index: 2;
+}
+
+.apartments {
+  position: absolute;
+  bottom: 0;
+  right: 720px;
+  width: 200px;
+  height: 250px;
+  display: none;
+  z-index: 2;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+button:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+#shop-button:hover, #mail-button:hover, #hire-button:hover, #casino-button:hover, #research-button:hover {
+  filter: brightness(1.1);
+}
+
+.hills {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 200px;
+  z-index: 1;
+}
+
+.hills path {
+  fill: #90EE90;
+  opacity: 0.8;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+</style></head><body>
+<svg class="hills" viewBox="0 0 1200 200" preserveAspectRatio="none">
+  <path d="M0 200 
+           Q 150 100, 300 150
+           Q 450 200, 600 120
+           Q 750 40, 900 100
+           Q 1050 160, 1200 140
+           L 1200 200 Z" 
+        fill="#7BC47F" />
+  <path d="M0 200
+           Q 300 120, 600 180
+           Q 900 140, 1200 160
+           L 1200 200 Z" 
+        fill="#90EE90" />
+</svg>
+<div class="cloud" style="width: 150px; height: 50px; top: 20%; animation-duration: 30s;"></div>
+<div class="cloud" style="width: 100px; height: 40px; top: 40%; animation-duration: 25s;"></div>
+<div class="cloud" style="width: 200px; height: 60px; top: 60%; animation-duration: 35s;"></div>
+
+<div class="bg-donut" style="top: 15%; left: 10%; animation-duration: 20s;">🍩</div>
+<div class="bg-donut" style="top: 45%; left: 80%; animation-duration: 25s;">🍩</div>
+<div class="bg-donut" style="top: 75%; left: 30%; animation-duration: 30s;">🍩</div>
+
+<div id="score">Donuts: 0</div>
+<div id="multiplier-info">Click Multiplier: 1x</div>
+<div id="factory-earnings" style="display: none;">Factory: +0/sec</div>
+<div id="bartbucks-earnings" style="display: none;">BartBucks: 0</div>
+<div id="bartbucks-per-second" style="display: none;">BartBucks/sec: 1</div>
+<button id="casino-button">Casino</button>
+<button id="shop-button">Shop</button>
+<button id="mail-button">Mail (0)</button>
+<button id="hire-button" style="display: none;">Hire</button>
+<button id="research-button">Research</button>
+<div id="research-menu">
+  <h2>Research Lab</h2>
+  <div id="research-list"></div>
+</div>
+<div id="casino-menu" style="display: none;">
+  <h2>Burns Casino</h2>
+  <div class="casino-game">
+    <h3>Donut Slots</h3>
+    <p>Bet donuts for a chance to win more!</p>
+    <div class="slot-machine">
+      <div id="slot1" class="slot">🍩</div>
+      <div id="slot2" class="slot">🍩</div>
+      <div id="slot3" class="slot">🍩</div>
+    </div>
+    <input type="number" id="bet-amount" min="1" value="1" style="width: 80px; margin: 10px;">
+    <button onclick="playSlots()" class="casino-button">Spin (1 donut)</button>
+  </div>
+  
+  <div class="casino-game">
+    <h3>High/Low</h3>
+    <p>Guess if the next number will be higher or lower!</p>
+    <div id="current-number">5</div>
+    <button onclick="playHighLow('high')" class="casino-button">Higher</button>
+    <button onclick="playHighLow('low')" class="casino-button">Lower</button>
+  </div>
+</div>
+<div id="hire-menu">
+  <h2>Available Workers</h2>
+  <div id="worker-list"></div>
+</div>
+<div id="mail-menu">
+  <h2>Messages</h2>
+  <div id="mail-list"></div>
+</div>
+<div id="speech-bubble"></div>
+
+<div id="shop-menu">
+  <div class="shop-category">
+    <h2>Icings</h2>
+    <div class="shop-item">
+      <span>Vanilla Icing (1.2x click bonus) - 50 donuts</span>
+      <button onclick="buyUpgrade('vanilla_icing')">Buy</button>
+    </div>
+    <div class="shop-item">
+      <span>Maple Icing (1.5x click bonus) - 100 donuts</span>
+      <button onclick="buyUpgrade('maple_icing')">Buy</button>
+    </div>
+    <div class="shop-item">
+      <span>Chocolate Icing (2x click bonus) - 200 donuts</span>
+      <button onclick="buyUpgrade('chocolate_icing')">Buy</button>
+    </div>
+    <div class="shop-item">
+      <span>Strawberry Icing (Random double donuts) - 500 donuts</span>
+      <button onclick="buyUpgrade('strawberry_icing')">Buy</button>
+    </div>
+  </div>
+  <div class="shop-category">
+    <h2>Buildings</h2>
+    <div class="shop-item" id="factory-item">
+      <span>Bart's Factory (Auto-clicks 1/sec) - 60 donuts</span>
+      <button onclick="buyUpgrade('bart_factory')">Buy</button>
+    </div>
+    <div class="shop-item" id="second-floor-item" style="display: none;">
+      <span>Second Floor (Doubles production) - 300 donuts</span>
+      <button onclick="buyUpgrade('second_floor')">Buy</button>
+    </div>
+    <div class="shop-item" id="third-floor-item" style="display: none;">
+      <span>Third Floor (Doubles production) - 600 donuts</span>
+      <button onclick="buyUpgrade('third_floor')">Buy</button>
+    </div>
+    <div class="shop-item" id="fourth-floor-item" style="display: none;">
+      <span>Fourth Floor (Doubles production) - 1200 donuts</span>
+      <button onclick="buyUpgrade('fourth_floor')">Buy</button>
+    </div>
+    <div class="shop-item" id="fifth-floor-item" style="display: none;">
+      <span>Fifth Floor (Doubles production) - 2400 donuts</span>
+      <button onclick="buyUpgrade('fifth_floor')">Buy</button>
+    </div>
+    <div class="shop-item" id="donut-shop-item" style="display: none;">
+      <span>Donut Shop (Produces 1 BartBuck/sec) - 500 donuts</span>
+      <button onclick="buyUpgrade('donut_shop')">Buy</button>
+    </div>
+    <div class="shop-item" id="laboratory-item" style="display: none;">
+      <span>Research Laboratory (Research new flavors) - 1000 donuts</span>
+      <button onclick="buyUpgrade('laboratory')">Buy</button>
+    </div>
+    <div class="shop-item" id="academy-item" style="display: none;">
+      <span>Donut Academy (Workers produce 50% more) - 1200 donuts</span>
+      <button onclick="buyUpgrade('donut_academy')">Buy</button>
+    </div>
+    <div class="shop-item" id="billboard-item" style="display: none;">
+      <span>Donut Billboard (20% production boost) - 800 donuts</span>
+      <button onclick="buyUpgrade('donut_billboard')">Buy</button>
+    </div>
+    <div class="shop-item" id="apartments-item" style="display: none;">
+      <span>Worker Apartments (25% lower salaries) - 1000 donuts</span>
+      <button onclick="buyUpgrade('apartments')">Buy</button>
+    </div>
+  </div>
+  <div class="shop-category">
+    <h2>Mutations</h2>
+    <div class="shop-item">
+      <span>Nuclear Homer (Radioactive multiplication) - 100 BartBucks</span>
+      <button onclick="buyUpgrade('nuclear_homer')">Buy</button>
+    </div>
+    <div class="shop-item">
+      <span>Quantum Homer (Probabilistic bonus clicks) - 500 BartBucks</span>
+      <button onclick="buyUpgrade('quantum_homer')">Buy</button>
+    </div>
+    <div class="shop-item">
+      <span>Robot Homer (Combo multiplier) - 1000 BartBucks</span>
+      <button onclick="buyUpgrade('robot_homer')">Buy</button>
+    </div>
+  </div>
+</div>
+
+<svg class="factory" viewBox="0 0 200 150">
+  <rect x="20" y="50" width="160" height="100" fill="#666"/>
+  <rect x="60" y="20" width="30" height="40" fill="#888"/>
+  <circle cx="75" cy="10" r="8" fill="#666"/>
+  <rect x="40" y="70" width="30" height="30" fill="#444"/>
+  <rect x="90" y="70" width="30" height="30" fill="#444"/>
+  <rect x="140" y="70" width="30" height="30" fill="#444"/>
+</svg>
+
+<svg class="donut-shop" viewBox="0 0 200 150">
+  <rect x="20" y="50" width="160" height="100" fill="#FFB6C1"/>
+  <path d="M 20 30 L 100 10 L 180 30 L 180 50 L 20 50 Z" fill="#FF69B4"/>
+  <rect x="80" y="80" width="40" height="70" fill="#FF1493"/>
+  <text x="85" y="40" fill="#FFF" font-size="14">DONUTS</text>
+  <circle cx="140" cy="100" r="15" fill="#FFD700"/>
+  <text x="132" y="105" fill="#FFF" font-size="12">$</text>
+</svg>
+
+<svg class="laboratory" viewBox="0 0 200 200">
+  <rect x="20" y="50" width="160" height="150" fill="#9C27B0"/>
+  <rect x="40" y="80" width="30" height="40" fill="#eee"/>
+  <rect x="90" y="80" width="30" height="40" fill="#eee"/>
+  <rect x="140" y="80" width="30" height="40" fill="#eee"/>
+  <path d="M 20 50 L 100 20 L 180 50" fill="#673AB7"/>
+  <circle cx="100" cy="140" r="20" fill="#eee"/>
+  <text x="90" y="145" font-size="20">⚗️</text>
+</svg>
+
+<svg class="academy" viewBox="0 0 200 200" style="display: none; position: absolute; bottom: 0; right: 940px; width: 200px; height: 200px; z-index: 2;">
+  <rect x="20" y="50" width="160" height="150" fill="#8B4513"/>
+  <path d="M 20 50 L 100 10 L 180 50" fill="#A0522D"/>
+  <rect x="80" y="80" width="40" height="60" fill="#DEB887"/>
+  <rect x="40" y="70" width="20" height="20" fill="#FFE4B5"/>
+  <rect x="140" y="70" width="20" height="20" fill="#FFE4B5"/>
+  <text x="60" y="40" fill="#FFD700" font-size="16">ACADEMY</text>
+  <circle cx="100" cy="160" r="20" fill="#FFD700"/>
+  <text x="88" y="165" fill="#8B4513" font-size="14">🍩</text>
+</svg>
+
+<svg class="billboard" viewBox="0 0 200 150">
+  <rect x="20" y="50" width="160" height="80" fill="#4CAF50"/>
+  <rect x="60" y="20" width="80" height="30" fill="#FFD700"/>
+  <text x="70" y="40" fill="#FF1493" font-size="16">DONUTS!</text>
+  <path d="M 100 130 L 60 150 L 140 150 Z" fill="#8B4513"/>
+</svg>
+
+<svg class="apartments" viewBox="0 0 200 250">
+  <rect x="20" y="50" width="160" height="200" fill="#B8860B"/>
+  <rect x="40" y="70" width="30" height="30" fill="#FFE4B5"/>
+  <rect x="90" y="70" width="30" height="30" fill="#FFE4B5"/>
+  <rect x="140" y="70" width="30" height="30" fill="#FFE4B5"/>
+  <rect x="40" y="120" width="30" height="30" fill="#FFE4B5"/>
+  <rect x="90" y="120" width="30" height="30" fill="#FFE4B5"/>
+  <rect x="140" y="120" width="30" height="30" fill="#FFE4B5"/>
+  <rect x="40" y="170" width="30" height="30" fill="#FFE4B5"/>
+  <rect x="90" y="170" width="30" height="30" fill="#FFE4B5"/>
+  <rect x="140" y="170" width="30" height="30" fill="#FFE4B5"/>
+  <path d="M 20 50 L 100 10 L 180 50" fill="#DAA520"/>
+</svg>
+
+<svg id="homer" viewBox="0 0 100 100" onclick="clickHomer()">
+  <circle cx="50" cy="50" r="40" fill="#FFD700"/>
+  <circle cx="90" cy="50" r="10" fill="#FFD700"/>
+  <path d="M 30 60 Q 50 80 70 60" fill="none" stroke="#000" stroke-width="3"/>
+  <circle cx="40" cy="40" r="10" fill="#FFF"/>
+  <circle cx="60" cy="40" r="10" fill="#FFF"/>
+  <circle cx="40" cy="40" r="5" fill="#000"/>
+  <circle cx="60" cy="40" r="5" fill="#000"/>
+  <path d="M 45 10 Q 50 0 55 10" fill="none" stroke="#000" stroke-width="2"/>
+  <path d="M 40 15 Q 45 5 50 15" fill="none" stroke="#000" stroke-width="2"/>
+</svg>
+
+<script>
+let score = 0;
+let bartbucks = 0;
+let multiplier = 1;
+let bartbuckMultiplier = 1;
+const scoreElement = document.getElementById('score');
+const bartbucksElement = document.getElementById('bartbucks-earnings');
+const multiplierElement = document.getElementById('multiplier-info');
+const factoryEarningsElement = document.getElementById('factory-earnings');
+
+// Modify the click sound setup at the top of the script
+const clickSound = new Audio('/click.mp3');
+clickSound.preload = 'auto';
+
+// Add sound effect variables at the top of the script
+const kachingSound = new Audio('/kaching.mp3');
+
+// Add this function to the script, preferably near the top where other game initialization functions are
+function initializeResearch() {
+    const researchList = document.getElementById('research-list');
+    
+    // Basic research items
+    const researchItems = [
+        {
+            name: "Advanced Donut Technology",
+            description: "Improve donut production efficiency",
+            price: 500,
+            effect: () => {
+                // Increase factory output by 10%
+                const currentOutput = parseFloat(factoryEarningsElement.textContent.split('+')[1]);
+                factoryEarningsElement.textContent = `Factory: +${currentOutput * 1.1}/sec`;
+                showSpeechBubble("Research breakthrough!");
+            }
+        },
+        {
+            name: "Flavor Innovation",
+            description: "Unlock new donut flavors",
+            price: 750,
+            effect: () => {
+                // Increase click multiplier
+                multiplier *= 1.3;
+                multiplierElement.textContent = `Click Multiplier: ${multiplier.toFixed(2)}x`;
+                showSpeechBubble("Delicious new flavors discovered!");
+            }
+        },
+        {
+            name: "Automation Upgrade",
+            description: "Improve worker efficiency",
+            price: 1000,
+            effect: () => {
+                // Increase worker output
+                workers.forEach(worker => {
+                    if (worker.hired) {
+                        worker.output *= 1.5;
+                    }
+                });
+                showSpeechBubble("Workers are now more productive!");
+            }
+        }
+    ];
+
+    // Populate research list
+    researchItems.forEach(item => {
+        const researchItem = document.createElement('div');
+        researchItem.className = 'research-item';
+        researchItem.innerHTML = `
+            <h3>${item.name}</h3>
+            <p>${item.description}</p>
+            <div class="research-progress">
+                <div class="progress-bar"></div>
+            </div>
+            <button onclick="conductResearch('${item.name}')">Research (${item.price} donuts)</button>
+        `;
+        researchList.appendChild(researchItem);
+    });
+}
+
+// Add a function to conduct research
+function conductResearch(researchName) {
+    const researchItem = document.querySelector(`.research-item:has(h3:contains('${researchName}'))`);
+    const progressBar = researchItem.querySelector('.progress-bar');
+    const button = researchItem.querySelector('button');
+    
+    // Get the specific research item details
+    const research = researchItems.find(r => r.name === researchName);
+    
+    if (score >= research.price) {
+        score -= research.price;
+        scoreElement.textContent = `Donuts: ${Math.floor(score)}`;
+        
+        // Animate progress bar
+        let progress = 0;
+        const animateProgress = setInterval(() => {
+            progress += 5;
+            progressBar.style.width = `${progress}%`;
+            
+            if (progress >= 100) {
+                clearInterval(animateProgress);
+                research.effect();
+                button.disabled = true;
+                button.textContent = 'Researched';
+            }
+        }, 100);
+    } else {
+        showSpeechBubble("Not enough donuts for research!");
+    }
+}
+
+// Modify factory earnings including worker production:
+function updateFactoryEarnings() {
+  let workerOutput = workers.reduce((total, worker) => {
+    return worker.hired ? total + worker.output : total;
+  }, 0);
+  let factoryBaseOutput = 1; // Base factory output
+  if (upgrades.second_floor.owned) factoryBaseOutput *= 2;
+  if (upgrades.third_floor.owned) factoryBaseOutput *= 2;
+  if (upgrades.fourth_floor.owned) factoryBaseOutput *= 2;
+  if (upgrades.fifth_floor.owned) factoryBaseOutput *= 2;
+  
+  let totalOutput = factoryBaseOutput + workerOutput;
+  factoryEarningsElement.textContent = `Factory: +${totalOutput}/sec`;
+}
+
+// Update in chocolate_icing effect:
+const upgrades = {
+    vanilla_icing: {
+        price: 50,
+        owned: false,
+        effect: () => {
+            multiplier *= 1.2;
+            multiplierElement.textContent = `Click Multiplier: ${multiplier}x`;
+            showSpeechBubble("Mmmm... vanilla!");
+        }
+    },
+    maple_icing: {
+        price: 100,
+        owned: false,
+        effect: () => {
+            multiplier *= 1.5;
+            multiplierElement.textContent = `Click Multiplier: ${multiplier}x`;
+            showSpeechBubble("Sweet maple goodness!");
+        }
+    },
+    chocolate_icing: {
+        price: 200,
+        owned: false,
+        effect: () => {
+            multiplier *= 2;
+            multiplierElement.textContent = `Click Multiplier: ${multiplier}x`;
+            const oldClick = window.clickHomer;
+            window.clickHomer = () => {
+                score += Math.floor(multiplier);
+                oldClick();
+            };
+            showSpeechBubble("Twice the chocolate, twice the donuts!");
+        }
+    },
+    strawberry_icing: {
+        price: 500,
+        owned: false,
+        effect: () => {
+            const oldClick = window.clickHomer;
+            window.clickHomer = () => {
+                if (Math.random() < 0.2) { // 20% chance
+                    score += Math.floor(multiplier);
+                    showSpeechBubble("Double donut bonus!");
+                }
+                oldClick();
+            };
+            showSpeechBubble("Pink donuts are lucky!");
+        }
+    },
+    nuclear_homer: {
+        price: 100,
+        currency: 'bartbucks',
+        owned: false,
+        effect: () => {
+            document.getElementById('homer').style.filter = 'hue-rotate(90deg) brightness(1.2)';
+            const oldClick = window.clickHomer;
+            window.clickHomer = () => {
+                oldClick();
+                setTimeout(() => {
+                    score += Math.floor(multiplier * 0.5);
+                    scoreElement.textContent = `Donuts: ${Math.floor(score)}`;
+                }, 3000);
+            };
+            showSpeechBubble("These donuts are radioactive!");
+        }
+    },
+    quantum_homer: {
+        price: 500,
+        currency: 'bartbucks',
+        owned: false,
+        effect: () => {
+            document.getElementById('homer').style.filter = 'hue-rotate(180deg) brightness(1.5) contrast(1.2)';
+            let quantumClicks = 0;
+            const oldClick = window.clickHomer;
+            window.clickHomer = () => {
+                quantumClicks++;
+                
+                // Quantum probability: sometimes get bonus clicks
+                if (Math.random() < 0.2) { // 20% chance
+                    const bonusClicks = Math.floor(Math.sqrt(quantumClicks));
+                    score += bonusClicks;
+                    showSpeechBubble(`Quantum bonus! +${bonusClicks} donuts`);
+                }
+                
+                oldClick();
+            };
+            showSpeechBubble("Quantum probability engaged!");
+        }
+    },
+    robot_homer: {
+        price: 1000,
+        currency: 'bartbucks',
+        owned: false,
+        effect: () => {
+            document.getElementById('homer').style.filter = 'grayscale(0.8) brightness(1.5) contrast(1.5)';
+            let combo = 0;
+            let lastClick = 0;
+            const oldClick = window.clickHomer;
+            window.clickHomer = () => {
+                const now = Date.now();
+                if (now - lastClick < 2000) {
+                    combo++;
+                } else {
+                    combo = 0;
+                }
+                score += Math.floor(multiplier * (1 + combo * 0.1));
+                lastClick = now;
+                oldClick();
+            };
+            showSpeechBubble("COMBO-MODE ACTIVATED. BEEP BOOP.");
+        }
+    },
+    bart_factory: {
+        price: 60,  // Changed from 150 to 60
+        owned: false,
+        effect: () => {
+            document.querySelector('.factory').style.display = 'block';
+            factoryEarningsElement.style.display = 'block';
+            factoryEarningsElement.textContent = 'Factory: +1/sec';
+            hireButton.style.display = 'block';
+            
+            // Generate initial workers
+            for (let i = 0; i < 3; i++) {
+                workers.push(generateWorker());
+            }
+            updateWorkerList();
+
+            setInterval(() => {
+                score += Math.floor(1);
+                scoreElement.textContent = `Donuts: ${Math.floor(score)}`;
+            }, 1000);
+
+            // Show second floor upgrade option
+            document.getElementById('factory-item').style.display = 'none';
+            document.getElementById('second-floor-item').style.display = 'flex';
+
+            // Add Bart's message
+            addMail(residents.bart.name, residents.bart.messages[0]);
+        }
+    },
+    second_floor: {
+        price: 300,
+        owned: false,
+        effect: () => {
+            const factory = document.querySelector('.factory');
+            // Add second floor to SVG
+            const secondFloor = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            secondFloor.innerHTML = `
+                <rect x="20" y="-50" width="160" height="100" fill="#666"/>
+                <rect x="40" y="-30" width="30" height="30" fill="#444"/>
+                <rect x="90" y="-30" width="30" height="30" fill="#444"/>
+                <rect x="140" y="-30" width="30" height="30" fill="#444"/>
+            `;
+            factory.appendChild(secondFloor);
+
+            // Double the factory production
+            factoryEarningsElement.textContent = 'Factory: +2/sec';
+            updateFactoryEarnings();
+
+            // Show donut shop upgrade option
+            document.getElementById('second-floor-item').style.display = 'none';
+            document.getElementById('donut-shop-item').style.display = 'flex';
+
+            // Show academy upgrade options
+            document.getElementById('academy-item').style.display = 'flex';
+
+            // Show new building options
+            document.getElementById('billboard-item').style.display = 'flex';
+            document.getElementById('apartments-item').style.display = 'flex';
+
+            // Add Bart's message
+            addMail(residents.bart.name, residents.bart.messages[1]);
+        }
+    },
+    third_floor: {
+        price: 600,
+        owned: false,
+        effect: () => {
+            const factory = document.querySelector('.factory');
+            const thirdFloor = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            thirdFloor.innerHTML = `
+                <rect x="20" y="-150" width="160" height="100" fill="#666"/>
+                <rect x="40" y="-130" width="30" height="30" fill="#444"/>
+                <rect x="90" y="-130" width="30" height="30" fill="#444"/>
+                <rect x="140" y="-130" width="30" height="30" fill="#444"/>
+            `;
+            factory.appendChild(thirdFloor);
+            updateFactoryEarnings();
+            
+            // Show fourth floor upgrade option
+            document.getElementById('third-floor-item').style.display = 'none';
+            document.getElementById('fourth-floor-item').style.display = 'flex';
+            
+            addMail(residents.bart.name, "Three floors? This factory is getting huge!");
+        }
+    },
+    fourth_floor: {
+        price: 1200,
+        owned: false,
+        effect: () => {
+            const factory = document.querySelector('.factory');
+            const fourthFloor = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            fourthFloor.innerHTML = `
+                <rect x="20" y="-250" width="160" height="100" fill="#666"/>
+                <rect x="40" y="-230" width="30" height="30" fill="#444"/>
+                <rect x="90" y="-230" width="30" height="30" fill="#444"/>
+                <rect x="140" y="-230" width="30" height="30" fill="#444"/>
+            `;
+            factory.appendChild(fourthFloor);
+            updateFactoryEarnings();
+            
+            // Show fifth floor upgrade option
+            document.getElementById('fourth-floor-item').style.display = 'none';
+            document.getElementById('fifth-floor-item').style.display = 'flex';
+        }
+    },
+    fifth_floor: {
+        price: 2400,
+        owned: false,
+        effect: () => {
+            const factory = document.querySelector('.factory');
+            const fifthFloor = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            fifthFloor.innerHTML = `
+                <rect x="20" y="-350" width="160" height="100" fill="#666"/>
+                <rect x="40" y="-330" width="30" height="30" fill="#444"/>
+                <rect x="90" y="-330" width="30" height="30" fill="#444"/>
+                <rect x="140" y="-330" width="30" height="30" fill="#444"/>
+            `;
+            factory.appendChild(fifthFloor);
+            updateFactoryEarnings();
+            
+            document.getElementById('fifth-floor-item').style.display = 'none';
+            addMail(residents.bart.name, "Five floors! We've built a donut empire!");
+        }
+    },
+    donut_shop: {
+        price: 500,
+        owned: false,
+        effect: () => {
+            const donutShopElement = document.querySelector('.donut-shop');
+            const bartbucksEarningsElement = document.getElementById('bartbucks-earnings');
+            const bartbucksPerSecondElement = document.getElementById('bartbucks-per-second');
+            const laboratoryItemElement = document.getElementById('laboratory-item');
+            
+            // Null checks before accessing
+            if (donutShopElement) donutShopElement.style.display = 'block';
+            if (bartbucksEarningsElement) {
+                bartbucksEarningsElement.style.display = 'block';
+                bartbucksEarningsElement.textContent = 'BartBucks: 0';
+            }
+            if (bartbucksPerSecondElement) {
+                bartbucksPerSecondElement.style.display = 'block';
+                bartbucksPerSecondElement.textContent = 'BartBucks/sec: 1';
+            }
+            if (laboratoryItemElement) laboratoryItemElement.style.display = 'flex';
+            
+            // Add donut shop upgrades section in the store
+            const shopMenu = document.getElementById('shop-menu');
+            if (shopMenu) {
+                const donutShopUpgradesSection = document.createElement('div');
+                donutShopUpgradesSection.className = 'shop-category';
+                donutShopUpgradesSection.innerHTML = `
+                    <h2>Donut Shop Upgrades</h2>
+                    <div class="shop-item" id="barista-training-item">
+                        <span>Barista Training (Increase BartBucks/sec) - 200 donuts</span>
+                        <button onclick="buyUpgrade('barista_training')">Buy</button>
+                    </div>
+                    <div class="shop-item" id="drive-thru-item">
+                        <span>Drive-Thru (Further increase BartBucks/sec) - 400 donuts</span>
+                        <button onclick="buyUpgrade('drive_thru')">Buy</button>
+                    </div>
+                    <div class="shop-item" id="delivery-service-item">
+                        <span>Delivery Service (Maximum BartBucks/sec) - 800 donuts</span>
+                        <button onclick="buyUpgrade('delivery_service')">Buy</button>
+                    </div>
+                `;
+                shopMenu.appendChild(donutShopUpgradesSection);
+            }
+            
+            // Existing BartBucks interval logic
+            bartbucksInterval = setInterval(() => {
+                bartbucks += (1 * bartbuckMultiplier);
+                if (bartbucksEarningsElement) {
+                    bartbucksEarningsElement.textContent = `BartBucks: ${Math.floor(bartbucks)}`;
+                }
+                updateBartbucksPerSecond();
+            }, 1000);
+            
+            showSpeechBubble("Now we're making BartBucks!");
+            
+            // Add Bart's message
+            addMail(residents.bart.name, "Sweet, a donut shop! Time to experiment with new flavors!");
+        }
+    },
+    laboratory: {
+        price: 1000,
+        owned: false,
+        effect: () => {
+            document.querySelector('.laboratory').style.display = 'block';
+            document.getElementById('research-button').style.display = 'block';
+            showSpeechBubble("Time to science up some donuts!");
+            initializeResearch();
+        }
+    },
+    donut_billboard: {
+        price: 800,
+        owned: false,
+        effect: () => {
+            document.querySelector('.billboard').style.display = 'block';
+            // Increase production by 20%
+            const currentFactoryRate = parseFloat(factoryEarningsElement.textContent.split('+')[1]);
+            factoryEarningsElement.textContent = `Factory: +${currentFactoryRate * 1.2}/sec`;
+            
+            // Increase BartBucks production by 20%
+            setInterval(() => {
+                bartbucks += 0.2;
+                bartbucksElement.textContent = `BartBucks: ${Math.floor(bartbucks)}`;
+            }, 1000);
+            
+            showSpeechBubble("Advertising works!");
+            addMail(residents.bart.name, "Sweet billboard, dad! Business is booming!");
+        }
+    },
+    apartments: {
+        price: 1000,
+        owned: false,
+        effect: () => {
+            document.querySelector('.apartments').style.display = 'block';
+            // Reduce all worker salaries by 25%
+            workers.forEach(worker => {
+                if (worker.hired) {
+                    worker.salary *= 0.75;
+                }
+            });
+            showSpeechBubble("Worker housing means lower wages!");
+            addMail(residents.bart.name, "Genius move with the apartments! The workers seem... less grumpy?");
+        }
+    },
+    donut_academy: {
+        price: 1200,
+        owned: false,
+        effect: () => {
+            document.querySelector('.academy').style.display = 'block';
+            // Increase all worker outputs by 50%
+            workers.forEach(worker => {
+                if (worker.hired) {
+                    worker.output *= 1.5;
+                }
+            });
+            showSpeechBubble("Now our workers are donut experts!");
+            addMail(residents.bart.name, "The Academy is awesome! Our workers are donut geniuses now!");
+        }
+    },
+    barista_training: {
+        price: 200,
+        currency: 'donuts',
+        owned: false,
+        effect: () => {
+            bartbuckMultiplier += 0.5;
+            updateBartbucksPerSecond();
+            showSpeechBubble("Our baristas make better coffee now!");
+        }
+    },
+    drive_thru: {
+        price: 400,
+        currency: 'donuts', 
+        owned: false,
+        effect: () => {
+            bartbuckMultiplier += 1.0;
+            updateBartbucksPerSecond();
+            showSpeechBubble("Drive-thru is bringing in more customers!");
+        }
+    },
+    delivery_service: {
+        price: 800,
+        currency: 'donuts',
+        owned: false,
+        effect: () => {
+            bartbuckMultiplier += 2.0;
+            updateBartbucksPerSecond();
+            showSpeechBubble("Donut delivery is a hit!");
+        }
+    }
+};
+
+const casinoButton = document.getElementById('casino-button');
+const casinoMenu = document.getElementById('casino-menu');
+const slotSymbols = ['🍩', '💰', '⭐', '🎲', '7️⃣'];
+let currentNumber = 5;
+
+casinoButton.onclick = () => {
+    casinoMenu.style.display = casinoMenu.style.display === 'none' ? 'block' : 'none';
+    shopMenu.style.display = 'none';
+    mailMenu.style.display = 'none';
+    hireMenu.style.display = 'none';
+};
+
+function playSlots() {
+    const betAmount = parseInt(document.getElementById('bet-amount').value);
+    if (score < betAmount) {  // Changed from bartbucks to score
+        showSpeechBubble("D'oh! Not enough donuts!");
+        return;
+    }
+    
+    score -= betAmount;  // Changed from bartbucks to score
+    scoreElement.textContent = `Donuts: ${Math.floor(score)}`; // Changed from bartbucksElement to scoreElement
+    
+    const slots = [
+        document.getElementById('slot1'),
+        document.getElementById('slot2'),
+        document.getElementById('slot3')
+    ];
+    
+    let spinCount = 0;
+    const spinInterval = setInterval(() => {
+        slots.forEach(slot => {
+            slot.textContent = slotSymbols[Math.floor(Math.random() * slotSymbols.length)];
+        });
+        spinCount++;
+        
+        if (spinCount >= 20) {
+            clearInterval(spinInterval);
+            checkWin(slots, betAmount);
+        }
+    }, 100);
+}
+
+function checkWin(slots, betAmount) {
+    const results = slots.map(slot => slot.textContent);
+    
+    if (results[0] === results[1] && results[1] === results[2]) {
+        // Jackpot
+        const winAmount = betAmount * 5;
+        score += winAmount;  // Changed from bartbucks to score
+        showSpeechBubble(`Woo hoo! Jackpot! Won ${winAmount} donuts!`);  // Changed BartBucks to donuts
+    } else if (results[0] === results[1] || results[1] === results[2]) {
+        // Small win
+        const winAmount = betAmount * 2;
+        score += winAmount;  // Changed from bartbucks to score
+        showSpeechBubble(`Won ${winAmount} donuts!`);  // Changed BartBucks to donuts
+    } else {
+        showSpeechBubble("D'oh! Try again!");
+    }
+    
+    scoreElement.textContent = `Donuts: ${Math.floor(score)}`;  // Changed from bartbucksElement to scoreElement
+}
+
+function playHighLow(guess) {
+    if (score < 1) {  // Changed from bartbucks to score
+        showSpeechBubble("D'oh! Need more donuts!");  // Changed BartBucks to donuts
+        return;
+    }
+    
+    score--;  // Changed from bartbucks to score
+    const newNumber = Math.floor(Math.random() * 10) + 1;
+    const won = (guess === 'high' && newNumber > currentNumber) || 
+                (guess === 'low' && newNumber < currentNumber);
+    
+    if (won) {
+        score += 2;  // Changed from bartbucks to score
+        showSpeechBubble("Woo hoo! You won!");
+    } else {
+        showSpeechBubble("D'oh! Wrong guess!");
+    }
+    
+    currentNumber = newNumber;
+    document.getElementById('current-number').textContent = currentNumber;
+    scoreElement.textContent = `Donuts: ${Math.floor(score)}`;  // Changed from bartbucksElement to scoreElement
+}
+
+// Add mail from Mr. Burns when first visiting casino
+let casinoVisited = false;
+casinoButton.addEventListener('click', () => {
+    if (!casinoVisited) {
+        addMail(residents.burns.name, "Welcome to my casino, Simpson! Try your luck, but remember - the house always wins! *evil laugh*");
+        casinoVisited = true;
+    }
+});
+
+const mailButton = document.getElementById('mail-button');
+const mailMenu = document.getElementById('mail-menu');
+const mailList = document.getElementById('mail-list');
+
+let unreadMails = 0;
+let messages = [];
+
+// Updated to use more realistic names
+const firstNames = ['John', 'Mary', 'James', 'Sarah', 'Michael', 'Emma', 'David', 'Lisa', 'Robert', 'Anna', 'William', 'Emily'];
+const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez'];
+
+let workers = [];
+let hireButton = document.getElementById('hire-button');
+let hireMenu = document.getElementById('hire-menu');
+let workerList = document.getElementById('worker-list');
+
+function generateWorkerName() {
+    return `${firstNames[Math.floor(Math.random() * firstNames.length)]} ${lastNames[Math.floor(Math.random() * lastNames.length)]}`;
+}
+
+function generateWorker(baseOutput = 2, baseSalary = 0.5) {
+    const multiplier = 1 + Math.random() * 0.5; // Random boost between 1x and 1.5x
+    return {
+        name: generateWorkerName(),
+        output: Math.floor(baseOutput * multiplier),
+        salary: baseSalary,
+        hired: false
+    };
+}
+
+function updateWorkerList() {
+    workerList.innerHTML = '';
+    workers.forEach((worker, index) => {
+        if (!worker.hired) {
+            const workerElement = document.createElement('div');
+            workerElement.className = 'worker-item';
+            workerElement.innerHTML = `
+                <div class="worker-info">
+                    <div class="worker-name">${worker.name}</div>
+                    <div class="worker-stats">Output: ${worker.output} donuts/sec<br>Salary: ${worker.salary} BartBucks/2sec</div>
+                </div>
+                <button onclick="hireWorker(${index})">Hire</button>
+            `;
+            workerList.appendChild(workerElement);
+        }
+    });
+}
+
+function hireWorker(index) {
+    const worker = workers[index];
+    if (!worker.hired) {
+        worker.hired = true;
+        // Start worker production
+        setInterval(() => {
+            score += worker.output;
+            scoreElement.textContent = `Donuts: ${Math.floor(score)}`;
+            updateFactoryEarnings(); // Update factory stats when worker is hired
+        }, 1000);
+        
+        // Start salary payment
+        setInterval(() => {
+            if (bartbucks >= worker.salary) {
+                bartbucks -= worker.salary;
+                bartbucksElement.textContent = `BartBucks: ${Math.floor(bartbucks)}`;
+            } else {
+                // Worker strikes if not paid
+                showSpeechBubble(`${worker.name} is on strike! Need more BartBucks!`);
+            }
+        }, 2000);
+        
+        updateWorkerList();
+    }
+}
+
+// Modify the bart_factory effect to show hire button
+upgrades.bart_factory.effect = () => {
+    document.querySelector('.factory').style.display = 'block';
+    factoryEarningsElement.style.display = 'block';
+    factoryEarningsElement.textContent = 'Factory: +1/sec';
+    hireButton.style.display = 'block';
+    
+    // Generate initial workers
+    for (let i = 0; i < 3; i++) {
+        workers.push(generateWorker());
+    }
+    updateWorkerList();
+    
+    setInterval(() => {
+        score += Math.floor(1);
+        scoreElement.textContent = `Donuts: ${Math.floor(score)}`;
+    }, 1000);
+
+    document.getElementById('factory-item').style.display = 'none';
+    document.getElementById('second-floor-item').style.display = 'flex';
+    addMail(residents.bart.name, residents.bart.messages[0]);
+};
+
+// Add hire button click handler
+hireButton.onclick = () => {
+    hireMenu.style.display = hireMenu.style.display === 'none' ? 'block' : 'none';
+    shopMenu.style.display = 'none';
+    mailMenu.style.display = 'none';
+};
+
+// Create a function to create random floating donuts periodically
+function createRandomDonut() {
+    // Calculate how many donuts to create based on score
+    const donutsToCreate = Math.floor(Math.log10(score + 1)); // +1 to avoid log(0)
+    
+    for(let i = 0; i < donutsToCreate; i++) {
+        const donut = document.createElement('div');
+        donut.className = 'bg-donut';
+        donut.textContent = '🍩';
+        donut.style.left = Math.random() * 100 + 'vw';
+        donut.style.top = Math.random() * 100 + 'vh';
+        donut.style.animationDuration = (20 + Math.random() * 20) + 's';
+        document.body.appendChild(donut);
+        
+        // Remove donut after animation duration
+        setTimeout(() => {
+            donut.remove();
+        }, 40000);
+    }
+}
+
+// Create new background donuts more frequently as score increases
+function updateBackgroundDonuts() {
+    // Scale interval with score - more donuts = faster spawning
+    const baseInterval = 10000; // 10 seconds base
+    const scaledInterval = Math.max(1000, baseInterval / (Math.log10(score + 1) || 1));
+    
+    createRandomDonut();
+    setTimeout(updateBackgroundDonuts, scaledInterval);
+}
+
+// Start the background donut system
+updateBackgroundDonuts();
+
+// Generate new worker periodically
+setInterval(() => {
+    if (workers.length < 10) { // Max 10 available workers
+        const baseOutput = 2 * Math.pow(1.5, workers.length); // Each new worker has higher base output
+        const baseSalary = 0.5 * Math.pow(1.3, workers.length); // And higher base salary
+        workers.push(generateWorker(baseOutput, baseSalary));
+        updateWorkerList();
+    }
+}, 30000); // New worker every 30 seconds
+
+const residents = {
+  marge: {
+    name: "Marge Simpson",
+    messages: [
+      "Homie, I'm proud of your donut business! Just don't eat them all.",
+      "The kids are amazed by how many donuts you're making!",
+    ]
+  },
+  lisa: {
+    name: "Lisa Simpson",
+    messages: [
+      "Dad, have you considered making vegetarian donuts?",
+      "Your carbon footprint from donut production is concerning...",
+    ]
+  },
+  burns: {
+    name: "Mr. Burns",
+    messages: [
+      "Simpson, eh? These donuts might be worth investing in...",
+      "Excellent... your donut empire grows stronger.",
+    ]
+  },
+  apu: {
+    name: "Apu Nahasapeemapetilon",
+    messages: [
+      "Your donut production is affecting my Kwik-E-Mart sales!",
+      "Perhaps we could arrange a business partnership?",
+    ]
+  },
+  bart: {
+    name: "Bart Simpson",
+    messages: [
+      "Whoa, you bought my factory! Time to make some serious donuts, man!",
+      "A second floor? Now we're talking! Double the trouble!",
+      "Sweet, a donut shop! Keep the BartBucks flowing, dad!",
+      "Sweet billboard, dad! Business is booming!",
+      "Genius move with the apartments! The workers seem... less grumpy?"
+    ]
+  },
+  ned: {
+    name: "Ned Flanders",
+    messages: [
+      "Hi-diddly-ho, neighbor! These donuts are heavenly-diddly divine! 5/5 stars!",
+      "The maple glaze is truly a blessing! 4.5/5 stars, neighbor!"
+    ]
+  },
+  wiggum: {
+    name: "Chief Wiggum", 
+    messages: [
+      "Best donuts in Springfield! Perfect for a stakeout. 5/5 donuts.",
+      "The chocolate frosting reminds me of my academy days... *sniff* 4/5 donuts."
+    ]
+  },
+  comic_book_guy: {
+    name: "Comic Book Guy",
+    messages: [
+      "Worst. Donuts. Ever. Just kidding, quite enjoyable actually. 3.5/5 stars.",
+      "Your strawberry frosting is surprisingly adequate. 4/5 stars."
+    ]
+  },
+  lenny: {
+    name: "Lenny Leonard",
+    messages: [
+      "Hey Homer, these donuts are great for break time at the plant! 4/5 donuts!",
+      "Carl and I love the new flavors! Keep 'em coming! 4.5/5 stars!"
+    ]
+  }
+};
+
+function addMail(sender, message) {
+    const mailItem = document.createElement('div');
+    mailItem.className = 'mail-item unread';
+    mailItem.innerHTML = `
+        <div class="mail-sender">${sender}</div>
+        <div class="mail-content">${message}</div>
+        <div class="mail-time">${new Date().toLocaleTimeString()}</div>
+    `;
+    
+    mailList.insertBefore(mailItem, mailList.firstChild);
+    messages.push(mailItem);
+    
+    unreadMails++;
+    mailButton.textContent = `Mail (${unreadMails})`;
+
+    // Add Homer notification
+    showSpeechBubble("Ooh, new mail from " + sender + "!");
+
+    mailItem.onclick = () => {
+        if (mailItem.classList.contains('unread')) {
+            mailItem.classList.remove('unread');
+            unreadMails--;
+            mailButton.textContent = `Mail (${unreadMails})`;
+        }
+    };
+}
+
+mailButton.onclick = () => {
+  mailMenu.style.display = mailMenu.style.display === 'none' ? 'block' : 'none';
+  shopMenu.style.display = 'none';
+  hireMenu.style.display = 'none';
+};
+
+// Modify clickHomer function to handle sound replay
+function clickHomer() {
+    // If the sound is playing, reset its current time to 0
+    if (!clickSound.paused) {
+        clickSound.currentTime = 0;
+    }
+    
+    // Play the sound
+    clickSound.play();
+    
+    const baseIncrease = Math.floor(1 * multiplier);
+    score += baseIncrease;
+    
+    scoreElement.textContent = `Donuts: ${Math.floor(score)}`;
+    
+    if (score % 100 === 0) {
+        showSpeechBubble(homerQuotes.milestone[Math.floor(Math.random() * homerQuotes.milestone.length)]);
+    }
+    
+    const donut = document.createElement('div');
+    donut.id = 'donut';
+    donut.textContent = '🍩';
+    donut.style.left = (event.clientX - 15) + 'px';
+    donut.style.top = (event.clientY - 15) + 'px';
+    document.body.appendChild(donut);
+    
+    const homer = document.getElementById('homer');
+    homer.style.transform = 'scale(0.9)';
+    setTimeout(() => {
+        homer.style.transform = 'scale(1)';
+    }, 100);
+    
+    requestAnimationFrame(() => {
+        donut.classList.add('flying');
+        setTimeout(() => {
+            donut.remove();
+        }, 1000);
+    });
+}
+
+// Modify buyUpgrade function to:
+// 1. Play kaching sound
+// 2. Remove donut shop from store after purchase
+function buyUpgrade(upgradeId) {
+    const upgrade = upgrades[upgradeId];
+    
+    // Play kaching sound for purchases
+    kachingSound.play();
+    
+    if (upgrade.currency === 'bartbucks') {
+        // Existing bartbucks purchase logic
+        if (bartbucks >= upgrade.price && !upgrade.owned) {
+            bartbucks -= upgrade.price;
+            upgrade.owned = true;
+            bartbucksElement.textContent = `BartBucks: ${bartbucks}`;
+            upgrade.effect();
+            const button = document.querySelector(`button[onclick="buyUpgrade('${upgradeId}')"]`);
+            button.disabled = true;
+            button.parentElement.classList.add('owned');
+
+            // Remove donut shop from store after purchase
+            if (upgradeId === 'donut_shop') {
+                document.getElementById('donut-shop-item').remove();
+            }
+        }
+    } else {
+        // Existing donuts purchase logic
+        if (score >= upgrade.price && !upgrade.owned) {
+            score -= upgrade.price;
+            upgrade.owned = true;
+            scoreElement.textContent = `Donuts: ${Math.floor(score)}`;
+            upgrade.effect();
+            const button = document.querySelector(`button[onclick="buyUpgrade('${upgradeId}')"]`);
+            button.disabled = true;
+            button.parentElement.classList.add('owned');
+
+            // Remove donut shop from store after purchase
+            if (upgradeId === 'donut_shop') {
+                document.getElementById('donut-shop-item').remove();
+            }
+        }
+    }
+}
+
+const shopButton = document.getElementById('shop-button');
+const shopMenu = document.getElementById('shop-menu');
+const speechBubble = document.getElementById('speech-bubble');
+
+const homerQuotes = {
+    lowDonuts: ["D'oh! Need more donuts!", "Mmmm... donuts...", "Must... get... more... donuts!"],
+    bigPurchase: ["Woo hoo! Shopping spree!", "Now we're talking!", "Time to celebrate with a donut!"],
+    milestone: ["Look at all these donuts!", "I'm getting hungry just looking at them!", "Sweet, sweet donuts!"]
+};
+
+function showSpeechBubble(text, duration = 3000) {
+    speechBubble.textContent = text;
+    speechBubble.style.display = 'block';
+    setTimeout(() => {
+        speechBubble.style.display = 'none';
+    }, duration);
+}
+
+shopButton.onclick = () => {
+    shopMenu.style.display = shopMenu.style.display === 'none' ? 'block' : 'none';
+    mailMenu.style.display = 'none';
+    hireMenu.style.display = 'none';
+    document.getElementById('research-menu').style.display = 'none';
+};
+
+// Send welcome message when page loads
+window.addEventListener('load', () => {
+    setTimeout(() => {
+        addMail("Marge Simpson", "Dear Homie, I heard you're starting a donut business! Just remember - try not to eat all the profits! Love, Marge");
+        showSpeechBubble("Mmmm... time to make some donuts!");
+    }, 500);
+
+    // Add research button handler
+    const researchBtn = document.getElementById('research-button');
+    if (researchBtn) {
+        researchBtn.onclick = () => {
+            const researchMenu = document.getElementById('research-menu');
+            researchMenu.style.display = researchMenu.style.display === 'none' ? 'block' : 'none';
+            shopMenu.style.display = 'none';
+            mailMenu.style.display = 'none';
+            hireMenu.style.display = 'none';
+            casinoMenu.style.display = 'none';
+        };
+    }
+});
+
+function updateBartbucksPerSecond() {
+    const bartbucksPerSecondElement = document.getElementById('bartbucks-per-second');
+    if (bartbucksPerSecondElement) {
+        bartbucksPerSecondElement.textContent = `BartBucks/sec: ${bartbuckMultiplier}`;
+    }
+}
+</script></body></html>
