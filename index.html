@@ -1,0 +1,188 @@
+<html><head><base href="https://horrific-depths.com/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Abyssal Nightmare</title>
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    font-family: 'Courier New', monospace;
+    background-color: #000;
+    color: #0df;
+  }
+  #ocean {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, #001e3c, #000510);
+    z-index: -1;
+  }
+  .bubble {
+    position: fixed;
+    border-radius: 50%;
+    background: radial-gradient(circle at 33% 33%, #fff, #5af);
+    opacity: 0.4;
+    animation: rise 15s infinite ease-in;
+  }
+  @keyframes rise {
+    0% { transform: translateY(100vh) scale(0); }
+    100% { transform: translateY(-20vh) scale(1); }
+  }
+  #content {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.7);
+    border: 1px solid #0df;
+    box-shadow: 0 0 20px #0df;
+  }
+  h1, h2 {
+    text-align: center;
+    font-size: 2.5em;
+    text-shadow: 0 0 10px #0df;
+  }
+  h2 {
+    font-size: 2em;
+    margin-top: 50px;
+  }
+  p {
+    line-height: 1.6;
+    text-align: justify;
+  }
+  #creature {
+    width: 100%;
+    height: 300px;
+    margin: 20px 0;
+  }
+  #tentacles path {
+    fill: none;
+    stroke: #0df;
+    stroke-width: 2;
+    opacity: 0.7;
+  }
+  .scientist-report {
+    background-color: rgba(13, 255, 255, 0.1);
+    border-left: 4px solid #0df;
+    padding: 15px;
+    margin: 20px 0;
+    font-style: italic;
+  }
+  #depth-meter {
+    position: fixed;
+    right: 20px;
+    top: 20px;
+    background-color: rgba(0, 0, 0, 0.7);
+    border: 1px solid #0df;
+    padding: 10px;
+    font-size: 1.2em;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+  <div id="ocean"></div>
+  <div id="depth-meter">Depth: <span id="current-depth">0</span> m</div>
+  <div id="content">
+    <h1>The Abyssal Nightmare</h1>
+    <p>In the crushing depths of the ocean's darkest trenches, where light has never dared to tread, lies a horror beyond human comprehension. Our deep-sea exploration team made a discovery that shook the very foundations of our understanding of life and sanity.</p>
+    <svg id="creature" viewBox="0 0 200 100">
+      <g id="tentacles"></g>
+      <circle cx="100" cy="50" r="30" fill="#023" stroke="#0df" stroke-width="2"/>
+      <circle cx="90" cy="40" r="5" fill="#0df">
+        <animate attributeName="r" values="5;7;5" dur="3s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="110" cy="40" r="5" fill="#0df">
+        <animate attributeName="r" values="5;7;5" dur="3s" repeatCount="indefinite"/>
+      </circle>
+    </svg>
+    <p>Its massive, pulsating form defies description - a writhing mass of tentacles and eyes, each movement sending ripples through the very fabric of reality. Those who gazed upon it spoke of madness, of whispers that echoed through their minds long after they left the ocean's embrace.</p>
+    <p>What is this entity? Where did it come from? And most terrifyingly... what does it want?</p>
+    
+    <h2>The Discovery</h2>
+    <p>On a routine deep-sea expedition, our team of marine biologists and oceanographers stumbled upon something that defied all scientific explanation. As our submersible descended into the inky blackness of the Challenger Deep, our sonar equipment began to malfunction, emitting strange, otherworldly sounds that sent chills down our spines.</p>
+    <div class="scientist-report">
+      "The readings we're getting... they're impossible. It's as if the laws of physics themselves are breaking down around us." - Dr. Emily Chen, Lead Scientist
+    </div>
+    <p>As we approached the source of the anomaly, our lights flickered and died, plunging us into total darkness. When they came back on, we saw it - a colossal entity that seemed to stretch endlessly into the void, its form constantly shifting and changing in ways that hurt to look at.</p>
+    
+    <h2>The Encounter</h2>
+    <p>The creature, if it can even be called that, seemed to exist in multiple dimensions at once. Tentacles the size of skyscrapers writhed and twisted, covered in countless eyes that blinked in and out of existence. As we watched in horror, some of the eyes turned to look directly at us, and we felt the weight of eons pressing down on our minds.</p>
+    <div class="scientist-report">
+      "I... I can hear it in my head. It's speaking to me in languages that haven't existed for millions of years. Oh god, the things it's showing me..." - Audio log of Dr. Michael Torres, moments before communication was lost
+    </div>
+    <p>In that moment of contact, each member of our team experienced visions of cosmic horror and beauty beyond imagination. We saw the birth and death of universes, the rise and fall of civilizations across countless worlds, and the terrifying truth of our own insignificance in the grand tapestry of existence.</p>
+    
+    <h2>The Aftermath</h2>
+    <p>Of the twelve-person crew that descended into the depths that day, only three returned to the surface. Those who survived speak of nightmares that plague them constantly, of whispers in the dark that call them back to the abyss. The governments of the world have quarantined the area, but can any force on Earth truly contain something so vast and incomprehensible?</p>
+    <p>As for the entity itself, it remains in the depths, waiting. But for what? And when it finally decides to rise from its ancient slumber, will humanity be prepared to face the unimaginable?</p>
+    <div class="scientist-report">
+      "We thought we were exploring the ocean's depths. Instead, we awakened something that has been dreaming at the bottom of the world since before life crawled out of the primordial ooze. God help us all." - Final report of Captain Sarah Hawkins
+    </div>
+  </div>
+
+  <script>
+    function createBubbles() {
+      const ocean = document.getElementById('ocean');
+      for (let i = 0; i < 50; i++) {
+        const bubble = document.createElement('div');
+        bubble.classList.add('bubble');
+        bubble.style.left = `${Math.random() * 100}%`;
+        bubble.style.width = bubble.style.height = `${Math.random() * 20 + 5}px`;
+        bubble.style.animationDuration = `${Math.random() * 10 + 5}s`;
+        bubble.style.animationDelay = `${Math.random() * 5}s`;
+        ocean.appendChild(bubble);
+      }
+    }
+
+    function createTentacles() {
+      const tentacles = document.getElementById('tentacles');
+      for (let i = 0; i < 8; i++) {
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        const startAngle = i * 45;
+        const endX = 100 + Math.cos(startAngle * Math.PI / 180) * 80;
+        const endY = 50 + Math.sin(startAngle * Math.PI / 180) * 80;
+        path.setAttribute('d', `M100,50 Q${endX},${endY} ${endX + Math.random() * 40 - 20},${endY + Math.random() * 40 - 20}`);
+        tentacles.appendChild(path);
+      }
+    }
+
+    function animateTentacles() {
+      const tentacles = document.querySelectorAll('#tentacles path');
+      tentacles.forEach((tentacle, index) => {
+        const animate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+        animate.setAttribute('attributeName', 'd');
+        animate.setAttribute('dur', `${3 + index * 0.5}s`);
+        animate.setAttribute('repeatCount', 'indefinite');
+        
+        const startD = tentacle.getAttribute('d');
+        const endD = startD.replace(/(-?\d+(\.\d+)?),(-?\d+(\.\d+)?)\s*$/, (match, x, _, y) => {
+          const newX = parseFloat(x) + Math.random() * 40 - 20;
+          const newY = parseFloat(y) + Math.random() * 40 - 20;
+          return `${newX},${newY}`;
+        });
+        
+        animate.setAttribute('values', `${startD};${endD};${startD}`);
+        tentacle.appendChild(animate);
+      });
+    }
+
+    function updateDepthMeter() {
+      const depthMeter = document.getElementById('current-depth');
+      const maxDepth = 11000; // Challenger Deep is approximately 11,000 meters deep
+      const scrollPosition = window.scrollY;
+      const documentHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const currentDepth = Math.round((scrollPosition / documentHeight) * maxDepth);
+      depthMeter.textContent = currentDepth.toLocaleString();
+    }
+
+    createBubbles();
+    createTentacles();
+    animateTentacles();
+
+    window.addEventListener('scroll', updateDepthMeter);
+    updateDepthMeter(); // Initial call to set the depth to 0
+  </script>
+</body>
+</html>
