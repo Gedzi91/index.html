@@ -1,0 +1,115 @@
+<html><head><base href="https://www.georgetheghoul.com/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>George the Ghoul's Spooky Corner</title>
+<style>
+    body, html {
+        height: 100%;
+        margin: 0;
+        font-family: 'Creepster', cursive;
+        background-color: #000;
+        color: #39FF14;
+        overflow: hidden;
+    }
+    .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        background: radial-gradient(circle, #1a0033 0%, #000000 100%);
+    }
+    #george {
+        width: 300px;
+        height: 300px;
+        animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+        100% { transform: translateY(0px); }
+    }
+    h1 {
+        font-size: 3em;
+        text-shadow: 0 0 10px #39FF14;
+        margin-bottom: 20px;
+    }
+    .spooky-text {
+        font-size: 1.5em;
+        text-align: center;
+        max-width: 600px;
+        margin-top: 20px;
+    }
+    .ghostly-button {
+        background: none;
+        border: 2px solid #39FF14;
+        color: #39FF14;
+        padding: 10px 20px;
+        font-size: 1.2em;
+        margin-top: 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .ghostly-button:hover {
+        background-color: #39FF14;
+        color: #000;
+        box-shadow: 0 0 20px #39FF14;
+    }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+    <h1>Welcome to George the Ghoul's Spooky Corner</h1>
+    <svg id="george" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path d="M50 10 C20 10 10 50 10 80 C10 90 20 90 30 90 L70 90 C80 90 90 90 90 80 C90 50 80 10 50 10 Z" fill="#39FF14"/>
+        <circle cx="35" cy="40" r="5" fill="black"/>
+        <circle cx="65" cy="40" r="5" fill="black"/>
+        <path d="M30 60 Q50 70 70 60" stroke="black" stroke-width="3" fill="none"/>
+    </svg>
+    <p class="spooky-text">Greetings, mortal! I'm George, your friendly neighborhood ghoul. Care to join me for some spine-chilling adventures?</p>
+    <button class="ghostly-button" onclick="haunting()">Start Haunting</button>
+</div>
+
+<script>
+    function haunting() {
+        const spookyPhrases = [
+            "Did you hear that? I think something's lurking in the shadows...",
+            "Ooooh, I feel a chill running down my ectoplasm!",
+            "Let's go rattle some chains and spook some unsuspecting visitors!",
+            "How about we practice our most blood-curdling moans?",
+            "I know a great abandoned mansion we could haunt tonight!"
+        ];
+        
+        const randomPhrase = spookyPhrases[Math.floor(Math.random() * spookyPhrases.length)];
+        document.querySelector('.spooky-text').textContent = randomPhrase;
+        
+        // Add some spooky effects
+        document.body.style.animation = "shake 0.5s";
+        document.body.style.animationIterationCount = "infinite";
+        
+        setTimeout(() => {
+            document.body.style.animation = "";
+        }, 1000);
+    }
+
+    // Add a shake animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+    `;
+    document.head.appendChild(style);
+</script>
+</body></html>
