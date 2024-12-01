@@ -1,0 +1,404 @@
+<html><head><base href="." target="_blank" /><meta charset="UTF-8"><style>
+body {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: #0a0505;
+    overflow: hidden;
+    cursor: none;
+    animation: heartbeat 2s infinite;
+}
+
+@keyframes heartbeat {
+    0%, 100% { background: #0a0505; }
+    50% { background: #1a0505; }
+}
+
+.cursor {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #800020;
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: all 0.1s ease;
+    mix-blend-mode: difference;
+    animation: cursorPulse 1s infinite;
+}
+
+@keyframes cursorPulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -50%) scale(1.5); border-color: #ff0000; }
+}
+
+.blood-drip {
+    position: absolute;
+    width: 2px;
+    height: 20px;
+    background: linear-gradient(to bottom, #800020, #ff0000);
+    animation: drip 3s linear infinite;
+    opacity: 0.7;
+    filter: blur(1px);
+}
+
+.strawberry {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    animation: creepyFloat 4s ease-in-out infinite, glitch 0.3s infinite;
+    filter: drop-shadow(0 0 20px rgba(255,0,0,0.5));
+}
+
+@keyframes glitch {
+    0% { transform: translate(0) skew(0deg); }
+    20% { transform: translate(-2px, 2px) skew(10deg); }
+    40% { transform: translate(-2px, -2px) skew(-10deg); }
+    60% { transform: translate(2px, 2px) skew(-5deg); }
+    80% { transform: translate(2px, -2px) skew(5deg); }
+    100% { transform: translate(0) skew(0deg); }
+}
+
+.pentagram {
+    position: absolute;
+    opacity: 0.3;
+    animation: rotate 20s linear infinite, flicker 2s infinite;
+    filter: drop-shadow(0 0 10px #ff0000);
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes flicker {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.8; }
+}
+
+.subliminal {
+    position: absolute;
+    font-family: 'Arial', sans-serif;
+    color: #ff0000;
+    font-size: 50px;
+    opacity: 0;
+    animation: subliminal 10s infinite;
+    pointer-events: none;
+}
+
+@keyframes subliminal {
+    0%, 99%, 100% { opacity: 0; }
+    99.5% { opacity: 0.7; }
+}
+
+.fog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(128, 0, 32, 0.05);
+    pointer-events: none;
+    animation: fogMove 20s infinite;
+}
+
+@keyframes fogMove {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* Adding new creepy effects */
+@keyframes creepyFloat {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(10px, -10px) rotate(5deg); }
+    50% { transform: translate(-10px, 10px) rotate(-5deg); }
+}
+
+.blood-splash {
+    position: fixed;
+    pointer-events: none;
+    opacity: 0;
+    background: radial-gradient(circle, #800020 0%, transparent 70%);
+    animation: splatter 0.5s forwards;
+}
+
+@keyframes splatter {
+    0% { transform: scale(0); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 0; }
+}
+
+.ghost-strawberry {
+    position: absolute;
+    opacity: 0.2;
+    filter: blur(5px) hue-rotate(180deg);
+    animation: haunt 10s infinite;
+}
+
+@keyframes haunt {
+    0%, 100% { transform: translate(0, 0) scale(1.2); opacity: 0.2; }
+    50% { transform: translate(100px, -50px) scale(0.8); opacity: 0; }
+}
+
+.static-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyBAMAAADsEZWCAAAAGFBMVEUAAAA/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz+3gqitAAAACHRSTlMABQgNEBkjKSq8kmQAAACWSURBVDjL1ZMhDsMwDEVDYdCghQ0K6wUsrNC+QNH6AgFXGOY9R1/glWYSDQ22UhuT9mxLX/r+nzz9SmhB5YWfYHKEhGcO0CSzWcURERERJ3q5MZdZzXhCHzmhTzyPfXF5zmnmCI/4iHfEcRp5QTjYpEqe6HvqB+gR3yP+l3i/xwc+P+JXPvJ7vMkxnuQcT3GOxx3EeJI/WXkGSwl3E/MAAAAASUVORK5CYII=');
+    opacity: 0.05;
+    pointer-events: none;
+    animation: staticNoise 0.2s steps(2) infinite;
+}
+
+@keyframes staticNoise {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(10px, 10px); }
+}
+
+.eye .pupil {
+    animation: pulsate 0.5s infinite alternate;
+}
+
+@keyframes pulsate {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.5); }
+}
+
+.veins path {
+    animation: throb 1s infinite;
+}
+
+@keyframes throb {
+    0%, 100% { stroke-width: 0.5; stroke: #600010; }
+    50% { stroke-width: 1.5; stroke: #ff0000; }
+}
+
+.seeds circle {
+    animation: seedPulse 2s infinite alternate;
+}
+
+@keyframes seedPulse {
+    0% { r: 3; }
+    50% { r: 4; fill: #ff0000; }
+}
+
+</style></head><body>
+
+<div class="cursor"></div>
+<div class="fog"></div>
+<div class="subliminal">CONSUME</div>
+<div class="subliminal" style="animation-delay: 3s;">DEVOUR</div>
+<div class="subliminal" style="animation-delay: 6s;">FEAST</div>
+
+<svg class="pentagram" viewBox="0 0 100 100" width="400" height="400">
+    <path d="M50 5 L61 40 L95 40 L68 62 L79 95 L50 75 L21 95 L32 62 L5 40 L39 40 Z" 
+          stroke="#800020" 
+          fill="none" 
+          stroke-width="0.5"/>
+</svg>
+
+<svg class="strawberry" viewBox="0 0 100 100">
+    <defs>
+        <filter id="bloodFilter">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="1"/>
+            <feColorMatrix type="matrix" values="1 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 1 0"/>
+        </filter>
+    </defs>
+    
+    <g class="veins" stroke="#600010" stroke-width="0.5" fill="none">
+        <path d="M50,25 Q30,45 20,70" />
+        <path d="M50,25 Q70,45 80,70" />
+        <path d="M50,25 Q50,45 50,90" />
+        <path d="M30,40 Q50,50 70,40" />
+        <path d="M25,60 Q50,70 75,60" />
+        <path d="M20,50 Q50,60 80,50" />
+        <path d="M30,30 Q50,40 70,30" />
+    </g>
+    
+    <path class="body" d="M50,20 C20,20 10,50 10,70 C10,90 30,95 50,95 C70,95 90,90 90,70 C90,50 80,20 50,20" 
+          fill="#600010"/>
+    
+    <g class="seeds" fill="#300008">
+        <circle cx="30" cy="40" r="3"/>
+        <circle cx="45" cy="35" r="3"/>
+        <circle cx="60" cy="40" r="3"/>
+        <circle cx="25" cy="55" r="3"/>
+        <circle cx="40" cy="50" r="3"/>
+        <circle cx="55" cy="55" r="3"/>
+        <circle cx="70" cy="50" r="3"/>
+        <circle cx="30" cy="70" r="3"/>
+        <circle cx="45" cy="65" r="3"/>
+        <circle cx="60" cy="70" r="3"/>
+        <circle cx="35" cy="80" r="3"/>
+        <circle cx="50" cy="75" r="3"/>
+        <circle cx="65" cy="80" r="3"/>
+    </g>
+    
+    <g class="eye">
+        <ellipse cx="35" cy="45" rx="10" ry="11" fill="#ff0000"/>
+        <circle cx="35" cy="45" r="4" fill="#000000" class="pupil"/>
+        <ellipse cx="65" cy="45" rx="10" ry="11" fill="#ff0000"/>
+        <circle cx="65" cy="45" r="4" fill="#000000" class="pupil"/>
+    </g>
+    
+    <path class="mouth" d="M30,60 Q50,85 70,60" fill="none" stroke="#000000" stroke-width="4"/>
+    
+    <path class="leaf" d="M45,15 C45,5 55,5 55,15 L50,25 Z" fill="#300008"/>
+    <path class="leaf" d="M35,18 C25,15 30,5 40,12 L50,25 Z" fill="#300008"/>
+    <path class="leaf" d="M65,18 C75,15 70,5 60,12 L50,25 Z" fill="#300008"/>
+</svg>
+
+<div class="static-overlay"></div>
+
+<script>
+function createBloodDrip() {
+    const drip = document.createElement('div');
+    drip.className = 'blood-drip';
+    drip.style.left = Math.random() * window.innerWidth + 'px';
+    document.body.appendChild(drip);
+    
+    drip.addEventListener('animationend', () => {
+        drip.remove();
+    });
+}
+
+setInterval(createBloodDrip, 500);
+
+const cursor = document.querySelector('.cursor');
+document.addEventListener('mousemove', (e) => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+    
+    const strawberry = document.querySelector('.strawberry');
+    const rect = strawberry.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    
+    const pupils = document.querySelectorAll('.pupil');
+    pupils.forEach(pupil => {
+        const eyeRect = pupil.getBoundingClientRect();
+        const angle = Math.atan2(e.clientY - eyeRect.top, e.clientX - eyeRect.left);
+        const distance = Math.min(6, Math.hypot(e.clientX - eyeRect.left, e.clientY - eyeRect.top) / 60);
+        const x = Math.cos(angle) * distance;
+        const y = Math.sin(angle) * distance;
+        pupil.style.transform = `translate(${x}px, ${y}px)`;
+    });
+    
+    const angleX = (e.clientX - centerX) / window.innerWidth * 60;
+    const angleY = (e.clientY - centerY) / window.innerHeight * 60;
+    
+    strawberry.style.transform = `rotateX(${angleY}deg) rotateY(${angleX}deg)`;
+});
+
+setInterval(() => {
+    const strawberry = document.querySelector('.strawberry');
+    if (Math.random() < 0.8) {
+        const randomRotate = (Math.random() - 0.5) * 45;
+        const randomScale = 1 + Math.random() * 0.5;
+        strawberry.style.transform += ` scale(${randomScale}) rotate(${randomRotate}deg)`;
+        setTimeout(() => {
+            strawberry.style.transform = strawberry.style.transform.replace(/scale\([^)]+\)/, '').replace(/rotate\([^)]+\)/, '');
+        }, 100);
+    }
+}, 700);
+
+setInterval(() => {
+    const mouth = document.querySelector('.mouth');
+    if (Math.random() < 0.6) {
+        const distortion = Math.random() * 40 + 85;
+        mouth.setAttribute('d', `M30,60 Q50,${distortion} 70,60`);
+        setTimeout(() => {
+            mouth.setAttribute('d', 'M30,60 Q50,85 70,60');
+        }, 150);
+    }
+}, 1000);
+
+setInterval(() => {
+    if (Math.random() < 0.2) {
+        document.body.style.transform = `translate(${(Math.random() - 0.5) * 15}px, ${(Math.random() - 0.5) * 15}px)`;
+        setTimeout(() => {
+            document.body.style.transform = 'none';
+        }, 50);
+    }
+}, 1500);
+
+// Add random whispers
+const whispers = ['consume...', 'devour...', 'feast...', 'fresh...', 'ripe...'];
+setInterval(() => {
+    if (Math.random() < 0.1) {
+        const audio = new Audio('data:audio/wav;base64,UklGRjIAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAAABmYWN0BAAAAAAAAABkYXRhAAAAAA==');
+        audio.play().catch(() => {});
+    }
+}, 5000);
+
+// Add blood splatter on click
+document.addEventListener('click', (e) => {
+    const splash = document.createElement('div');
+    splash.className = 'blood-splash';
+    splash.style.left = e.clientX + 'px';
+    splash.style.top = e.clientY + 'px';
+    splash.style.width = Math.random() * 100 + 50 + 'px';
+    splash.style.height = splash.style.width;
+    document.body.appendChild(splash);
+    setTimeout(() => splash.remove(), 500);
+
+    // Create ghost strawberry
+    const ghost = document.querySelector('.strawberry').cloneNode(true);
+    ghost.classList.add('ghost-strawberry');
+    ghost.classList.remove('strawberry');
+    document.body.appendChild(ghost);
+    setTimeout(() => ghost.remove(), 10000);
+});
+
+// Add distortion effects
+setInterval(() => {
+    if (Math.random() < 0.3) {
+        document.body.style.filter = `hue-rotate(${Math.random() * 360}deg) blur(${Math.random() * 5}px)`;
+        setTimeout(() => {
+            document.body.style.filter = '';
+        }, 100);
+    }
+}, 2000);
+
+// Add random screaming sounds
+const screamChance = 0.02;
+setInterval(() => {
+    if (Math.random() < screamChance) {
+        const freq = 200 + Math.random() * 500;
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        
+        oscillator.type = 'sawtooth';
+        oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        
+        oscillator.start();
+        gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.5);
+        
+        setTimeout(() => {
+            oscillator.stop();
+        }, 500);
+    }
+}, 3000);
+
+document.addEventListener('mousemove', (e) => {
+    if (Math.random() < 0.1) {
+        const strawberry = document.querySelector('.strawberry');
+        strawberry.style.filter = `hue-rotate(${Math.random() * 360}deg) contrast(200%)`;
+        setTimeout(() => {
+            strawberry.style.filter = 'drop-shadow(0 0 20px rgba(255,0,0,0.5))';
+        }, 100);
+    }
+});
+
+</script>
+
+</body></html>
