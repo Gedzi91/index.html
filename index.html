@@ -1,0 +1,381 @@
+<html><head><base href="https://websim.ai/alien-hangman-game"><title>Alien Hangman Game - Cosmic Celebration Edition</title>
+<style>
+  body {
+    font-family: 'Courier New', monospace;
+    background-color: #000;
+    color: #0f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 5px;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+  #gameContainer {
+    background-color: rgba(0, 255, 0, 0.1);
+    border: 2px solid #0f0;
+    border-radius: 10px;
+    padding: 1.5vh;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+    width: 95%;
+    max-width: 650px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 95vh;
+    overflow-y: auto;
+  }
+  #gameTitle {
+    font-size: 5vh;
+    margin-bottom: 1vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-shadow: 0 0 10px #0f0;
+  }
+  #gameLogo {
+    font-size: 6vh;
+    margin-right: 1vh;
+    display: inline-block;
+  }
+  #alien {
+    font-size: 6vh;
+    margin-bottom: 1.5vh;
+  }
+  #word, #guesses {
+    font-size: 3.5vh;
+    margin-bottom: 1vh;
+  }
+  #hangman {
+    font-size: 4.5vh;
+    margin-bottom: 1vh;
+    letter-spacing: 0.5vh;
+  }
+  #keyboard {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.7vh;
+    margin-top: 1.5vh;
+  }
+  button {
+    background-color: #000;
+    color: #0f0;
+    border: 1px solid #0f0;
+    padding: 1.5vh;
+    font-size: 3vh;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  button:hover {
+    background-color: #0f0;
+    color: #000;
+  }
+  #score, #highScore {
+    font-size: 2.5vh;
+    margin-top: 1vh;
+  }
+  #resetBtn {
+    margin-top: 1.5vh;
+    padding: 1.2vh 2.4vh;
+    font-size: 2.5vh;
+  }
+  @keyframes float {
+    0% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-2vh) rotate(10deg); }
+    100% { transform: translateY(0px) rotate(0deg); }
+  }
+  @keyframes swirl {
+    0% { transform: rotate(0deg) translateX(0.5vh) rotate(0deg); }
+    100% { transform: rotate(360deg) translateX(0.5vh) rotate(-360deg); }
+  }
+  #alien {
+    animation: float 3s ease-in-out infinite;
+  }
+  #gameLogo {
+    animation: swirl 3s linear infinite;
+  }
+  @keyframes celebrate {
+    0% { transform: scale(1) rotate(0deg); }
+    25% { transform: scale(1.5) rotate(-15deg); }
+    50% { transform: scale(2) rotate(0deg); }
+    75% { transform: scale(1.5) rotate(15deg); }
+    100% { transform: scale(1) rotate(0deg); }
+  }
+  .celebrate {
+    animation: celebrate 1s ease-in-out;
+  }
+  #fireworks {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+  }
+  @keyframes firework {
+    0% { transform: translate(0, 0); opacity: 1; }
+    100% { transform: translate(var(--tx), var(--ty)); opacity: 0; }
+  }
+  .firework {
+    position: absolute;
+    width: 0.6vh;
+    height: 0.6vh;
+    border-radius: 50%;
+    animation: firework 1s ease-out forwards;
+  }
+  #celebration-message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    font-size: 7vh;
+    color: #ff00ff;
+    text-shadow: 0 0 1vh #ff00ff, 0 0 2vh #ff00ff, 0 0 3vh #ff00ff;
+    z-index: 10000;
+    transition: transform 0.5s ease-out;
+  }
+  #celebration-message.show {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  #cosmic-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    opacity: 0;
+    transition: opacity 2s;
+    background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Starsinthesky.jpg/1280px-Starsinthesky.jpg');
+    background-size: cover;
+  }
+  .cosmic-active #cosmic-background {
+    opacity: 0.5;
+  }
+  #previousGuesses {
+    margin-top: 1vh;
+    font-size: 2.5vh;
+    height: 8vh;
+    overflow-y: auto;
+    text-align: left;
+    padding: 0.5vh;
+    border: 1px solid #0f0;
+    border-radius: 0.5vh;
+  }
+  @media (max-height: 600px) {
+    #gameContainer {
+      font-size: 2vh;
+      height: auto;
+      min-height: 95vh;
+    }
+    #gameTitle {
+      font-size: 4vh;
+    }
+    #gameLogo {
+      font-size: 5vh;
+    }
+    #alien {
+      font-size: 5vh;
+    }
+    #word, #guesses {
+      font-size: 3vh;
+    }
+    #hangman {
+      font-size: 4vh;
+    }
+    button {
+      font-size: 2.5vh;
+      padding: 1.2vh;
+    }
+    #previousGuesses {
+      height: 6vh;
+    }
+    #keyboard {
+      margin-bottom: 1.5vh;
+    }
+  }
+</style>
+</head>
+<body>
+<div id="cosmic-background"></div>
+<div id="fireworks"></div>
+<div id="celebration-message">COSMIC VICTORY!</div>
+<div id="gameContainer">
+  <div id="gameTitle"><span id="gameLogo">👾</span>Alien Hangman</div>
+  <div id="alien">👽</div>
+  <div id="word">_ _ _ _ _ _ _ _ _</div>
+  <div id="guesses">Guesses: </div>
+  <div id="hangman">👽 👽 👽 👽 👽 👽</div>
+  <div id="keyboard"><button>A</button><button>B</button><button>C</button><button>D</button><button>E</button><button>F</button><button>G</button><button>H</button><button>I</button><button>J</button><button>K</button><button>L</button><button>M</button><button>N</button><button>O</button><button>P</button><button>Q</button><button>R</button><button>S</button><button>T</button><button>U</button><button>V</button><button>W</button><button>X</button><button>Y</button><button>Z</button></div>
+  <div id="previousGuesses">Previous Guesses:
+</div>
+  <div id="score">Score: 0</div>
+  <div id="highScore">High Score: 134</div>
+  <button id="resetBtn">Reset Game</button>
+</div>
+
+<script>
+  const words = ['ABDUCTION', 'SPACECRAFT', 'EXTRATERRESTRIAL', 'GALAXY', 'NEBULA', 'ASTEROID', 'MARTIAN', 'LIGHTYEAR', 'QUASAR', 'SUPERNOVA'];
+  let word = '';
+  let guessedLetters = [];
+  let remainingGuesses = 6;
+  let score = 0;
+  let highScore = 134;
+
+  const wordEl = document.getElementById('word');
+  const guessesEl = document.getElementById('guesses');
+  const hangmanEl = document.getElementById('hangman');
+  const keyboardEl = document.getElementById('keyboard');
+  const scoreEl = document.getElementById('score');
+  const highScoreEl = document.getElementById('highScore');
+  const resetBtn = document.getElementById('resetBtn');
+  const alienEl = document.getElementById('alien');
+  const fireworksEl = document.getElementById('fireworks');
+  const celebrationMessageEl = document.getElementById('celebration-message');
+  const previousGuessesEl = document.getElementById('previousGuesses');
+
+  function initGame() {
+    word = words[Math.floor(Math.random() * words.length)];
+    guessedLetters = [];
+    remainingGuesses = 6;
+    updateWordDisplay();
+    updateHangman();
+    enableAllButtons();
+    updatePreviousGuesses();
+    document.body.classList.remove('cosmic-active');
+  }
+
+  function updateWordDisplay() {
+    wordEl.textContent = word.split('').map(letter => 
+      guessedLetters.includes(letter) ? letter : '_'
+    ).join(' ');
+  }
+
+  function updateHangman() {
+    hangmanEl.textContent = '👽 '.repeat(remainingGuesses) + '💀 '.repeat(6 - remainingGuesses);
+  }
+
+  function enableAllButtons() {
+    const buttons = keyboardEl.getElementsByTagName('button');
+    for (let button of buttons) {
+      button.disabled = false;
+    }
+  }
+
+  function updatePreviousGuesses() {
+    previousGuessesEl.textContent = 'Previous Guesses:\n' + guessedLetters.join(', ');
+  }
+
+  function guessLetter(letter) {
+    if (!guessedLetters.includes(letter)) {
+      guessedLetters.push(letter);
+      if (!word.includes(letter)) {
+        remainingGuesses--;
+      }
+      updateWordDisplay();
+      updateHangman();
+      updatePreviousGuesses();
+      checkGameEnd();
+    }
+    // Disable the button after it's clicked
+    event.target.disabled = true;
+  }
+
+  function checkGameEnd() {
+    if (wordEl.textContent === word.split('').join(' ')) {
+      score += word.length * remainingGuesses;
+      scoreEl.textContent = `Score: ${score}`;
+      if (score > highScore) {
+        highScore = score;
+        highScoreEl.textContent = `High Score: ${highScore}`;
+      }
+      showCosmicCelebration();
+    } else if (remainingGuesses === 0) {
+      setTimeout(() => {
+        alert(`Game over! The word was ${word}`);
+        score = 0;
+        scoreEl.textContent = `Score: ${score}`;
+        initGame();
+      }, 500);
+    }
+  }
+
+  function showCosmicCelebration() {
+    document.body.classList.add('cosmic-active');
+    celebrationMessageEl.classList.add('show');
+
+    for (let i = 0; i < 200; i++) {
+      setTimeout(() => {
+        const firework = document.createElement('div');
+        firework.classList.add('firework');
+        firework.style.left = `${Math.random() * 100}%`;
+        firework.style.top = `${Math.random() * 100}%`;
+        firework.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+        firework.style.setProperty('--tx', `${(Math.random() - 0.5) * 200}px`);
+        firework.style.setProperty('--ty', `${(Math.random() - 0.5) * 200}px`);
+        fireworksEl.appendChild(firework);
+
+        setTimeout(() => {
+          fireworksEl.removeChild(firework);
+        }, 1000);
+      }, i * 20);
+    }
+
+    alienEl.style.animation = 'celebrate 1s ease-in-out infinite';
+
+    const emojis = ['🎉', '🎊', '🥳', '👏', '🚀', '💫', '👽', '🛸', '🌠', '🌈'];
+    for (let i = 0; i < 20; i++) {
+      setTimeout(() => {
+        const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+        const particle = document.createElement('div');
+        particle.textContent = emoji;
+        particle.style.position = 'absolute';
+        particle.style.left = `${Math.random() * 100}%`;
+        particle.style.top = `${Math.random() * 100}%`;
+        particle.style.fontSize = '5vh';
+        particle.style.animation = `float ${3 + Math.random() * 3}s ease-out`;
+        particle.style.opacity = '1';
+        particle.style.transition = 'opacity 3s';
+        fireworksEl.appendChild(particle);
+
+        setTimeout(() => {
+          particle.style.opacity = '0';
+        }, 2000);
+
+        setTimeout(() => {
+          fireworksEl.removeChild(particle);
+        }, 5000);
+      }, i * 100);
+    }
+
+    setTimeout(() => {
+      celebrationMessageEl.classList.remove('show');
+      alienEl.style.animation = '';
+      setTimeout(() => {
+        alert('You won! The aliens are throwing a cosmic party in your honor!');
+        initGame();
+      }, 500);
+    }, 5000);
+  }
+
+  resetBtn.addEventListener('click', () => {
+    score = 0;
+    scoreEl.textContent = `Score: ${score}`;
+    initGame();
+  });
+
+  // Add event listeners to keyboard buttons
+  const buttons = keyboardEl.getElementsByTagName('button');
+  for (let button of buttons) {
+    button.addEventListener('click', (event) => guessLetter(event.target.textContent));
+  }
+
+  initGame();
+</script>
+</body></html>
