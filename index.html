@@ -1,0 +1,565 @@
+<html><head><base href="/">
+  <style>
+    /* Windows 1.0/2.0 inspired theme */
+    body {
+      background: #00FF00; /* Bright green background */
+      font-family: 'Courier New', monospace;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+      cursor: default;
+    }
+
+    /* Added fractal border animation */
+    @keyframes fractalCrack {
+      0% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+      25% { clip-path: polygon(5% 5%, 95% 2%, 98% 98%, 2% 95%); }
+      50% { clip-path: polygon(10% 3%, 97% 7%, 93% 93%, 7% 97%); }
+      75% { clip-path: polygon(3% 10%, 93% 5%, 97% 95%, 5% 93%); }
+      100% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+    }
+
+    /* Black hole effect around window */
+    .window-container {
+      position: relative;
+      animation: pulse 2s infinite ease-in-out;
+    }
+
+    .window-container::before {
+      content: '';
+      position: absolute;
+      top: -20px;
+      left: -20px;
+      right: -20px;
+      bottom: -20px;
+      background: radial-gradient(circle at center, transparent 40%, #000 100%);
+      animation: fractalCrack 4s infinite linear;
+      z-index: -1;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+      100% { transform: scale(1); }
+    }
+
+    .particle {
+      position: fixed;
+      width: 40px;
+      height: 40px;
+      pointer-events: all;
+      z-index: 1000;
+      animation: float 8s infinite linear;
+      transition: transform 0.3s ease-out;
+    }
+
+    @keyframes float {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      25% { transform: translate(50px, 50px) rotate(90deg); }
+      50% { transform: translate(0, 100px) rotate(180deg); }
+      75% { transform: translate(-50px, 50px) rotate(270deg); }
+      100% { transform: translate(0, 0) rotate(360deg); }
+    }
+
+    .particle img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      image-rendering: pixelated;
+    }
+
+    .window {
+      background-color: #ffffff;
+      border: 2px solid #000000;
+      width: 400px;
+      height: 400px;
+      position: relative;
+      z-index: 1;
+      image-rendering: pixelated;
+      box-shadow: 5px 5px 0px rgba(0,0,0,0.5);
+    }
+
+    /* Rest of the existing styles remain the same */
+    .title-bar {
+      background: #ffffff;
+      border-bottom: 2px solid #000000;
+      padding: 2px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .title {
+      font-size: 12px;
+      font-weight: bold;
+      color: #000000;
+      padding-left: 4px;
+    }
+
+    .control-button {
+      width: 16px;
+      height: 16px;
+      background: #ffffff;
+      border: 1px solid #000000;
+      margin-left: 2px;
+      cursor: pointer;
+    }
+
+    .image-button {
+      background: #ffffff;
+      border: 2px solid #000000;
+      padding: 0;
+      cursor: pointer;
+      width: 200px;
+      height: 200px;
+      overflow: hidden;
+      image-rendering: pixelated;
+    }
+
+    .second-button {
+      background: #ffffff;
+      border: 2px solid #000000;
+      padding: 0;
+      width: 100px;
+      height: 100px;
+      image-rendering: pixelated;
+    }
+
+    .gnarp-text {
+      font-size: 24px;
+      font-weight: bold;
+      color: #000000;
+      letter-spacing: 2px;
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
+
+    .static-image {
+      position: fixed;
+      width: 100vw;
+      height: 100vh;
+      z-index: 2000;
+      pointer-events: none;
+      top: 0;
+      left: 0;
+      background: #ffffff;
+    }
+
+    .content {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: calc(100% - 60px);
+      gap: 20px;
+      background: #ffffff;
+    }
+
+    .menu-bar {
+      background: #ffffff;
+      border-bottom: 2px solid #000000;
+      display: flex;
+      padding: 2px;
+    }
+
+    .menu-item {
+      padding: 2px 8px;
+      border: 1px solid #000000;
+      margin-right: 4px;
+      cursor: pointer;
+    }
+
+    /* New styles for falling images and trails */
+    .falling-image {
+      position: fixed;
+      width: 40px;
+      height: 40px;
+      pointer-events: none;
+      z-index: 900;
+      transition: top 2s linear;
+    }
+
+    .falling-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      image-rendering: pixelated;
+    }
+
+    .trail {
+      position: fixed;
+      width: 40px;
+      height: 5px;
+      background: black;
+      opacity: 0.5;
+      pointer-events: none;
+      z-index: 899;
+      transition: height 1s linear;
+    }
+
+    /* New styles for side tab */
+    .side-tab {
+      position: fixed;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #ffffff;
+      border: 2px solid #000000;
+      border-right: none;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      z-index: 1001;
+      box-shadow: -5px 5px 0px rgba(0,0,0,0.5);
+    }
+
+    .warning-button {
+      width: 100px;
+      height: 100px;
+      background: #ffffff;
+      border: 2px solid #000000;
+      padding: 0;
+      cursor: pointer;
+      position: relative;
+      image-rendering: pixelated;
+    }
+
+    .warning-text {
+      font-size: 12px;
+      color: #ff0000;
+      font-weight: bold;
+      text-align: center;
+      margin-top: 5px;
+      animation: flash 0.5s infinite;
+    }
+
+    @keyframes flash {
+      0%, 49% { color: #ff0000; }
+      50%, 100% { color: #000000; }
+    }
+
+    .warning-button img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Explosion particle effect */
+    .fire-particle {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background: radial-gradient(circle, #ff4400, #ff0000);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 2001;
+    }
+
+    /* Fade to black overlay */
+    .fade-to-black {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: black;
+      opacity: 0;
+      transition: opacity 2s ease-in;
+      pointer-events: none;
+      z-index: 2002;
+    }
+
+    /* Add this to the CSS section */
+    .gif-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 2003;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      pointer-events: none;
+      opacity: 1;
+      transition: opacity 0.5s ease-out;
+    }
+
+    .gif-overlay img {
+      max-width: 90vw;
+      max-height: 90vh;
+      object-fit: contain;
+    }
+  </style>
+</head>
+<body>
+  <audio id="meowSound" src="/undertale-meow.mp3" preload="auto"></audio>
+  <audio id="loopSound" src="/y2mate_5gbydy1.mp3" preload="auto" loop></audio>
+  <audio id="explosionSound" src="/explosion-meme_dTCfAHs.mp3" preload="auto"></audio>
+
+  <div class="side-tab">
+    <button class="warning-button">
+      <img 
+        src="/images (1).jpeg"
+        alt="Scared red cat screaming"
+        width="100"
+        height="100"
+      >
+    </button>
+    <div class="warning-text">DO NOT CLICK!</div>
+  </div>
+
+  <div class="window-container">
+    <div class="window">
+      <div class="title-bar">
+        <div class="title">GNARP.EXE</div>
+        <div class="window-controls">
+          <div class="control-button minimize">_</div>
+          <div class="control-button maximize">□</div>
+          <div class="control-button close">X</div>
+        </div>
+      </div>
+      <div class="menu-bar">
+        <div class="menu-item">File</div>
+        <div class="menu-item">Edit</div>
+        <div class="menu-item">Gnarp</div>
+      </div>
+      <div class="content">
+        <button class="image-button">
+          <img 
+            src="/an-oil-painting-of-a-cute-happy-robot-with-a-blue--E0AAAlLtQdq0ZH1CO9WoFg-UVOkavsHSjqKhp-mXFoHQg.jpeg" 
+            alt="Oil painting of a cute happy robot with blue accents"
+            width="200"
+            height="200"
+          >
+        </button>
+        <button class="second-button">
+          <img 
+            src="/download (1).jpeg"
+            alt="Green alien kitten with antenna"
+            width="100"
+            height="100"
+          >
+        </button>
+        <div class="gnarp-text">GNARP!</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const meowSound = document.getElementById('meowSound');
+    const loopSound = document.getElementById('loopSound');
+    const explosionSound = document.getElementById('explosionSound');
+
+    function playMeow() {
+      const sound = meowSound.cloneNode();
+      sound.play();
+    }
+
+    function createStaticImage(x, y) {
+      const div = document.createElement('div');
+      div.className = 'static-image';
+      
+      const img = document.createElement('img');
+      img.src = '/alien-cat-v0-vn77hwgmbl1b1.webp';
+      img.alt = "Static alien cat image";
+      img.style.width = '100%';
+      img.style.height = '100%';
+      
+      div.appendChild(img);
+      document.body.appendChild(div);
+      
+      loopSound.currentTime = 0;
+      loopSound.play();
+    }
+
+    function createFireParticle(x, y) {
+      const particle = document.createElement('div');
+      particle.className = 'fire-particle';
+      particle.style.left = x + 'px';
+      particle.style.top = y + 'px';
+      
+      // Random direction and speed
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 5 + Math.random() * 15;
+      const vx = Math.cos(angle) * speed;
+      const vy = Math.sin(angle) * speed;
+      
+      document.body.appendChild(particle);
+      
+      let opacity = 1;
+      let posX = x;
+      let posY = y;
+      
+      function animate() {
+        posX += vx;
+        posY += vy;
+        opacity -= 0.02;
+        
+        particle.style.left = posX + 'px';
+        particle.style.top = posY + 'px';
+        particle.style.opacity = opacity;
+        
+        if (opacity > 0) {
+          requestAnimationFrame(animate);
+        } else {
+          particle.remove();
+        }
+      }
+      
+      animate();
+    }
+
+    function triggerExplosion(x, y) {
+      explosionSound.play();
+      
+      // Create GIF overlay
+      const gifOverlay = document.createElement('div');
+      gifOverlay.className = 'gif-overlay';
+      const gifImage = document.createElement('img');
+      gifImage.src = '/Ws1o.gif';
+      gifImage.alt = "Explosion effect gif";
+      gifOverlay.appendChild(gifImage);
+      document.body.appendChild(gifOverlay);
+      
+      // Create fade to black overlay
+      const fadeOverlay = document.createElement('div');
+      fadeOverlay.className = 'fade-to-black';
+      document.body.appendChild(fadeOverlay);
+      
+      // Create multiple fire particles
+      for (let i = 0; i < 100; i++) {
+        createFireParticle(x, y);
+      }
+      
+      // Fade to black
+      setTimeout(() => {
+        fadeOverlay.style.opacity = '1';
+      }, 100);
+
+      // Remove GIF after it plays (assuming gif duration is about 2 seconds)
+      setTimeout(() => {
+        gifOverlay.style.opacity = '0';
+        setTimeout(() => {
+          gifOverlay.remove();
+        }, 500);
+      }, 2000);
+    }
+
+    function createParticle() {
+      const particle = document.createElement('div');
+      particle.className = 'particle';
+      
+      const img = document.createElement('img');
+      const images = [
+        '/download (1).jpeg',
+        '/an-oil-painting-of-a-cute-happy-robot-with-a-blue--E0AAAlLtQdq0ZH1CO9WoFg-UVOkavsHSjqKhp-mXFoHQg.jpeg'
+      ];
+      img.src = images[Math.floor(Math.random() * images.length)];
+      img.alt = "Floating particle";
+      
+      particle.appendChild(img);
+      document.body.appendChild(particle);
+
+      particle.style.left = Math.random() * (window.innerWidth - 40) + 'px';
+      particle.style.top = Math.random() * (window.innerHeight - 40) + 'px';
+      particle.style.animationDelay = -Math.random() * 8 + 's';
+
+      particle.addEventListener('click', function(e) {
+        playMeow();
+        createStaticImage(e.clientX, e.clientY);
+      });
+    }
+
+    function createFallingImage() {
+      const x = Math.random() * (window.innerWidth - 40);
+      
+      // Create trail element
+      const trail = document.createElement('div');
+      trail.className = 'trail';
+      trail.style.left = x + 'px';
+      trail.style.top = '0px';
+      document.body.appendChild(trail);
+
+      // Create falling image
+      const fallingImage = document.createElement('div');
+      fallingImage.className = 'falling-image';
+      
+      const img = document.createElement('img');
+      img.src = '/images.jpeg';
+      img.alt = "Falling three-eyed green cat";
+      
+      fallingImage.appendChild(img);
+      fallingImage.style.left = x + 'px';
+      fallingImage.style.top = '0px';
+      document.body.appendChild(fallingImage);
+
+      // Start animation
+      requestAnimationFrame(() => {
+        fallingImage.style.top = window.innerHeight + 'px';
+        trail.style.height = window.innerHeight + 'px';
+      });
+
+      // Cleanup after animation
+      setTimeout(() => {
+        trail.remove();
+        fallingImage.remove();
+      }, 2000);
+    }
+
+    for(let i = 0; i < 8; i++) {
+      createParticle();
+    }
+
+    document.querySelectorAll('button, .control-button, .menu-item').forEach(button => {
+      button.addEventListener('click', playMeow);
+      button.addEventListener('click', createParticle);
+      button.addEventListener('click', createFallingImage);
+    });
+
+    document.querySelector('.image-button').addEventListener('click', function(e) {
+      e.preventDefault();
+      const gnarps = ['GNARP!', 'GNORP!', 'GNERP!', 'GNURP!'];
+      const randomGnarp = gnarps[Math.floor(Math.random() * gnarps.length)];
+      document.querySelector('.gnarp-text').textContent = randomGnarp;
+      
+      setTimeout(() => {
+        for(let i = 0; i < 5; i++) {
+          window.open('https://youtu.be/9QkR0D6z940', '_blank');
+        }
+      }, 100);
+    });
+
+    document.querySelectorAll('.control-button').forEach(button => {
+      button.addEventListener('click', function() {
+        if (this.classList.contains('close')) {
+          alert('SYSTEM ERROR: GNARP CANNOT BE TERMINATED');
+        } else if (this.classList.contains('minimize')) {
+          alert('GNARP RESIZE ERROR');
+        } else if (this.classList.contains('maximize')) {
+          alert('GNARP OVERFLOW ERROR');
+        }
+      });
+    });
+
+    // Create falling images periodically
+    setInterval(createFallingImage, 1000);
+
+    // Update the warning button click handler to only trigger explosion
+    document.querySelector('.warning-button').addEventListener('click', function(e) {
+      const rect = this.getBoundingClientRect();
+      triggerExplosion(rect.left + rect.width/2, rect.top + rect.height/2);
+    });
+  </script>
+</body></html>
