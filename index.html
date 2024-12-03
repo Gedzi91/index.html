@@ -1,0 +1,349 @@
+<html><head><base href="https://cubus.os">
+<title>CubusOS - The Cubic Operating System</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Roboto', sans-serif;
+    background: #1a1a2e;
+    color: #e0e0e0;
+    overflow: hidden;
+  }
+  .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    position: relative;
+  }
+  .os-interface {
+    width: 80%;
+    height: 80%;
+    background: rgba(30, 30, 50, 0.8);
+    border-radius: 20px;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    position: relative;
+  }
+  #taskbar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background: rgba(40, 40, 60, 0.9);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+  }
+  #clock {
+    margin-left: auto;
+    font-size: 1rem;
+  }
+  #start-button {
+    background: none;
+    border: none;
+    color: #e0e0e0;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 5px;
+    transition: background 0.3s ease;
+  }
+  #start-button:hover {
+    background: rgba(100, 100, 120, 0.5);
+  }
+  #cube-container {
+    width: 300px;
+    height: 300px;
+    perspective: 1000px;
+  }
+  #cube {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.5s;
+  }
+  .face {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    background: rgba(60, 60, 80, 0.8);
+    border: 2px solid rgba(0, 255, 255, 0.5);
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 10px;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+  .app-icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.3s, background 0.3s;
+  }
+  .app-icon:hover {
+    transform: scale(1.05);
+    background: rgba(80, 80, 100, 0.8);
+  }
+  .app-icon svg {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 5px;
+  }
+  .app-name {
+    font-size: 0.8rem;
+    text-align: center;
+  }
+  .app-window {
+    position: absolute;
+    width: 280px;
+    height: 280px;
+    background: rgba(40, 40, 60, 0.95);
+    border: 2px solid rgba(0, 255, 255, 0.7);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .app-titlebar {
+    height: 30px;
+    background: rgba(60, 60, 100, 0.9);
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+  }
+  .app-title {
+    flex-grow: 1;
+    font-size: 0.9rem;
+  }
+  .app-controls {
+    display: flex;
+  }
+  .app-control {
+    width: 20px;
+    height: 20px;
+    margin-left: 5px;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+  .app-minimize {
+    background: #ffbd44;
+  }
+  .app-close {
+    background: #ff605c;
+  }
+  .app-content {
+    flex-grow: 1;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="os-interface">
+      <div id="cube-container">
+        <div id="cube">
+          <!-- Faces will be dynamically added here -->
+        </div>
+      </div>
+    </div>
+    <div id="taskbar">
+      <button id="start-button">Start</button>
+      <div id="clock"></div>
+    </div>
+  </div>
+
+  <script>
+    const apps = [
+      { name: "File Explorer", icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>` },
+      { name: "Terminal", icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>` },
+      { name: "Settings", icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>` },
+      { name: "Web Browser", icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>` },
+      { name: "Text Editor", icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>` },
+      { name: "Calculator", icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="8" y1="6" x2="16" y2="6"></line><line x1="8" y1="10" x2="16" y2="10"></line><line x1="8" y1="14" x2="16" y2="14"></line><line x1="8" y1="18" x2="16" y2="18"></line></svg>` },
+    ];
+
+    const cube = document.getElementById('cube');
+    const faces = ['front', 'back', 'right', 'left', 'top', 'bottom'];
+
+    faces.forEach((face, index) => {
+      const faceElement = document.createElement('div');
+      faceElement.className = `face ${face}`;
+      
+      // Add 4 apps to each face
+      for (let i = 0; i < 4; i++) {
+        const appIndex = (index * 4 + i) % apps.length;
+        const app = apps[appIndex];
+        const appElement = document.createElement('div');
+        appElement.className = 'app-icon';
+        appElement.innerHTML = `
+          ${app.icon}
+          <span class="app-name">${app.name}</span>
+        `;
+        appElement.addEventListener('click', () => launchApp(app, face));
+        faceElement.appendChild(appElement);
+      }
+
+      // Position the face
+      switch(face) {
+        case 'front':
+          faceElement.style.transform = 'translateZ(150px)';
+          break;
+        case 'back':
+          faceElement.style.transform = 'rotateY(180deg) translateZ(150px)';
+          break;
+        case 'right':
+          faceElement.style.transform = 'rotateY(90deg) translateZ(150px)';
+          break;
+        case 'left':
+          faceElement.style.transform = 'rotateY(-90deg) translateZ(150px)';
+          break;
+        case 'top':
+          faceElement.style.transform = 'rotateX(-90deg) translateZ(150px)';
+          break;
+        case 'bottom':
+          faceElement.style.transform = 'rotateX(90deg) translateZ(150px)';
+          break;
+      }
+
+      cube.appendChild(faceElement);
+    });
+
+    function launchApp(app, face) {
+      const appWindow = document.createElement('div');
+      appWindow.className = 'app-window';
+      appWindow.innerHTML = `
+        <div class="app-titlebar">
+          <div class="app-title">${app.name}</div>
+          <div class="app-controls">
+            <div class="app-control app-minimize"></div>
+            <div class="app-control app-close"></div>
+          </div>
+        </div>
+        <div class="app-content">
+          ${app.name} content placeholder
+        </div>
+      `;
+
+      const faceElement = cube.querySelector(`.${face}`);
+      faceElement.appendChild(appWindow);
+
+      // Add event listeners for minimize and close buttons
+      appWindow.querySelector('.app-minimize').addEventListener('click', () => {
+        appWindow.style.display = 'none';
+      });
+
+      appWindow.querySelector('.app-close').addEventListener('click', () => {
+        faceElement.removeChild(appWindow);
+      });
+    }
+
+    let rotationX = 0;
+    let rotationY = 0;
+    let isAutoRotating = true;
+
+    function rotateCube() {
+      if (isAutoRotating) {
+        rotationX += 0.5;
+        rotationY += 0.5;
+        cube.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
+        requestAnimationFrame(rotateCube);
+      }
+    }
+
+    rotateCube();
+
+    let isDragging = false;
+    let previousMousePosition = { x: 0, y: 0 };
+
+    cube.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      isAutoRotating = false;
+      previousMousePosition = { x: e.clientX, y: e.clientY };
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (isDragging) {
+        const deltaX = e.clientX - previousMousePosition.x;
+        const deltaY = e.clientY - previousMousePosition.y;
+
+        rotationY += deltaX * 0.5;
+        rotationX -= deltaY * 0.5;
+
+        cube.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
+
+        previousMousePosition = { x: e.clientX, y: e.clientY };
+      }
+    });
+
+    window.addEventListener('mouseup', () => {
+      isDragging = false;
+    });
+
+    // Add touch support for mobile devices
+    cube.addEventListener('touchstart', (e) => {
+      isDragging = true;
+      isAutoRotating = false;
+      previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    });
+
+    window.addEventListener('touchmove', (e) => {
+      if (isDragging) {
+        const deltaX = e.touches[0].clientX - previousMousePosition.x;
+        const deltaY = e.touches[0].clientY - previousMousePosition.y;
+
+        rotationY += deltaX * 0.5;
+        rotationX -= deltaY * 0.5;
+
+        cube.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
+
+        previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      }
+    });
+
+    window.addEventListener('touchend', () => {
+      isDragging = false;
+    });
+
+    // Add a button to toggle auto-rotation
+    const toggleRotationButton = document.createElement('button');
+    toggleRotationButton.textContent = 'Toggle Auto-Rotation';
+    toggleRotationButton.style.position = 'absolute';
+    toggleRotationButton.style.top = '10px';
+    toggleRotationButton.style.right = '10px';
+    toggleRotationButton.addEventListener('click', () => {
+      isAutoRotating = !isAutoRotating;
+      if (isAutoRotating) {
+        rotateCube();
+      }
+    });
+    document.body.appendChild(toggleRotationButton);
+
+    function updateClock() {
+      const now = new Date();
+      const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      document.getElementById('clock').textContent = timeString;
+    }
+
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    document.getElementById('start-button').addEventListener('click', () => {
+      alert('Opening Start Menu...');
+    });
+  </script>
+</body></html>
