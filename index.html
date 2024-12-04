@@ -1,0 +1,161 @@
+<html><head><base href="root://holy-matrix-wallpaper?settings=keep%20all%20functions%20and%20settings&enable=compatibility%20and%20interperability%20for%20usage%20on%20any%20html%20website%20as%20passive%20viewport%20background">
+<title>Holy Matrix Background</title>
+<style>
+#holy-matrix-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+}
+#holy-matrix-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+</style>
+</head>
+<body>
+<div id="holy-matrix-container">
+    <canvas id="holy-matrix-canvas"></canvas>
+</div>
+
+<script>
+(function() {
+    const canvas = document.getElementById('holy-matrix-canvas');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+
+    const chars = '♰✞✟✝✚†‡§¥£€$¢@#%&*()_+-=[]{}|;:,.<>?';
+    const fontSize = 16;
+    let columns, rows;
+
+    function updateDimensions() {
+        columns = Math.floor(canvas.width / fontSize);
+        rows = Math.floor(canvas.height / fontSize);
+    }
+    updateDimensions();
+
+    class Symbol {
+        constructor(x, y) {
+            this.x = x;
+            this.y = y;
+            this.value = chars[Math.floor(Math.random() * chars.length)];
+            this.speed = 0;
+            this.sinOffset = Math.random() * Math.PI * 2;
+        }
+
+        draw() {
+            const wave = Math.sin(this.sinOffset + performance.now() * 0.002) * 2;
+            ctx.fillStyle = `rgb(255, ${215 + wave * 20}, ${wave * 20})`;
+            ctx.fillText(this.value, this.x * fontSize, this.y * fontSize);
+        }
+    }
+
+    let symbols = [];
+
+    function initSymbols() {
+        symbols = [];
+        for (let x = 0; x < columns; x++) {
+            for (let y = 0; y < rows; y++) {
+                symbols.push(new Symbol(x, y));
+            }
+        }
+    }
+    initSymbols();
+
+    let mouseX = 0;
+    let mouseY = 0;
+
+    function updateSymbols() {
+        symbols.forEach(symbol => {
+            const dx = symbol.x * fontSize - mouseX;
+            const dy = symbol.y * fontSize - mouseY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance < 100) {
+                const angle = Math.atan2(dy, dx);
+                const force = (100 - distance) / 10;
+                symbol.x += Math.cos(angle) * force * 0.2;
+                symbol.y += Math.sin(angle) * force * 0.2;
+            } else {
+                symbol.x += (Math.floor(symbol.x) - symbol.x) * 0.1;
+                symbol.y += (Math.floor(symbol.y) - symbol.y) * 0.1;
+            }
+            
+            symbol.x = Math.max(0, Math.min(columns - 1, symbol.x));
+            symbol.y = Math.max(0, Math.min(rows - 1, symbol.y));
+        });
+    }
+
+    function draw() {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.font = fontSize + 'px monospace';
+        symbols.forEach(symbol => symbol.draw());
+    }
+
+    function animate() {
+        updateSymbols();
+        draw();
+        requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('resize', () => {
+        resizeCanvas();
+        updateDimensions();
+        initSymbols();
+    });
+
+    // Using pointer events instead of mouse events
+    window.addEventListener('pointermove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+    });
+
+    // Touch events for mobile devices
+    window.addEventListener('touchmove', (e) => {
+        mouseX = e.touches[0].clientX;
+        mouseY = e.touches[0].clientY;
+    }, { passive: true });
+
+    // Keyboard controls
+    const keys = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false };
+    window.addEventListener('keydown', (e) => keys[e.key] = true);
+    window.addEventListener('keyup', (e) => keys[e.key] = false);
+
+    function updateMouseWithKeyboard() {
+        const speed = 5;
+        if (keys.ArrowUp) mouseY -= speed;
+        if (keys.ArrowDown) mouseY += speed;
+        if (keys.ArrowLeft) mouseX -= speed;
+        if (keys.ArrowRight) mouseX += speed;
+        
+        mouseX = Math.max(0, Math.min(canvas.width, mouseX));
+        mouseY = Math.max(0, Math.min(canvas.height, mouseY));
+    }
+
+    function gameLoop() {
+        updateMouseWithKeyboard();
+        requestAnimationFrame(gameLoop);
+    }
+
+    animate();
+    gameLoop();
+
+    // Expose a function to manually update mouse position
+    window.updateHolyMatrixMouse = function(x, y) {
+        mouseX = x;
+        mouseY = y;
+    };
+})();
+</script>
+</body></html>
