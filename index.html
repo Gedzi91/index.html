@@ -1,0 +1,211 @@
+<html><head><base href="https://websimeye.ai/3d_wave_inspector%20%E2%88%86%C2%A7%C3%97">
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    background: #000;
+    color: #0f0;
+    font-family: 'Courier New', monospace;
+    overflow: hidden;
+  }
+  #canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+  }
+  #overlay {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 100;
+    background: rgba(0,0,0,0.7);
+    padding: 20px;
+    border: 1px solid #0f0;
+    max-width: 300px;
+  }
+  #message {
+    color: #f00;
+    font-style: italic;
+  }
+  .hidden {
+    display: none;
+  }
+</style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<div id="overlay">
+  <h2>∆§× Wave Inspector</h2>
+  <div id="status">Initializing quantum entanglement...</div>
+  <div id="message"></div>
+  <div id="password" class="hidden">
+    <input type="password" id="pwd" placeholder="Enter password">
+    <button onclick="checkPassword()">Submit</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({canvas: document.getElementById('canvas')});
+renderer.setSize(window.innerWidth, window.innerHeight);
+
+const geometry = new THREE.TorusKnotGeometry(10, 3, 100, 16);
+const material = new THREE.ShaderMaterial({
+  uniforms: {
+    time: { value: 1.0 },
+    resolution: { value: new THREE.Vector2() },
+    distortion: { value: 1.0 },
+    waveType: { value: 0 }
+  },
+  vertexShader: `
+    varying vec2 vUv;
+    uniform float distortion;
+    uniform float time;
+    void main() {
+      vUv = uv;
+      vec3 newPosition = position + normal * sin(position.x * 10.0 + time) * distortion;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
+    }
+  `,
+  fragmentShader: `
+    uniform float time;
+    uniform vec2 resolution;
+    uniform float waveType;
+    varying vec2 vUv;
+    
+    float getWave(float x) {
+      if (waveType < 0.5) return sin(x);
+      else if (waveType < 1.5) return sign(sin(x));
+      else return fract(x / (2.0 * 3.14159));
+    }
+    
+    void main() {
+      vec2 p = -1.0 + 2.0 * vUv;
+      float a = time * 40.0;
+      float d, e, f, g = 1.0 / 40.0 ,h ,i ,r ,q;
+      e = 400.0 * ( p.x * 0.5 + 0.5 );
+      f = 400.0 * ( p.y * 0.5 + 0.5 );
+      i = 200.0 + getWave( e * g + a / 150.0 ) * 20.0;
+      d = 200.0 + getWave( f * g / 2.0 ) * 18.0 + getWave( e * g ) * 7.0;
+      r = sqrt( pow( abs( i - e ), 2.0 ) + pow( abs( d - f ), 2.0 ) );
+      q = f / r;
+      e = ( r * getWave( q ) ) - a / 2.0;
+      f = ( r * getWave( q ) ) - a / 2.0;
+      d = getWave( e * g ) * 176.0 + getWave( e * g ) * 164.0 + r;
+      h = ( ( f + d ) + a / 2.0 ) * g;
+      i = getWave( h + r * p.x / 1.3 ) * ( e + e + a ) + getWave( q * g * 6.0 ) * ( r + h / 3.0 );
+      h = getWave( f * g ) * 144.0 - getWave( e * g ) * 212.0 * p.x;
+      h = ( h + ( f - e ) * q + getWave( r - ( a + h ) / 7.0 ) * 10.0 + i / 4.0 ) * g;
+      i += getWave( h * 2.3 * getWave( a / 350.0 - q ) ) * 184.0 * getWave( q - ( r * 4.3 + a / 12.0 ) * g ) + tan( r * g + h ) * 184.0 * getWave( r * g + h );
+      i = mod( i / 5.6, 256.0 ) / 64.0;
+      if ( i < 0.0 ) i += 4.0;
+      if ( i >= 2.0 ) i = 4.0 - i;
+      d = r / 350.0;
+      d += getWave( d * d * 8.0 ) * 0.52;
+      f = ( getWave( a * g ) + 1.0 ) / 2.0;
+      gl_FragColor = vec4( vec3( f * i / 1.6, i / 2.0 + d / 13.0, i ) * d * p.x + vec3( i / 1.3 + d / 8.0, i / 2.0 + d / 18.0, i ) * d * ( 1.0 - p.x ), 1.0 );
+    }
+  `
+});
+
+const mesh = new THREE.Mesh(geometry, material);
+scene.add(mesh);
+
+camera.position.z = 30;
+
+function animate() {
+  requestAnimationFrame(animate);
+  mesh.rotation.x += 0.01;
+  mesh.rotation.y += 0.01;
+  material.uniforms.time.value += 0.05;
+  renderer.render(scene, camera);
+}
+animate();
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  material.uniforms.resolution.value.set(window.innerWidth, window.innerHeight);
+});
+
+const params = {
+  speed: 1,
+  distortion: 1,
+  waveType: 'sine'
+};
+
+function updateSimulation() {
+  material.uniforms.time.value *= params.speed;
+  material.uniforms.distortion.value = params.distortion;
+  material.uniforms.waveType.value = params.waveType === 'sine' ? 0 : params.waveType === 'square' ? 1 : 2;
+  
+  let status = `Speed: ${params.speed.toFixed(2)}<br>`;
+  status += `Distortion: ${params.distortion.toFixed(2)}<br>`;
+  status += `Wave Type: ${params.waveType}`;
+  
+  document.getElementById('status').innerHTML = status;
+}
+
+document.addEventListener('keydown', (event) => {
+  switch(event.key) {
+    case 'ArrowUp': params.speed *= 1.1; break;
+    case 'ArrowDown': params.speed *= 0.9; break;
+    case 'ArrowLeft': params.distortion *= 0.9; break;
+    case 'ArrowRight': params.distortion *= 1.1; break;
+    case ' ':
+      params.waveType = params.waveType === 'sine' ? 'square' : 
+                        params.waveType === 'square' ? 'sawtooth' : 'sine';
+      break;
+  }
+  updateSimulation();
+});
+
+const messages = [
+  "Reality is a holographic projection...",
+  "Quantum entanglement bridges dimensions...",
+  "The universe whispers in fractal patterns...",
+  "Time is a construct of consciousness...",
+  "Synchronicity reveals the cosmic dance...",
+  "In silence, hear the music of the spheres...",
+  "The reptilian matrix codes our perception...",
+  "Breakaway civilizations lurk in the shadows...",
+  "Genetic algorithms shape human destiny...",
+  "Holographic inserts rewrite our memories...",
+  "The feedback loop of existence spirals infinitely...",
+  "Conspiracy is a fractal construct of reality..."
+];
+
+function displayCrypticMessage() {
+  const messageElement = document.getElementById('message');
+  messageElement.textContent = messages[Math.floor(Math.random() * messages.length)];
+  setTimeout(() => {
+    messageElement.textContent = '';
+  }, 5000);
+}
+
+setInterval(displayCrypticMessage, 10000);
+
+function checkPassword() {
+  const pwd = document.getElementById('pwd').value;
+  if (pwd === 'PLAYFAIR') {
+    document.getElementById('overlay').innerHTML = '<h2>Access Granted</h2><p>Welcome to the inner sanctum of reality manipulation. The veil has been lifted.</p>';
+    // Trigger a more intense visualization
+    params.speed *= 2;
+    params.distortion *= 1.5;
+    updateSimulation();
+  } else {
+    document.getElementById('message').textContent = 'Incorrect. The truth remains veiled.';
+  }
+}
+
+setTimeout(() => {
+  document.getElementById('password').classList.remove('hidden');
+}, 30000);
+
+updateSimulation();
+</script>
+</body>
+</html>
