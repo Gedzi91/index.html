@@ -1,0 +1,1265 @@
+<html><head><base href="https://www.ai-image-generator.com">
+<title>AI Image Generator V2 - Yanz X Edition</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
+  :root {
+    --primary-blue: #00FFFF;
+    --secondary-blue: #0080FF;
+    --primary-dark: #1A1A1A;
+    --secondary-dark: #333333;
+    --neon-glow: 0 0 10px #00FFFF, 0 0 20px #00FFFF, 0 0 30px #00FFFF;
+
+    --bg: #0A0A0A;
+    --secondary: #1E1E1E;
+    --text: #FFFFFF;
+    --accent: #00FFFF;
+    --button-gradient-start: #00FFFF;
+    --button-gradient-end: #0080FF;
+  }
+
+  body, html {
+    font-family: 'Orbitron', sans-serif;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  .header {
+    background-color: var(--secondary);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+  }
+
+  .profile-image {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    margin-right: 20px;
+    border: 2px solid var(--accent);
+  }
+
+  .header h1 {
+    font-size: 2.5em;
+    color: var(--accent);
+    text-shadow: var(--neon-glow);
+    margin: 0;
+  }
+
+  .banner-container {
+    position: relative;
+    width: 50%;
+    height: 60px;
+    overflow: hidden;
+  }
+
+  .banner {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2em;
+    color: var(--text);
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+  }
+
+  .banner.active {
+    opacity: 1;
+  }
+
+  .container {
+    display: flex;
+    flex: 1;
+    padding: 20px;
+  }
+
+  .sidebar {
+    border-radius: 15px;
+    padding: 20px;
+    width: 400px;
+    margin-right: 20px;
+    background-color: var(--secondary);
+    overflow: auto;
+    min-width: 350px;
+    max-width: 700px;
+    position: relative;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+  }
+
+  .resize-handle {
+    width: 10px;
+    height: 100%;
+    cursor: ew-resize;
+    position: absolute;
+    right: 0;
+    top: 0;
+    background-color: var(--accent);
+    opacity: 0.3;
+  }
+
+  #imageForm {
+    display: flex;
+    flex-direction: column;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 600;
+    color: var(--accent);
+    text-shadow: var(--neon-glow);
+  }
+
+  input[type="text"], select, textarea {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 2px solid var(--accent);
+    border-radius: 8px;
+    font-size: 14px;
+    background-color: rgba(0, 255, 255, 0.1);
+    color: var(--text);
+    transition: all 0.3s ease;
+  }
+
+  input[type="text"]:focus, select:focus, textarea:focus {
+    outline: none;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+  }
+
+  select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2300FFFF' d='M10.293 3.293L6 7.586 1.707 3.293A1 1 0 00.293 4.707l5 5a1 1 0 001.414 0l5-5a1 1 0 10-1.414-1.414z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 12px;
+    padding-right: 30px;
+  }
+
+  button {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+    color: var(--primary-dark);
+    background: linear-gradient(45deg, var(--button-gradient-start), var(--button-gradient-end));
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+    transition: all 0.3s ease;
+  }
+
+  button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 255, 255, 0.8);
+  }
+
+  #result {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    background-color: var(--secondary);
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+  }
+
+  .image-grid {
+    display: grid;
+    gap: 25px;
+    padding: 20px;
+  }
+
+  .image-container {
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+  }
+
+  .image-container:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 25px rgba(0, 255, 255, 0.5);
+  }
+
+  .image-container img {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: transform 0.3s ease;
+  }
+
+  .image-container:hover img {
+    transform: scale(1.1);
+  }
+
+  .fullscreen-image {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+
+  .fullscreen-image img {
+    max-width: 80%;
+    max-height: 80%;
+    object-fit: contain;
+    border: 3px solid var(--accent);
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+  }
+
+  .download-icon, .favorite-icon {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    filter: drop-shadow(0 0 5px var(--accent));
+  }
+
+  .download-icon:hover, .favorite-icon:hover {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+
+  .download-icon {
+    top: 20px;
+    right: 20px;
+  }
+
+  .favorite-icon {
+    top: 20px;
+    right: 70px;
+  }
+
+  .favorite-icon.active {
+    fill: #FF0000;
+  }
+
+  .generation-info {
+    padding: 15px;
+    margin-top: 15px;
+    border-radius: 8px;
+    font-size: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    background-color: rgba(0, 255, 255, 0.1);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+  }
+
+  .generation-info p {
+    margin: 0;
+    padding: 5px 10px;
+    border-radius: 5px;
+    background-color: rgba(0, 255, 255, 0.2);
+  }
+
+  #favorites {
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    background-color: var(--secondary);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+  }
+
+  .favorite-images {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+
+  .favorite-image {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+  }
+
+  .favorite-image:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+  }
+
+  #toggleColors, #toggleFavorites, #clearResults, #customerService {
+    background: none;
+    border: 2px solid var(--accent);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 8px 15px;
+    border-radius: 8px;
+    margin-right: 10px;
+    color: var(--accent);
+    background: rgba(0, 255, 255, 0.1);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+    transition: all 0.3s ease;
+  }
+
+  #toggleColors:hover, #toggleFavorites:hover, #clearResults:hover, #customerService:hover {
+    background: rgba(0, 255, 255, 0.2);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
+  }
+
+  .top-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  #clearFavorites {
+    padding: 8px 15px;
+    font-size: 14px;
+    background-color: #FF0000;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: var(--text);
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
+  }
+
+  #clearFavorites:hover {
+    background-color: #FF3333;
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+  }
+
+  #exportParams, #importParams {
+    font-size: 14px;
+    padding: 8px 15px;
+    width: auto;
+    margin-right: 10px;
+  }
+
+  .export-import-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+  }
+
+  #exportParams, #importParams {
+    flex: 1;
+    margin: 0 5px;
+  }
+
+  #imagesPerRow {
+    margin-bottom: 15px;
+  }
+
+  .favorites-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+
+  .favorites-controls select {
+    width: auto;
+    margin-right: 15px;
+  }
+
+  #colorPicker {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--secondary);
+    padding: 30px;
+    border-radius: 15px;
+    z-index: 1000;
+    display: none;
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+  }
+
+  #colorPicker input[type="color"] {
+    width: 100%;
+    height: 50px;
+    margin-bottom: 15px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  #colorPicker button {
+    margin-top: 15px;
+  }
+
+  .theme-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  #lightTheme, #darkTheme {
+    font-size: 14px;
+    padding: 8px 15px;
+    width: 48%;
+  }
+
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 999;
+    display: none;
+  }
+
+  #commentSection {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: var(--secondary);
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+  }
+
+  #commentForm textarea {
+    width: 100%;
+    height: 100px;
+    margin-bottom: 15px;
+  }
+
+  .comment {
+    background-color: rgba(0, 255, 255, 0.1);
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+  }
+
+  #ratingSection {
+    margin-top: 30px;
+    text-align: center;
+  }
+
+  .star {
+    font-size: 30px;
+    color: #ccc;
+    cursor: pointer;
+    transition: color 0.3s ease;
+  }
+
+  .star:hover, .star.active {
+    color: #FFD700;
+  }
+
+  #creatorInfo {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 14px;
+    color: var(--accent);
+    text-shadow: var(--neon-glow);
+  }
+
+  /* Icon styles */
+  .icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 5px;
+    vertical-align: middle;
+  }
+</style>
+</head>
+<body>
+<header class="header">
+  <div class="header-left">
+    <img src="https://source.unsplash.com/random/60x60/?anime,girl" alt="Anime profile picture" class="profile-image">
+    <h1>Waifu AI</h1>
+  </div>
+  <div class="banner-container">
+    <div class="banner active">Welcome to Waifu AI - Your Anime Image Generator</div>
+    <div class="banner">Create stunning anime-style images with AI</div>
+    <div class="banner">Customize your waifu with various styles and settings</div>
+  </div>
+</header>
+<div class="container">
+  <div class="sidebar">
+    <div class="resize-handle"></div>
+    <div class="top-buttons">
+      <button id="toggleColors">
+        <img src="https://img.icons8.com/ios-filled/50/00ffff/color-palette.png" alt="Color Palette" class="icon">
+        Site Colors
+      </button>
+      <button id="toggleFavorites">
+        <img src="https://img.icons8.com/ios-filled/50/00ffff/like.png" alt="Favorites" class="icon">
+        Favorites
+      </button>
+      <button id="clearResults">
+        <img src="https://img.icons8.com/ios-filled/50/00ffff/broom.png" alt="Clear Results" class="icon">
+        Clear Results
+      </button>
+      <button id="customerService">
+        <img src="https://img.icons8.com/ios-filled/50/00ffff/whatsapp.png" alt="Customer Service" class="icon">
+        Contact Us
+      </button>
+    </div>
+    <form id="imageForm" method="GET" action="https://websim.ai">
+      <div class="form-group">
+        <label for="prompt">Image Description:</label>
+        <textarea id="prompt" name="prompt" required="" placeholder="Describe the image you want to generate"></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label for="style">Style:</label>
+        <select id="style" name="style">
+          <option value="none" selected="">None</option>
+          <option value="realistic">Realistic</option>
+          <option value="low-poly">Low Poly</option>
+          <option value="3d-low-poly">3D Low Poly</option>
+          <option value="cartoon">Cartoon</option>
+          <option value="anime">Japanese Anime</option>
+          <option value="painting">Painting</option>
+          <option value="sketch">Sketch</option>
+          <option value="3d">3D</option>
+          <option value="pixel-art">Pixel Art</option>
+          <option value="minimalist">Minimalist</option>
+          <option value="retro">Retro</option>
+          <option value="futuristic">Futuristic</option>
+          <option value="fantasy">Fantasy</option>
+          <option value="sci-fi">Science Fiction</option>
+          <option value="horror">Horror</option>
+          <option value="pop-art">Pop Art</option>
+          <option value="abstract">Abstract</option>
+          <option value="watercolor">Watercolor</option>
+          <option value="vector">Vector</option>
+          <option value="collage">Collage</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="viewpoint">Viewpoint:</label>
+        <select id="viewpoint" name="viewpoint">
+          <option value="none">None</option>
+          <option value="close-up">Close-Up</option>
+          <option value="medium-shot">Medium Shot</option>
+          <option value="long-shot">Long Shot</option>
+          <option value="aerial">Aerial View</option>
+          <option value="eye-level">Eye Level View</option>
+          <option value="low-angle">Low Angle View</option>
+          <option value="high-angle">High Angle View</option>
+          <option value="side-view">Side View</option>
+          <option value="front-view">Front View</option>
+          <option value="back-view">Back View</option>
+          <option value="over-the-shoulder">Over the Shoulder</option>
+          <option value="first-person">First Person</option>
+          <option value="panoramic">Panoramic View</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="lighting">Lighting:</label>
+        <select id="lighting" name="lighting">
+          <option value="none" selected="">None</option>
+          <option value="bright">Bright</option>
+          <option value="dim">Dim</option>
+          <option value="warm">Warm</option>
+          <option value="cool">Cool</option>
+          <option value="natural">Natural</option>
+          <option value="artificial">Artificial</option>
+          <option value="indoor">Indoor</option>
+          <option value="outdoor">Outdoor</option>
+          <option value="dramatic">Dramatic</option>
+          <option value="soft">Soft</option>
+          <option value="harsh">Harsh</option>
+          <option value="colorful">Colorful</option>
+          <option value="monochromatic">Monochromatic</option>
+          <option value="sunrise">Sunrise</option>
+          <option value="sunset">Sunset</option>
+          <option value="midday">Midday</option>
+          <option value="golden-hour">Golden Hour</option>
+          <option value="blue-hour">Blue Hour</option>
+        </select>
+      </div>
+      
+      <div class="form-group"><label for="aspect-ratio">Aspect Ratio:</label>
+        <select id="aspect-ratio" name="aspect-ratio">
+          <option value="1:1">Square (1:1)</option>
+          <option value="4:3">Standard (4:3)</option>
+          <option value="3:4">Standard Portrait (3:4)</option>
+          <option value="3:2">Classic (3:2)</option>
+          <option value="2:3">Classic Portrait (2:3)</option>
+          <option value="16:9">Widescreen (16:9)</option>
+          <option value="21:9">Ultra Wide (21:9)</option>
+          <option value="9:16">Smartphone Portrait (9:16)</option>
+        </select>
+      </div>
+      
+      <div class="form-group"><label for="image-count">Number of Images:</label>
+        <select id="image-count" name="image-count">
+    <option value="1">1</option>
+    <option value="5">5</option>
+    <option value="10" selected="">10</option>
+    <option value="20">20</option>
+    <option value="50">50</option>
+    <option value="100">100</option>
+  </select>
+      </div>
+      
+      <button type="submit">Generate</button>
+      
+      <div class="form-group">
+        <label for="imagesPerRow" style="margin-top: 10px;">Images per Row:</label>
+        <select id="imagesPerRow">
+          <option value="auto">Auto</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+          <option value="9">9</option>
+          <option value="10">10</option>
+        </select>
+      </div>
+      
+      <button type="button" id="resetParams" style="font-size: 0.8em; margin-top: 10px;">Reset Parameters</button>
+      <div class="export-import-container">
+        <button type="button" id="exportParams">Export</button>
+        <button type="button" id="importParams">Import</button>
+      </div>
+    </form>
+  </div>
+  
+  <div id="result">
+    <div id="favoritesSection">
+      <div id="favorites">
+        <div class="favorites-controls">
+          <select id="favoritesImagesPerRow">
+  <option value="auto">Auto (favorites per row)</option>
+  <script>
+    for (let i = 5; i <= 15; i++) {
+      document.write(`<option value="${i}">${i}</option>`);
+    }
+  </script>
+  </select>
+            <button id="clearFavorites" style="font-size: 0.8em; padding: 3px 6px; margin-left: auto; width: auto;">Clear All Favorites</button>
+          </div>
+          <div class="favorite-images">
+            <!-- Favorite images will be displayed here -->
+          </div>
+        </div>
+      </div>
+      <!-- Generated images will be displayed here -->
+    </div>
+  </div>
+  
+  <div class="overlay" id="overlay"></div>
+  
+  <div id="colorPicker" style="width: 300px; padding: 30px;">
+  <h3>Choose Site Colors:</h3>
+  <div class="theme-buttons">
+    <button id="lightTheme">Light Theme</button>
+    <button id="darkTheme">Dark Theme</button>
+  </div>
+  <label for="bgColor">Background Color:</label>
+  <input type="color" id="bgColor" name="bgColor" value="#0A0A0A">
+  <label for="textColor">Text Color:</label>
+  <input type="color" id="textColor" name="textColor" value="#FFFFFF">
+  <label for="accentColor">Accent Color:</label>
+  <input type="color" id="accentColor" name="accentColor" value="#00FFFF">
+  <label for="secondaryColor">Secondary Color:</label>
+  <input type="color" id="secondaryColor" name="secondaryColor" value="#1E1E1E">
+  <label for="buttonGradientStart">Button Gradient Start:</label>
+  <input type="color" id="buttonGradientStart" name="buttonGradientStart" value="#00FFFF">
+  <label for="buttonGradientEnd">Button Gradient End:</label>
+  <input type="color" id="buttonGradientEnd" name="buttonGradientEnd" value="#0080FF">
+  <button id="applyColors">Apply</button>
+</div>
+
+<div id="commentSection">
+  <h3>Comments</h3>
+  <form id="commentForm">
+    <textarea id="commentText" placeholder="Leave your comment here"></textarea>
+    <button type="submit">Submit Comment</button>
+  </form>
+  <div id="comments">
+    <!-- Comments will be displayed here -->
+  </div>
+</div>
+
+<div id="ratingSection">
+  <h3>Rate This Web App</h3>
+  <div id="starRating">
+    <span class="star" data-rating="1">★</span>
+    <span class="star" data-rating="2">★</span>
+    <span class="star" data-rating="3">★</span>
+    <span class="star" data-rating="4">★</span>
+    <span class="star" data-rating="5">★</span>
+  </div>
+  <p id="averageRating">Average Rating: 0</p>
+</div>
+
+<div id="creatorInfo">
+  Created by: It'z Me YanzX
+</div>
+  
+  <script>
+  document.getElementById('imageForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const params = Object.fromEntries(formData.entries());
+    
+    // Save parameters
+    localStorage.setItem('lastGenerationParams', JSON.stringify(params));
+    
+    generateImages(params);
+  });
+  
+  function generateImages(params) {
+    const result = document.getElementById('result');
+    const generationInfo = document.createElement('div');
+    generationInfo.className = 'generation-info';
+    
+    let infoHtml = `<button class="apply-params">Apply These Parameters</button>`;
+    infoHtml += `<p>Prompt: ${params.prompt}</p>`;
+    if (params.style !== 'none') infoHtml += `<p>Style: ${getTranslatedValue('style', params.style)}</p>`;
+    if (params.viewpoint !== 'none') infoHtml += `<p>Viewpoint: ${getTranslatedValue('viewpoint', params.viewpoint)}</p>`;
+    if (params.lighting !== 'none') infoHtml += `<p>Lighting: ${getTranslatedValue('lighting', params.lighting)}</p>`;
+    infoHtml += `<p>Aspect Ratio: ${getTranslatedValue('aspect-ratio', params['aspect-ratio'])}</p>`;
+    
+    generationInfo.innerHTML = infoHtml;
+    result.insertBefore(generationInfo, result.firstChild.nextSibling);
+    
+    const [width, height] = getImageDimensions(params['aspect-ratio']);
+    
+    let imagesHtml = `
+      <div class="image-grid">
+    `;
+    
+    for (let i = 0; i < parseInt(params['image-count']); i++) {
+      const imageUrl = generateStylizedImageUrl(params, width, height, i);
+      imagesHtml += `
+        <div class="image-container ${params.style === 'glow-in-the-dark' ? 'glow-in-dark' : ''}" style="padding-bottom: ${(height / width * 100)}%;">
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${width}' height='${height}' viewBox='0 0 ${width} ${height}'%3E%3Crect width='100%25' height='100%25' fill='%23cccccc'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-size='14' fill='%23333333'%3EGenerating...%3C/text%3E%3C/svg%3E" 
+               alt="Generating..." 
+               width="${width}" 
+               height="${height}" 
+               data-src="${imageUrl}" 
+               class="lazy-load">
+        </div>
+      `;
+    }
+    
+    imagesHtml += '</div>';
+    
+    generationInfo.insertAdjacentHTML('afterend', imagesHtml);
+    
+    // Lazy load images with better error handling
+    const lazyLoadImages = document.querySelectorAll('img.lazy-load');
+    lazyLoadImages.forEach(img => {
+      const retryCount = 3; // Number of retry attempts
+      let attempts = 0;
+      
+      const loadImage = () => {
+        attempts++;
+        const tmpImg = new Image();
+        tmpImg.onload = () => {
+          img.src = tmpImg.src;
+          img.classList.remove('lazy-load');
+        };
+        tmpImg.onerror = () => {
+          if (attempts < retryCount) {
+            setTimeout(loadImage, 1000); // Retry after 1 second
+          } else {
+            img.src = `https://via.placeholder.com/${width}x${height}?text=Image+Generation+Failed`;
+            img.alt = 'Image Generation Failed';
+            img.classList.remove('lazy-load');
+          }
+        };
+        tmpImg.src = img.dataset.src;
+      };
+      
+      loadImage();
+    });
+
+    // Add event listeners for fullscreen display
+    const imageGrid = document.querySelector('.image-grid');
+    imageGrid.addEventListener('click', function(e) {
+      const container = e.target.closest('.image-container');
+      if (container) {
+        const img = container.querySelector('img');
+        const index = Array.from(imageGrid.children).indexOf(container);
+        showFullscreenImage(img.src, params, index, 'generated');
+      }
+    });
+}
+
+  function generateStylizedImageUrl(params, width, height, index) {
+    try {
+        const baseUrl = 'https://source.unsplash.com';
+        let stylizedPrompt = params.prompt;
+        
+        // Build a more specific and detailed prompt
+        const promptParts = [];
+        
+        // Add main prompt
+        promptParts.push(stylizedPrompt);
+        
+        // Add style if specified
+        if (params.style !== 'none') {
+            promptParts.push(`${params.style} style`);
+        }
+        
+        // Add viewpoint if specified
+        if (params.viewpoint !== 'none') {
+            promptParts.push(`${params.viewpoint} view`);
+        }
+        
+        // Add lighting if specified
+        if (params.lighting !== 'none') {
+            promptParts.push(`${params.lighting} lighting`);
+        }
+        
+        // Combine all parts with proper formatting
+        const finalPrompt = promptParts.join(', ');
+        
+        // Add randomization to prevent caching
+        const timestamp = Date.now();
+        const randomSeed = Math.floor(Math.random() * 1000000);
+        
+        return `${baseUrl}/${width}x${height}/?${encodeURIComponent(finalPrompt)}&sig=${index}-${timestamp}-${randomSeed}`;
+    } catch (error) {
+        console.error('Error generating image URL:', error);
+        return `https://via.placeholder.com/${width}x${height}?text=Image+Generation+Failed`;
+    }
+}
+
+  function getTranslatedValue(selectId, value) {
+    const select = document.getElementById(selectId);
+    const option = select.querySelector(`option[value="${value}"]`);
+    return option ? option.textContent : value;
+  }
+  
+  function getImageDimensions(aspectRatio) {
+    const ratios = {
+      '1:1': [1000,1000],
+      '4:3': [1600, 1200],
+      '3:4': [1200, 1600],
+      '3:2': [1800, 1200],
+      '2:3': [1200, 1800],
+      '16:9': [1920, 1080],
+      '21:9': [2560,1080],
+      '9:16': [1080, 1920]
+    };
+    
+    return ratios[aspectRatio] || [1600, 900];
+  }
+  
+  function showFullscreenImage(src, params, currentIndex, context) {
+    const fullscreenDiv = document.createElement('div');
+    fullscreenDiv.className = 'fullscreen-image';
+    fullscreenDiv.innerHTML = `
+      <div class="image-params">
+        <h3>Image Parameters</h3>
+        <p><strong>Prompt:</strong> ${params.prompt}</p>
+        <p><strong>Style:</strong> ${getTranslatedValue('style', params.style)}</p>
+        <p><strong>Viewpoint:</strong> ${getTranslatedValue('viewpoint', params.viewpoint)}</p>
+        <p><strong>Lighting:</strong> ${getTranslatedValue('lighting', params.lighting)}</p>
+        <p><strong>Aspect Ratio:</strong> ${getTranslatedValue('aspect-ratio', params['aspect-ratio'])}</p>
+        <button class="apply-params">Apply These Parameters</button>
+      </div>
+      <img src="${src}" alt="Fullscreen Image">
+      <svg class="download-icon" xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="7 10 12 15 17 10"></polyline>
+        <line x1="12" y1="15" x2="12" y2="3"></line>
+      </svg>
+      <svg class="favorite-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+      </svg>
+      <button class="close-fullscreen">Close</button>
+      <button class="prev-image">Previous</button>
+      <button class="next-image">Next</button>
+    `;
+    document.body.appendChild(fullscreenDiv);
+    
+    const closeButton = fullscreenDiv.querySelector('.close-fullscreen');
+    closeButton.addEventListener('click', () => {
+      document.body.removeChild(fullscreenDiv);
+    });
+    
+    const downloadIcon = fullscreenDiv.querySelector('.download-icon');
+    downloadIcon.addEventListener('click', () => {
+      downloadImage(src, `ai_generated_image_${currentIndex}.jpg`);
+    });
+    
+    const favoriteIcon = fullscreenDiv.querySelector('.favorite-icon');
+    favoriteIcon.addEventListener('click', () => {
+      toggleFavorite(src, params);
+      favoriteIcon.classList.toggle('active');
+    });
+    
+    const applyParamsButton = fullscreenDiv.querySelector('.apply-params');
+    applyParamsButton.addEventListener('click', () => {
+      applyParams(params);
+    });
+    
+    const prevButton = fullscreenDiv.querySelector('.prev-image');
+    const nextButton = fullscreenDiv.querySelector('.next-image');
+    
+    prevButton.addEventListener('click', () => {
+      navigateImage(-1, context);
+    });
+    
+    nextButton.addEventListener('click', () => {
+      navigateImage(1, context);
+    });
+    
+    function navigateImage(direction, context) {
+      let images;
+      if (context === 'generated') {
+        images = document.querySelectorAll('.image-container img');
+      } else if (context === 'favorites') {
+        images = document.querySelectorAll('.favorite-image');
+      }
+      
+      let newIndex = (currentIndex + direction + images.length) % images.length;
+      const newSrc = images[newIndex].src;
+      
+      fullscreenDiv.querySelector('img').src = newSrc;
+      currentIndex = newIndex;
+    }
+  }
+  
+  function downloadImage(url, filename) {
+    fetch(url)
+      .then(response => response.blob())
+      .then(blob => {
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+        URL.revokeObjectURL(link.href);
+      })
+      .catch(console.error);
+  }
+  
+  function toggleFavorite(src, params) {
+    let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+    const index = favorites.findIndex(fav => fav.src === src);
+    
+    if (index !== -1) {
+      favorites.splice(index, 1);
+    } else {
+      favorites.push({ src, params });
+    }
+    
+    localStorage.setItem('favorites', JSON.stringify(favorites));
+    updateFavorites();
+  }
+  
+  function updateFavorites() {
+    const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+    const favoriteImagesContainer = document.querySelector('.favorite-images');
+    favoriteImagesContainer.innerHTML = '';
+    
+    favorites.forEach((fav, index) => {
+      const img = document.createElement('img');
+      img.src = fav.src;
+      img.alt = `Favorite Image ${index + 1}`;
+      img.className = 'favorite-image';
+      img.addEventListener('click', () => {
+        showFullscreenImage(fav.src, fav.params, index, 'favorites');
+      });
+      favoriteImagesContainer.appendChild(img);
+    });
+  }
+  
+  function applyParams(params) {
+    document.getElementById('prompt').value = params.prompt;
+    document.getElementById('style').value = params.style;
+    document.getElementById('viewpoint').value = params.viewpoint;
+    document.getElementById('lighting').value = params.lighting;
+    document.getElementById('aspect-ratio').value = params['aspect-ratio'];
+    document.getElementById('image-count').value = params['image-count'];
+  }
+  
+  document.getElementById('toggleFavorites').addEventListener('click', function() {
+    const favoritesSection = document.getElementById('favoritesSection');
+    favoritesSection.style.display = favoritesSection.style.display === 'none' ? 'block' : 'none';
+  });
+  
+  document.getElementById('clearResults').addEventListener('click', function() {
+    const result = document.getElementById('result');
+    const favoritesSection = document.getElementById('favoritesSection');
+    result.innerHTML = '';
+    result.appendChild(favoritesSection);
+  });
+  
+  document.getElementById('clearFavorites').addEventListener('click', function() {
+    localStorage.removeItem('favorites');
+    updateFavorites();
+  });
+  
+  document.getElementById('customerService').addEventListener('click', function() {
+    window.open('https://wa.me/6283842754812', '_blank');
+  });
+  
+  document.getElementById('toggleColors').addEventListener('click', function() {
+    const colorPicker = document.getElementById('colorPicker');
+    const overlay = document.getElementById('overlay');
+    colorPicker.style.display = colorPicker.style.display === 'none' ? 'block' : 'none';
+    overlay.style.display = overlay.style.display === 'none' ? 'block' : 'none';
+  });
+  
+  document.getElementById('applyColors').addEventListener('click', function() {
+    const root = document.documentElement;
+    root.style.setProperty('--bg', document.getElementById('bgColor').value);
+    root.style.setProperty('--text', document.getElementById('textColor').value);
+    root.style.setProperty('--accent', document.getElementById('accentColor').value);
+    root.style.setProperty('--secondary', document.getElementById('secondaryColor').value);
+    root.style.setProperty('--button-gradient-start', document.getElementById('buttonGradientStart').value);
+    root.style.setProperty('--button-gradient-end', document.getElementById('buttonGradientEnd').value);
+    
+    document.getElementById('colorPicker').style.display = 'none';
+    document.getElementById('overlay').style.display = 'none';
+  });
+  
+  document.getElementById('lightTheme').addEventListener('click', function() {
+    setTheme('light');
+  });
+  
+  document.getElementById('darkTheme').addEventListener('click', function() {
+    setTheme('dark');
+  });
+  
+  function setTheme(theme) {
+    const root = document.documentElement;
+    if (theme === 'light') {
+      root.style.setProperty('--bg', '#FFFFFF');
+      root.style.setProperty('--text', '#000000');
+      root.style.setProperty('--accent', '#007BFF');
+      root.style.setProperty('--secondary', '#F8F9FA');
+      root.style.setProperty('--button-gradient-start', '#007BFF');
+      root.style.setProperty('--button-gradient-end', '#0056b3');
+    } else {
+      root.style.setProperty('--bg', '#0A0A0A');
+      root.style.setProperty('--text', '#FFFFFF');
+      root.style.setProperty('--accent', '#00FFFF');
+      root.style.setProperty('--secondary', '#1E1E1E');
+      root.style.setProperty('--button-gradient-start', '#00FFFF');
+      root.style.setProperty('--button-gradient-end', '#0080FF');
+    }
+    
+    document.getElementById('bgColor').value = getComputedStyle(root).getPropertyValue('--bg');
+    document.getElementById('textColor').value = getComputedStyle(root).getPropertyValue('--text');
+    document.getElementById('accentColor').value = getComputedStyle(root).getPropertyValue('--accent');
+    document.getElementById('secondaryColor').value = getComputedStyle(root).getPropertyValue('--secondary');
+    document.getElementById('buttonGradientStart').value = getComputedStyle(root).getPropertyValue('--button-gradient-start');
+    document.getElementById('buttonGradientEnd').value = getComputedStyle(root).getPropertyValue('--button-gradient-end');
+  }
+  
+  document.getElementById('resetParams').addEventListener('click', function() {
+    document.getElementById('imageForm').reset();
+  });
+  
+  document.getElementById('exportParams').addEventListener('click', function() {
+    const formData = new FormData(document.getElementById('imageForm'));
+    const params = Object.fromEntries(formData.entries());
+    const jsonString = JSON.stringify(params);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'image_params.json';
+    link.click();
+    URL.revokeObjectURL(url);
+  });
+  
+  document.getElementById('importParams').addEventListener('click', function() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/json';
+    input.onchange = function(event) {
+      const file = event.target.files[0];
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const params = JSON.parse(e.target.result);
+        applyParams(params);
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  });
+  
+  document.getElementById('imagesPerRow').addEventListener('change', function() {
+    updateImageGrid();
+  });
+  
+  document.getElementById('favoritesImagesPerRow').addEventListener('change', function() {
+    updateFavoritesGrid();
+  });
+  
+  function updateImageGrid() {
+    const imagesPerRow = document.getElementById('imagesPerRow').value;
+    const imageGrid = document.querySelector('.image-grid');
+    if (imageGrid) {
+      if (imagesPerRow === 'auto') {
+        imageGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(200px, 1fr))';
+      } else {
+        imageGrid.style.gridTemplateColumns = `repeat(${imagesPerRow}, 1fr)`;
+      }
+    }
+  }
+  
+  function updateFavoritesGrid() {
+    const favoritesPerRow = document.getElementById('favoritesImagesPerRow').value;
+    const favoriteImages = document.querySelector('.favorite-images');
+    if (favoriteImages) {
+      if (favoritesPerRow === 'auto') {
+        favoriteImages.style.gridTemplateColumns = 'repeat(auto-fill, minmax(100px, 1fr))';
+      } else {
+        favoriteImages.style.gridTemplateColumns = `repeat(${favoritesPerRow}, 1fr)`;
+      }
+    }
+  }
+  
+  // Comment system
+  document.getElementById('commentForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const commentText = document.getElementById('commentText').value;
+    if (commentText.trim() !== '') {
+      addComment(commentText);
+      document.getElementById('commentText').value = '';
+    }
+  });
+  
+  function addComment(text) {
+    const commentsContainer = document.getElementById('comments');
+    const commentDiv = document.createElement('div');
+    commentDiv.className = 'comment';
+    commentDiv.textContent = text;
+    commentsContainer.appendChild(commentDiv);
+    
+    // Save comment to localStorage
+    let comments = JSON.parse(localStorage.getItem('comments')) || [];
+    comments.push(text);
+    localStorage.setItem('comments', JSON.stringify(comments));
+  }
+  
+  function loadComments() {
+    const comments = JSON.parse(localStorage.getItem('comments')) || [];
+    const commentsContainer = document.getElementById('comments');
+    commentsContainer.innerHTML = '';
+    comments.forEach(comment => {
+      const commentDiv = document.createElement('div');
+      commentDiv.className = 'comment';
+      commentDiv.textContent = comment;
+      commentsContainer.appendChild(commentDiv);
+    });
+  }
+  
+  // Rating system
+  const stars = document.querySelectorAll('.star');
+  stars.forEach(star => {
+    star.addEventListener('click', function() {
+      const rating = this.dataset.rating;
+      setRating(rating);
+    });
+  });
+  
+  function setRating(rating) {
+    stars.forEach(star => {
+      star.classList.toggle('active', star.dataset.rating <= rating);
+    });
+    
+    // Save rating to localStorage
+    let ratings = JSON.parse(localStorage.getItem('ratings')) || [];
+    ratings.push(parseInt(rating));
+    localStorage.setItem('ratings', JSON.stringify(ratings));
+    
+    updateAverageRating();
+  }
+  
+  function updateAverageRating() {
+    const ratings = JSON.parse(localStorage.getItem('ratings')) || [];
+    if (ratings.length > 0) {
+      const average = ratings.reduce((a, b) => a + b) / ratings.length;
+      document.getElementById('averageRating').textContent = `Average Rating: ${average.toFixed(1)}`;
+    }
+  }
+  
+  // Resize sidebar
+  const resizeHandle = document.querySelector('.resize-handle');
+  const sidebar = document.querySelector('.sidebar');
+  let isResizing = false;
+  
+  resizeHandle.addEventListener('mousedown', (e) => {
+    isResizing = true;
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', () => {
+      isResizing = false;
+      document.removeEventListener('mousemove', handleMouseMove);
+    });
+  });
+  
+  function handleMouseMove(e) {
+    if (!isResizing) return;
+    sidebar.style.width = `${e.clientX}px`;
+  }
+  
+  // Load saved data on page load
+  window.addEventListener('load', function() {
+    updateFavorites();
+    loadComments();
+    updateAverageRating();
+    
+    // Load last generation parameters
+    const lastParams = JSON.parse(localStorage.getItem('lastGenerationParams'));
+    if (lastParams) {
+      applyParams(lastParams);
+    }
+    rotateBanners();
+  });
+
+  function rotateBanners() {
+    const banners = document.querySelectorAll('.banner');
+    let currentBanner = 0;
+
+    setInterval(() => {
+      banners[currentBanner].classList.remove('active');
+      currentBanner = (currentBanner + 1) % banners.length;
+      banners[currentBanner].classList.add('active');
+    }, 5000);
+  }
+  </script>
+</body></html>
