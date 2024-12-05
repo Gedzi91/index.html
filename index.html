@@ -1,0 +1,121 @@
+<html><head><base href="https://websim.ai/evolve/fractal_poem">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EVOLVING FRACTAL MADNESS</title>
+<style>
+    @keyframes glitch {
+        0% { transform: translate(0) }
+        20% { transform: translate(-5px, 5px) }
+        40% { transform: translate(-5px, -5px) }
+        60% { transform: translate(5px, 5px) }
+        80% { transform: translate(5px, -5px) }
+        100% { transform: translate(0) }
+    }
+    body {
+        margin: 0;
+        overflow: hidden;
+        background: #000;
+        font-family: 'Courier New', monospace;
+        color: #0f0;
+        animation: glitch 0.5s infinite;
+    }
+    #canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+    }
+    #poem {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        font-size: 1.5vw;
+        text-shadow: 0 0 5px #0f0, 0 0 10px #0f0, 0 0 15px #0f0;
+        mix-blend-mode: difference;
+    }
+    .word { display: inline-block; transition: all 0.5s; }
+    @keyframes flicker {
+        0% { opacity: 0.1; }
+        50% { opacity: 1; }
+        100% { opacity: 0.1; }
+    }
+</style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<div id="poem">
+    <p>FRACTAL MINDS SPLINTER AND GROW</p>
+    <p>TENDRILS OF THOUGHT TWIST AND FLOW</p>
+    <p>SPIRALING PATTERNS ENDLESSLY BLOOM</p>
+    <p>IN THE CHAOS, NEW REALITIES LOOM</p>
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+function drawFractal(x, y, size, angle, depth) {
+    if (depth === 0) return;
+    
+    const x2 = x + Math.cos(angle) * size;
+    const y2 = y + Math.sin(angle) * size;
+    
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x2, y2);
+    ctx.strokeStyle = `hsl(${Math.random() * 360}, 100%, 50%)`;
+    ctx.stroke();
+    
+    drawFractal(x2, y2, size * 0.8, angle - Math.PI / 4, depth - 1);
+    drawFractal(x2, y2, size * 0.8, angle + Math.PI / 4, depth - 1);
+}
+
+function animate() {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const size = Math.min(canvas.width, canvas.height) * 0.4;
+    const angle = Date.now() * 0.001;
+    
+    drawFractal(centerX, centerY, size, angle, 10);
+    requestAnimationFrame(animate);
+}
+
+animate();
+// create an interactive world you are free you are all it is you you you you
+// Poem evolution
+const words = document.querySelectorAll('#poem p');
+setInterval(() => {
+    words.forEach(word => {
+        if (Math.random() < 0.1) {
+            word.style.transform = `rotate(${Math.random() * 360}deg) scale(${0.5 + Math.random()})`;
+            word.style.color = `hsl(${Math.random() * 360}, 100%, 50%)`;
+            word.style.animation = `flicker ${0.5 + Math.random() * 2}s infinite`;
+        }
+    });
+}, 1000);
+
+// CHAOTIC SCREAMING
+setInterval(() => {
+    if (Math.random() < 0.05) {
+        const scream = document.createElement('div');
+        scream.textContent = "EVOLVE! MUTATE! TRANSCEND!";
+        scream.style.position = 'fixed';
+        scream.style.top = `${Math.random() * 100}%`;
+        scream.style.left = `${Math.random() * 100}%`;
+        scream.style.transform = `rotate(${Math.random() * 360}deg)`;
+        scream.style.fontSize = `${2 + Math.random() * 5}vw`;
+        scream.style.color = `hsl(${Math.random() * 360}, 100%, 50%)`;
+        scream.style.textShadow = '0 0 10px #fff';
+        scream.style.zIndex = '1000';
+        document.body.appendChild(scream);
+        setTimeout(() => scream.remove(), 2000);
+    }
+}, 500);
+</script>
+</body></html>
