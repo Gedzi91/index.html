@@ -1,0 +1,1121 @@
+<html><head><base href="/">
+    <meta charset="UTF-8">
+    <title>Silly Stories</title>
+    <style>
+        body {
+            position: relative;
+            color: #000;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 200%;
+            height: 200%;
+            background-image: url('/bgstickman.png');
+            background-repeat: repeat;
+            background-size: 100px auto;
+            opacity: 0.5;
+            z-index: -1;
+            animation: scrollBackground 20s linear infinite;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: black;
+            z-index: -2;
+        }
+
+        @keyframes scrollBackground {
+            from {
+                transform: translate(0, 0);
+            }
+            to {
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        h1 {
+            color: white;
+            font-family: "Comic Sans MS", "Comic Sans", cursive;
+        }
+
+        p {
+            color: white;
+            font-family: "Comic Sans MS", "Comic Sans", cursive;
+            font-weight: 300;
+            text-shadow: none;
+        }
+
+        .slider-container {
+            margin: 20px auto;
+            width: 300px;
+            text-align: center;
+            color: white;
+            font-family: "Comic Sans MS", "Comic Sans", cursive;
+        }
+
+        #characterSlider {
+            width: 100%;
+            height: 15px;
+            -webkit-appearance: none;
+            background: white;
+            outline: none;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 1);
+        }
+
+        #characterSlider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: black;
+            cursor: pointer;
+            border: 4px solid white;
+            box-shadow: -407px 0 0 400px black;
+        }
+
+        #conversation {
+            max-width: 800px;
+            margin: 20px auto;
+            display: none;
+            position: relative;
+            height: 400px;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .character-container {
+            position: absolute;
+            width: 250px;
+            transition: transform 0.5s ease-out;
+        }
+
+        #guy1-container {
+            left: -100px;
+            top: 50%;
+            transform: translateY(-50%) translateX(-100%);
+        }
+
+        #guy2-container {
+            right: -100px;
+            top: 50%;
+            transform: translateY(-50%) translateX(100%);
+        }
+
+        #guy3-container {
+            left: 50%;
+            top: 50%;
+            transform: translateX(-50%) translateY(-50%);
+            z-index: 1;
+        }
+
+        .character-container img {
+            width: 250px;
+            height: auto;
+        }
+
+        .dialogue {
+            position: absolute;
+            left: 50%;
+            bottom: 20px;
+            transform: translateX(-50%);
+            font-size: 1em;
+            text-align: center;
+            width: 80%;
+            background: rgba(0,0,0,0.7);
+            padding: 15px;
+            border-radius: 8px;
+            color: white;
+            font-family: "Comic Sans MS", "Comic Sans", cursive;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+
+        textarea {
+            display: block;
+            width: 80%;
+            height: 100px;
+            margin: 20px auto;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            border-radius: 15px;
+            border: 3px solid black;
+            padding: 10px;
+            font-family: "Comic Sans MS", "Comic Sans", cursive;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 0;
+            margin: 10px auto;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            display: block;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        button:active {
+            transform: scale(0.95);
+            transition: transform 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        button img {
+            display: block;
+            width: 150px;
+            height: auto;
+        }
+
+        #editScriptButton img {
+            width: 80px;
+            height: auto;
+        }
+
+        #loader {
+            display: none;
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: white;
+            font-family: "Comic Sans MS", "Comic Sans", cursive;
+            animation: bounce 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+        }
+
+        #playButton {
+            display: none;
+        }
+
+        #scriptEditor {
+            width: 80%;
+            height: 150px;
+            margin-top: 20px;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            border-radius: 15px;
+            border: 3px solid black;
+            padding: 10px;
+            font-family: "Comic Sans MS", "Comic Sans", cursive;
+            font-size: 16px;
+            display: none;
+        }
+
+        #updateScriptButton {
+            margin-right: 10px;
+            display: none;
+        }
+
+        .tooltip-container {
+            position: relative;
+            display: inline-block;
+            margin-left: 10px;
+        }
+
+        .help-button {
+            background: none;
+            border: 2px solid white;
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            font-family: "Comic Sans MS", "Comic Sans", cursive;
+            cursor: pointer;
+            padding: 0;
+            font-size: 16px;
+            margin: 0;
+            vertical-align: middle;
+        }
+
+        .tooltip {
+            display: none;
+            position: absolute;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            width: 300px;
+            text-align: left;
+            z-index: 100;
+            font-family: "Comic Sans MS", "Comic Sans", cursive;
+            font-size: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .tooltip.show {
+            display: block;
+        }
+
+        .tooltip code {
+            background: rgba(255,255,255,0.1);
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+
+        .script-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px auto;
+            width: 80%;
+        }
+
+        #publicStoriesMenu {
+            position: fixed; /* Changed from absolute to fixed */
+            top: 100px; /* Increased this value to move it down further */
+            right: 10px;
+            width: 300px;
+            max-height: 400px; /* Made vertically bigger */
+            overflow-y: auto;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            border-radius: 15px;
+            border: 3px solid black;
+            padding: 10px;
+            font-family: "Comic Sans MS", "Comic Sans", cursive;
+            font-size: 16px;
+            z-index: 1000;
+        }
+
+        .story-item {
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 10px;
+        }
+
+        .story-username {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .story-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .story-actions button {
+            padding: 5px 10px;
+            margin-right: 5px;
+            font-family: "Comic Sans MS", "Comic Sans", cursive;
+            font-size: 14px;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+
+        .story-item pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        .story-actions img {
+            width: 80px;
+            height: auto;
+        }
+
+        .voting-controls {
+            display: inline-flex;
+            align-items: center;
+            margin-left: 10px;
+            gap: 5px;
+        }
+
+        .vote-button {
+            padding: 0;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .vote-button:hover {
+            transform: scale(1.1);
+        }
+
+        .vote-button img {
+            width: 30px;
+            height: auto;
+        }
+
+        .vote-button.voted {
+            opacity: 0.7;
+        }
+
+        .vote-count {
+            color: black;
+            font-family: "Comic Sans MS", "Comic Sans", cursive;
+            margin: 0 5px;
+            font-size: 14px;
+        }
+        
+        #openScriptsButton {
+            position: fixed; /* Changed from absolute to fixed */
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            z-index: 1001; /* Ensure it stays above the menu */
+        }
+    </style>
+</head>
+<body>
+    <button id="openScriptsButton" onclick="togglePublicStoriesMenu()">
+        <img src="/scriptsbutton.svg" alt="Public Stories" style="width: 150px; height: auto;">
+    </button>
+    <img src="/sillystoriesLOGO.svg" alt="Silly Stories" style="width: 300px; margin: 20px auto; display: block; transform: translateX(-20px);">
+    <p>Enter a prompt for your story:</p>
+    <textarea id="storyInput" placeholder="Example: guy1 sees guy2 drinking cola"></textarea>
+    <div class="slider-container">
+        <input type="range" id="characterSlider" min="2" max="3" value="2" step="1">
+        <label for="characterSlider">Number of Characters: <span id="sliderValue">2</span></label>
+    </div>
+    <div class="script-header">
+        <textarea id="scriptEditor" placeholder="Edit or write your own script..."></textarea>
+        <div class="tooltip-container help-container" style="display: none;">
+            <button class="help-button" onclick="toggleTooltip()">?</button>
+            <div class="tooltip" id="scriptHelp">
+                <p><b>Script Syntax Guide:</b></p>
+                <p><code>{character}</code> - Switch speaking character (use guy1, guy2, or guy3)</p>
+                <p><code>[emotion]</code> - Change current character's emotion</p>
+                <p><code>(emotion)</code> - Set starting emotions</p>
+                <p><b>Available emotions:</b> happy, neutral, sad, think</p>
+                <p><b>Example:</b><br>
+                <code>(happy){guy1}[happy]Hey bro!<br>
+                {guy2}[think]Hmm...<br>
+                [sad]Not cool.<br>
+                {guy3}[neutral]What are we talking about?</code></p>
+            </div>
+        </div>
+    </div>
+    <button id="editScriptButton" onclick="toggleScriptEditor()">
+        <img src="/editscript.svg" alt="Edit Script" style="width: 80px; height: auto;">
+    </button>
+    <button id="updateScriptButton" style="display: none;" onclick="updateScript()">
+        <img src="/updatescriptbutton.svg" alt="Update Script" style="width: 150px; height: auto;">
+    </button>
+    <button onclick="generateStory()">
+        <img src="/generatebutton.svg" alt="Generate Story" style="width: 150px; height: auto;">
+    </button>
+    <button id="playButton" onclick="playStory()">
+        <img src="/playagainbutton.svg" alt="Play Again" style="width: 150px; height: auto;">
+    </button>
+    <button id="shareButton" onclick="shareStory()" style="display: none;">
+        <img src="/sharebutton.svg" alt="Share Story" style="width: 150px; height: auto;">
+    </button>
+    <div id="loader">Generating...</div>
+    <div id="conversation">
+        <div id="guy1-container" class="character-container">
+            <img id="guy1-image" src="/guy1neutral.png" alt="Guy 1">
+        </div>
+        <div id="guy3-container" class="character-container">
+            <img id="guy3-image" src="/guy3neutral.png" alt="Guy 3">
+        </div>
+        <div id="guy2-container" class="character-container">
+            <img id="guy2-image" src="/guy2neutral.png" alt="Guy 2">
+        </div>
+        <div id="dialogue" class="dialogue"></div>
+    </div>
+
+    <p style="margin-top: 20px; font-size: 1.2em;">TYSM GUYS FOR FOLLOWING ME! My follower count doubled when I got home from school. Amazing! -Dex</p>
+    <p style="margin-top: 10px;">Please follow me!</p>
+
+    <div id="publicStoriesMenu" style="display: none;">
+        <!-- Scripts will be dynamically loaded here -->
+    </div>
+
+    <script>
+        let currentUtterance = null;
+        let isPlaying = false;
+        let bgMusic;
+        let room;
+        let client;
+        window.scriptsUnsubscribe = null;
+
+        speechSynthesis.addEventListener('voiceschanged', function() {
+            window.speechSynthesisVoices = speechSynthesis.getVoices();
+        });
+
+        const assets = {
+            'guy1happy': '/guy1happy.png',
+            'guy1happytalk': '/guy1happttalk.png',
+            'guy1neutral': '/guy1netural.png',
+            'guy1neutraltalk': '/guy1netrualtalk.png',
+            'guy1sad': '/guy1sad.png',
+            'guy1sadtalk': '/guy1sadtalk.png',
+            'guy1think': '/guy1think.png',
+            'guy2happy': '/guy2happy.png',
+            'guy2happytalk': '/guy2happytalk.png',
+            'guy2neutral': '/guy2neutral.png',
+            'guy2neutraltalk': '/guy2neutraltalk.png',
+            'guy2sad': '/guy2sad.png',
+            'guy2sadtalk': '/guy2sadtalk.png',
+            'guy2think': '/guy2think.png',
+            'guy3happy': '/guy3happy.png',
+            'guy3happytalk': '/guy3happytalk.png',
+            'guy3neutral': '/guy3neutral.png',
+            'guy3neutraltalk': '/guy3neutraltalk.png',
+            'guy3sad': '/guy3sad.png',
+            'guy3sadtalk': '/guy3sadtalk.png',
+            'guy3think': '/guy3think.png'
+        };
+
+        window.onload = function() {
+            bgMusic = new Audio('/Olde Timey.mp3');
+            bgMusic.loop = true;
+            bgMusic.volume = 0.3;
+            bgMusic.play().catch(error => {
+                console.log("Audio autoplay failed:", error);
+            });
+            room = new WebsimSocket();
+            client = room.party.client;
+        };
+
+        const emotions = ['happy', 'neutral', 'sad', 'think'];
+
+        let storySegments = [];
+        const conversationDiv = document.getElementById('conversation');
+        const dialogueDiv = document.getElementById('dialogue');
+        const guy1Image = document.getElementById('guy1-image');
+        const guy2Image = document.getElementById('guy2-image');
+        const guy3Image = document.getElementById('guy3-image');
+
+        let scriptMode = false;
+
+        function toggleScriptEditor() {
+            const scriptEditor = document.getElementById('scriptEditor');
+            const helpContainer = document.querySelector('.help-container');
+            scriptMode = !scriptMode;
+            
+            if (scriptMode) {
+                scriptEditor.style.display = 'block';
+                helpContainer.style.display = 'inline-block';
+                if (storySegments.length > 0) {
+                    let script = '';
+                    let currentCharacter = null;
+                    for (let segment of storySegments) {
+                        if (segment.character !== currentCharacter) {
+                            currentCharacter = segment.character;
+                            script += `{${segment.character}}`;
+                        }
+                        script += `[${segment.emotion}]${segment.text}`;
+                    }
+                    scriptEditor.value = script;
+                }
+            } else {
+                scriptEditor.style.display = 'none';
+                helpContainer.style.display = 'none';
+                document.getElementById('updateScriptButton').style.display = 'none';
+            }
+        }
+
+        function toggleTooltip() {
+            const tooltip = document.getElementById('scriptHelp');
+            tooltip.classList.toggle('show');
+        }
+
+        document.addEventListener('click', function(event) {
+            const tooltip = document.getElementById('scriptHelp');
+            const helpButton = event.target.closest('.help-button');
+            
+            if (!helpButton && tooltip.classList.contains('show')) {
+                tooltip.classList.remove('show');
+            }
+        });
+
+        async function generateStory() {
+            stopPlayback();
+            const prompt = document.getElementById('storyInput').value;
+            const loader = document.getElementById('loader');
+            const playButton = document.getElementById('playButton');
+            const scriptEditor = document.getElementById('scriptEditor');
+            
+            dialogueDiv.innerHTML = '';
+            conversationDiv.style.display = 'none';
+            loader.style.display = 'block';
+            playButton.style.display = 'none';
+            document.getElementById('shareButton').style.display = 'none';
+            storySegments = [];
+
+            try {
+                const response = await fetch('/api/ai_completion', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        prompt: `Generate a casual, Gen Z-style dialog script between guy1, guy2, and guy3 based on this prompt: "${prompt}".
+                        Make the dialogue dynamic and realistic, including potential arguments, disagreements, or conflicts.
+                        The conversation can range from friendly banter to heated arguments.
+                        Make the dialogue funny and casual using modern internet slang and expressions like:
+                        - "bro", "buddy", "my guy"
+                        - "fr fr", "no cap", "based"
+                        - "so epic", "lets gooo"
+                        - "wtf", "bruh"
+                        - "nah fam", "sheesh"
+                        - "lowkey", "highkey"
+                        - "no shot", "literally"
+                        - "shit", "ass"
+                        - "weak ass", "dumb ass"
+                        
+                        For arguments, include expressions like:
+                        - "that's cap and you know it"
+                        - "you're actually trippin"
+                        - "i can't with this shit rn"
+                        - "you're being mad toxic"
+                        - "don't even start with that shit"
+                        - "your ass is actually wilding"
+                        - "this ain't it chief"
+                        - "that's some weak ass excuse"
+                        
+                        Use the following format with emotion tags:
+                        (emotion) for starting emotions
+                        {character} to indicate who is speaking
+                        [emotion] to change current speaker's emotion
+                        Available emotions: happy, neutral, sad, think
+                        Create a dynamic story with natural progression and varied emotional states.
+                        The story can be as long as needed to reach a satisfying or dramatic conclusion.
+                        Not every ending needs to be happy - vary between:
+                        - Positive endings (reconciliation, understanding)
+                        - Negative endings (unresolved conflict, walking away angry)
+                        - Ambiguous endings (tension remaining but not escalated)
+                        Include:
+                        - Natural emotional progression
+                        - Realistic reactions to provocative statements
+                        - Quick emotional shifts during heated moments
+                        - Moments of tension and release
+                        - Varied intensity levels
+                        Example format:
+                        (happy){guy1}[happy]Yo what's good buddy![neutral]{guy2}[neutral]That's some weak ass excuse and you know it.[sad]{guy1}[sad]What do you mean?[think]{guy2}[think]You know exactly what I mean.[sad]That shit wasn't cool fr fr.[sad]{guy1}[sad]You're being mad toxic rn...[neutral]Whatever.
+                        <typescript-interface>
+                        interface Response {
+                            story: string;
+                        }
+                        </typescript-interface>
+                        <example>
+                        {
+                            "story": "(happy){guy1}[happy]Yooo what's good my guy![neutral]{guy2}[sad]Your ass better not start.[think]You've been acting real different lately.[sad]{guy1}[think]Bro what?[sad]This shit is crazy, you're actually trippin.[neutral]{guy2}[sad]Whatever man, I'm out."
+                        }
+                        </example>`,
+                        data: prompt
+                    })
+                });
+                
+                const data = await response.json();
+                const generatedScript = data.story;
+                
+                scriptEditor.value = generatedScript;
+                processScript(scriptEditor.value);
+                
+                loader.style.display = 'none';
+                document.getElementById('shareButton').style.display = 'inline-block';
+                playStory();
+            } catch (error) {
+                console.error('Error generating story:', error);
+                loader.style.display = 'none';
+                dialogueDiv.innerHTML = 'Error generating story. Please try again.';
+                conversationDiv.style.display = 'block';
+            }
+        }
+
+        function processScript(script) {
+            storySegments = [];
+            const lines = script.match(/(\{.*?\}|\[.*?\]|\(.*?\)|[^{}\[\]()]+)/g) || [];
+            let currentCharacter = null;
+            let currentEmotion = {
+                'guy1': 'neutral',
+                'guy2': 'neutral',
+                'guy3': 'neutral'
+            };
+
+            const validEmotions = ['happy', 'neutral', 'sad', 'think'];
+
+            for (let segment of lines) {
+                segment = segment.trim();
+                
+                if (segment.startsWith('(') && segment.endsWith(')')) {
+                    let emotion = segment.slice(1, -1).toLowerCase();
+                    if (!validEmotions.includes(emotion) && !emotion.includes('guy')) {
+                        emotion = 'neutral';
+                    }
+                    if (segment.includes('guy1')) {
+                        currentEmotion['guy1'] = emotion.replace('guy1', '');
+                    } else if (segment.includes('guy2')) {
+                        currentEmotion['guy2'] = emotion.replace('guy2', '');
+                    } else if (segment.includes('guy3')) {
+                        currentEmotion['guy3'] = emotion.replace('guy3', '');
+                    }
+                }
+                else if (segment.startsWith('{') && segment.endsWith('}')) {
+                    currentCharacter = segment.slice(1, -1).toLowerCase();
+                }
+                else if (segment.startsWith('[') && segment.endsWith(']')) {
+                    let emotion = segment.slice(1, -1).toLowerCase();
+                    if (!validEmotions.includes(emotion)) {
+                        emotion = 'neutral';
+                    }
+                    currentEmotion[currentCharacter] = emotion;
+                }
+                else if (segment.trim()) {
+                    let isTalking = true;
+                    let emotion = currentEmotion[currentCharacter];
+                    
+                    if (emotion === 'think') {
+                        isTalking = false;
+                    }
+
+                    let renderEmotion = emotion;
+                    if (isTalking && emotion === 'happy') {
+                        renderEmotion = 'happytalk';
+                    }
+
+                    storySegments.push({
+                        text: segment.trim(),
+                        character: currentCharacter,
+                        emotion: renderEmotion,
+                        talking: isTalking
+                    });
+                }
+            }
+
+            const numCharacters = parseInt(document.getElementById('characterSlider').value);
+            const characters = new Set();
+            for (let segment of storySegments) {
+                characters.add(segment.character);
+            }
+            
+            if (characters.size > numCharacters) {
+                alert(`Warning: Script contains ${characters.size} characters but slider is set to ${numCharacters}`);
+            }
+        }
+
+        function updateScript() {
+            const scriptEditor = document.getElementById('scriptEditor');
+            stopPlayback();
+            dialogueDiv.innerHTML = '';
+            conversationDiv.style.display = 'none';
+            document.getElementById('loader').style.display = 'block';
+            document.getElementById('playButton').style.display = 'none';
+            
+            processScript(scriptEditor.value);
+            document.getElementById('shareButton').style.display = 'inline-block';
+            
+            document.getElementById('loader').style.display = 'none';
+            playStory();
+        }
+
+        const originalGenerateStory = generateStory;
+        generateStory = async function() {
+            await originalGenerateStory();
+            if (scriptMode && document.getElementById('scriptEditor').style.display === 'block') {
+                document.getElementById('updateScriptButton').style.display = 'inline-block';
+            }
+        };
+
+        document.getElementById('scriptEditor').addEventListener('input', function() {
+            document.getElementById('updateScriptButton').style.display = 'inline-block';
+        });
+
+        function updateCharacterImage(character, emotion, talking) {
+            const numCharacters = parseInt(document.getElementById('characterSlider').value);
+            const guy3Container = document.getElementById('guy3-container');
+            const guy1Container = document.getElementById('guy1-container');
+            const guy2Container = document.getElementById('guy2-container');
+            
+            guy1Container.style.display = 'none';
+            guy2Container.style.display = 'none';
+            guy3Container.style.display = 'none';
+
+            guy1Container.style.display = 'block';
+            guy2Container.style.display = 'block';
+            if (numCharacters >= 3) guy3Container.style.display = 'block';
+
+            const img = document.getElementById(`${character}-image`);
+            
+            if (numCharacters === 2) {
+                if (character === 'guy1') {
+                    guy1Container.style.transform = 'translateY(-50%) translateX(50%)';
+                    guy2Container.style.transform = 'translateY(-50%) translateX(200%)';
+                } else {
+                    guy2Container.style.transform = 'translateY(-50%) translateX(-50%)';
+                    guy1Container.style.transform = 'translateY(-50%) translateX(-200%)';
+                }
+            } else if (numCharacters === 3) {
+                if (character === 'guy1') {
+                    guy1Container.style.transform = 'translateY(-50%) translateX(50%)';
+                    guy2Container.style.transform = 'translateY(-50%) translateX(200%)';
+                    guy3Container.style.transform = 'translateY(-50%) translateX(350%)';
+                } else if (character === 'guy2') {
+                    guy1Container.style.transform = 'translateY(-50%) translateX(-200%)';
+                    guy2Container.style.transform = 'translateY(-50%) translateX(-50%)';
+                    guy3Container.style.transform = 'translateY(-50%) translateX(-350%)';
+                } else if (character === 'guy3') {
+                    guy1Container.style.transform = 'translateY(-50%) translateX(-225%)';
+                    guy2Container.style.transform = 'translateY(-50%) translateX(125%)';
+                    guy3Container.style.transform = 'translateY(-50%) translateX(-25%)';
+                }
+            }
+
+            emotion = emotion || '?';
+            let emotionKey = character + emotion;
+            if (talking && emotion !== 'think') {
+                emotionKey += 'talk';
+            }
+
+            if (!assets[emotionKey]) {
+                emotionKey = character + 'neutral';
+            }
+
+            img.src = assets[emotionKey];
+            img.alt = character + ' ' + emotion;
+        }
+
+        function resetCharacterPositions() {
+            const numCharacters = parseInt(document.getElementById('characterSlider').value);
+            const guy1Container = document.getElementById('guy1-container');
+            const guy2Container = document.getElementById('guy2-container');
+            const guy3Container = document.getElementById('guy3-container');
+
+            guy1Container.style.display = 'none';
+            guy2Container.style.display = 'none';
+            guy3Container.style.display = 'none';
+
+            guy1Container.style.display = 'block';
+            guy2Container.style.display = 'block';
+            if (numCharacters >= 3) guy3Container.style.display = 'block';
+
+            if (numCharacters === 2) {
+                guy1Container.style.transform = 'translateY(-50%) translateX(-100%)';
+                guy2Container.style.transform = 'translateY(-50%) translateX(100%)';
+            } else if (numCharacters === 3) {
+                guy1Container.style.transform = 'translateY(-50%) translateX(-200%)';
+                guy3Container.style.transform = 'translateY(-50%) translateX(-50%)';
+                guy2Container.style.transform = 'translateY(-50%) translateX(100%)';
+            }
+        }
+
+        function playStory() {
+            if (currentUtterance) {
+                speechSynthesis.cancel();
+            }
+            
+            isPlaying = true;
+            dialogueDiv.innerHTML = '';
+            conversationDiv.style.display = 'block';
+            playButton.style.display = 'none';
+            resetCharacterPositions();
+
+            function playSegment(index) {
+                if (!isPlaying || index >= storySegments.length) {
+                    playButton.style.display = 'inline-block';
+                    isPlaying = false;
+                    return;
+                }
+
+                const segment = storySegments[index];
+                dialogueDiv.innerHTML = segment.text;
+                updateCharacterImage(segment.character, segment.emotion, segment.talking);
+                
+                try {
+                    currentUtterance = new SpeechSynthesisUtterance(segment.text);
+                    
+                    const voices = speechSynthesis.getVoices();
+                    
+                    if (segment.character === 'guy1') {
+                        currentUtterance.voice = voices.find(voice => 
+                            voice.lang.startsWith('en') && voice.name.toLowerCase().includes('male')) ||
+                            voices.find(voice => voice.lang.startsWith('en'));
+                    } else if (segment.character === 'guy2') {
+                        currentUtterance.voice = voices.find(voice => 
+                            voice.lang.startsWith('en') && voice.name.toLowerCase().includes('female')) ||
+                            voices.find(voice => voice.lang.startsWith('en'));
+                    } else {
+                        currentUtterance.voice = voices.find(voice => 
+                            voice.lang.startsWith('en') && voice.name.toLowerCase().includes('male')) ||
+                            voices.find(voice => voice.lang.startsWith('en'));
+                    }
+                    
+                    currentUtterance.onend = function() {
+                        currentUtterance = null;
+                        if (isPlaying) {
+                            playSegment(index + 1);
+                        }
+                    };
+
+                    currentUtterance.onerror = function(event) {
+                        console.error('Speech synthesis error:', event);
+                        currentUtterance = null;
+                        if (isPlaying) {
+                            playSegment(index + 1);
+                        }
+                    };
+
+                    speechSynthesis.speak(currentUtterance);
+                } catch (error) {
+                    console.error('Error in speech synthesis:', error);
+                    currentUtterance = null;
+                    if (isPlaying) {
+                        playSegment(index + 1);
+                    }
+                }
+            }
+
+            if (speechSynthesis.getVoices().length === 0) {
+                speechSynthesis.addEventListener('voiceschanged', function() {
+                    playSegment(0);
+                }, { once: true });
+            } else {
+                playSegment(0);
+            }
+        }
+
+        window.addEventListener('beforeunload', function() {
+            isPlaying = false;
+            if (currentUtterance) {
+                speechSynthesis.cancel();
+            }
+        });
+
+        function stopPlayback() {
+            isPlaying = false;
+            if (currentUtterance) {
+                speechSynthesis.cancel();
+            }
+            currentUtterance = null;
+            playButton.style.display = 'inline-block';
+        }
+
+        document.getElementById('characterSlider').addEventListener('input', function(e) {
+            document.getElementById('sliderValue').textContent = e.target.value;
+        });
+
+        function shareStory() {
+            const scriptText = document.getElementById('scriptEditor').value;
+            if (!scriptText.trim()) {
+                alert('Script is empty!');
+                return;
+            }
+
+            room.collection('script').create({
+                script: scriptText,
+                upvotes: [],
+                downvotes: []
+            }).then(() => {
+                alert('Script shared successfully!');
+            }).catch(error => {
+                console.error('Error sharing script:', error);
+                alert('Error sharing script. Please try again.');
+            });
+        }
+
+        function togglePublicStoriesMenu() {
+            const menu = document.getElementById('publicStoriesMenu');
+            if (menu.style.display === 'none' || menu.style.display === '') {
+                menu.style.display = 'block';
+                loadPublicStories();
+            } else {
+                menu.style.display = 'none';
+                if (window.scriptsUnsubscribe) {
+                    window.scriptsUnsubscribe();
+                    window.scriptsUnsubscribe = null;
+                }
+            }
+        }
+
+        function loadPublicStories() {
+            const menu = document.getElementById('publicStoriesMenu');
+            menu.innerHTML = '<p>Loading...</p>';
+
+            if (window.scriptsUnsubscribe) {
+                window.scriptsUnsubscribe();
+            }
+
+            window.scriptsUnsubscribe = room.collection('script').subscribe(function (scripts) {
+                menu.innerHTML = '';
+                
+                // Sort scripts by vote count (upvotes - downvotes)
+                scripts.sort((a, b) => {
+                    const aVotes = (a.upvotes || []).length - (a.downvotes || []).length;
+                    const bVotes = (b.upvotes || []).length - (b.downvotes || []).length;
+                    return bVotes - aVotes;  // Sort descending
+                });
+
+                scripts.forEach(scriptRecord => {
+                    const { id, username, script, upvotes = [], downvotes = [] } = scriptRecord;
+                    const storyItem = document.createElement('div');
+                    storyItem.className = 'story-item';
+
+                    const usernameDiv = document.createElement('div');
+                    usernameDiv.className = 'story-username';
+                    usernameDiv.textContent = '@' + username;
+
+                    const scriptPreview = document.createElement('pre');
+                    scriptPreview.textContent = script.length > 270 ? script.substring(0, 270) + '...' : script;
+
+                    const actionsDiv = document.createElement('div');
+                    actionsDiv.className = 'story-actions';
+
+                    const useScriptButton = document.createElement('button');
+                    useScriptButton.onclick = function() {
+                        document.getElementById('scriptEditor').style.display = 'block';
+                        document.getElementById('scriptEditor').value = script;
+                        document.getElementById('updateScriptButton').style.display = 'inline-block';
+                        alert('Script loaded into editor!');
+                    };
+                    const useScriptImg = document.createElement('img');
+                    useScriptImg.src = '/usescriptbutton.svg';
+                    useScriptButton.appendChild(useScriptImg);
+
+                    // Add voting buttons
+                    const votingDiv = document.createElement('div');
+                    votingDiv.className = 'voting-controls';
+
+                    const upvoteButton = document.createElement('button');
+                    upvoteButton.className = 'vote-button';
+                    const upvoteImg = document.createElement('img');
+                    upvoteImg.src = '/upvote.svg';
+                    upvoteImg.alt = 'Upvote';
+                    upvoteButton.appendChild(upvoteImg);
+                    
+                    const upvoteCount = document.createElement('span');
+                    upvoteCount.className = 'vote-count';
+                    upvoteCount.textContent = upvotes.length;
+
+                    const downvoteButton = document.createElement('button');
+                    downvoteButton.className = 'vote-button';
+                    const downvoteImg = document.createElement('img');
+                    downvoteImg.src = '/downvote.svg';
+                    downvoteImg.alt = 'Downvote';
+                    downvoteButton.appendChild(downvoteImg);
+                    
+                    const downvoteCount = document.createElement('span');
+                    downvoteCount.className = 'vote-count';
+                    downvoteCount.textContent = downvotes.length;
+
+                    // Handle voting
+                    upvoteButton.onclick = async function() {
+                        const hasUpvoted = upvotes.includes(client.username);
+                        const hasDownvoted = downvotes.includes(client.username);
+                        
+                        let newUpvotes = [...upvotes];
+                        let newDownvotes = [...downvotes];
+                        
+                        if (hasUpvoted) {
+                            // Remove upvote
+                            newUpvotes = newUpvotes.filter(u => u !== client.username);
+                        } else {
+                            // Add upvote and remove downvote if exists
+                            newUpvotes.push(client.username);
+                            newDownvotes = newDownvotes.filter(u => u !== client.username);
+                        }
+                        
+                        await room.collection('script').update(id, {
+                            upvotes: newUpvotes,
+                            downvotes: newDownvotes
+                        });
+                    };
+
+                    downvoteButton.onclick = async function() {
+                        const hasUpvoted = upvotes.includes(client.username);
+                        const hasDownvoted = downvotes.includes(client.username);
+                        
+                        let newUpvotes = [...upvotes];
+                        let newDownvotes = [...downvotes];
+                        
+                        if (hasDownvoted) {
+                            // Remove downvote
+                            newDownvotes = newDownvotes.filter(u => u !== client.username);
+                        } else {
+                            // Add downvote and remove upvote if exists
+                            newDownvotes.push(client.username);
+                            newUpvotes = newUpvotes.filter(u => u !== client.username);
+                        }
+                        
+                        await room.collection('script').update(id, {
+                            upvotes: newUpvotes,
+                            downvotes: newDownvotes
+                        });
+                    };
+
+                    // Update button styles based on user's votes
+                    if (upvotes.includes(client.username)) {
+                        upvoteButton.classList.add('voted');
+                    }
+                    if (downvotes.includes(client.username)) {
+                        downvoteButton.classList.add('voted');
+                    }
+
+                    votingDiv.appendChild(upvoteButton);
+                    votingDiv.appendChild(upvoteCount);
+                    votingDiv.appendChild(downvoteButton);
+                    votingDiv.appendChild(downvoteCount);
+
+                    actionsDiv.appendChild(useScriptButton);
+                    actionsDiv.appendChild(votingDiv);
+
+                    if (username === client.username) {
+                        const deleteButton = document.createElement('button');
+                        deleteButton.textContent = 'Delete';
+                        deleteButton.onclick = function() {
+                            if (confirm('Are you sure you want to delete this script?')) {
+                                room.collection('script').delete(id).catch(error => {
+                                    console.error('Error deleting script:', error);
+                                    alert('Error deleting script. Please try again.');
+                                });
+                            }
+                        };
+                        actionsDiv.appendChild(deleteButton);
+                    }
+
+                    storyItem.appendChild(usernameDiv);
+                    storyItem.appendChild(scriptPreview);
+                    storyItem.appendChild(actionsDiv);
+
+                    menu.appendChild(storyItem);
+                });
+            });
+        }
+    </script>
+</body>
+</html>
