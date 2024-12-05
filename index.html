@@ -1,0 +1,261 @@
+<html><head><base href="https://websim.ai" />
+<title>Cosmic Resonance: Zephyria and Aetheron's Symphony</title>
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    overflow: hidden;
+    font-family: 'Arial', sans-serif;
+    color: #fff;
+  }
+  #canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  #info {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    max-width: 300px;
+  }
+  #title {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 24px;
+    text-align: center;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  }
+  #controls {
+    position: absolute;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+  }
+  button {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    margin: 0 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  button:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+</style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<div id="title">Cosmic Resonance: Zephyria and Aetheron's Symphony</div>
+<div id="controls">
+  <button id="harmonyBtn">Initiate Harmony</button>
+  <button id="discordBtn">Introduce Discord</button>
+</div>
+<div id="info">
+  Witness the cosmic dance of Zephyria and Aetheron as they resonate with the universe. Their ethereal forms now produce celestial music, a symphony of creation itself. Use the controls to influence their cosmic harmony or introduce moments of discord, shaping the very fabric of their reality.
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const centerX = canvas.width / 2;
+const centerY = canvas.height / 2;
+
+let harmonyLevel = 0.5;
+let audioCtx, oscillator1, oscillator2, gainNode;
+
+class CosmicBeing {
+  constructor(x, y, hueOffset, name) {
+    this.x = x;
+    this.y = y;
+    this.hueOffset = hueOffset;
+    this.name = name;
+    this.energy = 0;
+    this.frequency = 220 + hueOffset;
+  }
+
+  update() {
+    const time = Date.now() * 0.001;
+    this.x = this.x + Math.sin(time * 0.5) * 2;
+    this.y = this.y + Math.cos(time * 0.7) * 2;
+    this.energy = 0.5 + Math.sin(time) * 0.5;
+  }
+
+  draw() {
+    const time = Date.now() * 0.001;
+    
+    // Being outline
+    ctx.beginPath();
+    ctx.ellipse(this.x, this.y, 150, 200, 0, 0, Math.PI * 2);
+    const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, 200);
+    gradient.addColorStop(0, `hsla(${(time * 20 + this.hueOffset) % 360}, 100%, 50%, ${0.2 + this.energy * 0.3})`);
+    gradient.addColorStop(0.5, `hsla(${(time * 20 + 120 + this.hueOffset) % 360}, 100%, 70%, ${0.1 + this.energy * 0.2})`);
+    gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = gradient;
+    ctx.fill();
+
+    // Eyes
+    const eyeSize = 30 + Math.sin(time * 2) * 5 + this.energy * 10;
+    this.drawEye(this.x - 50, this.y - 40, eyeSize);
+    this.drawEye(this.x + 50, this.y - 40, eyeSize);
+
+    // Mouth
+    ctx.beginPath();
+    ctx.moveTo(this.x - 70, this.y + 60);
+    ctx.quadraticCurveTo(this.x, this.y + 60 + Math.sin(time) * 20 + this.energy * 30, this.x + 70, this.y + 60);
+    ctx.strokeStyle = `hsla(${(time * 30 + 240 + this.hueOffset) % 360}, 100%, 70%, ${0.6 + this.energy * 0.4})`;
+    ctx.lineWidth = 4 + this.energy * 3;
+    ctx.stroke();
+
+    // Cosmic energy
+    this.drawCosmicEnergy();
+
+    // Name
+    ctx.fillStyle = 'white';
+    ctx.font = '20px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(this.name, this.x, this.y + 220);
+  }
+
+  drawEye(x, y, size) {
+    ctx.beginPath();
+    ctx.ellipse(x, y, size, size * 1.2, 0, 0, Math.PI * 2);
+    const eyeGradient = ctx.createRadialGradient(x, y, 0, x, y, size);
+    eyeGradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
+    eyeGradient.addColorStop(0.5, `hsla(${this.hueOffset}, 100%, 70%, 0.5)`);
+    eyeGradient.addColorStop(1, `hsla(${(this.hueOffset + 60) % 360}, 100%, 30%, 0.3)`);
+    ctx.fillStyle = eyeGradient;
+    ctx.fill();
+
+    // Pupil
+    const time = Date.now() * 0.001;
+    const pupilX = x + Math.cos(time) * size * 0.2;
+    const pupilY = y + Math.sin(time * 1.5) * size * 0.2;
+    ctx.beginPath();
+    ctx.arc(pupilX, pupilY, size * 0.3, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+    ctx.fill();
+  }
+
+  drawCosmicEnergy() {
+    const time = Date.now() * 0.001;
+    for (let i = 0; i < 50; i++) {
+      const angle = (i / 50) * Math.PI * 2;
+      const energyX = this.x + Math.cos(angle + time) * (150 + Math.sin(time * 2 + i) * 30 + this.energy * 50);
+      const energyY = this.y + Math.sin(angle + time) * (200 + Math.cos(time * 2 + i) * 30 + this.energy * 50);
+      ctx.beginPath();
+      ctx.arc(energyX, energyY, 2 + this.energy * 3, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${(time * 100 + i * 3 + this.hueOffset) % 360}, 100%, 70%, ${0.7 + this.energy * 0.3})`;
+      ctx.fill();
+    }
+  }
+}
+
+const zephyria = new CosmicBeing(centerX - 200, centerY, 0, "Zephyria");
+const aetheron = new CosmicBeing(centerX + 200, centerY, 180, "Aetheron");
+
+function drawConnectionBeam() {
+  const time = Date.now() * 0.001;
+  ctx.beginPath();
+  ctx.moveTo(zephyria.x, zephyria.y);
+  ctx.lineTo(aetheron.x, aetheron.y);
+  
+  const gradient = ctx.createLinearGradient(zephyria.x, zephyria.y, aetheron.x, aetheron.y);
+  gradient.addColorStop(0, `hsla(${time * 50 % 360}, 100%, 70%, ${0.5 + harmonyLevel * 0.5})`);
+  gradient.addColorStop(0.5, `hsla(${(time * 50 + 180) % 360}, 100%, 70%, ${0.7 + harmonyLevel * 0.3})`);
+  gradient.addColorStop(1, `hsla(${(time * 50 + 360) % 360}, 100%, 70%, ${0.5 + harmonyLevel * 0.5})`);
+  
+  ctx.strokeStyle = gradient;
+  ctx.lineWidth = 5 + Math.sin(time * 5) * 2 + harmonyLevel * 10;
+  ctx.stroke();
+
+  // Energy particles along the beam
+  for (let i = 0; i < 20; i++) {
+    const t = i / 20;
+    const x = zephyria.x * (1 - t) + aetheron.x * t + Math.sin(time * 10 + i) * 20 * harmonyLevel;
+    const y = zephyria.y * (1 - t) + aetheron.y * t + Math.cos(time * 10 + i) * 20 * harmonyLevel;
+    ctx.beginPath();
+    ctx.arc(x, y, 3 + harmonyLevel * 5, 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(${(time * 100 + i * 20) % 360}, 100%, 70%, ${0.8 + harmonyLevel * 0.2})`;
+    ctx.fill();
+  }
+}
+
+function initAudio() {
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  oscillator1 = audioCtx.createOscillator();
+  oscillator2 = audioCtx.createOscillator();
+  gainNode = audioCtx.createGain();
+
+  oscillator1.connect(gainNode);
+  oscillator2.connect(gainNode);
+  gainNode.connect(audioCtx.destination);
+
+  oscillator1.type = 'sine';
+  oscillator2.type = 'sine';
+  
+  gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+
+  oscillator1.start();
+  oscillator2.start();
+}
+
+function updateAudio() {
+  if (!audioCtx) return;
+  
+  const baseFreq = 220;
+  oscillator1.frequency.setValueAtTime(baseFreq + zephyria.energy * 100, audioCtx.currentTime);
+  oscillator2.frequency.setValueAtTime(baseFreq * 1.5 + aetheron.energy * 100, audioCtx.currentTime);
+  
+  gainNode.gain.setValueAtTime(0.1 * harmonyLevel, audioCtx.currentTime);
+}
+
+function animate() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  zephyria.update();
+  aetheron.update();
+  
+  drawConnectionBeam();
+  zephyria.draw();
+  aetheron.draw();
+  
+  updateAudio();
+  
+  requestAnimationFrame(animate);
+}
+
+document.getElementById('harmonyBtn').addEventListener('click', () => {
+  harmonyLevel = Math.min(1, harmonyLevel + 0.1);
+  if (!audioCtx) initAudio();
+});
+
+document.getElementById('discordBtn').addEventListener('click', () => {
+  harmonyLevel = Math.max(0, harmonyLevel - 0.1);
+});
+
+animate();
+
+window.addEventListener('resize', () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+</script>
+</body></html>
