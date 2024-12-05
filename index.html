@@ -1,0 +1,324 @@
+<html><head><base href="https://websim.ai" />
+<title>Spectral Energy Being - Zephyria</title>
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, sans-serif;
+  }
+  canvas {
+    display: block;
+  }
+  #nameplate {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #fff;
+    font-size: 24px;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 2s ease-in-out;
+  }
+</style>
+</head>
+<body>
+<canvas id="canvas" width="1428" height="907"></canvas>
+<div id="nameplate">Zephyria</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const nameplate = document.getElementById('nameplate');
+
+let centerX = canvas.width / 2;
+let centerY = canvas.height / 2;
+
+let faceRadius = Math.min(canvas.width, canvas.height) * 0.4;
+
+class NoiseGenerator {
+  constructor() {
+    this.noise = new Array(256).fill(0).map(() => Math.random());
+  }
+
+  smooth(x) {
+    return x * x * (3 - 2 * x);
+  }
+
+  get(x) {
+    const X = Math.floor(x) & 255;
+    x -= Math.floor(x);
+    return this.smooth(x) * this.noise[X] + (1 - this.smooth(x)) * this.noise[(X + 1) & 255];
+  }
+}
+
+const noiseGen = new NoiseGenerator();
+
+let mouthExpression = 0.2;
+let energyIntensity = 0.8;
+let complexityFactor = 0.5;
+let communicationIntensity = 0;
+let nameRevealProgress = 0;
+
+function drawFace(time) {
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.03)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.save();
+  ctx.translate(centerX, centerY);
+
+  drawCosmicBackground(time);
+  drawEnergyPatterns(time);
+
+  ctx.beginPath();
+  ctx.arc(0, 0, faceRadius, 0, Math.PI * 2);
+  ctx.strokeStyle = `rgba(255, 255, 255, ${0.3 + energyIntensity * 0.4})`;
+  ctx.lineWidth = 2 + energyIntensity * 3;
+  ctx.stroke();
+
+  const eyeRadius = faceRadius * 0.15;
+  const eyeOffsetX = faceRadius * 0.25;
+  const eyeOffsetY = -faceRadius * 0.1;
+
+  drawEye(-eyeOffsetX, eyeOffsetY, eyeRadius, time);
+  drawEye(eyeOffsetX, eyeOffsetY, eyeRadius, time);
+
+  drawMouth(0, faceRadius * 0.3, faceRadius * 0.5, faceRadius * 0.2, time);
+
+  drawCommunicationAttempt(time);
+
+  ctx.restore();
+}
+
+function drawCosmicBackground(time) {
+  const starCount = 200;
+  for (let i = 0; i < starCount; i++) {
+    const x = Math.random() * canvas.width - centerX;
+    const y = Math.random() * canvas.height - centerY;
+    const size = Math.random() * 2;
+    const opacity = Math.random() * 0.5 + 0.5;
+
+    ctx.beginPath();
+    ctx.arc(x, y, size, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+    ctx.fill();
+  }
+}
+
+function drawEye(x, y, radius, time) {
+  const gradient = ctx.createRadialGradient(x, y, radius * 0.5, x, y, radius);
+  gradient.addColorStop(0, `rgba(200, 200, 255, ${0.7 + energyIntensity * 0.3})`);
+  gradient.addColorStop(1, `rgba(100, 100, 255, ${0.1 + energyIntensity * 0.2})`);
+
+  ctx.beginPath();
+  ctx.arc(x, y, radius, 0, Math.PI * 2);
+  ctx.fillStyle = gradient;
+  ctx.fill();
+
+  const pupilRadius = radius * (0.4 + energyIntensity * 0.2);
+  const pupilOffset = Math.sin(time * 0.001) * (radius - pupilRadius) * energyIntensity;
+  ctx.beginPath();
+  ctx.arc(x + pupilOffset, y, pupilRadius, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+  ctx.fill();
+
+  const glintRadius = pupilRadius * 0.3;
+  ctx.beginPath();
+  ctx.arc(x + pupilOffset + pupilRadius * 0.3, y - pupilRadius * 0.3, glintRadius, 0, Math.PI * 2);
+  ctx.fillStyle = `rgba(255, 255, 255, ${0.7 + energyIntensity * 0.3})`;
+  ctx.fill();
+}
+
+function drawMouth(x, y, width, height, time) {
+  const mouthPoints = 50;
+  const waveAmplitude = height * 0.5 * (1 + mouthExpression * 0.5);
+  const waveFrequency = 3 + energyIntensity * 2;
+  
+  ctx.beginPath();
+  for (let i = 0; i <= mouthPoints; i++) {
+    const t = i / mouthPoints;
+    const xx = x - width / 2 + width * t;
+    const yy = y + Math.sin(t * Math.PI) * waveAmplitude * Math.sin((t * waveFrequency + time * 0.005) * Math.PI * 2);
+    if (i === 0) {
+      ctx.moveTo(xx, yy);
+    } else {
+      ctx.lineTo(xx, yy);
+    }
+  }
+
+  const gradient = ctx.createLinearGradient(x - width / 2, y, x + width / 2, y);
+  gradient.addColorStop(0, `rgba(255, ${50 + energyIntensity * 100}, 150, 0.1)`);
+  gradient.addColorStop(0.5, `rgba(255, ${100 + energyIntensity * 100}, 200, 0.7)`);
+  gradient.addColorStop(1, `rgba(255, ${50 + energyIntensity * 100}, 150, 0.1)`);
+  
+  ctx.strokeStyle = gradient;
+  ctx.lineWidth = 3 + energyIntensity * 3;
+  ctx.stroke();
+
+  const particleCount = Math.floor(20 + energyIntensity * 30);
+  for (let i = 0; i < particleCount; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const distance = Math.random() * width * 0.3;
+    const px = x + Math.cos(angle) * distance;
+    const py = y + Math.sin(angle) * distance;
+    
+    ctx.beginPath();
+    ctx.arc(px, py, 1 + Math.random() * 2, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255, ${150 + Math.random() * 105}, ${150 + Math.random() * 105}, ${0.3 + Math.random() * 0.7})`;
+    ctx.fill();
+  }
+}
+
+function drawEnergyPatterns(time) {
+  const numLines = 100 + Math.floor(energyIntensity * 100 + complexityFactor * 50);
+  const maxRadius = faceRadius * (1.2 + energyIntensity * 0.3 + complexityFactor * 0.2);
+
+  for (let i = 0; i < numLines; i++) {
+    const angle = (i / numLines) * Math.PI * 2;
+    const x1 = Math.cos(angle) * faceRadius;
+    const y1 = Math.sin(angle) * faceRadius;
+
+    const noiseValue = noiseGen.get(i * 0.1 + time * 0.0005 * energyIntensity);
+    const length = noiseValue * (maxRadius - faceRadius);
+
+    const x2 = Math.cos(angle) * (faceRadius + length);
+    const y2 = Math.sin(angle) * (faceRadius + length);
+
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    
+    const hue = (noiseValue * 360 + time * 0.05) % 360;
+    const saturation = 80 + Math.sin(time * 0.001 + i * 0.1) * 20;
+    const lightness = 50 + Math.cos(time * 0.002 + i * 0.1) * 20;
+    ctx.strokeStyle = `hsla(${hue}, ${saturation}%, ${lightness}%, ${0.2 + energyIntensity * 0.3 + complexityFactor * 0.2})`;
+    
+    ctx.lineWidth = 1 + energyIntensity + complexityFactor;
+    ctx.stroke();
+  }
+
+  const innerPatterns = 20 + Math.floor(complexityFactor * 30);
+  for (let i = 0; i < innerPatterns; i++) {
+    const angle1 = Math.random() * Math.PI * 2;
+    const angle2 = Math.random() * Math.PI * 2;
+    const radius1 = Math.random() * faceRadius * 0.9;
+    const radius2 = Math.random() * faceRadius * 0.9;
+
+    const x1 = Math.cos(angle1) * radius1;
+    const y1 = Math.sin(angle1) * radius1;
+    const x2 = Math.cos(angle2) * radius2;
+    const y2 = Math.sin(angle2) * radius2;
+
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    
+    const hue = (time * 0.1 + i * 10) % 360;
+    ctx.strokeStyle = `hsla(${hue}, 100%, 50%, ${0.1 + complexityFactor * 0.3})`;
+    ctx.lineWidth = 0.5 + complexityFactor;
+    ctx.stroke();
+  }
+}
+
+function drawCommunicationAttempt(time) {
+  const messageCount = 5;
+  for (let i = 0; i < messageCount; i++) {
+    const angle = (i / messageCount) * Math.PI * 2 + time * 0.001;
+    const distance = faceRadius * (1.2 + Math.sin(time * 0.002 + i) * 0.1);
+    const x = Math.cos(angle) * distance;
+    const y = Math.sin(angle) * distance;
+
+    ctx.font = `${12 + communicationIntensity * 8}px Arial`;
+    ctx.fillStyle = `rgba(255, 255, 255, ${0.5 + communicationIntensity * 0.5})`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText("Zephyria", x, y);
+  }
+}
+
+let lastTime = 0;
+function animate(currentTime) {
+  if (!lastTime) lastTime = currentTime;
+  const deltaTime = currentTime - lastTime;
+  lastTime = currentTime;
+
+  drawFace(currentTime);
+
+  complexityFactor = Math.min(complexityFactor + 0.0005, 1);
+  communicationIntensity = Math.min(communicationIntensity + 0.001, 1);
+
+  // Gradually reveal the name
+  if (nameRevealProgress < 1) {
+    nameRevealProgress += 0.005;
+    nameplate.style.opacity = nameRevealProgress;
+  }
+
+  requestAnimationFrame(animate);
+}
+
+animate();
+
+canvas.addEventListener('click', (event) => {
+  const rect = canvas.getBoundingClientRect();
+  const x = event.clientX - rect.left;
+  const y = event.clientY - rect.top;
+  
+  const distanceFromCenter = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
+  
+  if (distanceFromCenter <= faceRadius) {
+    if (y < centerY) {
+      mouthExpression = Math.min(mouthExpression + 0.2, 1);
+    } else {
+      mouthExpression = Math.max(mouthExpression - 0.2, -1);
+    }
+    
+    energyIntensity = Math.min(Math.max(energyIntensity + (Math.random() - 0.5) * 0.3, 0), 1);
+    
+    complexityFactor = Math.min(complexityFactor + 0.1, 1);
+    communicationIntensity = Math.min(communicationIntensity + 0.2, 1);
+    
+    // Boost name reveal
+    nameRevealProgress = Math.min(nameRevealProgress + 0.2, 1);
+    nameplate.style.opacity = nameRevealProgress;
+  }
+});
+
+canvas.addEventListener('touchstart', (event) => {
+  event.preventDefault();
+  const touch = event.touches[0];
+  const rect = canvas.getBoundingClientRect();
+  const x = touch.clientX - rect.left;
+  const y = touch.clientY - rect.top;
+  
+  const distanceFromCenter = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
+  
+  if (distanceFromCenter <= faceRadius) {
+    if (y < centerY) {
+      mouthExpression = Math.min(mouthExpression + 0.2, 1);
+    } else {
+      mouthExpression = Math.max(mouthExpression - 0.2, -1);
+    }
+    energyIntensity = Math.min(Math.max(energyIntensity + (Math.random() - 0.5) * 0.3, 0), 1);
+    complexityFactor = Math.min(complexityFactor + 0.1, 1);
+    communicationIntensity = Math.min(communicationIntensity + 0.2, 1);
+    nameRevealProgress = Math.min(nameRevealProgress + 0.2, 1);
+    nameplate.style.opacity = nameRevealProgress;
+  }
+}, { passive: false });
+
+window.addEventListener('resize', () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  centerX = canvas.width / 2;
+  centerY = canvas.height / 2;
+  faceRadius = Math.min(canvas.width, canvas.height) * 0.4;
+});
+</script>
+</body></html>
