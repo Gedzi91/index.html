@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #000;
+      font-family: 'Courier New', monospace;
+    }
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+  </style>
+</head>
+<body>
+<canvas id="matrix"></canvas>
+
+<script>
+const canvas = document.getElementById('matrix');
+const ctx = canvas.getContext('2d', { alpha: false });
+
+const bufferCanvas = document.createElement('canvas');
+const bufferCtx = bufferCanvas.getContext('2d', { alpha: false });
+
+let width = window.innerWidth;
+let height = window.innerHeight;
+const resizeCanvas = () => {
+  width = window.innerWidth;
+  height = window.innerHeight;
+  canvas.width = width;
+  canvas.height = height;
+  bufferCanvas.width = width;
+  bufferCanvas.height = height;
+  bufferCtx.font = `${config.fontSize}px monospace`;
+  ctx.font = `${config.fontSize}px monospace`;
+};
+
+const config = {
+  fontSize: 20,
+  particleSpacing: 24,
+  repulsionRadius: 200,
+  repulsionForce: 2.5,
+  returnForce: 0.05,
+  friction: 0.95,
+  maxSpeed: 40,
+  glowIntensity: 0.8
+};
+
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+const characters = '0123456789ABCDEF';
+
+class Particle {
+  constructor(x, y) {
+    this.homeX = x;
+    this.homeY = y;
+    this.x = x;
+    this.y = y;
+    this.vx = 0;
+    this.vy = 0;
+    this.char = characters[Math.floor(Math.random() * characters.length)];
+    this.energy = 0;  // Energy level for visual effects
+  }
+
+  update(mouseX, mouseY) {
+    const dx = this.x - mouseX;
+    const dy = this.y - mouseY;
+    const dist = dx * dx + dy * dy;
+    
+    // More dramatic repulsion
+    if (dist < config.repulsionRadius * config.repulsionRadius) {
+      const force = config.repulsionForce / (Math.sqrt(dist) + 1);
+      this.vx += dx * force;
+      this.vy += dy * force;
+      this.energy = 1;  // Energize particle when affected
+    }
+    
+    // Return to home position
+    const homeForce = config.returnForce;
+    this.vx += (this.homeX - this.x) * homeForce;
+    this.vy += (this.homeY - this.y) * homeForce;
+    
+    // Speed limiting for stability
+    const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+    if (speed > config.maxSpeed) {
+      this.vx = (this.vx / speed) * config.maxSpeed;
+      this.vy = (this.vy / speed) * config.maxSpeed;
+    }
+    
+    // Apply friction
+    this.vx *= config.friction;
+    this.vy *= config.friction;
+    
+    // Update position
+    this.x += this.vx;
+    this.y += this.vy;
+    
+    // Decay energy
+    this.energy *= 0.95;
+    
+    // Randomly change character (more frequent when energized)
+    if (Math.random() < (0.02 + this.energy * 0.2)) {
+      this.char = characters[Math.floor(Math.random() * characters.length)];
+    }
+  }
+
+  draw(ctx) {
+    // Apply glow effect based on energy and velocity
+    const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+    const intensity = Math.min(1, (speed / config.maxSpeed) + this.energy);
+    
+    if (intensity > 0.1) {
+      //ctx.shadowColor = '#0f0';
+      //ctx.shadowBlur = intensity * 15;
+      ctx.fillStyle = `rgb(0, ${Math.floor(200 + intensity * 55)}, 0)`;
+    } else {
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#0f0';
+    }
+    
+    ctx.fillText(this.char, this.x, this.y);
+  }
+}
+
+// Create particle grid
+const particles = [];
+const cols = Math.floor(width / config.particleSpacing);
+const rows = Math.floor(height / config.particleSpacing);
+
+for (let i = 0; i < cols; i++) {
+  for (let j = 0; j < rows; j++) {
+    particles.push(new Particle(
+      i * config.particleSpacing,
+      j * config.particleSpacing
+    ));
+  }
+}
+
+// Track mouse position with interpolation for smoother effect
+let mouseX = width / 2;
+let mouseY = height / 2;
+let targetX = mouseX;
+let targetY = mouseY;
+
+canvas.addEventListener('mousemove', (e) => {
+  targetX = e.clientX;
+  targetY = e.clientY;
+});
+
+canvas.addEventListener('touchmove', (e) => {
+  e.preventDefault();
+  targetX = e.touches[0].clientX;
+  targetY = e.touches[0].clientY;
+}, { passive: false });
+
+// Set text properties
+ctx.font = `${config.fontSize}px monospace`;
+
+function animate() {
+  // Smooth mouse movement
+  mouseX += (targetX - mouseX) * 0.1;
+  mouseY += (targetY - mouseY) * 0.1;
+  
+  // Clear canvas
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
+  ctx.fillRect(0, 0, width, height);
+  
+  // Update and draw particles
+  for (let i = 0; i < particles.length; i++) {
+    const particle = particles[i];
+    particle.update(mouseX, mouseY);
+    particle.draw(ctx);
+  }
+  
+  requestAnimationFrame(animate);
+}
+
+animate();
+</script>
+</body>
+</html>
