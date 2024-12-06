@@ -1,0 +1,459 @@
+<html><head><base href="https://musicbox.com?v=2.9.0">
+</head><body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Harmony Synthesizer</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000;
+            font-family: 'Arial', sans-serif;
+            color: #fff;
+        }
+        #musicBox {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .control-panel {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+        }
+        .control-panel:hover {
+            opacity: 1;
+        }
+        button, select {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        button:hover, select:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+        #volumeControl, #tempoControl, #reverbControl, #delayControl, #filterControl, #gravityControl {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        input[type="range"]:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 15px;
+            height: 15px;
+            background: #fff;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+        #info {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            font-size: 14px;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+        }
+        #info:hover {
+            opacity: 1;
+        }
+        #particleCount {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            font-size: 14px;
+            opacity: 0.7;
+            z-index: 1000;
+        }
+        #visualization {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 900;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="musicBox"></canvas>
+    <svg id="visualization" width="800" height="600"></svg>
+    <div id="info">Cosmic Harmony Synthesizer v2.9.0</div>
+    <div id="particleCount">Particles: 88</div>
+    <div class="control-panel">
+        <button id="playPause">II</button>
+        <select id="colorScheme">
+            <option value="cosmic">Cosmic</option>
+            <option value="aurora">Aurora</option>
+            <option value="sunset">Sunset</option>
+            <option value="nebula">Nebula</option>
+            <option value="blackhole">Black Hole</option>
+            <option value="quantumFlux">Quantum Flux</option>
+        </select>
+        <select id="instrument">
+            <option value="crystal">Crystal</option>
+            <option value="stardust">Stardust</option>
+            <option value="pulsar">Pulsar</option>
+            <option value="quasar">Quasar</option>
+            <option value="supernova">Supernova</option>
+            <option value="cosmicStrings">Cosmic Strings</option>
+        </select>
+        <div id="volumeControl">
+            <span>🔊</span>
+            <input type="range" id="volume" min="0" max="1" step="0.1" value="0.5">
+        </div>
+        <div id="tempoControl">
+            <span>🎵</span>
+            <input type="range" id="tempo" min="60" max="240" step="1" value="120">
+            <span id="tempoValue">120 BPM</span>
+        </div>
+        <div id="reverbControl">
+            <span>🌌</span>
+            <input type="range" id="reverb" min="0" max="1" step="0.1" value="0.5">
+        </div>
+        <div id="delayControl">
+            <span>🔁</span>
+            <input type="range" id="delay" min="0" max="1" step="0.1" value="0.2">
+        </div>
+        <div id="filterControl">
+            <span>🎛️</span>
+            <input type="range" id="filter" min="20" max="20000" step="1" value="20000">
+        </div>
+        <div id="gravityControl">
+            <span>🌍</span>
+            <input type="range" id="gravity" min="0" max="1" step="0.01" value="0">
+        </div>
+        <button id="fullscreen">⛶</button>
+        <input type="number" id="particleInput" min="1" max="200" value="88" style="width: 50px;">
+        <button id="updateParticles">Update</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script>
+        const canvas = document.getElementById('musicBox');
+        const ctx = canvas.getContext('2d');
+        let width, height, centerX, centerY, radius;
+
+        function resizeCanvas() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+            centerX = width / 2;
+            centerY = height / 2;
+            radius = Math.min(width, height) * 0.45;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        let numPoints = 88;
+        let cycleLength = 360; // 6 minutes
+        let tempo = 120; // BPM
+        let gravity = 0;
+
+        let startTime;
+        let isPlaying = true;
+        let points = [];
+
+        const reverb = new Tone.Reverb({
+            decay: 5,
+            wet: 0.5
+        }).toDestination();
+
+        const delay = new Tone.PingPongDelay({
+            delayTime: 0.25,
+            feedback: 0.2,
+            wet: 0.2
+        }).connect(reverb);
+
+        const filter = new Tone.Filter({
+            type: "lowpass",
+            frequency: 20000,
+            rolloff: -12
+        }).connect(delay);
+
+        const synth = new Tone.PolySynth(Tone.FMSynth, {
+            harmonicity: 3,
+            modulationIndex: 10,
+            oscillator: {
+                type: "sine"
+            },
+            envelope: {
+                attack: 0.01,
+                decay: 0.2,
+                sustain: 0.2,
+                release: 0.5
+            },
+            modulation: {
+                type: "square"
+            },
+            modulationEnvelope: {
+                attack: 0.5,
+                decay: 0,
+                sustain: 1,
+                release: 0.5
+            }
+        }).connect(filter);
+
+        let currentInstrument = synth;
+
+        function getColor(i, scheme) {
+            const t = i / numPoints;
+            switch(scheme) {
+                case 'cosmic':
+                    return `hsl(${240 + t * 120}, ${80 + t * 20}%, ${40 + t * 20}%)`;
+                case 'aurora':
+                    return `hsl(${120 + t * 180}, ${90 - t * 30}%, ${50 + t * 20}%)`;
+                case 'sunset':
+                    return `hsl(${360 - t * 60}, ${80 + t * 20}%, ${50 + t * 30}%)`;
+                case 'nebula':
+                    return `hsl(${280 + t * 80}, ${70 + t * 30}%, ${30 + t * 40}%)`;
+                case 'blackhole':
+                    return `hsl(${200 + t * 60}, ${50 + t * 50}%, ${10 + t * 20}%)`;
+                case 'quantumFlux':
+                    return `hsl(${t * 360 * 3 % 360}, ${70 + Math.sin(t * Math.PI * 2) * 30}%, ${50 + Math.cos(t * Math.PI * 2) * 20}%)`;
+                default:
+                    return `hsl(${t * 360}, 80%, 60%)`;
+            }
+        }
+
+        function initPoints() {
+            points = [];
+            for (let i = 0; i < numPoints; i++) {
+                points.push({
+                    angle: 0,
+                    lastPlayTime: 0,
+                    velocity: 0
+                });
+            }
+        }
+
+        function init() {
+            startTime = Date.now();
+            initPoints();
+            animate();
+            initVisualization();
+        }
+
+        function animate() {
+            if (!isPlaying) return;
+
+            ctx.clearRect(0, 0, width, height);
+            const currentTime = (Date.now() - startTime) / 1000;
+
+            const colorScheme = document.getElementById('colorScheme').value;
+
+            ctx.globalCompositeOperation = 'lighter';
+
+            for (let i = 0; i < numPoints; i++) {
+                const point = points[i];
+                const baseSpeed = (2 * Math.PI * (i + 1) * tempo) / (cycleLength * 60);
+                point.velocity += gravity * 0.0001;
+                point.angle = (currentTime * baseSpeed + point.velocity) % (Math.PI * 2);
+
+                const x = centerX + Math.cos(point.angle) * radius * (1 - i / numPoints * 0.5);
+                const y = centerY + Math.sin(point.angle) * radius * (1 - i / numPoints * 0.5);
+
+                const gradient = ctx.createRadialGradient(x, y, 0, x, y, 15 + (numPoints - i) / 3);
+                const color = getColor(i, colorScheme);
+                gradient.addColorStop(0, color);
+                gradient.addColorStop(1, 'transparent');
+
+                ctx.beginPath();
+                ctx.arc(x, y, 15 + (numPoints - i) / 3, 0, Math.PI * 2);
+                ctx.fillStyle = gradient;
+                ctx.fill();
+
+                if (point.angle < 0.1 && (currentTime - point.lastPlayTime) > 0.1) {
+                    const note = Tone.Frequency(110 * (i + 1) / numPoints, "hz").toNote();
+                    currentInstrument.triggerAttackRelease(note, "16n");
+                    point.lastPlayTime = currentTime;
+                    updateVisualization(i, note);
+                }
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        // D3.js Visualization
+        let svg, noteCircles;
+
+        function initVisualization() {
+            svg = d3.select("#visualization");
+            const svgWidth = 800;
+            const svgHeight = 600;
+
+            noteCircles = svg.selectAll("circle")
+                .data(d3.range(numPoints))
+                .enter().append("circle")
+                .attr("cx", (d, i) => svgWidth / 2 + Math.cos(i * 2 * Math.PI / numPoints) * 250)
+                .attr("cy", (d, i) => svgHeight / 2 + Math.sin(i * 2 * Math.PI / numPoints) * 250)
+                .attr("r", 5)
+                .attr("fill", "white")
+                .attr("opacity", 0.5);
+        }
+
+        function updateVisualization(index, note) {
+            noteCircles.filter((d, i) => i === index)
+                .transition()
+                .duration(200)
+                .attr("r", 10)
+                .attr("fill", getColor(index, document.getElementById('colorScheme').value))
+                .attr("opacity", 1)
+                .transition()
+                .duration(800)
+                .attr("r", 5)
+                .attr("fill", "white")
+                .attr("opacity", 0.5);
+        }
+
+        document.getElementById('playPause').addEventListener('click', function() {
+            isPlaying = !isPlaying;
+            this.textContent = isPlaying ? 'II' : '▶';
+            if (isPlaying) {
+                startTime = Date.now() - (startTime ? Date.now() - startTime : 0);
+                animate();
+            }
+        });
+
+        document.getElementById('instrument').addEventListener('change', function() {
+            switch(this.value) {
+                case 'crystal':
+                    currentInstrument.set({
+                        harmonicity: 3,
+                        modulationIndex: 10
+                    });
+                    break;
+                case 'stardust':
+                    currentInstrument.set({
+                        harmonicity: 0.5,
+                        modulationIndex: 2
+                    });
+                    break;
+                case 'pulsar':
+                    currentInstrument.set({
+                        harmonicity: 2,
+                        modulationIndex: 8,
+                        oscillator: { type: 'triangle' }
+                    });
+                    break;
+                case 'quasar':
+                    currentInstrument.set({
+                        harmonicity: 4,
+                        modulationIndex: 15,
+                        oscillator: { type: 'sawtooth' }
+                    });
+                    break;
+                case 'supernova':
+                    currentInstrument.set({
+                        harmonicity: 5,
+                        modulationIndex: 20,
+                        oscillator: { type: 'square' }
+                    });
+                    break;
+                case 'cosmicStrings':
+                    currentInstrument.set({
+                        harmonicity: 1,
+                        modulationIndex: 5,
+                        oscillator: { type: 'sine' },
+                        envelope: {
+                            attack: 0.1,
+                            decay: 0.3,
+                            sustain: 0.4,
+                            release: 2
+                        }
+                    });
+                    break;
+            }
+        });
+
+        document.getElementById('volume').addEventListener('input', function() {
+            Tone.Destination.volume.rampTo(Tone.gainToDb(this.value), 0.1);
+        });
+
+        document.getElementById('tempo').addEventListener('input', function() {
+            tempo = parseInt(this.value);
+            document.getElementById('tempoValue').textContent = `${tempo} BPM`;
+        });
+
+        document.getElementById('reverb').addEventListener('input', function() {
+            reverb.wet.value = parseFloat(this.value);
+        });
+
+        document.getElementById('delay').addEventListener('input', function() {
+            delay.wet.value = parseFloat(this.value);
+        });
+
+        document.getElementById('filter').addEventListener('input', function() {
+            filter.frequency.value = parseFloat(this.value);
+        });
+
+        document.getElementById('gravity').addEventListener('input', function() {
+            gravity = parseFloat(this.value);
+        });
+
+        document.getElementById('fullscreen').addEventListener('click', function() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        });
+
+        document.getElementById('updateParticles').addEventListener('click', function() {
+            const newParticleCount = parseInt(document.getElementById('particleInput').value);
+            if (newParticleCount >= 1 && newParticleCount <= 200) {
+                numPoints = newParticleCount;
+                initPoints();
+                document.getElementById('particleCount').textContent = `Particles: ${numPoints}`;
+                initVisualization();
+            }
+        });
+
+        init();
+    </script>
+</body>
+</html>
+</body></html>
