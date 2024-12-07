@@ -1,0 +1,669 @@
+<html><head><base href="https://noosphereexplorer.com/3d-navigator"><title>Noosphere Explorer 3D Navigator - v1.5 Upgrade</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+  
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Roboto', sans-serif;
+    background-color: #111;
+    color: #fff;
+    overflow: hidden;
+  }
+  #container {
+    display: flex;
+    height: 100%;
+  }
+  #sidebar {
+    width: 300px;
+    background-color: rgba(30, 30, 30, 0.8);
+    padding: 20px;
+    overflow-y: auto;
+    backdrop-filter: blur(10px);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  #main-content {
+    flex-grow: 1;
+    position: relative;
+  }
+  #canvas {
+    width: 100%;
+    height: 100%;
+  }
+  h1, h2 {
+    color: #4CAF50;
+    font-weight: 300;
+  }
+  button {
+    background-color: #4CAF50;
+    color: #fff;
+    border: none;
+    padding: 12px;
+    margin: 5px 0;
+    width: 100%;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+    font-size: 14px;
+  }
+  button:hover {
+    background-color: #45a049;
+  }
+  #thought-input {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+  }
+  #overlay {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: rgba(30, 30, 30, 0.8);
+    padding: 15px;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+  }
+  #thought-stream {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    height: 120px;
+    overflow: hidden;
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    background: rgba(30, 30, 30, 0.8);
+    padding: 15px;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+  }
+  #update-log {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 300px;
+    height: 200px;
+    background: rgba(30, 30, 30, 0.8);
+    padding: 15px;
+    border-radius: 10px;
+    overflow-y: auto;
+    font-size: 14px;
+    backdrop-filter: blur(10px);
+  }
+  #legend {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(30, 30, 30, 0.8);
+    padding: 15px;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+  }
+  .legend-color {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    border-radius: 50%;
+  }
+  .stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .stat-value {
+    font-weight: bold;
+    color: #4CAF50;
+  }
+  .thought {
+    margin-bottom: 10px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 5px;
+  }
+  #node-details {
+    position: absolute;
+    background: rgba(30, 30, 30, 0.9);
+    color: #fff;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    pointer-events: none;
+    display: none;
+    max-width: 200px;
+    backdrop-filter: blur(5px);
+  }
+  #upgrade-notification {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(76, 175, 80, 0.9);
+    color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 18px;
+    z-index: 1000;
+    display: none;
+  }
+  #search-bar {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+  }
+</style>
+</head>
+<body>
+<div id="container">
+  <div id="sidebar">
+    <h1>Noosphere Explorer v1.5</h1>
+    <h2>Navigation</h2>
+    <button onclick="zoomIn()">Zoom In</button>
+    <button onclick="zoomOut()">Zoom Out</button>
+    <button onclick="rotateLeft()">Rotate Left</button>
+    <button onclick="rotateRight()">Rotate Right</button>
+    <h2>Interactions</h2>
+    <button onclick="addThought()">Add Thought</button>
+    <input type="text" id="thought-input" placeholder="Enter a thought...">
+    <button onclick="searchThoughts()">Search Thoughts</button>
+    <input type="text" id="search-bar" placeholder="Search the noosphere...">
+    <button onclick="analyzePatterns()">Analyze Patterns</button>
+    <h2>Stats</h2>
+    <div class="stat">
+      <span>Active Nodes:</span>
+      <span id="node-count" class="stat-value">1,234,567</span>
+    </div>
+    <div class="stat">
+      <span>Connections:</span>
+      <span id="connection-count" class="stat-value">7,654,321</span>
+    </div>
+    <div class="stat">
+      <span>Thought Velocity:</span>
+      <span id="thought-velocity" class="stat-value">1,337 t/s</span>
+    </div>
+    <div class="stat">
+      <span>Resonance Index:</span>
+      <span id="resonance-index" class="stat-value">89.7%</span>
+    </div>
+  </div>
+  <div id="main-content">
+    <canvas id="canvas"></canvas>
+    <div id="overlay">
+      <h2>Noosphere Status</h2>
+      <div class="stat">
+        <span>Global Consciousness:</span>
+        <span id="consciousness-level" class="stat-value">Expanding</span>
+      </div>
+      <div class="stat">
+        <span>Dominant Meme:</span>
+        <span id="dominant-meme" class="stat-value">Quantum Entanglement</span>
+      </div>
+      <div class="stat">
+        <span>Emergent Paradigm:</span>
+        <span id="emergent-paradigm" class="stat-value">Holistic Integration</span>
+      </div>
+    </div>
+    <div id="thought-stream"></div>
+    <div id="update-log"></div>
+    <div id="legend">
+      <h3>Node Types</h3>
+      <div class="legend-item"><div class="legend-color" style="background-color: #4CAF50;"></div>Concept</div>
+      <div class="legend-item"><div class="legend-color" style="background-color: #2196F3;"></div>Memory</div>
+      <div class="legend-item"><div class="legend-color" style="background-color: #FFC107;"></div>Emotion</div>
+      <div class="legend-item"><div class="legend-color" style="background-color: #E91E63;"></div>Inspiration</div>
+      <div class="legend-item"><div class="legend-color" style="background-color: #9C27B0;"></div>Archetype</div>
+      <h3>Connection Types</h3>
+      <div class="legend-item"><div class="legend-color" style="background-color: #FFFFFF;"></div>Logical</div>
+      <div class="legend-item"><div class="legend-color" style="background-color: #FF4081;"></div>Emotional</div>
+      <div class="legend-item"><div class="legend-color" style="background-color: #18FFFF;"></div>Intuitive</div>
+      <div class="legend-item"><div class="legend-color" style="background-color: #FFD600;"></div>Synchronistic</div>
+    </div>
+    <div id="node-details"></div>
+  </div>
+</div>
+<div id="upgrade-notification">
+  Upgrade to v1.5 complete! New features activated.
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, (window.innerWidth - 300) / window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({canvas: document.getElementById('canvas'), antialias: true});
+renderer.setSize(window.innerWidth - 300, window.innerHeight);
+
+// Create a sphere to represent the noosphere
+const geometry = new THREE.SphereGeometry(5, 64, 64);
+const material = new THREE.MeshBasicMaterial({color: 0x4CAF50, wireframe: true});
+const noosphere = new THREE.Mesh(geometry, material);
+scene.add(noosphere);
+
+// Node types and colors (updated for v1.5)
+const nodeTypes = [
+  { type: 'Concept', color: 0x4CAF50 },
+  { type: 'Memory', color: 0x2196F3 },
+  { type: 'Emotion', color: 0xFFC107 },
+  { type: 'Inspiration', color: 0xE91E63 },
+  { type: 'Archetype', color: 0x9C27B0 }
+];
+
+// Connection types and colors (updated for v1.5)
+const connectionTypes = [
+  { type: 'Logical', color: 0xFFFFFF },
+  { type: 'Emotional', color: 0xFF4081 },
+  { type: 'Intuitive', color: 0x18FFFF },
+  { type: 'Synchronistic', color: 0xFFD600 }
+];
+
+// Create thought nodes
+const nodeGeometry = new THREE.SphereGeometry(0.05, 16, 16);
+const nodes = new THREE.Group();
+for (let i = 0; i < 1000; i++) {
+  const nodeType = nodeTypes[Math.floor(Math.random() * nodeTypes.length)];
+  const nodeMaterial = new THREE.MeshBasicMaterial({color: nodeType.color});
+  const node = new THREE.Mesh(nodeGeometry, nodeMaterial);
+  const theta = Math.random() * Math.PI * 2;
+  const phi = Math.acos(2 * Math.random() - 1);
+  const radius = 4.5 + Math.random();
+  node.position.x = radius * Math.sin(phi) * Math.cos(theta);
+  node.position.y = radius * Math.sin(phi) * Math.sin(theta);
+  node.position.z = radius * Math.cos(phi);
+  node.userData = {
+    type: nodeType.type,
+    connections: Math.floor(Math.random() * 10) + 1,
+    strength: Math.floor(Math.random() * 100) + 1,
+    created: new Date(Date.now() - Math.random() * 1000 * 60 * 60 * 24 * 365).toISOString().split('T')[0],
+    resonance: Math.random().toFixed(2)
+  };
+  nodes.add(node);
+}
+scene.add(nodes);
+
+// Create connections
+const connections = new THREE.Group();
+for (let i = 0; i < 500; i++) {
+  const connectionType = connectionTypes[Math.floor(Math.random() * connectionTypes.length)];
+  const connectionMaterial = new THREE.LineBasicMaterial({color: connectionType.color, opacity: 0.3, transparent: true});
+  const geometry = new THREE.BufferGeometry().setFromPoints([
+    nodes.children[Math.floor(Math.random() * nodes.children.length)].position,
+    nodes.children[Math.floor(Math.random() * nodes.children.length)].position
+  ]);
+  const connection = new THREE.Line(geometry, connectionMaterial);
+  connections.add(connection);
+}
+scene.add(connections);
+
+camera.position.z = 10;
+
+// Add subtle particle effect to background
+const particlesGeometry = new THREE.BufferGeometry();
+const particlesCnt = 5000;
+const posArray = new Float32Array(particlesCnt * 3);
+
+for(let i = 0; i < particlesCnt * 3; i++) {
+  posArray[i] = (Math.random() - 0.5) * 15;
+}
+
+particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+
+const particlesMaterial = new THREE.PointsMaterial({
+  size: 0.005,
+  color: 0x4CAF50,
+  transparent: true,
+  opacity: 0.5,
+});
+
+const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+scene.add(particlesMesh);
+
+// Add ambient light to make sure everything is visible
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+scene.add(ambientLight);
+
+// Add directional light to enhance visibility
+const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+directionalLight.position.set(5, 5, 5);
+scene.add(directionalLight);
+
+function animate() {
+  requestAnimationFrame(animate);
+  noosphere.rotation.x += 0.001;
+  noosphere.rotation.y += 0.001;
+  nodes.rotation.x += 0.001;
+  nodes.rotation.y += 0.001;
+  connections.rotation.x += 0.001;
+  connections.rotation.y += 0.001;
+  particlesMesh.rotation.x += 0.0005;
+  particlesMesh.rotation.y += 0.0005;
+  renderer.render(scene, camera);
+}
+animate();
+
+// Raycaster for node interaction
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+// Node details element
+const nodeDetails = document.getElementById('node-details');
+
+// Event listener for mouse movement
+document.addEventListener('mousemove', onMouseMove, false);
+
+function onMouseMove(event) {
+  // Calculatemouse position in normalized device coordinates
+  mouse.x = ((event.clientX - 300) / (window.innerWidth - 300)) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+  // Update the picking ray with the camera and mouse position
+  raycaster.setFromCamera(mouse, camera);
+
+  // Calculate objects intersecting the picking ray
+  const intersects = raycaster.intersectObjects(nodes.children);
+
+  if (intersects.length > 0) {
+    const intersection = intersects[0];
+    const node = intersection.object;
+    
+    // Display node details
+    nodeDetails.style.display = 'block';
+    nodeDetails.style.left = event.clientX + 10 + 'px';
+    nodeDetails.style.top = event.clientY + 10 + 'px';
+    nodeDetails.innerHTML = `
+      <strong>Type:</strong> ${node.userData.type}<br>
+      <strong>Connections:</strong> ${node.userData.connections}<br>
+      <strong>Strength:</strong> ${node.userData.strength}<br>
+      <strong>Created:</strong> ${node.userData.created}<br>
+      <strong>Resonance:</strong> ${node.userData.resonance}
+    `;
+  } else {
+    // Hide node details if not hovering over a node
+    nodeDetails.style.display = 'none';
+  }
+}
+
+// Navigation functions
+function zoomIn() {
+  camera.position.z = Math.max(6, camera.position.z - 1);
+}
+
+function zoomOut() {
+  camera.position.z = Math.min(15, camera.position.z + 1);
+}
+
+function rotateLeft() {
+  noosphere.rotation.y -= 0.1;
+  nodes.rotation.y -= 0.1;
+  connections.rotation.y -= 0.1;
+}
+
+function rotateRight() {
+  noosphere.rotation.y += 0.1;
+  nodes.rotation.y += 0.1;
+  connections.rotation.y += 0.1;
+}
+
+// Interaction functions
+function addThought() {
+  const thought = document.getElementById('thought-input').value;
+  if (thought) {
+    addToThoughtStream(thought);
+    document.getElementById('thought-input').value = '';
+    
+    // Add new node to visualization
+    const nodeType = nodeTypes[Math.floor(Math.random() * nodeTypes.length)];
+    const nodeMaterial = new THREE.MeshBasicMaterial({color: nodeType.color});
+    const newNode = new THREE.Mesh(nodeGeometry, nodeMaterial);
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.acos(2 * Math.random() - 1);
+    const radius = 4.5 + Math.random();
+    newNode.position.x = radius * Math.sin(phi) * Math.cos(theta);
+    newNode.position.y = radius * Math.sin(phi) * Math.sin(theta);
+    newNode.position.z = radius * Math.cos(phi);
+    newNode.userData = {
+      type: nodeType.type,
+      connections: 1,
+      strength: 1,
+      created: new Date().toISOString().split('T')[0],
+      resonance: Math.random().toFixed(2)
+    };
+    nodes.add(newNode);
+    
+    // Add new connection
+    const connectionType = connectionTypes[Math.floor(Math.random() * connectionTypes.length)];
+    const connectionMaterial = new THREE.LineBasicMaterial({color: connectionType.color, opacity: 0.3, transparent: true});
+    const geometry = new THREE.BufferGeometry().setFromPoints([
+      newNode.position,
+      nodes.children[Math.floor(Math.random() * (nodes.children.length - 1))].position
+    ]);
+    const connection = new THREE.Line(geometry, connectionMaterial);
+    connections.add(connection);
+    
+    // Update stats
+    updateNodeCount(1);
+    updateConnectionCount(1);
+    updateResonanceIndex();
+    addLogEntry(`New ${nodeType.type} thought added to the noosphere`);
+  }
+}
+
+function searchThoughts() {
+  const searchTerm = document.getElementById('search-bar').value.toLowerCase();
+  if (searchTerm) {
+    const matchingNodes = nodes.children.filter(node => 
+      node.userData.type.toLowerCase().includes(searchTerm)
+    );
+    highlightNodes(matchingNodes);
+    addLogEntry(`Searched for "${searchTerm}". Found ${matchingNodes.length} matching nodes.`);
+  }
+}
+
+function highlightNodes(nodesToHighlight) {
+  nodes.children.forEach(node => {
+    if (nodesToHighlight.includes(node)) {
+      node.material.emissive = new THREE.Color(0xFFFFFF);
+      node.material.emissiveIntensity = 0.5;
+    } else {
+      node.material.emissive = new THREE.Color(0x000000);
+      node.material.emissiveIntensity = 0;
+    }
+  });
+}
+
+function analyzePatterns() {
+  const patterns = [
+    "Fractal recursion in thought structures",
+    "Emergence of collective archetypes",
+    "Quantum-like superposition of ideas",
+    "Nonlinear causality in memetic spread",
+    "Self-organizing critical states in belief systems"
+  ];
+  const randomPattern = patterns[Math.floor(Math.random() * patterns.length)];
+  addLogEntry(`Pattern analysis complete. Detected: ${randomPattern}`);
+}
+
+// Update functions
+function updateNodeCount(delta) {
+  const nodeCount = document.getElementById('node-count');
+  const currentCount = parseInt(nodeCount.textContent.replace(/,/g, ''));
+  nodeCount.textContent = (currentCount + delta).toLocaleString();
+}
+
+function updateConnectionCount(delta) {
+  const connectionCount = document.getElementById('connection-count');
+  const currentCount = parseInt(connectionCount.textContent.replace(/,/g, ''));
+  connectionCount.textContent = (currentCount + delta).toLocaleString();
+}
+
+function updateThoughtVelocity() {
+  const thoughtVelocity = document.getElementById('thought-velocity');
+  const currentVelocity = parseInt(thoughtVelocity.textContent.split(' ')[0]);
+  const newVelocity = currentVelocity + Math.floor(Math.random() * 21) - 10; // Random change between -10 and 10
+  thoughtVelocity.textContent = `${Math.max(0, newVelocity)} t/s`;
+}
+
+function updateConsciousnessLevel() {
+  const levels = ["Dormant", "Stirring", "Awakening", "Expanding", "Interconnecting", "Harmonizing", "Transcending"];
+  const currentLevel = document.getElementById('consciousness-level').textContent;
+  const currentIndex = levels.indexOf(currentLevel);
+  const newIndex = (currentIndex + Math.floor(Math.random() * 3) - 1 + levels.length) % levels.length;
+  document.getElementById('consciousness-level').textContent = levels[newIndex];
+}
+
+function updateDominantMeme() {
+  const memes = [
+    "Quantum Entanglement",
+    "Collective Evolution",
+    "Fractal Time",
+    "Holographic Universe",
+    "Synchronicity",
+    "Morphic Resonance",
+    "Cosmic Consciousness",
+    "Singularity",
+    "Gaia Hypothesis",
+    "Noetic Science"
+  ];
+  const currentMeme = document.getElementById('dominant-meme').textContent;
+  let newMeme;
+  do {
+    newMeme = memes[Math.floor(Math.random() * memes.length)];
+  } while (newMeme === currentMeme);
+  document.getElementById('dominant-meme').textContent = newMeme;
+}
+
+function updateEmergentParadigm() {
+  const paradigms = [
+    "Holistic Integration",
+    "Systemic Synergy",
+    "Quantum Coherence",
+    "Evolutionary Transcendence",
+    "Cosmic Harmony",
+    "Interconnected Consciousness",
+    "Nonlinear Dynamics",
+    "Empathic Resonance",
+    "Holographic Wholeness",
+    "Unified Field Awareness"
+  ];
+  const currentParadigm = document.getElementById('emergent-paradigm').textContent;
+  let newParadigm;
+  do {
+    newParadigm = paradigms[Math.floor(Math.random() * paradigms.length)];
+  } while (newParadigm === currentParadigm);
+  document.getElementById('emergent-paradigm').textContent = newParadigm;
+}
+
+function updateResonanceIndex() {
+  const resonanceIndex = document.getElementById('resonance-index');
+  const currentResonance = parseFloat(resonanceIndex.textContent);
+  const newResonance = Math.min(100, Math.max(0, currentResonance + (Math.random() - 0.5) * 5)).toFixed(1);
+  resonanceIndex.textContent = newResonance + '%';
+}
+
+// Thought stream
+const thoughtStream = document.getElementById('thought-stream');
+function addToThoughtStream(thought) {
+  const thoughtElement = document.createElement('div');
+  thoughtElement.className = 'thought';
+  thoughtElement.textContent = thought;
+  thoughtStream.prepend(thoughtElement);
+  if (thoughtStream.children.length > 5) {
+    thoughtStream.removeChild(thoughtStream.lastChild);
+  }
+}
+
+// Update log
+const updateLog = document.getElementById('update-log');
+function addLogEntry(message) {
+  const entry = document.createElement('div');
+  entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+  updateLog.appendChild(entry);
+  updateLog.scrollTop = updateLog.scrollHeight;
+}
+
+// Simulated updates
+function simulateUpdates() {
+  if (Math.random() < 0.3) {
+    updateNodeCount(Math.floor(Math.random() * 5) + 1);
+    addLogEntry("New nodes emerged in the noosphere");
+  }
+  if (Math.random() < 0.2) {
+    updateConnectionCount(Math.floor(Math.random() * 10) + 1);
+    addLogEntry("New connections formed between thoughts");
+  }
+  updateThoughtVelocity();
+  if (Math.random() < 0.1) {
+    updateConsciousnessLevel();
+    addLogEntry("Global consciousness level shifted");
+  }
+  if (Math.random() < 0.05) {
+    updateDominantMeme();
+    addLogEntry("New dominant meme detected in the noosphere");
+  }
+  if (Math.random() < 0.05) {
+    updateEmergentParadigm();
+    addLogEntry("Emergent paradigm shift observed");
+  }
+  updateResonanceIndex();
+  
+  // Simulate random thought
+  if (Math.random() < 0.2) {
+    const thoughts = [
+      "The interconnectedness of all things ripples through the noosphere.",
+      "Quantum entanglement mirrors the interwoven tapestry of human consciousness.",
+      "As above, so below; as within, so without.",
+      "The observer effect extends beyond particles to societal shifts.",
+      "Collective dreams shape the fabric of reality.",
+      "Time is not linear, but a complex web of possibilities.",
+      "The boundaries between minds blur in this shared cognitive space.",
+      "Empathy is the key to unlocking collective wisdom.",
+      "Innovation emerges at the intersection of diverse ideas.",
+      "The noosphere pulses with the rhythm of seven billion minds.",
+      "Archetypes arise as emergent properties of collective thought.",
+      "Synchronicity reveals the hidden connections of the universe.",
+      "The holographic principle applies to consciousness itself.",
+      "Fractal patterns of thought give rise to infinite complexity.",
+      "The noosphere evolves towards ever-increasing coherence."
+    ];
+    addToThoughtStream(thoughts[Math.floor(Math.random() * thoughts.length)]);
+  }
+  
+  setTimeout(simulateUpdates, Math.random() * 3000 + 1000);
+}
+
+// Resize handler
+window.addEventListener('resize', () => {
+  camera.aspect = (window.innerWidth - 300) / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth - 300, window.innerHeight);
+});
+
+// Start simulation
+simulateUpdates();
+addLogEntry("Noosphere Explorer v1.5 activated");
+addLogEntry("New features: Archetype nodes, Synchronistic connections, Resonance Index, and Enhanced Pattern Analysis");
+
+// Show upgrade notification
+const upgradeNotification = document.getElementById('upgrade-notification');
+upgradeNotification.style.display = 'block';
+setTimeout(() => {
+  upgradeNotification.style.display = 'none';
+}, 5000);
+
+</script>
+</body></html>
