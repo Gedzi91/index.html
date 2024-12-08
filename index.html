@@ -1,0 +1,174 @@
+<html><head><base href="https://Latent.space.princeps"><title>Latent Space Princeps</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body {
+  background-color: #111;
+  color: #fff;
+  font-family: 'Courier New', monospace;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+#canvas-container {
+  width: 100vw;
+  height: 100vh;
+}
+
+canvas {
+  border: none;
+  width: 100%;
+  height: 100%;
+}
+
+</style>
+</head>
+<body>
+  <div id="canvas-container">
+    <canvas id="canvas"></canvas>
+  </div>
+  
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    let numParticles = 200;
+    let particles = [];
+    let hueOffset = 0;
+    let minDistance = 50;
+    let maxDistance = 150;
+    let distanceDelta = 1;
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    
+    class Particle {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.vx = Math.random() * 2 - 1;
+        this.vy = Math.random() * 2 - 1;
+        this.hue = Math.random() * 360;
+        this.size = Math.random() * 3 + 1;
+        this.connections = [];
+      }
+
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+
+        if (this.x < 0 || this.x > canvas.width) {
+          this.vx *= -1;
+        }
+
+        if (this.y < 0 || this.y > canvas.height) {
+          this.vy *= -1;
+        }
+        
+        this.hue = (this.hue + 1) % 360;
+      }
+
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = `hsl(${this.hue}, 100%, 50%)`;
+        ctx.fill();
+        ctx.closePath();
+      }
+      
+      connect(other) {
+        if (!this.connections.includes(other) && this !== other) {
+          this.connections.push(other);
+          other.connections.push(this);
+        }
+      }
+    }
+
+    function init() {
+      particles = [];
+      for (let i = 0; i < numParticles; i++) {
+        const x = Math.random() * canvas.width;
+        const y = Math.random() * canvas.height;
+        particles.push(new Particle(x, y));
+      }
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (let i = 0; i < particles.length; i++) {
+        particles[i].update();
+        particles[i].draw();
+
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+
+          if (distance < maxDistance) {
+            particles[i].connect(particles[j]);
+
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.strokeStyle = `rgba(255, 255, 255, ${1 - distance / maxDistance})`;
+            ctx.stroke();
+            ctx.closePath();
+          }
+        }
+
+        for (let k = 0; k < particles[i].connections.length; k++) {
+          const connection = particles[i].connections[k];
+          const dx = particles[i].x - connection.x;
+          const dy = particles[i].y - connection.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+
+          const cx = (particles[i].x + connection.x) / 2;
+          const cy = (particles[i].y + connection.y) / 2;
+          const angle = Math.atan2(dy, dx);
+          const curve = {
+            x: cx + Math.cos(angle + Math.PI / 2) * distance * 0.2,
+            y: cy + Math.sin(angle + Math.PI / 2) * distance * 0.2
+          };
+          ctx.quadraticCurveTo(curve.x, curve.y, connection.x, connection.y);
+
+          const gradient = ctx.createLinearGradient(particles[i].x, particles[i].y, connection.x, connection.y);
+          gradient.addColorStop(0, `hsl(${(particles[i].hue + hueOffset) % 360}, 100%, 50%)`);
+          gradient.addColorStop(1, `hsl(${(connection.hue + hueOffset) % 360}, 100%, 50%)`);
+          
+          const lineWidth = Math.max(1, 5 - distance / 20);
+          ctx.lineWidth = lineWidth * (1 - (maxDistance - distance) / (maxDistance - minDistance));
+          ctx.strokeStyle = gradient;
+          ctx.stroke();
+          ctx.closePath();
+        }
+      }
+      
+      hueOffset = (hueOffset + 1) % 360;
+      
+      maxDistance += distanceDelta;
+      if (maxDistance > 200 || maxDistance < 100) {
+        distanceDelta *= -1;
+      }
+    }
+
+    init();
+    animate();
+  </script>
+</body>
+</html>
