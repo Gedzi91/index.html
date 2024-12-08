@@ -1,0 +1,609 @@
+<html><head><base href="." /><meta charset="UTF-8"/><meta content="width=device-width, initial-scale=1" name="viewport"/><meta content="width=device-width" name="viewport"/>
+<title>3D Nyan Cat vs Evil Nyan Cat</title>
+<style>
+body { 
+    margin: 0;
+    background: linear-gradient(45deg, #1a1a2e, #16213e);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+}
+
+.controls {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    border-radius: 10px;
+    color: white;
+}
+
+.rainbow-trail {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.speech-bubble {
+    position: absolute;
+    background: white;
+    border-radius: 15px;
+    padding: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    display: none;
+}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+
+<div class="controls">
+    <h3>Nyan Cat Controls:</h3>
+    <p>Left click + drag to rotate</p>
+    <p>Right click + drag to pan</p>
+    <p>Scroll to zoom</p>
+</div>
+<div id="lizardSpeech" class="speech-bubble">WHERES MY OWNER?!?!?!</div>
+
+<script>
+// Set up scene
+const scene = new THREE.Scene();
+
+// Add skybox
+const loader = new THREE.TextureLoader();
+const texture = loader.load('/a/1db63550-d6fe-4fb1-b974-64bc5b684602');
+const skyboxGeometry = new THREE.BoxGeometry(1000, 1000, 1000);
+const skyboxMaterial = new THREE.MeshBasicMaterial({
+    map: texture,
+    side: THREE.BackSide
+});
+const skybox = new THREE.Mesh(skyboxGeometry, skyboxMaterial);
+scene.add(skybox);
+
+// Set up camera and renderer
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+// Add controls
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.05;
+
+// Create Nyan Cat body (Pop-tart)
+const poptartGeometry = new THREE.BoxGeometry(2, 1, 1);
+const poptartMaterial = new THREE.MeshPhongMaterial({ color: 0xFFC0CB }); // Pink
+const poptart = new THREE.Mesh(poptartGeometry, poptartMaterial);
+
+// Create cat head
+const headGeometry = new THREE.BoxGeometry(0.8, 0.8, 0.8);
+const headMaterial = new THREE.MeshPhongMaterial({ color: 0x808080 }); // Grey
+const head = new THREE.Mesh(headGeometry, headMaterial);
+head.position.x = 1.2;
+head.position.y = 0.2;
+
+// Create eyes
+const eyeGeometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
+const eyeMaterial = new THREE.MeshPhongMaterial({ color: 0x000000 });
+const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+const rightEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+
+leftEye.position.set(1.4, 0.3, 0.2);
+rightEye.position.set(1.4, 0.3, -0.2);
+
+// Create rainbow trail
+const rainbowColors = [
+    0xFF0000, // Red
+    0xFF7F00, // Orange
+    0xFFFF00, // Yellow
+    0x00FF00, // Green
+    0x0000FF, // Blue
+    0x4B0082  // Indigo
+];
+
+const rainbowTrail = rainbowColors.map((color, index) => {
+    const trailGeometry = new THREE.BoxGeometry(0.5, 0.6, 1);
+    const trailMaterial = new THREE.MeshPhongMaterial({ color: color });
+    const trail = new THREE.Mesh(trailGeometry, trailMaterial);
+    trail.position.x = -1 - (index * 0.5);
+    return trail;
+});
+
+// Create cat ears
+const earGeometry = new THREE.ConeGeometry(0.2, 0.4, 4);
+const earMaterial = new THREE.MeshPhongMaterial({ color: 0x808080 });
+const leftEar = new THREE.Mesh(earGeometry, earMaterial);
+const rightEar = new THREE.Mesh(earGeometry, earMaterial);
+
+leftEar.position.set(1.2, 0.6, 0.3);
+rightEar.position.set(1.2, 0.6, -0.3);
+leftEar.rotation.x = -0.3;
+rightEar.rotation.x = 0.3;
+
+// Create mouth
+const mouthGeometry = new THREE.BoxGeometry(0.1, 0.1, 0.3);
+const mouthMaterial = new THREE.MeshPhongMaterial({ color: 0x000000 });
+const mouth = new THREE.Mesh(mouthGeometry, mouthMaterial);
+mouth.position.set(1.5, 0.1, 0);
+
+// Create legs
+const legGeometry = new THREE.BoxGeometry(0.2, 0.4, 0.2);
+const legMaterial = new THREE.MeshPhongMaterial({ color: 0x808080 });
+const legs = [];
+const legPositions = [
+    [-0.6, -0.6, 0.3],  // Front right
+    [-0.6, -0.6, -0.3], // Front left
+    [0.6, -0.6, 0.3],   // Back right
+    [0.6, -0.6, -0.3]   // Back left
+];
+
+for (let pos of legPositions) {
+    const leg = new THREE.Mesh(legGeometry, legMaterial);
+    leg.position.set(...pos);
+    legs.push(leg);
+}
+
+// Create tail
+const tailGeometry = new THREE.CylinderGeometry(0.1, 0.05, 0.8);
+const tailMaterial = new THREE.MeshPhongMaterial({ color: 0x808080 });
+const tail = new THREE.Mesh(tailGeometry, tailMaterial);
+tail.position.set(-1.2, 0, 0);
+tail.rotation.z = Math.PI / 3;
+
+// Add lighting
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+const pointLight = new THREE.PointLight(0xffffff, 1);
+pointLight.position.set(5, 5, 5);
+
+scene.add(ambientLight);
+scene.add(pointLight);
+
+// Add everything to the scene
+scene.add(poptart);
+scene.add(head);
+scene.add(leftEye);
+scene.add(rightEye);
+rainbowTrail.forEach(trail => scene.add(trail));
+scene.add(leftEar);
+scene.add(rightEar);
+scene.add(mouth);
+legs.forEach(leg => scene.add(leg));
+scene.add(tail);
+
+// Add whiskers
+const whiskerGeometry = new THREE.CylinderGeometry(0.01, 0.01, 0.4);
+const whiskerMaterial = new THREE.MeshPhongMaterial({ color: 0xFFFFFF });
+const whiskers = [];
+const whiskerPositions = [
+    [1.4, 0.1, 0.2, 0, 0, Math.PI/6],    // Upper right
+    [1.4, 0.0, 0.2, 0, 0, 0],            // Middle right
+    [1.4, -0.1, 0.2, 0, 0, -Math.PI/6],  // Lower right
+    [1.4, 0.1, -0.2, 0, 0, Math.PI/6],   // Upper left
+    [1.4, 0.0, -0.2, 0, 0, 0],           // Middle left
+    [1.4, -0.1, -0.2, 0, 0, -Math.PI/6]  // Lower left
+];
+
+whiskerPositions.forEach(pos => {
+    const whisker = new THREE.Mesh(whiskerGeometry, whiskerMaterial);
+    whisker.position.set(pos[0], pos[1], pos[2]);
+    whisker.rotation.z = pos[5];
+    whiskers.push(whisker);
+});
+
+// Add nose
+const noseGeometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
+const noseMaterial = new THREE.MeshPhongMaterial({ color: 0xFFA0A0 });
+const nose = new THREE.Mesh(noseGeometry, noseMaterial);
+nose.position.set(1.6, 0.2, 0);
+
+// Add cheeks
+const cheekGeometry = new THREE.SphereGeometry(0.15, 8, 8);
+const cheekMaterial = new THREE.MeshPhongMaterial({ color: 0xFFAAAA, transparent: true, opacity: 0.3 });
+const leftCheek = new THREE.Mesh(cheekGeometry, cheekMaterial);
+const rightCheek = new THREE.Mesh(cheekGeometry, cheekMaterial);
+leftCheek.position.set(1.3, 0.1, 0.3);
+rightCheek.position.set(1.3, 0.1, -0.3);
+
+// Add to scene
+scene.add(nose);
+scene.add(leftCheek);
+scene.add(rightCheek);
+whiskers.forEach(whisker => scene.add(whisker));
+
+// Create Evil Nyan Cat
+const evilPoptartGeometry = new THREE.BoxGeometry(2, 1, 1);
+const waffleMaterial = new THREE.MeshPhongMaterial({ 
+    color: 0x8B4513, // Brown color
+    bumpScale: 0.05
+});
+
+// Create waffle pattern using repeated geometry
+const wafflePattern = new THREE.Group();
+const gridSize = 5;
+const segmentSize = 0.2;
+
+for (let i = 0; i < gridSize; i++) {
+    for (let j = 0; j < gridSize; j++) {
+        const indentGeometry = new THREE.BoxGeometry(segmentSize, 0.1, segmentSize);
+        const indentMaterial = new THREE.MeshPhongMaterial({ color: 0x654321 });
+        const indent = new THREE.Mesh(indentGeometry, indentMaterial);
+        
+        indent.position.set(
+            -0.8 + i * (segmentSize * 1.2),
+            0.5,
+            -0.4 + j * (segmentSize * 1.2)
+        );
+        wafflePattern.add(indent);
+    }
+}
+
+const evilPoptart = new THREE.Mesh(evilPoptartGeometry, waffleMaterial);
+evilPoptart.add(wafflePattern);
+evilPoptart.position.set(8, 0, 0);
+
+// Evil cat head (black)
+const evilHeadGeometry = new THREE.BoxGeometry(0.8, 0.8, 0.8);
+const evilHeadMaterial = new THREE.MeshPhongMaterial({ color: 0x000000 }); // Black
+const evilHead = new THREE.Mesh(evilHeadGeometry, evilHeadMaterial);
+evilHead.position.set(9.2, 0.2, 0);
+
+// Evil eyes (red and glowing)
+const evilEyeGeometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
+const evilEyeMaterial = new THREE.MeshPhongMaterial({ 
+    color: 0xFF0000,
+    emissive: 0xFF0000,
+    emissiveIntensity: 1
+});
+const evilLeftEye = new THREE.Mesh(evilEyeGeometry, evilEyeMaterial);
+const evilRightEye = new THREE.Mesh(evilEyeGeometry, evilEyeMaterial);
+
+evilLeftEye.position.set(9.4, 0.3, 0.2);
+evilRightEye.position.set(9.4, 0.3, -0.2);
+
+// Evil rainbow trail (darker colors)
+const evilRainbowColors = [
+    0x8B0000, // Dark Red
+    0x8B4513, // Dark Orange
+    0x8B8B00, // Dark Yellow
+    0x006400, // Dark Green
+    0x00008B, // Dark Blue
+    0x4B0082  // Indigo
+];
+
+const evilRainbowTrail = evilRainbowColors.map((color, index) => {
+    const trailGeometry = new THREE.BoxGeometry(0.5, 0.6, 1);
+    const trailMaterial = new THREE.MeshPhongMaterial({ color: color });
+    const trail = new THREE.Mesh(trailGeometry, trailMaterial);
+    trail.position.x = 7 - (index * 0.5);
+    return trail;
+});
+
+// Evil cat ears (pointed and black)
+const evilEarGeometry = new THREE.ConeGeometry(0.2, 0.6, 4); // Taller ears
+const evilEarMaterial = new THREE.MeshPhongMaterial({ color: 0x000000 });
+const evilLeftEar = new THREE.Mesh(evilEarGeometry, evilEarMaterial);
+const evilRightEar = new THREE.Mesh(evilEarGeometry, evilEarMaterial);
+
+evilLeftEar.position.set(9.2, 0.6, 0.3);
+evilRightEar.position.set(9.2, 0.6, -0.3);
+evilLeftEar.rotation.x = -0.3;
+evilRightEar.rotation.x = 0.3;
+
+// Evil mouth (fanged)
+const evilMouthGeometry = new THREE.BoxGeometry(0.2, 0.2, 0.4);
+const evilMouthMaterial = new THREE.MeshPhongMaterial({ color: 0xFF0000 });
+const evilMouth = new THREE.Mesh(evilMouthGeometry, evilMouthMaterial);
+evilMouth.position.set(9.5, 0.1, 0);
+
+// Evil legs
+const evilLegGeometry = new THREE.BoxGeometry(0.2, 0.4, 0.2);
+const evilLegMaterial = new THREE.MeshPhongMaterial({ color: 0x000000 });
+const evilLegs = [];
+const evilLegPositions = [
+    [7.4, -0.6, 0.3],
+    [7.4, -0.6, -0.3],
+    [8.6, -0.6, 0.3],
+    [8.6, -0.6, -0.3]
+];
+
+for (let pos of evilLegPositions) {
+    const leg = new THREE.Mesh(evilLegGeometry, evilLegMaterial);
+    leg.position.set(...pos);
+    evilLegs.push(leg);
+}
+
+// Evil pointed tail
+const evilTailGeometry = new THREE.ConeGeometry(0.1, 0.8, 4);
+const evilTailMaterial = new THREE.MeshPhongMaterial({ color: 0x000000 });
+const evilTail = new THREE.Mesh(evilTailGeometry, evilTailMaterial);
+evilTail.position.set(6.8, 0, 0);
+evilTail.rotation.z = -Math.PI / 3;
+
+// Add evil Nyan cat parts to scene
+scene.add(evilPoptart);
+scene.add(evilHead);
+scene.add(evilLeftEye);
+scene.add(evilRightEye);
+evilRainbowTrail.forEach(trail => scene.add(trail));
+scene.add(evilLeftEar);
+scene.add(evilRightEar);
+scene.add(evilMouth);
+evilLegs.forEach(leg => scene.add(leg));
+scene.add(evilTail);
+
+// Create Donut
+const donutGroup = new THREE.Group();
+const torusGeometry = new THREE.TorusGeometry(1.5, 0.7, 16, 50);
+const donutMaterial = new THREE.MeshPhongMaterial({ color: 0xC68E17 }); // Brown donut base
+const donut = new THREE.Mesh(torusGeometry, donutMaterial);
+
+// Add frosting using a slightly smaller torus
+const frostingGeometry = new THREE.TorusGeometry(1.5, 0.75, 16, 50);
+const frostingMaterial = new THREE.MeshPhongMaterial({ color: 0xFF69B4 }); // Pink frosting
+const frosting = new THREE.Mesh(frostingGeometry, frostingMaterial);
+frosting.scale.set(1.02, 1.02, 1.02); // Slightly larger to cover donut
+
+// Add sprinkles
+const sprinkles = [];
+for (let i = 0; i < 30; i++) {
+    const sprinkleGeometry = new THREE.BoxGeometry(0.2, 0.05, 0.05);
+    const sprinkleMaterial = new THREE.MeshPhongMaterial({ 
+        color: Math.random() > 0.5 ? 0xFF0000 : 0x00FF00 // Random red or green sprinkles
+    });
+    const sprinkle = new THREE.Mesh(sprinkleGeometry, sprinkleMaterial);
+    
+    // Position sprinkles randomly around the donut
+    const angle = Math.random() * Math.PI * 2;
+    const radius = 1.5;
+    sprinkle.position.set(
+        Math.cos(angle) * radius,
+        Math.random() * 0.5 - 0.25,
+        Math.sin(angle) * radius
+    );
+    sprinkle.rotation.set(
+        Math.random() * Math.PI,
+        Math.random() * Math.PI,
+        Math.random() * Math.PI
+    );
+    sprinkles.push(sprinkle);
+}
+
+// Add rainbow trail for donut
+const donutRainbowColors = [
+    0xFF0000, // Red
+    0xFF7F00, // Orange
+    0xFFFF00, // Yellow
+    0x00FF00, // Green
+    0x0000FF, // Blue
+    0x4B0082  // Indigo
+];
+
+const donutRainbowTrail = donutRainbowColors.map((color, index) => {
+    const trailGeometry = new THREE.TorusGeometry(1.3 - (index * 0.1), 0.3, 16, 50);
+    const trailMaterial = new THREE.MeshPhongMaterial({ 
+        color: color,
+        transparent: true,
+        opacity: 0.7
+    });
+    const trail = new THREE.Mesh(trailGeometry, trailMaterial);
+    return trail;
+});
+
+// Add everything to the donut group
+donutGroup.add(donut);
+donutGroup.add(frosting);
+sprinkles.forEach(sprinkle => donutGroup.add(sprinkle));
+donutRainbowTrail.forEach(trail => donutGroup.add(trail));
+
+// Position donut group
+donutGroup.position.set(0, 5, -10);
+scene.add(donutGroup);
+
+// Position camera
+camera.position.z = 5;
+
+// Create Lizard
+const lizardGroup = new THREE.Group();
+
+// Lizard body
+const bodyGeometry = new THREE.CylinderGeometry(0.3, 0.5, 2, 8);
+const lizardMaterial = new THREE.MeshPhongMaterial({ color: 0x2E8B57 }); // Sea green
+const body = new THREE.Mesh(bodyGeometry, lizardMaterial);
+body.rotation.z = Math.PI / 2;
+
+// Head
+const lizardHeadGeometry = new THREE.BoxGeometry(0.6, 0.4, 0.4);
+const headLizard = new THREE.Mesh(lizardHeadGeometry, lizardMaterial);
+headLizard.position.x = 1.0;
+
+// Eyes
+const lizardEyeGeometry = new THREE.SphereGeometry(0.1, 8, 8);
+const eyeMaterialLizard = new THREE.MeshPhongMaterial({ color: 0xFFFF00 }); // Yellow
+const leftEyeLizard = new THREE.Mesh(lizardEyeGeometry, eyeMaterialLizard);
+const rightEyeLizard = new THREE.Mesh(lizardEyeGeometry, eyeMaterialLizard);
+leftEyeLizard.position.set(1.1, 0.15, 0.15);
+rightEyeLizard.position.set(1.1, 0.15, -0.15);
+
+// Legs
+const lizardLegGeometry = new THREE.CylinderGeometry(0.1, 0.1, 0.6, 8);
+const legsLizard = [];
+const legPositionsLizard = [
+    [-0.5, -0.3, 0.3],
+    [-0.5, -0.3, -0.3],
+    [0.5, -0.3, 0.3],
+    [0.5, -0.3, -0.3]
+];
+
+for (let pos of legPositionsLizard) {
+    const leg = new THREE.Mesh(lizardLegGeometry, lizardMaterial);
+    leg.position.set(...pos);
+    legsLizard.push(leg);
+}
+
+// Tail
+const lizardTailGeometry = new THREE.CylinderGeometry(0.2, 0.05, 1.5, 8);
+const tailLizard = new THREE.Mesh(lizardTailGeometry, lizardMaterial);
+tailLizard.position.set(-1.2, 0, 0);
+tailLizard.rotation.z = -Math.PI / 6;
+
+// Add all parts to lizard group
+lizardGroup.add(body);
+lizardGroup.add(headLizard);
+lizardGroup.add(leftEyeLizard);
+lizardGroup.add(rightEyeLizard);
+legsLizard.forEach(leg => lizardGroup.add(leg));
+lizardGroup.add(tailLizard);
+
+// Position lizard
+lizardGroup.position.set(-5, 0, 5);
+scene.add(lizardGroup);
+
+// Speech bubble positioning function
+function updateSpeechBubblePosition() {
+    const vector = new THREE.Vector3();
+    lizardGroup.getWorldPosition(vector);
+    vector.project(camera);
+    
+    const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
+    const y = -(vector.y * 0.5 - 0.5) * window.innerHeight;
+    
+    const speech = document.getElementById('lizardSpeech');
+    speech.style.display = 'block';
+    speech.style.left = x + 'px';
+    speech.style.top = y - 50 + 'px';
+}
+
+// Animation
+function animate() {
+    requestAnimationFrame(animate);
+    
+    const time = Date.now() * 0.001;
+
+    // Rotate skybox slowly
+    skybox.rotation.y += 0.0005;
+
+    // Make Nyan Cat bob up and down
+    poptart.position.y = Math.sin(time * 2) * 0.2;
+    head.position.y = 0.2 + Math.sin(time * 2) * 0.2;
+    leftEye.position.y = 0.3 + Math.sin(time * 2) * 0.2;
+    rightEye.position.y = 0.3 + Math.sin(time * 2) * 0.2;
+
+    // New animations for ears, mouth, legs, and tail
+    leftEar.position.y = 0.6 + Math.sin(time * 2) * 0.2;
+    rightEar.position.y = 0.6 + Math.sin(time * 2) * 0.2;
+    mouth.position.y = 0.1 + Math.sin(time * 2) * 0.2;
+
+    legs.forEach((leg, index) => {
+        const offset = index * (Math.PI / 2);
+        leg.position.y = -0.6 + Math.sin(time * 4 + offset) * 0.1;
+    });
+
+    tail.rotation.z = Math.PI / 3 + Math.sin(time * 4) * 0.2;
+
+    // Animate whiskers
+    whiskers.forEach((whisker, index) => {
+        const isRight = index < 3;
+        const baseRotation = isRight ? 0 : Math.PI;
+        whisker.rotation.z = baseRotation + Math.sin(time * 2 + index * 0.5) * 0.1;
+        whisker.position.y = whiskerPositions[index][1] + Math.sin(time * 2) * 0.2;
+    });
+
+    // Animate nose and cheeks
+    nose.position.y = 0.2 + Math.sin(time * 2) * 0.2;
+    leftCheek.position.y = 0.1 + Math.sin(time * 2) * 0.2;
+    rightCheek.position.y = 0.1 + Math.sin(time * 2) * 0.2;
+
+    // Make rainbow trail wave with larger amplitude
+    rainbowTrail.forEach((trail, index) => {
+        trail.position.y = Math.sin(time * 3 + index * 0.5) * 0.3;
+    });
+
+    // Evil Nyan cat animations
+    evilPoptart.position.y = Math.sin(time * 2 + Math.PI) * 0.2; // Opposite phase
+    evilHead.position.y = 0.2 + Math.sin(time * 2 + Math.PI) * 0.2;
+    evilLeftEye.position.y = 0.3 + Math.sin(time * 2 + Math.PI) * 0.2;
+    evilRightEye.position.y = 0.3 + Math.sin(time * 2 + Math.PI) * 0.2;
+
+    evilLeftEar.position.y = 0.6 + Math.sin(time * 2 + Math.PI) * 0.2;
+    evilRightEar.position.y = 0.6 + Math.sin(time * 2 + Math.PI) * 0.2;
+    evilMouth.position.y = 0.1 + Math.sin(time * 2 + Math.PI) * 0.2;
+
+    evilLegs.forEach((leg, index) => {
+        const offset = index * (Math.PI / 2);
+        leg.position.y = -0.6 + Math.sin(time * 4 + offset + Math.PI) * 0.1;
+    });
+
+    evilTail.rotation.z = -Math.PI / 3 + Math.sin(time * 4 + Math.PI) * 0.2;
+
+    evilRainbowTrail.forEach((trail, index) => {
+        trail.position.y = Math.sin(time * 3 + index * 0.5 + Math.PI) * 0.3;
+    });
+    
+    // Animate donut
+    const donutTime = time * 0.5;
+    donutGroup.position.x = Math.sin(donutTime) * 10;
+    donutGroup.position.z = Math.cos(donutTime) * 10;
+    donutGroup.position.y = Math.sin(donutTime * 2) * 3 + 5;
+    
+    // Rotate donut
+    donutGroup.rotation.x += 0.01;
+    donutGroup.rotation.y += 0.02;
+    
+    // Animate donut rainbow trail
+    donutRainbowTrail.forEach((trail, index) => {
+        trail.rotation.z = Math.sin(time + index * 0.5) * 0.2;
+        trail.scale.set(
+            1 + Math.sin(time * 2 + index) * 0.1,
+            1 + Math.sin(time * 2 + index) * 0.1,
+            1
+        );
+    });
+
+    // Animate lizard
+    const lizardTime = time * 0.7;
+    lizardGroup.position.x = Math.sin(lizardTime) * 8;
+    lizardGroup.position.z = Math.cos(lizardTime) * 8;
+    lizardGroup.position.y = Math.sin(lizardTime * 2) * 2 + 3;
+
+    // Rotate lizard to face movement direction
+    lizardGroup.rotation.y = -lizardTime;
+    lizardGroup.rotation.x = Math.sin(lizardTime) * 0.2;
+
+    // Animate lizard tail
+    tailLizard.rotation.z = -Math.PI / 6 + Math.sin(time * 5) * 0.2;
+
+    // Animate lizard legs
+    legsLizard.forEach((leg, index) => {
+        leg.rotation.x = Math.sin(time * 5 + index * Math.PI/2) * 0.5;
+    });
+
+    // Update speech bubble position
+    updateSpeechBubblePosition();
+
+    controls.update();
+    renderer.render(scene, camera);
+}
+
+// Handle window resizing
+window.addEventListener('resize', onWindowResize, false);
+
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+animate();
+</script>
+
+</body></html>
