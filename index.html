@@ -1,0 +1,300 @@
+<html><head><base href="https://4dimensi-4D%20Musical-bola%20jatuh%20dan%20berbunyi%20note%20berbeda"><title>4D Musical Spheres with Ripple Effect</title>
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(to bottom, #000033, #000066);
+    color: #fff;
+  }
+  #canvas-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+  #controls {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    padding: 10px;
+    border-radius: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  button, input, select {
+    margin: 5px;
+    padding: 5px 10px;
+    font-size: 14px;
+    background: #4a4a4a;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+  }
+  #info {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 15px;
+    border-radius: 10px;
+  }
+  h1 {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+  #dimension-display {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 15px;
+    border-radius: 10px;
+  }
+</style>
+</head>
+<body>
+<div id="canvas-container"></div>
+<div id="info">
+  <h1>4D Musical Spheres with Ripple Effect</h1>
+  <p>Experience the harmony of multidimensional motion with visual ripples.</p>
+  <p>Active Spheres: <span id="sphere-count">0</span></p>
+</div>
+<div id="dimension-display">
+  <p>Current Dimension: <span id="current-dimension">4D</span></p>
+</div>
+<div id="controls">
+  <button onclick="toggleAnimation()">Toggle Animation</button>
+  <input type="range" id="gravity" min="0.1" max="2" step="0.1" value="1" onchange="changeGravity()">
+  <label for="gravity">Gravity</label>
+  <input type="range" id="spawnRate" min="1" max="20" step="1" value="5" onchange="changeSpawnRate()">
+  <label for="spawnRate">Spawn Rate</label>
+  <select id="soundType" onchange="changeSoundType()">
+    <option value="harmonic">Harmonic</option>
+    <option value="pentatonic">Pentatonic</option>
+    <option value="chromatic">Chromatic</option>
+    <option value="microtonal">Microtonal</option>
+  </select>
+  <label for="soundType">Sound Scale</label>
+  <button onclick="toggleDimension()">Toggle Dimension</button>
+</div>
+
+<script>
+let canvas, ctx;
+let animationEnabled = true;
+let gravity = 1;
+let spawnRate = 5;
+let spheres = [];
+let audioContext;
+let lastSpawnTime = 0;
+let currentSoundType = 'harmonic';
+let currentDimension = 4;
+let ripples = [];
+
+const soundScales = {
+  harmonic: [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25],
+  pentatonic: [261.63, 293.66, 329.63, 392.00, 440.00],
+  chromatic: [261.63, 277.18, 293.66, 311.13, 329.63, 349.23, 369.99, 392.00, 415.30, 440.00, 466.16, 493.88],
+  microtonal: [261.63, 270.00, 280.00, 290.00, 300.00, 310.00, 320.00, 330.00]
+};
+
+class Sphere {
+  constructor(x, y, z, w) {
+    this.x = x;
+    this.y = y;
+    this.z = z;
+    this.w = w;
+    this.radius = 5 + Math.random() * 10;
+    this.color = getRandomColor();
+    this.frequency = getRandomFrequency();
+    this.velocity = { x: 0, y: 0, z: 0, w: 0 };
+    this.rotation = { x: Math.random() * Math.PI, y: Math.random() * Math.PI };
+    this.rotationSpeed = { x: Math.random() * 0.05, y: Math.random() * 0.05 };
+    this.hasPlayed = false;
+  }
+
+  draw() {
+    let scale = 1000 / (1000 - this.z);
+    let x2d = this.x * scale;
+    let y2d = this.y * scale;
+    let r2d = this.radius * scale;
+
+    ctx.save();
+    ctx.translate(canvas.width/2 + x2d, canvas.height/2 + y2d);
+    ctx.rotate(this.rotation.x);
+    ctx.scale(1, Math.cos(this.rotation.y));
+
+    ctx.beginPath();
+    ctx.arc(0, 0, r2d, 0, Math.PI * 2);
+    ctx.fillStyle = this.color;
+    ctx.fill();
+
+    // Add a highlight to create a 3D effect
+    let gradient = ctx.createRadialGradient(r2d/3, -r2d/3, 0, 0, 0, r2d);
+    gradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
+    gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    ctx.fillStyle = gradient;
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  update() {
+    this.velocity.y += gravity * 0.1;
+    this.x += this.velocity.x;
+    this.y += this.velocity.y;
+    this.z += this.velocity.z;
+    this.w += this.velocity.w;
+
+    this.rotation.x += this.rotationSpeed.x;
+    this.rotation.y += this.rotationSpeed.y;
+
+    if (this.y + this.radius > canvas.height / 2) {
+      this.y = canvas.height / 2 - this.radius;
+      this.velocity.y *= -0.8;
+      if (!this.hasPlayed) {
+        playSound(this.frequency);
+        this.hasPlayed = true;
+        createRipple(canvas.width/2 + this.x, canvas.height/2 + this.y, this.frequency);
+      }
+      this.color = getRandomColor();
+    }
+
+    // Remove sphere if it goes too far off-screen
+    return (this.y < canvas.height + this.radius);
+  }
+}
+
+class Ripple {
+  constructor(x, y, frequency) {
+    this.x = x;
+    this.y = y;
+    this.radius = 0;
+    this.maxRadius = Math.min(canvas.width, canvas.height) * 0.4;
+    this.frequency = frequency;
+    this.speed = 5 + (frequency / 100);
+    this.opacity = 1;
+  }
+
+  draw() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    ctx.strokeStyle = `hsla(${this.frequency % 360}, 100%, 50%, ${this.opacity})`;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+
+  update() {
+    this.radius += this.speed;
+    this.opacity = 1 - (this.radius / this.maxRadius);
+    return this.opacity > 0;
+  }
+}
+
+function init() {
+  canvas = document.createElement('canvas');
+  ctx = canvas.getContext('2d');
+  document.getElementById('canvas-container').appendChild(canvas);
+
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+  animate();
+}
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+
+function animate(currentTime) {
+  if (animationEnabled) {
+    ctx.fillStyle = 'rgba(0, 0, 51, 0.1)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    if (currentTime - lastSpawnTime > 1000 / spawnRate) {
+      spawnSphere();
+      lastSpawnTime = currentTime;
+    }
+
+    spheres = spheres.filter(sphere => sphere.update());
+    spheres.forEach(sphere => sphere.draw());
+
+    ripples = ripples.filter(ripple => ripple.update());
+    ripples.forEach(ripple => ripple.draw());
+
+    document.getElementById('sphere-count').textContent = spheres.length;
+  }
+
+  requestAnimationFrame(animate);
+}
+
+function getRandomColor() {
+  return `hsl(${Math.random() * 360}, 100%, 50%)`;
+}
+
+function getRandomFrequency() {
+  let frequencies = soundScales[currentSoundType];
+  return frequencies[Math.floor(Math.random() * frequencies.length)];
+}
+
+function spawnSphere() {
+  const x = (Math.random() - 0.5) * canvas.width;
+  const y = -canvas.height / 2;
+  const z = Math.random() * 500 - 250;
+  const w = currentDimension === 4 ? Math.random() * 500 - 250 : 0;
+  spheres.push(new Sphere(x, y, z, w));
+}
+
+function playSound(frequency) {
+  const oscillator = audioContext.createOscillator();
+  oscillator.type = 'sine';
+  oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+
+  const gainNode = audioContext.createGain();
+  gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+  gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1);
+
+  oscillator.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+
+  oscillator.start();
+  oscillator.stop(audioContext.currentTime + 1);
+}
+
+function createRipple(x, y, frequency) {
+  ripples.push(new Ripple(x, y, frequency));
+}
+
+function toggleAnimation() {
+  animationEnabled = !animationEnabled;
+}
+
+function changeGravity() {
+  gravity = parseFloat(document.getElementById('gravity').value);
+}
+
+function changeSpawnRate() {
+  spawnRate = parseInt(document.getElementById('spawnRate').value);
+}
+
+function changeSoundType() {
+  currentSoundType = document.getElementById('soundType').value;
+}
+
+function toggleDimension() {
+  currentDimension = currentDimension === 3 ? 4 : 3;
+  document.getElementById('current-dimension').textContent = currentDimension + 'D';
+}
+
+init();
+</script>
+</body></html>
