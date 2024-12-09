@@ -1,0 +1,161 @@
+<html><head><base href="https://www.whyieatnapkins.com/myevenweiderneighborjeff">
+<title>A Duck Named Earn - An Unexpected Adventure</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+    body {
+        font-family: 'Arial', sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f0f8ff;
+        color: #333;
+        line-height: 1.6;
+    }
+    header {
+        background-color: #4682b4;
+        color: #fff;
+        text-align: center;
+        padding: 1rem;
+    }
+    h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0;
+    }
+    main {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    .duck-container {
+        width: 200px;
+        height: 200px;
+        margin: 2rem auto;
+        position: relative;
+    }
+    .duck {
+        width: 100%;
+        height: 100%;
+        background-color: #ffff00;
+        border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+        position: relative;
+    }
+    .duck::before {
+        content: '';
+        position: absolute;
+        width: 50%;
+        height: 50%;
+        background-color: #ffa500;
+        top: 25%;
+        left: -10%;
+        border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+        transform: rotate(-45deg);
+    }
+    .duck::after {
+        content: '';
+        position: absolute;
+        width: 10%;
+        height: 10%;
+        background-color: #000;
+        border-radius: 50%;
+        top: 30%;
+        left: 75%;
+    }
+    .story {
+        background-color: #fff;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    @keyframes waddle {
+        0% { transform: rotate(0deg); }
+        25% { transform: rotate(5deg); }
+        75% { transform: rotate(-5deg); }
+        100% { transform: rotate(0deg); }
+    }
+</style>
+</head>
+<body>
+    <header>
+        <h1>A Duck Named Earn</h1>
+        <p>An Unexpected Adventure</p>
+    </header>
+
+    <main>
+        <div class="duck-container">
+            <div class="duck"></div>
+        </div>
+        
+        <section class="story">
+            <h2>The Peculiar Tale of Earn the Duck</h2>
+            <p>In a quaint little pond on the outskirts of town, there lived a most unusual duck named Earn. Unlike his feathered friends who were content with their daily bread crumbs, Earn had loftier ambitions. You see, Earn was determined to make a name for himself in the world of finance.</p>
+            
+            <p>Every morning, while other ducks practiced their synchronized swimming, Earn would waddle over to the nearby park bench where an old man often sat reading the financial times. Earn would listen intently, absorbing terms like "stocks," "bonds," and "compound interest" with a fervor that bewildered his fellow waterfowl.</p>
+            
+            <p>One fateful day, Earn discovered a discarded smartphone by the pond's edge. With remarkable dexterity for a web-footed creature, he managed to unlock the device and stumble upon a stock trading app. And thus began Earn's secret double life as a duck by day, and a shrewd investor by night.</p>
+            
+            <p>Word spread quickly among the local wildlife. Squirrels sought Earn's advice on nut futures, while a group of enterprising raccoons consulted him about diversifying their trash can portfolios. Soon, Earn was the talk of the animal kingdom, known far and wide as "The Wolf of Pond Street."</p>
+            
+            <p>But fame comes at a price. The pond's resident lifeguard, a no-nonsense swan named Gertrude, grew suspicious of Earn's late-night activities. She organized a sting operation, only to discover Earn hosting a midnight seminar on cryptocurrency for a group of wide-eyed tadpoles.</p>
+            
+            <p>In the end, Earn's financial escapades were exposed to the human world when a local news crew, tipped off by an anonymous caller (suspected to be a jealous goose), caught him in the act of explaining market trends to a captivated audience of ducklings.</p>
+            
+            <p>And so, Earn the duck became an overnight sensation, appearing on talk shows and even ringing the opening bell at the New York Stock Exchange. He may not have been your average duck, but Earn had certainly made a splash in the world of finance, proving that with determination and a bit of luck, anyone – even a duck – can earn their place in the sun.</p>
+        </section>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const duck = document.querySelector('.duck');
+            duck.style.animation = 'waddle 2s infinite';
+
+            duck.addEventListener('click', function() {
+                const quacks = [
+                    "Quack! Buy low, sell high!",
+                    "Quack! Diversify your portfolio!",
+                    "Quack! Time in the market beats timing the market!",
+                    "Quack! Don't put all your eggs in one basket!",
+                    "Quack! Compound interest is the eighth wonder of the world!"
+                ];
+                alert(quacks[Math.floor(Math.random() * quacks.length)]);
+            });
+
+            // Easter egg: Konami code to make it rain money
+            let konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+            let konamiCodePosition = 0;
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === konamiCode[konamiCodePosition]) {
+                    konamiCodePosition++;
+                    if (konamiCodePosition === konamiCode.length) {
+                        makeItRain();
+                        konamiCodePosition = 0;
+                    }
+                } else {
+                    konamiCodePosition = 0;
+                }
+            });
+
+            function makeItRain() {
+                for (let i = 0; i < 50; i++) {
+                    let money = document.createElement('div');
+                    money.textContent = '💰';
+                    money.style.position = 'fixed';
+                    money.style.left = Math.random() * 100 + 'vw';
+                    money.style.top = '-20px';
+                    money.style.fontSize = '20px';
+                    money.style.transition = 'all 3s ease-out';
+                    document.body.appendChild(money);
+                    
+                    setTimeout(() => {
+                        money.style.top = '120vh';
+                        money.style.transform = 'rotate(' + (Math.random() * 360) + 'deg)';
+                    }, 100);
+
+                    setTimeout(() => {
+                        document.body.removeChild(money);
+                    }, 3000);
+                }
+            }
+        });
+    </script>
+</body></html>
