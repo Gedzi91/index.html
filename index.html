@@ -1,0 +1,1446 @@
+<html><head><base href="https://websim.ai/frogs/" />
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #ccffee;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+  }
+  #game-container {
+    background-color: #ccffcc;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    max-width: 800px;
+    width: 100%;
+    animation: glow-effect 3s infinite alternate;
+  }
+
+  @keyframes glow-effect {
+    from { box-shadow: 0 0 10px #66ff66; }
+    to { box-shadow: 0 0 20px #00ff00; }
+  }
+
+  #game-title {
+    font-size: 36px;
+    font-weight: bold;
+    color: #4CAF50;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    animation: glowing-header 3s infinite;
+  }
+  @keyframes glowing-header {
+    0% { text-shadow: 0 0 4px #fff, 0 0 10px #66ff66; }
+    50% { text-shadow: 0 0 20px #fff, 0 0 40px #66ff66; }
+    100% { text-shadow: 0 0 4px #fff, 0 0 10px #66ff66; }
+  }
+  #frog {
+    font-size: 100px;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.1s;
+    position: relative;
+  }
+  #frog:active {
+    transform: scale(0.95);
+  }
+  #stats {
+    margin-top: 20px;
+    font-size: 18px;
+  }
+  #mosquito-count, #click-power, #mosquitoes-per-second {
+    font-weight: bold;
+    color: #2e7d32;
+    text-shadow: 1px 1px 2px #00c853;
+  }
+  #toad-coins {
+    font-weight: bold;
+    color: #ff4500;
+    text-shadow: 1px 1px 2px #ff6347;
+  }
+  .toad-coin-icon {
+    font-size: 18px;
+    margin-right: 5px;
+  }
+  .toad-coin-balance {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+  }
+  .section {
+    margin-top: 20px;
+    border-top: 1px solid #ccc;
+    padding-top: 20px;
+  }
+  button {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s, transform 0.1s;
+  }
+  button:hover {
+    transform: translateY(-2px);
+  }
+  button:active {
+    transform: translateY(1px);
+  }
+  button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+  .mosquito {
+    position: absolute;
+    font-size: 20px;
+    pointer-events: none;
+  }
+  @keyframes fly {
+    0% { transform: translate(0, 0); opacity: 1; }
+    100% { transform: translate(0, -100px); opacity: 0; }
+  }
+  .mosquito-capture {
+    position: fixed;
+    font-size: 24px;
+    pointer-events: none;
+    animation: mosquito-fade 1.5s ease-out forwards;
+  }
+  @keyframes mosquito-fade {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-50px) rotate(20deg); }
+  }
+  .home {
+    display: inline-block;
+    margin: 0 10px;
+    animation: sparkle 2s infinite;
+    cursor: pointer;
+  }
+  @keyframes sparkle {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
+  #secret-shop {
+    margin-top: 20px;
+    font-size: 24px;
+    padding: 20px;
+    background-color: #ffe6f0;
+    border-radius: 10px;
+    border: 2px dashed #ff69b4;
+  }
+  .secret-item {
+    display: inline-block;
+    margin: 10px;
+    padding: 10px;
+    background-color: #ffd700;
+    border-radius: 10px;
+    cursor: pointer;
+    animation: subtle-glow 1.5s infinite alternate;
+  }
+  .secret-item-description {
+    font-size: 14px;
+    margin-top: 5px;
+    color: #333;
+  }
+  @keyframes subtle-glow {
+    from { box-shadow: 0 0 2px #fff, 0 0 4px #fff, 0 0 6px #fff, 0 0 8px #ff00de, 0 0 10px #ff00de; }
+    to { box-shadow: 0 0 3px #fff, 0 0 5px #fff, 0 0 7px #fff, 0 0 9px #ff00de, 0 0 11px #ff00de; }
+  }
+  #frog-collection {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+  .frog-card {
+    background-color: #f0f8ff;
+    border: 1px solid #add8e6;
+    border-radius: 5px;
+    padding: 10px;
+    width: 150px;
+    text-align: left;
+    transition: box-shadow 0.3s ease;
+  }
+  .frog-card h4 {
+    margin: 0 0 5px 0;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .frog-card p {
+    margin: 2px 0;
+    font-size: 12px;
+  }
+  .frog-card.level-up {
+    animation: sparkle 1s ease-in-out infinite alternate;
+  }
+  .xp-bar {
+    width: 100%;
+    height: 10px;
+    background-color: #e0e0e0;
+    border-radius: 5px;
+    overflow: hidden;
+    margin-top: 5px;
+  }
+  .xp-progress {
+    height: 100%;
+    background-color: #4CAF50;
+    width: 0%;
+    transition: width 0.5s ease-in-out;
+  }
+  .frog-emoji {
+    font-size: 20px;
+    margin-right: 5px;
+  }
+  .common { color: #808080; }
+  .uncommon { color: #0000ff; }
+  .rare { color: #800080; }
+  .legendary { 
+    color: #ffd700; 
+    text-shadow: 0 0 5px #ffd700;
+  }
+  .legendary-card {
+    box-shadow: 0 0 10px #ffd700;
+  }
+  #case-section {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .case-button {
+    flex: 1 1 calc(50% - 10px);
+    max-width: calc(50% - 10px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+  }
+  .case-button:hover {
+    transform: translateY(-7px);
+    background-image: linear-gradient(45deg, #ffab00, #ffd700);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  }
+  .case-button .emoji {
+    font-size: 30px;
+    margin-bottom: 10px;
+  }
+  .case-button .cost {
+    font-size: 14px;
+    margin-top: 5px;
+  }
+  #commonCaseBtn { background-color: #a0a0a0; }
+  #uncommonCaseBtn { background-color: #4a86e8; }
+  #rareCaseBtn { background-color: #9900ff; }
+  #legendaryCaseBtn { background-color: #ffd700; }
+  #mythicalCaseBtn {
+    background-color: #FF4500;
+  }
+  #aboveMythicalCaseBtn {
+    background-color: #FF69B4;
+  }
+  #tryYourLuckCaseBtn {
+    background-image: linear-gradient(135deg, #ff4500, #ff7f50);
+  }
+  #tryYourLuckCaseBtn:hover {
+    transform: translateY(-7px);
+    background-image: linear-gradient(45deg, #ff6347, #ff4500);
+    box-shadow: 0 10px 20px rgba(255, 99, 71, 0.5);
+  }
+  .chances-button {
+    margin-top: 5px;
+    background-color: #d3d3d3;
+    border: none;
+    color: black;
+    padding: 7px 12px;
+    text-align: center;
+    display: inline-block;
+    font-size: 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  .chances-button:hover {
+    background-color: #aaa;
+    transform: translateY(-2px);
+  }
+  .chances-button:active {
+    transform: translateY(1px);
+  }
+  .buy-multi-button {
+    margin-top: 5px;
+    background-color: #2196F3;
+    border: none;
+    color: white;
+    padding: 5px 10px;
+    text-align: center;
+    display: inline-block;
+    font-size: 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  .buy-multi-button:hover {
+    background-color: #1976D2;
+  }
+  .buy-multi-button:active {
+    transform: translateY(1px);
+  }
+  #sort-section {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .sort-button {
+    background-color: #2196F3;
+    border: none;
+    color: white;
+    padding: 5px 10px;
+    font-size: 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  .sort-button:hover {
+    background-color: #1976D2;
+  }
+  .sort-button:active {
+    transform: translateY(1px);
+  }
+  
+  @keyframes ripple {
+    to {
+      transform: scale(5);
+      opacity: 0;
+    }
+  }
+  .ripple {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background: rgba(102, 255, 102, 0.5);
+    border-radius: 50%;
+    pointer-events: none;
+    animation: ripple-animation 0.6s ease-out;
+  }
+
+  @keyframes ripple-animation {
+    from {
+      transform: scale(0);
+      opacity: 0.5;
+    }
+    to {
+      transform: scale(4);
+      opacity: 0;
+    }
+  }
+
+  /* Dynamic Counter Animation */
+  .count-dynamic {
+    font-size: 24px;
+    animation: count-increase 0.5s ease-out forwards;
+  }
+  @keyframes count-increase {
+    from { transform: translateY(10px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  
+  /* House Buy Button Animation */
+  .house:hover {
+    background-color: #82e982;
+    transform: scale(1.1);
+    box-shadow: 3px 3px 6px rgba(0, 128, 0, 0.4);
+  }
+
+  /* Smooth Progress Animation */
+  .progress-bar {
+    height: 10px;
+    border-radius: 4px;
+    margin-top: 10px;
+    background-color: #e2e2e2;
+    overflow: hidden;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+  }
+  .progress-bar .progress-fill {
+    height: 100%;
+    background-color: #4CAF50;
+    width: 0%;
+    animation: progress-increase 1s ease-out forwards;
+  }
+  @keyframes progress-increase {
+    from { width: 0%; }
+    to { width: var(--progress-width, 0%); }
+  }
+
+  /* Case Opening Explosions */
+  @keyframes explosion {
+    from { transform: scale(0.5); opacity: 1; }
+    to { transform: scale(5); opacity: 0; }
+  }
+  .explosion {
+    position: absolute;
+    background: radial-gradient(circle, #ff0, #ff8, transparent);
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    animation: explosion 1s;
+    pointer-events: none;
+  }
+
+  /* Jumping Animation for Frogs */
+  @keyframes frog-jump {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+  }
+  .new-frog-animation {
+    animation: frog-jump 0.6s linear;
+  }
+  #failExoticCaseBtn {
+    background: linear-gradient(135deg, #ff8c00, #ff4500);
+  }
+  #failExoticCaseBtn:hover {
+    transform: translateY(-7px);
+    background: linear-gradient(45deg, #ff4500, #ff6347);
+    box-shadow: 0 10px 20px rgba(255, 99, 71, 0.5);
+  }
+  /* Add `exoticCaseBtn` color styling */
+  #exoticCaseBtn {
+    background-color: #da70d6;
+  }
+  #exoticCaseBtn:hover {
+    transform: translateY(-7px);
+    box-shadow: 0 10px 20px rgba(218, 70, 214, 0.5);
+    background-image: linear-gradient(45deg, #e0b0ff, #da70d6);
+  }
+  #exoticCaseBtn:disabled {
+    background-color: #e5e5e5;
+    cursor: not-allowed;
+  }
+</style>
+<title>🐸 Enhanced Frog Clicker 🐸</title>
+</head>
+<body>
+<div id="game-container">
+  <h1 id="game-title">🐸 Enhanced Frog Clicker 🐸</h1>
+  <button id="secret-shop-btn" onclick="toggleNormalShop()" style="display: block; margin: 10px auto;">
+    Toggle Normal Shop 🔮
+  </button>
+  <div id="frog">🐸</div>
+  <div id="stats">
+    Mosquitoes: <span id="mosquito-count" class="count-dynamic">0</span> 🦟<br>
+    Toad Coins: 
+    <span class="toad-coin-balance">
+      <span class="toad-coin-icon">🪙</span> 
+      <span id="toad-coins">0</span>
+    </span><br>
+    Click Power: <span id="click-power">1</span><br>
+    Mosquitoes/s: <span id="mosquitoes-per-second">0</span>
+  </div>
+  
+  <div class="section">
+    <h3>Homes</h3>
+    <button id="toggle-homes-btn">Buy House</button>
+    <div id="homes" style="display: none;"></div>
+  </div>
+  
+  <div class="section">
+    <h3>Rarity Cases</h3>
+    <div id="case-section">
+      <button id="commonCaseBtn" class="case-button" onclick="openCase('common'); addExplosionEffect(this);">
+        <span class="emoji">🗃️</span>
+        Common Case
+        <span class="cost">(<span id="commonCaseCost">100</span> 🦟)</span>
+        <button class="chances-button" onclick="showChances(event, 'common')">Chances</button>
+      </button>
+      <div>
+        <button class="buy-multi-button" onclick="openMultipleCases(event, 'common', 10)">Buy x10</button>
+        <button class="buy-multi-button" onclick="openMultipleCases(event, 'common', 20)">Buy x20</button>
+      </div>
+      <button id="uncommonCaseBtn" class="case-button" onclick="openCase('uncommon'); addExplosionEffect(this);">
+        <span class="emoji">🎁</span>
+        Uncommon Case
+        <span class="cost">(<span id="uncommonCaseCost">500</span> 🦟)</span>
+        <button class="chances-button" onclick="showChances(event, 'uncommon')">Chances</button>
+      </button>
+      <div>
+        <button class="buy-multi-button" onclick="openMultipleCases(event, 'uncommon', 10)">Buy x10</button>
+        <button class="buy-multi-button" onclick="openMultipleCases(event, 'uncommon', 20)">Buy x20</button>
+      </div>
+      <button id="rareCaseBtn" class="case-button" onclick="openCase('rare'); addExplosionEffect(this);">
+        <span class="emoji">💎</span>
+        Rare Case
+        <span class="cost">(<span id="rareCaseCost">1000</span> 🦟)</span>
+        <button class="chances-button" onclick="showChances(event, 'rare')">Chances</button>
+      </button>
+      <div>
+        <button class="buy-multi-button" onclick="openMultipleCases(event, 'rare', 10)">Buy x10</button>
+        <button class="buy-multi-button" onclick="openMultipleCases(event, 'rare', 20)">Buy x20</button>
+      </div>
+      <button id="legendaryCaseBtn" class="case-button" onclick="openCase('legendary'); addExplosionEffect(this);">
+        <span class="emoji">🏆</span>
+        Legendary Case
+        <span class="cost">(<span id="legendaryCaseCost">2000</span> 🦟)</span>
+        <button class="chances-button" onclick="showChances(event, 'legendary')">Chances</button>
+      </button>
+      <div>
+        <button class="buy-multi-button" onclick="openMultipleCases(event, 'legendary', 10)">Buy x10</button>
+        <button class="buy-multi-button" onclick="openMultipleCases(event, 'legendary', 20)">Buy x20</button>
+      </div>
+
+      <!-- Above Mythical Case -->
+      <button id="aboveMythicalCaseBtn" class="case-button" onclick="openCase('aboveMythical'); addExplosionEffect(this);">
+        <span class="emoji">🌠</span>
+        Above Mythical Case
+        <span class="cost">(<span id="aboveMythicalCaseCost">10000</span> 🦟)</span>
+        <button class="chances-button" onclick="showChances(event, 'aboveMythical')">Chances</button>
+      </button>
+      <div>
+        <button class="buy-multi-button" onclick="openMultipleCases(event, 'aboveMythical', 10)">Buy x10</button>
+        <button class="buy-multi-button" onclick="openMultipleCases(event, 'aboveMythical', 20)">Buy x20</button>
+      </div>
+
+      <!-- Fail Exotic Case -->
+      <button id="failExoticCaseBtn" class="case-button" onclick="openFailExoticCase()">
+        <span class="emoji">💥</span>
+        Fail Exotic Case
+        <span class="cost">(<span id="failExoticCaseCost">20000</span> 🦟)</span>
+        <button class="chances-button" onclick="showChances(event, 'failExotic')">Chances</button>
+      </button>
+      <div>
+        <button class="buy-multi-button" onclick="openMultipleCases(event, 'failExotic', 10)">Buy x10</button>
+        <button class="buy-multi-button" onclick="openMultipleCases(event, 'failExotic', 20)">Buy x20</button>
+      </div>
+
+      <!-- Exotic Case Button -->
+      <button id="exoticCaseBtn" class="case-button" onclick="openExoticCase(); addExplosionEffect(this);">
+        <span class="emoji">🌟</span>
+        Exotic Case
+        <span class="cost">(<span id="exoticCaseCost">50000</span> 🦟)</span>
+        <button class="chances-button" onclick="showChances(event, 'exotic')">Chances</button>
+      </button>
+      <div>
+        <button class="buy-multi-button" onclick="openMultipleCases(event, 'exotic', 10)">Buy x10</button>
+        <button class="buy-multi-button" onclick="openMultipleCases(event, 'exotic', 20)">Buy x20</button>
+      </div>
+
+      <!-- Move the Try Your Luck Case to the end -->
+      <button id="tryYourLuckCaseBtn" class="case-button" onclick="openTryYourLuckCase()">
+        <span class="emoji">🎲</span>
+        Try Your Luck?
+        <span class="cost">(<span id="tryYourLuckCaseCost">10000</span> 🦟)</span>
+        <button class="chances-button" onclick="showChances(event, 'tryYourLuck')">Chances</button>
+      </button>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h3>Frog Collection</h3>
+    <div id="sort-section">
+      <button class="sort-button" onclick="sortFrogs('highest')">Sort: Highest Power</button>
+      <button class="sort-button" onclick="sortFrogs('lowest')">Sort: Lowest Power</button>
+      <button class="sort-button" onclick="sortFrogs('rarity')">Sort: Rarity</button>
+    </div>
+    <div id="frog-collection"></div>
+  </div>
+  
+  <div id="secret-shop" class="section" style="display: none;">
+    <h3>🐸🌟 Normal Frog Shop 🐸🌟</h3>
+    <div class="secret-item" onclick="buySecretUpgrade('clickPower')">
+      Super Click 🌟 (<span id="clickPowerCost">1000</span> 🦟)
+      <div class="secret-item-description">Doubles your click power!</div>
+    </div>
+    <div class="secret-item" onclick="buySecretUpgrade('passiveIncome')">
+      Mosquito Rain ☔ (<span id="passiveIncomeCost">1000</span> 🦟)
+      <div class="secret-item-description">Doubles your passive mosquito income!</div>
+    </div>
+    <div class="secret-item" onclick="buySecretUpgrade('goldenFrog')">
+      Golden Frog 🐸✨ (<span id="goldenFrogCost">5000</span> 🦟)
+      <div class="secret-item-description">Triples both click power and passive income!</div>
+    </div>
+  </div>
+
+  <!-- Add the Items Shop section -->
+  <div class="section">
+    <button id="items-shop-btn" onclick="toggleItemShop()">Items Shop 🛒</button>
+    <div id="items-shop" style="display: none;">
+      <h3>🛒 Items Shop 🛒</h3>
+      <p>Coming soon... (You can add items later)</p>
+    </div>
+  </div>
+
+  <!-- Add the Admin Button and Admin Case -->
+  <div class="section">
+    <button id="admin-btn" onclick="unlockAdmin()">Admin Only</button>
+    <div id="admin-case-section" style="display: none;">
+      <h3>Admin Case 🐸🔑</h3>
+      <button id="adminCaseBtn" class="case-button" onclick="openAdminCase()">
+        <span class="emoji">👑</span>
+        Admin Case
+        <span class="cost">(1 🦟)</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Add the Frogger Dex Button -->
+  <div class="section">
+    <button id="frogger-dex-btn" onclick="toggleFroggerDex()">Frogger Dex 🐸📖</button>
+    <div id="frogger-dex" style="display: none;">
+      <h3>🐸 Frogger Dex 🐸</h3>
+      <div id="dex-content"></div>
+      <div id="frog-3d-model" style="display: none; height: 400px;">
+        <canvas id="3d-viewer"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add the YouTube Link Section -->
+  <div class="section">
+    <h3>Special Frog Opportunity</h3>
+    <p>
+      Visit this awesome YouTube channel:
+      <a href="https://www.youtube.com/@kirbipoyo" id="youtube-link" target="_blank" onclick="getYoutuberFrog();">
+        YouTube: Kirbipoyo
+      </a>
+    </p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.152.0/build/three.min.js"></script>
+<script>
+// Define the loadFrogModel3D function
+function loadFrogModel3D(canvas, frogId) {
+  // Create the Three.js scene
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(
+    75,
+    canvas.clientWidth / canvas.clientHeight,
+    0.1,
+    1000
+  );
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+  renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+
+  // Add lighting to the scene
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.9); // Soft white light
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+  directionalLight.position.set(5, 10, 7.5); // Position the light
+  scene.add(ambientLight, directionalLight);
+
+  // Create the frog geometry and material
+  const frogColorMap = {
+    "common": 0x00FF00,         // Green for common frogs
+    "uncommon": 0x0000FF,       // Blue for uncommon frogs
+    "rare": 0x800080,           // Purple for rare frogs
+    "legendary": 0xFFD700,      // Gold for legendary frogs
+    "mythical": 0xFF4500,       // Orange for mythical frogs
+    "aboveMythical": 0xFF1493,  // Pink for above mythical frogs
+    "mutated": 0x08D9D6,        // Cyan for mutated frogs
+    "exotic": 0xDC143C,         // Crimson red for exotic frogs
+    "cosmic": 0x8A2BE2,         // Indigo for cosmic frogs
+    "solar system": 0x7CFC00,   // Lime green for solar system frogs
+    "admin tier": 0xFFFFFF,     // White for admin tier frogs
+    "owner tier": 0x1E90FF,     // Dodger blue for owner tier frogs
+    "exclusive": 0xFFD5E5       // Light pink for exclusive frogs
+  };
+  
+  const frogRarity = frogs.find(frog => frog.id === frogId)?.rarity || "common";
+  const color = frogColorMap[frogRarity];
+  
+  // Create a simple frog-like 3D model represented as a sphere
+  const frogGeometry = new THREE.SphereGeometry(1, 32, 32); // Sphere geometry
+  const frogMaterial = new THREE.MeshStandardMaterial({
+    color: color,
+    emissive: 0x45231e,
+    roughness: 0.8,
+    metalness: 0.1
+  });
+  const frogMesh = new THREE.Mesh(frogGeometry, frogMaterial);
+
+  // Add the frog geometry to the scene
+  scene.add(frogMesh);
+
+  // Animation loop for rotation
+  camera.position.z = 5;
+  function animate() {
+    requestAnimationFrame(animate);
+
+    // Rotate the frog mesh for a 360-degree view
+    frogMesh.rotation.y += 0.01;
+
+    renderer.render(scene, camera);
+  }
+
+  // Start the animation loop
+  animate();
+}
+</script>
+<script>
+let mosquitoes = 0;
+let clickPower = 1;
+let mosquitoesPerSecond = 0;
+let toads = 0; // Add a variable to track Toad Coins
+let secretUpgrades = {
+  clickPower: { cost: 1000, level: 0 },
+  passiveIncome: { cost: 1000, level: 0 },
+  goldenFrog: { cost: 5000, level: 0 }
+};
+let frogs = [];
+let caseCosts = {
+  common: 100,
+  uncommon: 500,
+  rare: 1000,
+  legendary: 2000,
+  mythical: 5000,
+  aboveMythical: 10000,
+  tryYourLuck: 10000, // Add new case cost
+  failExotic: 20000, // Add the "Fail Exotic Case" cost
+  exotic: 50000 // Add Exotic Case Cost
+};
+
+let isAdmin = false; // Flag to track admin status
+
+let frogIdCounter = 0; // Unique ID counter for frogs
+const frogNames = [
+  "Sir Croaksalot", "Hopscotch McGee", "Ribbit Reynolds", "Kermit the Hermit",
+  "Froggy McFrogface", "Lily Padington", "Toadally Awesome", "Prince Charming",
+  "Frog Marley", "Froggert Einstein", "Hoppy Potter", "Jeremiah Bullfrog"
+];
+
+const frogEmojis = ["🐸", "🐊", "🐢", "🦎", "🐍"];
+let frogDescriptions = {};
+
+function toggleFroggerDex() {
+  const dex = document.getElementById("frogger-dex");
+  dex.style.display = dex.style.display === "none" ? "block" : "none";
+}
+
+function updateFroggerDex(frog) {
+  // Add frog data and description to Frogger Dex
+  if (!frog) return;
+  const dexContent = document.getElementById("dex-content");
+
+  // Avoid duplicates
+  if (!frogDescriptions[frog.id]) {
+    frogDescriptions[frog.id] = {
+      name: frog.name,
+      rarity: frog.rarity,
+      power: frog.power,
+      description: generateFrogDescription(frog)
+    };
+
+    const frogEntry = document.createElement('div');
+    frogEntry.className = `dex-entry ${frog.rarity}-card`;
+    frogEntry.dataset.frogId = frog.id;
+
+    frogEntry.innerHTML = `
+      <h4>${frog.emoji} <span>${frog.name}</span></h4>
+      <p>Rarity: <strong>${frog.rarity.charAt(0).toUpperCase() + frog.rarity.slice(1)}</strong></p>
+      <p>Power: <strong>${frog.power}</strong></p>
+      <p id="description-${frog.id}">${frogDescriptions[frog.id].description}</p>
+      <button onclick="viewFrog3D('${frog.id}')">View 3D Model</button>
+    `;
+
+    dexContent.appendChild(frogEntry);
+  }
+}
+
+function generateFrogDescription(frog) {
+  switch (frog.rarity) {
+    case "common": return "A common frog, enjoying peaceful swamp life.";
+    case "uncommon": return "An uncommon frog with slightly above-average hops.";
+    case "rare": return "A rare frog that the other frogs look up to.";
+    case "legendary": return "A legendary frog, the stuff of ribbit jumps and folklore.";
+    case "mythical": return "A mythical frog surrounded by aura and mystery.";
+    case "aboveMythical": return "A god-like frog surpassing all myths and legends.";
+    case "mutated": return "A strange frog with peculiar abilities.";
+    case "exotic": return "An exotic frog with dazzling patterns and abilities.";
+    case "cosmic": return "A cosmic frog, harnessing the power of the stars.";
+    case "solar system": return "A solar system frog, embodying the galaxies.";
+    case "admin tier": return "The God of Frogs, ruler of all froggy domains.";
+    case "owner tier": return "Owner of all Sigmas, a unique cornerstone in Frogger lore.";
+    case "exclusive": return "HAKARI: Always 777% stronger than your strongest frog!";
+    default: return "A mysterious frog with an indescribable aura.";
+  }
+}
+
+function viewFrog3D(frogId) {
+  const modelContainer = document.getElementById("frog-3d-model");
+  const canvas = document.getElementById("3d-viewer");
+  modelContainer.style.display = "block";
+
+  // Load 3D Model via Three.js
+  loadFrogModel3D(canvas, frogId);
+}
+
+function openMultipleCases(event, rarity, amount) {
+  let totalCost = caseCosts[rarity];
+  // Allow payment with either mosquitoes or Toad Coins
+  if (mosquitoes >= totalCost || toads >= totalCost) {
+    const obtainedFrogs = []; // Store all frogs obtained from the cases
+    for (let i = 0; i < amount; i++) {
+      const frog = openCase(rarity); // Store the frog obtained in this case
+      if (frog) obtainedFrogs.push(frog); // Add to the obtainedFrogs array
+    }
+    // Update the UI to showcase all frogs in the collection
+    obtainedFrogs.forEach(frog => addFrogToCollection(frog.rarity, frog.power));
+  } else {
+    alert(`You need ${totalCost - Math.max(mosquitoes, toads)} more to open ${amount} cases!`);
+  }
+}
+
+function openCase(rarity) {
+  const cost = caseCosts[rarity];
+  if (mosquitoes >= cost || toads >= cost) {
+    if (mosquitoes >= cost) {
+      mosquitoes -= cost;
+    } else {
+      toads -= cost;
+    }
+
+    const powerIncreases = {
+      common: 1,
+      uncommon: 3,
+      rare: 5,
+      legendary: 10,
+      mythical: 15,
+      aboveMythical: 25
+    };
+
+    clickPower += powerIncreases[rarity];
+
+    // Price scaling for next purchase
+    caseCosts[rarity] = Math.floor(cost * 1.1);
+
+    let tierChances = [];
+    switch (rarity) {
+      case 'aboveMythical':
+        tierChances = [
+          { tier: 'Above Mythical', chance: 90 },
+          { tier: 'Mutated', chance: 8 },
+          { tier: 'Exotic', chance: 2 }
+        ];
+        break;
+      case 'mythical':
+        tierChances = [
+          { tier: 'Mythical', chance: 90 },
+          { tier: 'Above Mythical', chance: 9 },
+          { tier: 'Mutated', chance: 1 }
+        ];
+        break;
+      case 'legendary':
+        tierChances = [
+          { tier: 'Legendary', chance: 91.7 },
+          { tier: 'Mythical', chance: 8 },
+          { tier: 'Mutated', chance: 0.3 }
+        ];
+        break;
+      case 'rare':
+        tierChances = [
+          { tier: 'Rare', chance: 50 },
+          { tier: 'Legendary', chance: 40 },
+          { tier: 'Mythical', chance: 10 }
+        ];
+        break;
+      case 'uncommon':
+        tierChances = [
+          { tier: 'Uncommon', chance: 60 },
+          { tier: 'Rare', chance: 25 },
+          { tier: 'Legendary', chance: 15 }
+        ];
+        break;
+      case 'common':
+        tierChances = [
+          { tier: 'Common', chance: 80 },
+          { tier: 'Uncommon', chance: 15 },
+          { tier: 'Rare', chance: 5 }
+        ];
+        break;
+      default:
+        console.error(`Unknown case rarity: ${rarity}`);
+        return null;
+    }
+
+    // Determine the rarity of the frog obtained
+    let random = Math.random() * 100;
+    const selectedTier = tierChances.find(tier => {
+      random -= tier.chance;
+      return random <= 0;
+    }).tier;
+
+    const newFrog = {
+      rarity: selectedTier.toLowerCase(),
+      power: powerIncreases[rarity]
+    };
+
+    addFrogToCollection(newFrog.rarity, newFrog.power); // Add to the frog collection UI
+    updateStats();
+
+    return newFrog; // Return the new frog details
+  }
+  return null;
+}
+
+function addFrogToCollection(rarity, powerIncrease) {
+  const randomFrogName = frogNames[Math.floor(Math.random() * frogNames.length)];
+  const randomFrogEmoji = frogEmojis[Math.floor(Math.random() * frogEmojis.length)];
+
+  const newFrog = {
+    id: `frog-${frogIdCounter++}`,
+    name: randomFrogName,
+    emoji: randomFrogEmoji,
+    rarity: rarity,
+    power: powerIncrease,
+    level: 1,
+    xp: 0,
+    nextLevelXp: 100
+  };
+
+  frogs.push(newFrog);
+  renderFrogCard(newFrog);
+  updateFrogCards();
+
+  // Add the frog to the Frogger Dex
+  updateFroggerDex(newFrog);
+
+  return newFrog; // Return the added frog details
+}
+
+function renderFrogCard(frog) {
+  const collection = document.getElementById('frog-collection');
+  
+  // Create a new frog card element
+  const frogCard = document.createElement('div');
+  frogCard.className = `frog-card ${frog.rarity}-card`;
+  frogCard.dataset.frogId = frog.id;
+  
+  // Populate the frog card with frog details
+  frogCard.innerHTML = `
+    <h4>
+      <span class="frog-emoji">${frog.emoji}</span>
+      ${frog.name}
+    </h4>
+    <p>Power: <span>${frog.power}</span></p>
+    <p>Level: <span>${frog.level || 1}</span></p>
+    <div class="xp-bar">
+      <div class="xp-progress" style="width: ${(frog.xp / (frog.nextLevelXp || 100)) * 100}%;"></div>
+    </div>
+  `;
+
+  // Append the new frog card to the collection
+  collection.appendChild(frogCard);
+}
+
+function updateStats() {
+  document.getElementById('mosquito-count').textContent = Math.floor(mosquitoes);
+  document.getElementById('toad-coins').textContent = Math.floor(toads); // Update Toad Coins display
+  document.getElementById('click-power').textContent = clickPower;
+  document.getElementById('mosquitoes-per-second').textContent = mosquitoesPerSecond;
+  updateCaseButtons(); // Call updated function
+}
+
+function updateCaseButtons() {
+  Object.keys(caseCosts).forEach(rarity => {
+    const button = document.getElementById(`${rarity}CaseBtn`);
+    const costSpan = document.getElementById(`${rarity}CaseCost`);
+
+    // Ensure the button and cost span exist
+    if (button && costSpan) {
+      const cost = caseCosts[rarity];
+      button.disabled = mosquitoes < cost && toads < cost; // Toggle disabled state based on cost
+      costSpan.textContent = cost; // Update displayed cost
+    }
+  });
+}
+
+function clickFrog(event) {
+  addRippleEffect(event);
+  mosquitoes += clickPower;
+  toads += Math.max(1, Math.floor(clickPower / 10)); // Earn Toad Coins relative to Click Power
+  updateStats();
+  createFlyingMosquito();
+  createCaptureAnimation();
+
+  const dynamicCount = document.getElementById('mosquito-count');
+  dynamicCount.classList.add('count-dynamic');
+  setTimeout(() => dynamicCount.classList.remove('count-dynamic'), 500);
+
+  if (mosquitoes >= 1000 && document.getElementById('secret-shop').style.display === 'none') {
+    document.getElementById('secret-shop').style.display = 'block'; // Show Normal Shop
+  }
+}
+
+function createFlyingMosquito() {
+  const mosquito = document.createElement('div');
+  mosquito.textContent = '🦟';
+  mosquito.className = 'mosquito';
+  mosquito.style.left = `${Math.random() * window.innerWidth}px`;
+  mosquito.style.top = `${Math.random() * window.innerHeight}px`;
+  document.body.appendChild(mosquito);
+  
+  mosquito.animate([
+    { transform: 'translate(0, 0)', opacity: 1 },
+    { transform: 'translate(0, -100px)', opacity: 0 }
+  ], {
+    duration: 1000,
+    easing: 'ease-out'
+  }).onfinish = () => mosquito.remove();
+}
+
+function createCaptureAnimation() {
+  const captureAnimation = document.createElement('div');
+  captureAnimation.textContent = '💦✨✳️';
+  captureAnimation.className = 'mosquito-capture';
+  captureAnimation.style.left = `${Math.random() * 100}vw`;
+  captureAnimation.style.top = `${Math.random() * 100}vh`;
+  document.body.appendChild(captureAnimation);
+  
+  captureAnimation.animate([
+    { transform: 'translateY(0)', opacity: 1 },
+    { transform: 'translateY(-50px)', opacity: 0 }
+  ], {
+    duration: 1500,
+    easing: 'ease-out'
+  }).onfinish = () => captureAnimation.remove();
+}
+
+function buyHome(level) {
+  // Adjust the costs and MPS scaling
+  const costs = Array.from({ length: 120 }, (_, i) => Math.floor(10 * Math.pow(1.5, i))); // Dynamic cost scaling
+  const mps = costs.map(cost => cost / 10); // Mosquitoes per second is now 10% of the cost
+
+  if (mosquitoes >= costs[level - 1]) {
+    mosquitoes -= costs[level - 1];
+    mosquitoesPerSecond += mps[level - 1];
+    updateStats();
+  }
+}
+
+function openExoticCase() {
+  const cost = caseCosts.exotic;
+  if (mosquitoes < cost && toads < cost) {
+    alert(`You need ${Math.max(0, cost - mosquitoes)} more mosquitoes or ${Math.max(0, cost - toads)} more Toad Coins to open the Exotic Case!`);
+    return;
+  }
+  if (mosquitoes >= cost) {
+    mosquitoes -= cost;
+  } else {
+    toads -= cost;
+  }
+
+  const chance = Math.random() * 100;
+  let exoticFrog = null;
+
+  if (chance <= 80) { // Exotic Tier Frog (80%)
+    exoticFrog = addFrogToCollection("exotic", 100);
+    alert("You got an EXOTIC tier frog!");
+  } else if (chance <= 96) { // Cosmic Tier Frog (16%)
+    exoticFrog = addFrogToCollection("cosmic", 500);
+    alert("You got a COSMIC tier frog!");
+  } else { // Solar System Tier Frog (4%)
+    exoticFrog = addFrogToCollection("solar system", 1000);
+    alert("You got a SOLAR SYSTEM tier frog!");
+  }
+
+  // Scale the cost for the next purchase
+  caseCosts.exotic = Math.floor(caseCosts.exotic * 1.1);
+  document.getElementById("exoticCaseCost").textContent = caseCosts.exotic;
+
+  // Show frog in Frog Collection
+  if (exoticFrog) {
+    renderFrogCard(exoticFrog);
+    updateFroggerDex(exoticFrog); // Add frog to Frogger Dex
+  }
+
+  updateStats(); // Refresh the stats after opening the case
+}
+
+// Add Exotic Case Odds to Chances Explanation
+const chances = {
+  common: "Common: 80%, Uncommon: 15%, Rare: 5%",
+  uncommon: "Uncommon: 60%, Rare: 25%, Legendary: 15%",
+  rare: "Rare: 50%, Legendary: 40%, Mythical: 10%",
+  legendary: "Legendary: 91.7%, Mythical: 8%, Mutated: 0.3%",
+  mythical: "Mythical: 90%, Above Mythical: 9%, Mutated: 1%",
+  aboveMythical: "Above Mythical: 90%, Mutated: 8%, Exotic: 2%",
+  tryYourLuck: "Common: 99.65%, HAKARI: 0.34%, Owner of the Sigmas: 0.01%",
+  failExotic: "Mutated: 88%, Exotic: 10%, Cosmic: 2%", // Add Fail Exotic chances
+  exotic: "Exotic: 80%, Cosmic: 16%, Solar System: 4%" // Add Exotic chances
+};
+
+function showChances(event, rarity) {
+  event.stopPropagation();
+  alert(`Chances for ${rarity.charAt(0).toUpperCase() + rarity.slice(1)} Case:\n\n${chances[rarity]}`);
+}
+
+function sortFrogs(order) {
+  if (order === 'highest') {
+    frogs.sort((a, b) => b.power - a.power);
+  } else if (order === 'lowest') {
+    frogs.sort((a, b) => a.power - b.power);
+  } else if (order === 'rarity') {
+    frogs.sort((a, b) => a.rarity.localeCompare(b.rarity));
+  }
+  updateFrogCards();
+}
+
+function openTryYourLuckCase() {
+  const cost = caseCosts.tryYourLuck;
+  if (mosquitoes < cost && toads < cost) {
+    alert(`You need ${Math.max(0, cost - mosquitoes)} more mosquitoes or ${Math.max(0, cost - toads)} more Toad Coins to try your luck!`);
+    return;
+  }
+
+  if (mosquitoes >= cost) {
+    mosquitoes -= cost;
+  } else {
+    toads -= cost;
+  }
+
+  const chance = Math.random() * 100;
+  let luckyFrog = null;
+
+  if (chance <= 99.65) { // Common Tier Frog (99.65%)
+    luckyFrog = addFrogToCollection("common", 0.5);
+    alert("You got a COMMON frog! Better luck next time!");
+  } else if (chance <= 99.99) { // HAKARI Tier Frog (0.34%)
+    luckyFrog = addFrogToCollection("exclusive", 777);
+    alert("You got HAKARI! 777% stronger than your strongest frog!");
+  } else { // Owner Tier Frog (0.01%)
+    luckyFrog = addFrogToCollection("owner tier", Number.MAX_SAFE_INTEGER);
+    alert("You got the Owner of the Sigmas! The rarest frog of them all!");
+  }
+
+  // Scale the cost for the next purchase
+  caseCosts.tryYourLuck = Math.floor(caseCosts.tryYourLuck * 1.1);
+  document.getElementById("tryYourLuckCaseCost").textContent = caseCosts.tryYourLuck;
+
+  // Show frog in Frog Collection
+  if (luckyFrog) {
+    renderFrogCard(luckyFrog);
+    updateFroggerDex(luckyFrog); // Add frog to Frogger Dex
+  }
+
+  updateStats(); // Refresh the stats after opening the case
+}
+
+document.getElementById('frog').addEventListener('click', clickFrog);
+document.getElementById('toggle-homes-btn').addEventListener('click', () => {
+  const homes = document.getElementById('homes');
+  homes.style.display = homes.style.display === 'none' ? 'block' : 'none';
+  
+  if (homes.childElementCount === 0) {
+    for (let i = 1; i <= 120; i++) {
+      const home = document.createElement('span');
+      home.className = 'home';
+      home.innerHTML = `🏡 Home ${i} (${Math.floor(10 * Math.pow(1.5, i - 1))} 🦟)`;
+      home.setAttribute('onclick', `buyHome(${i})`);
+      homes.appendChild(home);
+    }
+  }
+});
+
+setInterval(() => {
+  mosquitoes += mosquitoesPerSecond;
+  toads += Math.floor(mosquitoesPerSecond / 10); // Earn Toad Coins from passive income
+  updateStats(); // Update all stats regularly
+  updateFrogXP();
+}, 1000);
+
+// Initial update
+updateStats();
+
+// Define the toggleNormalShop function to handle showing/hiding the normal shop
+function toggleNormalShop() {
+  // Select the normal shop element
+  const normalShop = document.getElementById('secret-shop');
+
+  // Toggle its visibility
+  if (normalShop.style.display === 'none') {
+    normalShop.style.display = 'block'; // Show the shop
+  } else {
+    normalShop.style.display = 'none'; // Hide the shop
+  }
+}
+
+// Define the toggleItemShop function to handle showing/hiding the items shop
+function toggleItemShop() {
+  // Select the items shop element
+  const itemsShop = document.getElementById('items-shop');
+
+  // Toggle its visibility
+  if (itemsShop.style.display === 'none') {
+    itemsShop.style.display = 'block'; // Show the items shop
+  } else {
+    itemsShop.style.display = 'none'; // Hide the items shop
+  }
+}
+
+// Define the addRippleEffect function
+function addRippleEffect(event) {
+  // Get the position of the click
+  const x = event.clientX;
+  const y = event.clientY;
+
+  // Create a ripple element
+  const ripple = document.createElement('span');
+  ripple.className = 'ripple';
+  ripple.style.left = `${x - 50}px`;  // Offset by half the width/height of ripple (50px/2)
+  ripple.style.top = `${y - 50}px`;
+
+  // Add the ripple to the page
+  document.body.appendChild(ripple);
+
+  // Remove the ripple after animation ends
+  ripple.addEventListener('animationend', () => ripple.remove());
+}
+
+// Define the addExplosionEffect function
+function addExplosionEffect(element) {
+  // Create an explosion element
+  const explosion = document.createElement('div');
+  explosion.className = 'explosion';
+  explosion.style.left =
+    `${element.getBoundingClientRect().left + element.offsetWidth / 2}px`;
+  explosion.style.top =
+    `${element.getBoundingClientRect().top + element.offsetHeight / 2}px`;
+  
+  // Append the explosion to the document body
+  document.body.appendChild(explosion);
+
+  // Remove the explosion after the animation ends
+  explosion.addEventListener('animationend', () => explosion.remove());
+}
+
+// Admin Functions
+function unlockAdmin() {
+  const password = prompt("Enter Admin Password:");
+  if (password === "2809") {
+    alert("Admin Mode Unlocked!");
+    mosquitoes = Infinity;
+    isAdmin = true;
+    document.getElementById("admin-case-section").style.display = "block";
+    updateStats();
+  } else {
+    alert("Incorrect Password!");
+  }
+}
+
+function openAdminCase() {
+  // Ensure Admin Mode is activated
+  if (!isAdmin) {
+    alert("Admin privileges required.");
+    return;
+  }
+
+  // Check mosquito requirements
+  if (mosquitoes < 1) {
+    alert("You don't have enough mosquitoes!");
+    return;
+  }
+
+  // Deduct 1 mosquito for admin case
+  mosquitoes--;
+
+  const chance = Math.random() * 100;
+  let rareFrog = null;
+
+  // Add either Admin tier or Owner tier frogs
+  if (chance <= 80) {
+    rareFrog = {
+      id: `frog-${frogIdCounter++}`,
+      name: "God of Frogs",
+      emoji: "🐸✨",
+      rarity: "admin tier",
+      power: Number.MAX_SAFE_INTEGER - 1 // Almost infinite power
+    };
+  } else {
+    rareFrog = {
+      id: `frog-${frogIdCounter++}`,
+      name: "Owner of the Sigmas",
+      emoji: "👑🐸",
+      rarity: "owner tier",
+      power: Number.MAX_SAFE_INTEGER // Infinite power
+    };
+  }
+
+  // Add to collection and update the dex
+  frogs.push(rareFrog);
+  renderFrogCard(rareFrog);
+  updateFroggerDex(rareFrog);
+
+  // Notify the user
+  alert(`You unlocked: ${rareFrog.name}`);
+  updateStats();
+}
+
+// Add mosquito income multiplier for frogs
+setInterval(() => {
+  const totalPower = frogs.reduce((total, frog) => total + frog.power, 0);
+  mosquitoes += mosquitoesPerSecond + totalPower * 2; // Multiply mosquito income with power
+  updateStats();
+  updateFrogXP();
+}, 1000);
+
+function triggerFrogJumpingAnimation(frogCard) {
+  if (!frogCard) return; // Ensure the frogCard exists to avoid errors
+
+  // Add the animation class
+  frogCard.classList.add('new-frog-animation');
+
+  // Remove the animation class after the animation is complete
+  setTimeout(() => {
+    frogCard.classList.remove('new-frog-animation');
+  }, 600); // Matches the animation duration defined in CSS
+}
+
+// Define the updateFrogXP function
+function updateFrogXP() {
+  frogs.forEach(frog => {
+    if (!frog.xp) frog.xp = 0; // Initialize XP if not already defined
+    if (!frog.nextLevelXp) frog.nextLevelXp = 100; // Define the initial XP needed for the next level
+
+    frog.xp += 1; // Increase XP over time
+    if (frog.xp >= frog.nextLevelXp) {
+      frog.xp = 0; // Reset XP after leveling up
+      if (!frog.level) frog.level = 1; // Initialize level if not set
+      frog.level++; // Increment the frog's level
+      frog.power = Math.floor(frog.power * 1.2); // Boost frog's power on level up
+      frog.nextLevelXp = Math.floor(frog.nextLevelXp * 1.5); // Increase XP required for the next level
+
+      // Add sparkle effect for leveled-up frogs
+      triggerFrogJumpingAnimation(document.querySelector(`[data-frog-id="${frog.id}"]`));
+    }
+  });
+
+  // Update the display of frog cards to showcase XP and levels
+  updateFrogCards();
+}
+
+// Define the updateFrogCards function that re-renders frog information
+function updateFrogCards() {
+  const collection = document.getElementById('frog-collection');
+  collection.innerHTML = ''; // Clear current display
+
+  frogs.forEach(frog => {
+    const frogCard = document.createElement('div');
+    frogCard.className = `frog-card ${frog.rarity}-card`;
+    frogCard.dataset.frogId = frog.id;
+
+    frogCard.innerHTML = `
+      <h4>
+        <span class="frog-emoji">${frog.emoji}</span>
+        ${frog.name}
+      </h4>
+      <p>Power: <span>${frog.power}</span></p>
+      <p>Level: <span>${frog.level || 1}</span></p>
+      <div class="xp-bar">
+        <div class="xp-progress" style="width: ${(frog.xp / (frog.nextLevelXp || 100)) * 100}%;"></div>
+      </div>
+    `;
+
+    collection.appendChild(frogCard);
+  });
+}
+
+// Define the buySecretUpgrade function to handle secret upgrades
+function buySecretUpgrade(upgradeType) {
+  if (!secretUpgrades[upgradeType]) {
+    console.error(`Invalid upgradeType: ${upgradeType}`);
+    return;
+  }
+
+  const upgrade = secretUpgrades[upgradeType];
+  if (mosquitoes >= upgrade.cost || toads >= upgrade.cost) {
+    if (mosquitoes >= upgrade.cost) {
+      mosquitoes -= upgrade.cost;
+    } else {
+      toads -= upgrade.cost;
+    }
+    upgrade.level++;
+
+    // Increase the upgrade effect
+    switch (upgradeType) {
+      case 'clickPower':
+        clickPower *= 2; // Double the click power
+        break;
+      case 'passiveIncome':
+        mosquitoesPerSecond *= 2; // Double the passive mosquito income
+        break;
+      case 'goldenFrog':
+        clickPower *= 3; // Triple click power
+        mosquitoesPerSecond *= 3; // Triple passive mosquito income
+        break;
+      default:
+        console.error(`Unknown upgradeType: ${upgradeType}`);
+    }
+
+    // Increase the cost for the next level
+    upgrade.cost = Math.floor(upgrade.cost * 1.5);
+
+    // Update the displayed cost
+    document.getElementById(`${upgradeType}Cost`).textContent = upgrade.cost;
+
+    // Update the stats
+    updateStats();
+  } else {
+    alert(`You need ${upgrade.cost - Math.max(mosquitoes, toads)} more to buy this upgrade!`);
+  }
+}
+
+// Add the function to handle the "Youtuber Frog" effect
+function getYoutuberFrog() {
+  // Check if the Youtuber Frog is already unlocked
+  const alreadyUnlocked = frogs.some(frog => frog.name === "Youtuber Frog");
+  if (alreadyUnlocked) {
+    alert("You've already unlocked the Youtuber Frog!");
+    return;
+  }
+
+  // Create the "Youtuber Frog"
+  const youtuberFrog = {
+    id: `frog-${frogIdCounter++}`,
+    name: "Youtuber Frog",
+    emoji: "🎥🐸",
+    rarity: "exclusive",
+    power: 777, // Arbitrary high power
+    level: 1,
+    xp: 0,
+    nextLevelXp: 100
+  };
+
+  // Add the Youtuber Frog to the player's collection
+  frogs.push(youtuberFrog);
+  renderFrogCard(youtuberFrog);
+  updateFroggerDex(youtuberFrog);
+
+  // Multiply all stats by 50 to apply the buff
+  mosquitoes *= 50;
+  clickPower *= 50;
+  mosquitoesPerSecond *= 50;
+  toads *= 50;
+
+  // Update stats after applying the buff
+  updateStats();
+
+  // Notify the player
+  alert("You unlocked the Youtuber Frog! All your stats have been buffed 50x!");
+}
+</script>
+</body></html>
