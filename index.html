@@ -1,0 +1,3736 @@
+<html><head><base href="."><title>Sol's RNG but Made by AI</title><style>
+/* Center the game container */
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    background: #1a1a1a;
+    font-family: Arial, sans-serif;
+    color: #fff;
+}
+
+.game-container {
+    background: #2a2a2a;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    text-align: center;
+}
+
+.character {
+    width: 100px;
+    height: 150px;
+    margin: 20px auto;
+    position: relative;
+}
+
+/* Update the base aura styling */
+.aura {
+    position: absolute;
+    width: 140px;
+    height: 190px;
+    top: -20px;
+    left: -20px;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+    pointer-events: none;
+}
+
+/* Common tier auras - simple ovals with respective colors */
+.aura.common-blue {
+    background: radial-gradient(circle at center, #0066ff40 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #0066ff !important;
+}
+
+.aura.common-green {
+    background: radial-gradient(circle at center, #00cc0040 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #00cc00 !important;
+}
+
+.aura.common-red {
+    background: radial-gradient(circle at center, #ff333340 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #ff3333 !important;
+}
+
+/* Uncommon tier auras - simple ovals with respective colors */
+.aura.uncommon-sapphire {
+    background: radial-gradient(circle at center, #0099ff40 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #0099ff !important;
+}
+
+.aura.uncommon-emerald {
+    background: radial-gradient(circle at center, #00ff0040 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #00ff00 !important;
+}
+
+.aura.uncommon-ruby {
+    background: radial-gradient(circle at center, #ff000040 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #ff0000 !important;
+}
+
+.aura.uncommon-amber {
+    background: radial-gradient(circle at center, #ffaa0040 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #ffaa00 !important;
+}
+
+/* Rare tier auras - simple ovals with respective colors */
+.aura.rare-crystal {
+    background: radial-gradient(circle at center, #e6e6ff40 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #e6e6ff !important;
+}
+
+.aura.rare-plasma {
+    background: radial-gradient(circle at center, #cc00ff40 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #cc00ff !important;
+}
+
+.aura.rare-sunset {
+    background: radial-gradient(circle at center, #ff660040 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #ff6600 !important;
+}
+
+.aura.rare-ocean {
+    background: radial-gradient(circle at center, #0066cc40 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #0066cc !important;
+}
+
+.aura.rare-forest {
+    background: radial-gradient(circle at center, #00660040 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #006600 !important;
+}
+
+/* Epic tier special effects */
+.aura.epic-rainbow {
+    background: linear-gradient(45deg, 
+        #ff0000 0%,
+        #ff9900 20%,
+        #ffff00 40%,
+        #33cc33 60%,
+        #3399ff 80%,
+        #cc33ff 100%) !important;
+    animation: rainbow-rotate 3s linear infinite !important;
+}
+
+@keyframes rainbow-rotate {
+    0% { filter: hue-rotate(0deg); }
+    100% { filter: hue-rotate(360deg); }
+}
+
+.aura.epic-galaxy {
+    background: radial-gradient(circle at center,
+        #000033 0%,
+        #3300cc 40%,
+        #6600ff 70%,
+        transparent 90%) !important;
+    box-shadow: 0 0 60px #3300cc !important;
+}
+
+.aura.epic-galaxy::before {
+    content: '✨';
+    position: absolute;
+    font-size: 24px;
+    animation: galaxyStars 3s infinite;
+}
+
+.aura.epic-galaxy::after {
+    content: '🌟';
+    position: absolute;
+    font-size: 24px;
+    animation: galaxyStars 3s infinite reverse;
+}
+
+@keyframes galaxyStars {
+    0%, 100% { 
+        transform: translate(20px, 20px) rotate(0deg);
+        opacity: 0.2;
+    }
+    50% { 
+        transform: translate(80px, 80px) rotate(180deg);
+        opacity: 1;
+    }
+}
+
+.aura.epic-phoenix {
+    background: radial-gradient(circle at center,
+        #ff3300 0%,
+        #ff6600 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 60px #ff3300 !important;
+}
+
+.aura.epic-phoenix::before {
+    content: '🔥';
+    position: absolute;
+    font-size: 28px;
+    left: 50%;
+    animation: phoenixFlame 2s infinite;
+}
+
+@keyframes phoenixFlame {
+    0%, 100% { transform: translateY(0) scale(1); opacity: 0.5; }
+    50% { transform: translateY(-20px) scale(1.2); opacity: 1; }
+}
+
+.aura.epic-frost {
+    background: radial-gradient(circle at center,
+        #99ffff 0%,
+        #66ccff 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 60px #99ffff !important;
+}
+
+.aura.epic-frost::before,
+.aura.epic-frost::after {
+    content: '❄️';
+    position: absolute;
+    font-size: 24px;
+    animation: snowfall 3s infinite linear;
+}
+
+@keyframes snowfall {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 0; }
+    50% { transform: translateY(80px) rotate(180deg); opacity: 1; }
+    100% { transform: translateY(180px) rotate(360deg); opacity: 0; }
+}
+
+/* Legendary tier special effects */
+.aura.legendary-dragon {
+    background: radial-gradient(circle at center,
+        #ff0000 0%,
+        #cc0000 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 80px #ff0000 !important;
+}
+
+.aura.legendary-dragon::before {
+    content: '🐉';
+    position: absolute;
+    font-size: 32px;
+    animation: dragonFloat 4s infinite;
+}
+
+@keyframes dragonFloat {
+    0%, 100% { transform: translate(0, 0) rotate(-10deg); }
+    50% { transform: translate(20px, -20px) rotate(10deg); }
+}
+
+.aura.legendary-celestial {
+    background: radial-gradient(circle at center,
+        #ffcc00 0%,
+        #ffaa00 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 80px #ffcc00 !important;
+}
+
+.aura.legendary-celestial::before {
+    content: '☀️';
+    position: absolute;
+    font-size: 32px;
+    animation: celestialOrbit 4s infinite linear;
+}
+
+.aura.legendary-celestial::after {
+    content: '🌙';
+    position: absolute;
+    font-size: 24px;
+    animation: celestialOrbit 4s infinite linear reverse;
+}
+
+@keyframes celestialOrbit {
+    0% { transform: rotate(0deg) translateX(60px); }
+    100% { transform: rotate(360deg) translateX(60px); }
+}
+
+.aura.legendary-void {
+    background: radial-gradient(circle at center,
+        #000000 0%,
+        #1a0033 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 80px #000000 !important;
+}
+
+.aura.legendary-void::before {
+    content: '🌌';
+    position: absolute;
+    font-size: 32px;
+    animation: voidPulse 3s infinite;
+}
+
+@keyframes voidPulse {
+    0%, 100% { transform: scale(0.8); opacity: 0.5; }
+    50% { transform: scale(1.2); opacity: 1; }
+}
+
+.aura.legendary-nature {
+    background: radial-gradient(circle at center,
+        #33cc33 0%,
+        #009900 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 80px #33cc33 !important;
+}
+
+.aura.legendary-nature::before,
+.aura.legendary-nature::after {
+    content: '🌿';
+    position: absolute;
+    font-size: 28px;
+    animation: natureGrow 4s infinite;
+}
+
+@keyframes natureGrow {
+    0% { transform: scale(0) rotate(0deg); opacity: 0; }
+    50% { transform: scale(1.2) rotate(180deg); opacity: 1; }
+    100% { transform: scale(0) rotate(360deg); opacity: 0; }
+}
+
+.aura.legendary-storm {
+    background: radial-gradient(circle at center,
+        #0033cc 0%,
+        #000099 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 80px #0033cc !important;
+}
+
+.aura.legendary-storm::before {
+    content: '⚡';
+    position: absolute;
+    font-size: 32px;
+    animation: stormFlash 2s infinite;
+}
+
+@keyframes stormFlash {
+    0%, 100% { transform: translateY(0) scale(1); opacity: 0.5; }
+    50% { transform: translateY(-20px) scale(1.3); opacity: 1; }
+}
+
+/* Add these styles in the <style> section */
+.aura-confirmation {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+}
+
+.confirmation-dialog {
+    background: #2a2a2a;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+.confirmation-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.skip-button, .equip-button {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.skip-button:hover, .equip-button:hover {
+    transform: translateY(-2px);
+}
+
+/* Other CSS rules remain unchanged */
+.roll-animation {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none; /* Change from display: flex to display: none by default */
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+}
+
+/* Remove the old spinner and sparkle styles since we're not using them anymore */
+.spinner, .sparkle {
+    display: none;
+}
+
+button {
+    background: #4a4a4a;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 10px;
+    transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+button:before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255,255,255,0.1);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s, height 0.3s;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+button:hover:before {
+    width: 200%;
+    height: 200%;
+}
+
+button:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.stats {
+    margin-top: 20px;
+    padding: 10px;
+    background: #3a3a3a;
+}
+
+.button-group {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    align-items: center;
+}
+
+.quick-roll-locked {
+    position: relative;
+}
+
+.quick-roll-locked::after {
+    content: '🔒 Need 15 rolls';
+    position: absolute;
+    bottom: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 12px;
+    white-space: nowrap;
+    color: #ff9900;
+}
+
+/* Adding styles for the toggle switch */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+    margin: 10px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #3a3a3a;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #4CAF50;
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+.quick-roll-text {
+    font-size: 14px;
+    color: #fff;
+    margin-top: 5px;
+}
+
+/* Adding new styles for quick roll status */
+.quick-roll-status {
+    font-size: 12px;
+    color: #ff9900;
+    margin-top: 5px;
+    text-align: center;
+}
+
+.quick-roll-status.unlocked {
+    color: #4CAF50;
+}
+
+.quick-roll-toggle-container {
+    position: relative;
+}
+
+.quick-roll-toggle-container::after {
+    content: '🔒 Unlock at 15 rolls';
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 12px;
+    white-space: nowrap;
+    color: #ff9900;
+    opacity: 1;
+    transition: opacity 0.3s;
+}
+
+.quick-roll-toggle-container.unlocked::after {
+    content: '🔓 Quick Roll Available!';
+    color: #4CAF50;
+}
+
+.quick-roll-toggle-container.active::after {
+    opacity: 0;
+}
+
+/* New styles for auto roll */
+.auto-roll-toggle-container {
+    position: relative;
+}
+
+.auto-roll-toggle-container::after {
+    content: '🔒 Unlock at 100 rolls';
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 12px;
+    white-space: nowrap;
+    color: #ff9900;
+    opacity: 1;
+    transition: opacity 0.3s;
+}
+
+.auto-roll-toggle-container.unlocked::after {
+    content: '🔓 Auto Roll Available!';
+    color: #4CAF50;
+}
+
+.auto-roll-toggle-container.active::after {
+    opacity: 0;
+}
+
+/* Stats button and modal styles */
+.stats-button {
+    position: fixed;
+    left: 20px;
+    top: 40%; /* Moved up */
+    transform: translateY(-50%);
+    background: #4a4a4a;
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 24px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    transition: background 0.3s;
+}
+
+.settings-button {
+    position: fixed;
+    left: 20px;
+    top: 60%; /* Moved down */
+    transform: translateY(-50%);    
+    background: #4a4a4a;
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 24px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    transition: background 0.3s;
+}
+
+.collection-button {
+    position: fixed;
+    left: 20px;
+    top: 50%; /* Centered */
+    transform: translateY(-50%);    
+    background: #4a4a4a;
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 24px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    transition: background 0.3s;
+}
+
+/* Update crafting button style */
+.crafting-button {
+    position: fixed;
+    left: 20px;
+    top: 30%; /* Above Aura Storage */
+    transform: translateY(-50%);
+    background: #4a4a4a;
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 24px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    transition: background 0.3s;
+}
+
+/* Update stats modal styles */
+.stats-modal,
+.settings-modal,
+.crafting-modal,
+.collection-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    z-index: 1000;
+}
+
+.stats-content {
+    position: absolute;
+    left: 100px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #2a2a2a;
+    padding: 20px;
+    border-radius: 10px;
+    max-height: 80vh;
+    overflow-y: auto;
+    transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    display: block;
+}
+
+.crafting-modal {
+    display: none;
+}
+
+.crafting-content {
+    background: #2a2a2a;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 800px;
+    margin: 50px auto;
+    position: relative;
+}
+
+.collection-modal {
+    display: none;
+}
+
+.collection-content {
+    background: #2a2a2a;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 800px;
+    margin: 50px auto;
+    position: relative;
+    overflow-x: auto;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    scrollbar-width: none; /* Hide scrollbar for Firefox */
+    -ms-overflow-style: none; /* Hide scrollbar for IE/Edge */
+}
+
+.collection-content::-webkit-scrollbar {
+    display: none; /* Hide scrollbar for Chrome/Safari */
+}
+
+.collection-grid {
+    display: flex;
+    gap: 20px;
+    padding: 10px;
+}
+
+.collection-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 150px;
+}
+
+.collection-aura-preview {
+    width: 150px;
+    height: 150px;
+    background: #404040;
+    border-radius: 10px;
+    position: relative;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.collection-aura {
+    position: absolute;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+}
+
+.collection-aura.common-blue {
+    background: radial-gradient(circle at center, #0066ff40 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #0066ff !important;
+}
+
+.collection-aura.common-green {
+    background: radial-gradient(circle at center, #00cc0040 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #00cc00 !important;
+}
+
+.collection-aura.common-red {
+    background: radial-gradient(circle at center, #ff333340 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #ff3333 !important;
+}
+
+.collection-aura.uncommon-sapphire {
+    background: radial-gradient(circle at center, #0099ff40 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #0099ff !important;
+}
+
+.collection-aura.uncommon-emerald {
+    background: radial-gradient(circle at center, #00ff0040 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #00ff00 !important;
+}
+
+.collection-aura.uncommon-ruby {
+    background: radial-gradient(circle at center, #ff000040 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #ff0000 !important;
+}
+
+.collection-aura.uncommon-amber {
+    background: radial-gradient(circle at center, #ffaa0040 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #ffaa00 !important;
+}
+
+.collection-aura.rare-crystal {
+    background: radial-gradient(circle at center, #e6e6ff40 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #e6e6ff !important;
+}
+
+.collection-aura.rare-plasma {
+    background: radial-gradient(circle at center, #cc00ff40 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #cc00ff !important;
+}
+
+.collection-aura.rare-sunset {
+    background: radial-gradient(circle at center, #ff660040 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #ff6600 !important;
+}
+
+.collection-aura.rare-ocean {
+    background: radial-gradient(circle at center, #0066cc40 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #0066cc !important;
+}
+
+.collection-aura.rare-forest {
+    background: radial-gradient(circle at center, #00660040 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #006600 !important;
+}
+
+.collection-aura.epic-rainbow {
+    background: linear-gradient(45deg, 
+        #ff0000 0%,
+        #ff9900 20%,
+        #ffff00 40%,
+        #33cc33 60%,
+        #3399ff 80%,
+        #cc33ff 100%) !important;
+    animation: rainbow-rotate 3s linear infinite !important;
+}
+
+.collection-aura.epic-galaxy {
+    background: radial-gradient(circle at center,
+        #000033 0%,
+        #3300cc 40%,
+        #6600ff 70%,
+        transparent 90%) !important;
+    box-shadow: 0 0 60px #3300cc !important;
+}
+
+.collection-aura.epic-phoenix {
+    background: radial-gradient(circle at center,
+        #ff3300 0%,
+        #ff6600 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 60px #ff3300 !important;
+}
+
+.collection-aura.epic-frost {
+    background: radial-gradient(circle at center,
+        #99ffff 0%,
+        #66ccff 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 60px #99ffff !important;
+}
+
+.collection-aura.legendary-dragon {
+    background: radial-gradient(circle at center,
+        #ff0000 0%,
+        #cc0000 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 80px #ff0000 !important;
+}
+
+.collection-aura.legendary-celestial {
+    background: radial-gradient(circle at center,
+        #ffcc00 0%,
+        #ffaa00 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 80px #ffcc00 !important;
+}
+
+.collection-aura.legendary-void {
+    background: radial-gradient(circle at center,
+        #000000 0%,
+        #1a0033 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 80px #000000 !important;
+}
+
+.collection-aura.legendary-nature {
+    background: radial-gradient(circle at center,
+        #33cc33 0%,
+        #009900 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 80px #33cc33 !important;
+}
+
+.collection-aura.legendary-storm {
+    background: radial-gradient(circle at center,
+        #0033cc 0%,
+        #000099 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 80px #0033cc !important;
+}
+
+/* Stats button and modal styles */
+.stats-button {
+    position: fixed;
+    left: 20px;
+    top: 40%; /* Moved up */
+    transform: translateY(-50%);
+    background: #4a4a4a;
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 24px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    transition: background 0.3s;
+}
+
+.settings-button {
+    position: fixed;
+    left: 20px;
+    top: 60%; /* Moved down */
+    transform: translateY(-50%);    
+    background: #4a4a4a;
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 24px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    transition: background 0.3s;
+}
+
+.collection-button {
+    position: fixed;
+    left: 20px;
+    top: 50%; /* Centered */
+    transform: translateY(-50%);    
+    background: #4a4a4a;
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 24px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    transition: background 0.3s;
+}
+
+/* Update crafting button style */
+.crafting-button {
+    position: fixed;
+    left: 20px;
+    top: 30%; /* Above Aura Storage */
+    transform: translateY(-50%);
+    background: #4a4a4a;
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 24px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    transition: background 0.3s;
+}
+
+/* Update stats modal styles */
+.stats-modal,
+.settings-modal,
+.crafting-modal,
+.collection-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    z-index: 1000;
+}
+
+.stats-content {
+    position: absolute;
+    left: 100px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #2a2a2a;
+    padding: 20px;
+    border-radius: 10px;
+    max-height: 80vh;
+    overflow-y: auto;
+    transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    display: block;
+}
+
+.crafting-modal {
+    display: none;
+}
+
+.crafting-content {
+    background: #2a2a2a;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 800px;
+    margin: 50px auto;
+    position: relative;
+}
+
+.collection-modal {
+    display: none;
+}
+
+.collection-content {
+    background: #2a2a2a;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 800px;
+    margin: 50px auto;
+    position: relative;
+    overflow-x: auto;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    scrollbar-width: none; /* Hide scrollbar for Firefox */
+    -ms-overflow-style: none; /* Hide scrollbar for IE/Edge */
+}
+
+.collection-content::-webkit-scrollbar {
+    display: none; /* Hide scrollbar for Chrome/Safari */
+}
+
+.collection-grid {
+    display: flex;
+    gap: 20px;
+    padding: 10px;
+}
+
+.collection-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 150px;
+}
+
+.collection-aura-preview {
+    width: 150px;
+    height: 150px;
+    background: #404040;
+    border-radius: 10px;
+    position: relative;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.collection-aura {
+    position: absolute;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+}
+
+.collection-aura.common-blue {
+    background: radial-gradient(circle at center, #0066ff40 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #0066ff !important;
+}
+
+.collection-aura.common-green {
+    background: radial-gradient(circle at center, #00cc0040 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #00cc00 !important;
+}
+
+.collection-aura.common-red {
+    background: radial-gradient(circle at center, #ff333340 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #ff3333 !important;
+}
+
+.collection-aura.uncommon-sapphire {
+    background: radial-gradient(circle at center, #0099ff40 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #0099ff !important;
+}
+
+.collection-aura.uncommon-emerald {
+    background: radial-gradient(circle at center, #00ff0040 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #00ff00 !important;
+}
+
+.collection-aura.uncommon-ruby {
+    background: radial-gradient(circle at center, #ff000040 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #ff0000 !important;
+}
+
+.collection-aura.uncommon-amber {
+    background: radial-gradient(circle at center, #ffaa0040 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #ffaa00 !important;
+}
+
+.collection-aura.rare-crystal {
+    background: radial-gradient(circle at center, #e6e6ff40 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #e6e6ff !important;
+}
+
+.collection-aura.rare-plasma {
+    background: radial-gradient(circle at center, #cc00ff40 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #cc00ff !important;
+}
+
+.collection-aura.rare-sunset {
+    background: radial-gradient(circle at center, #ff660040 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #ff6600 !important;
+}
+
+.collection-aura.rare-ocean {
+    background: radial-gradient(circle at center, #0066cc40 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #0066cc !important;
+}
+
+.collection-aura.rare-forest {
+    background: radial-gradient(circle at center, #00660040 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #006600 !important;
+}
+
+.collection-aura.epic-rainbow {
+    background: linear-gradient(45deg, 
+        #ff0000 0%,
+        #ff9900 20%,
+        #ffff00 40%,
+        #33cc33 60%,
+        #3399ff 80%,
+        #cc33ff 100%) !important;
+    animation: rainbow-rotate 3s linear infinite !important;
+}
+
+.collection-aura.epic-galaxy {
+    background: radial-gradient(circle at center,
+        #000033 0%,
+        #3300cc 40%,
+        #6600ff 70%,
+        transparent 90%) !important;
+    box-shadow: 0 0 60px #3300cc !important;
+}
+
+.collection-aura.epic-phoenix {
+    background: radial-gradient(circle at center,
+        #ff3300 0%,
+        #ff6600 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 60px #ff3300 !important;
+}
+
+.collection-aura.epic-frost {
+    background: radial-gradient(circle at center,
+        #99ffff 0%,
+        #66ccff 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 60px #99ffff !important;
+}
+
+.collection-aura.legendary-dragon {
+    background: radial-gradient(circle at center,
+        #ff0000 0%,
+        #cc0000 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 80px #ff0000 !important;
+}
+
+.collection-aura.legendary-celestial {
+    background: radial-gradient(circle at center,
+        #ffcc00 0%,
+        #ffaa00 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 80px #ffcc00 !important;
+}
+
+.collection-aura.legendary-void {
+    background: radial-gradient(circle at center,
+        #000000 0%,
+        #1a0033 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 80px #000000 !important;
+}
+
+.collection-aura.legendary-nature {
+    background: radial-gradient(circle at center,
+        #33cc33 0%,
+        #009900 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 80px #33cc33 !important;
+}
+
+.collection-aura.legendary-storm {
+    background: radial-gradient(circle at center,
+        #0033cc 0%,
+        #000099 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 80px #0033cc !important;
+}
+
+/* Add these styles in the <style> section */
+.aura-confirmation {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+}
+
+.confirmation-dialog {
+    background: #2a2a2a;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+.confirmation-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.skip-button, .equip-button {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.skip-button:hover, .equip-button:hover {
+    transform: translateY(-2px);
+}
+
+/* Other CSS rules remain unchanged */
+.roll-animation {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none; /* Change from display: flex to display: none by default */
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+}
+
+/* Remove the old spinner and sparkle styles since we're not using them anymore */
+.spinner, .sparkle {
+    display: none;
+}
+
+button {
+    background: #4a4a4a;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 10px;
+    transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+button:before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255,255,255,0.1);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s, height 0.3s;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+button:hover:before {
+    width: 200%;
+    height: 200%;
+}
+
+button:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.stats {
+    margin-top: 20px;
+    padding: 10px;
+    background: #3a3a3a;
+}
+
+.button-group {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    align-items: center;
+}
+
+.quick-roll-locked {
+    position: relative;
+}
+
+.quick-roll-locked::after {
+    content: '🔒 Need 15 rolls';
+    position: absolute;
+    bottom: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 12px;
+    white-space: nowrap;
+    color: #ff9900;
+}
+
+/* Adding styles for the toggle switch */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+    margin: 10px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #3a3a3a;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #4CAF50;
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+.quick-roll-text {
+    font-size: 14px;
+    color: #fff;
+    margin-top: 5px;
+}
+
+/* Adding new styles for quick roll status */
+.quick-roll-status {
+    font-size: 12px;
+    color: #ff9900;
+    margin-top: 5px;
+    text-align: center;
+}
+
+.quick-roll-status.unlocked {
+    color: #4CAF50;
+}
+
+.quick-roll-toggle-container {
+    position: relative;
+}
+
+.quick-roll-toggle-container::after {
+    content: '🔒 Unlock at 15 rolls';
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 12px;
+    white-space: nowrap;
+    color: #ff9900;
+    opacity: 1;
+    transition: opacity 0.3s;
+}
+
+.quick-roll-toggle-container.unlocked::after {
+    content: '🔓 Quick Roll Available!';
+    color: #4CAF50;
+}
+
+.quick-roll-toggle-container.active::after {
+    opacity: 0;
+}
+
+/* New styles for auto roll */
+.auto-roll-toggle-container {
+    position: relative;
+}
+
+.auto-roll-toggle-container::after {
+    content: '🔒 Unlock at 100 rolls';
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 12px;
+    white-space: nowrap;
+    color: #ff9900;
+    opacity: 1;
+    transition: opacity 0.3s;
+}
+
+.auto-roll-toggle-container.unlocked::after {
+    content: '🔓 Auto Roll Available!';
+    color: #4CAF50;
+}
+
+.auto-roll-toggle-container.active::after {
+    opacity: 0;
+}
+
+/* Stats button and modal styles */
+.stats-button {
+    position: fixed;
+    left: 20px;
+    top: 40%; /* Moved up */
+    transform: translateY(-50%);
+    background: #4a4a4a;
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 24px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    transition: background 0.3s;
+}
+
+.settings-button {
+    position: fixed;
+    left: 20px;
+    top: 60%; /* Moved down */
+    transform: translateY(-50%);    
+    background: #4a4a4a;
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 24px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    transition: background 0.3s;
+}
+
+.collection-button {
+    position: fixed;
+    left: 20px;
+    top: 50%; /* Centered */
+    transform: translateY(-50%);    
+    background: #4a4a4a;
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 24px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    transition: background 0.3s;
+}
+
+/* Update crafting button style */
+.crafting-button {
+    position: fixed;
+    left: 20px;
+    top: 30%; /* Above Aura Storage */
+    transform: translateY(-50%);
+    background: #4a4a4a;
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 24px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    transition: background 0.3s;
+}
+
+/* Update stats modal styles */
+.stats-modal,
+.settings-modal,
+.crafting-modal,
+.collection-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    z-index: 1000;
+}
+
+.stats-content {
+    position: absolute;
+    left: 100px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #2a2a2a;
+    padding: 20px;
+    border-radius: 10px;
+    max-height: 80vh;
+    overflow-y: auto;
+    transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    display: block;
+}
+
+.crafting-modal {
+    display: none;
+}
+
+.crafting-content {
+    background: #2a2a2a;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 800px;
+    margin: 50px auto;
+    position: relative;
+}
+
+.collection-modal {
+    display: none;
+}
+
+.collection-content {
+    background: #2a2a2a;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 800px;
+    margin: 50px auto;
+    position: relative;
+    overflow-x: auto;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    scrollbar-width: none; /* Hide scrollbar for Firefox */
+    -ms-overflow-style: none; /* Hide scrollbar for IE/Edge */
+}
+
+.collection-content::-webkit-scrollbar {
+    display: none; /* Hide scrollbar for Chrome/Safari */
+}
+
+.collection-grid {
+    display: flex;
+    gap: 20px;
+    padding: 10px;
+}
+
+.collection-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 150px;
+}
+
+.collection-aura-preview {
+    width: 150px;
+    height: 150px;
+    background: #404040;
+    border-radius: 10px;
+    position: relative;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.collection-aura {
+    position: absolute;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+}
+
+.collection-aura.common-blue {
+    background: radial-gradient(circle at center, #0066ff40 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #0066ff !important;
+}
+
+.collection-aura.common-green {
+    background: radial-gradient(circle at center, #00cc0040 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #00cc00 !important;
+}
+
+.collection-aura.common-red {
+    background: radial-gradient(circle at center, #ff333340 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #ff3333 !important;
+}
+
+.collection-aura.uncommon-sapphire {
+    background: radial-gradient(circle at center, #0099ff40 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #0099ff !important;
+}
+
+.collection-aura.uncommon-emerald {
+    background: radial-gradient(circle at center, #00ff0040 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #00ff00 !important;
+}
+
+.collection-aura.uncommon-ruby {
+    background: radial-gradient(circle at center, #ff000040 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #ff0000 !important;
+}
+
+.collection-aura.uncommon-amber {
+    background: radial-gradient(circle at center, #ffaa0040 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #ffaa00 !important;
+}
+
+.collection-aura.rare-crystal {
+    background: radial-gradient(circle at center, #e6e6ff40 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #e6e6ff !important;
+}
+
+.collection-aura.rare-plasma {
+    background: radial-gradient(circle at center, #cc00ff40 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #cc00ff !important;
+}
+
+.collection-aura.rare-sunset {
+    background: radial-gradient(circle at center, #ff660040 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #ff6600 !important;
+}
+
+.collection-aura.rare-ocean {
+    background: radial-gradient(circle at center, #0066cc40 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #0066cc !important;
+}
+
+.collection-aura.rare-forest {
+    background: radial-gradient(circle at center, #00660040 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #006600 !important;
+}
+
+.collection-aura.epic-rainbow {
+    background: linear-gradient(45deg, 
+        #ff0000 0%,
+        #ff9900 20%,
+        #ffff00 40%,
+        #33cc33 60%,
+        #3399ff 80%,
+        #cc33ff 100%) !important;
+    animation: rainbow-rotate 3s linear infinite !important;
+}
+
+.collection-aura.epic-galaxy {
+    background: radial-gradient(circle at center,
+        #000033 0%,
+        #3300cc 40%,
+        #6600ff 70%,
+        transparent 90%) !important;
+    box-shadow: 0 0 60px #3300cc !important;
+}
+
+.collection-aura.epic-phoenix {
+    background: radial-gradient(circle at center,
+        #ff3300 0%,
+        #ff6600 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 60px #ff3300 !important;
+}
+
+.collection-aura.epic-frost {
+    background: radial-gradient(circle at center,
+        #99ffff 0%,
+        #66ccff 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 60px #99ffff !important;
+}
+
+.collection-aura.legendary-dragon {
+    background: radial-gradient(circle at center,
+        #ff0000 0%,
+        #cc0000 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 80px #ff0000 !important;
+}
+
+.collection-aura.legendary-celestial {
+    background: radial-gradient(circle at center,
+        #ffcc00 0%,
+        #ffaa00 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 80px #ffcc00 !important;
+}
+
+.collection-aura.legendary-void {
+    background: radial-gradient(circle at center,
+        #000000 0%,
+        #1a0033 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 80px #000000 !important;
+}
+
+.collection-aura.legendary-nature {
+    background: radial-gradient(circle at center,
+        #33cc33 0%,
+        #009900 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 80px #33cc33 !important;
+}
+
+.collection-aura.legendary-storm {
+    background: radial-gradient(circle at center,
+        #0033cc 0%,
+        #000099 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 80px #0033cc !important;
+}
+
+/* Add these styles in the <style> section */
+.aura-confirmation {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+}
+
+.confirmation-dialog {
+    background: #2a2a2a;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+.confirmation-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.skip-button, .equip-button {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.skip-button:hover, .equip-button:hover {
+    transform: translateY(-2px);
+}
+
+/* Other CSS rules remain unchanged */
+.roll-animation {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none; /* Change from display: flex to display: none by default */
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+}
+
+/* Remove the old spinner and sparkle styles since we're not using them anymore */
+.spinner, .sparkle {
+    display: none;
+}
+
+button {
+    background: #4a4a4a;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 10px;
+    transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+button:before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255,255,255,0.1);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s, height 0.3s;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+button:hover:before {
+    width: 200%;
+    height: 200%;
+}
+
+button:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.stats {
+    margin-top: 20px;
+    padding: 10px;
+    background: #3a3a3a;
+}
+
+.button-group {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    align-items: center;
+}
+
+.quick-roll-locked {
+    position: relative;
+}
+
+.quick-roll-locked::after {
+    content: '🔒 Need 15 rolls';
+    position: absolute;
+    bottom: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 12px;
+    white-space: nowrap;
+    color: #ff9900;
+}
+
+/* Adding styles for the toggle switch */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+    margin: 10px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #3a3a3a;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #4CAF50;
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+.quick-roll-text {
+    font-size: 14px;
+    color: #fff;
+    margin-top: 5px;
+}
+
+/* Adding new styles for quick roll status */
+.quick-roll-status {
+    font-size: 12px;
+    color: #ff9900;
+    margin-top: 5px;
+    text-align: center;
+}
+
+.quick-roll-status.unlocked {
+    color: #4CAF50;
+}
+
+.quick-roll-toggle-container {
+    position: relative;
+}
+
+.quick-roll-toggle-container::after {
+    content: '🔒 Unlock at 15 rolls';
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 12px;
+    white-space: nowrap;
+    color: #ff9900;
+    opacity: 1;
+    transition: opacity 0.3s;
+}
+
+.quick-roll-toggle-container.unlocked::after {
+    content: '🔓 Quick Roll Available!';
+    color: #4CAF50;
+}
+
+.quick-roll-toggle-container.active::after {
+    opacity: 0;
+}
+
+/* New styles for auto roll */
+.auto-roll-toggle-container {
+    position: relative;
+}
+
+.auto-roll-toggle-container::after {
+    content: '🔒 Unlock at 100 rolls';
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 12px;
+    white-space: nowrap;
+    color: #ff9900;
+    opacity: 1;
+    transition: opacity 0.3s;
+}
+
+.auto-roll-toggle-container.unlocked::after {
+    content: '🔓 Auto Roll Available!';
+    color: #4CAF50;
+}
+
+.auto-roll-toggle-container.active::after {
+    opacity: 0;
+}
+
+/* Stats button and modal styles */
+.stats-button {
+    position: fixed;
+    left: 20px;
+    top: 40%; /* Moved up */
+    transform: translateY(-50%);
+    background: #4a4a4a;
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 24px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    transition: background 0.3s;
+}
+
+.settings-button {
+    position: fixed;
+    left: 20px;
+    top: 60%; /* Moved down */
+    transform: translateY(-50%);    
+    background: #4a4a4a;
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 24px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    transition: background 0.3s;
+}
+
+.collection-button {
+    position: fixed;
+    left: 20px;
+    top: 50%; /* Centered */
+    transform: translateY(-50%);    
+    background: #4a4a4a;
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 24px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    transition: background 0.3s;
+}
+
+/* Update crafting button style */
+.crafting-button {
+    position: fixed;
+    left: 20px;
+    top: 30%; /* Above Aura Storage */
+    transform: translateY(-50%);
+    background: #4a4a4a;
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 24px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    transition: background 0.3s;
+}
+
+/* Update stats modal styles */
+.stats-modal,
+.settings-modal,
+.crafting-modal,
+.collection-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    z-index: 1000;
+}
+
+.stats-content {
+    position: absolute;
+    left: 100px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #2a2a2a;
+    padding: 20px;
+    border-radius: 10px;
+    max-height: 80vh;
+    overflow-y: auto;
+    transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    display: block;
+}
+
+.crafting-modal {
+    display: none;
+}
+
+.crafting-content {
+    background: #2a2a2a;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 800px;
+    margin: 50px auto;
+    position: relative;
+}
+
+.collection-modal {
+    display: none;
+}
+
+.collection-content {
+    background: #2a2a2a;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 800px;
+    margin: 50px auto;
+    position: relative;
+    overflow-x: auto;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    scrollbar-width: none; /* Hide scrollbar for Firefox */
+    -ms-overflow-style: none; /* Hide scrollbar for IE/Edge */
+}
+
+.collection-content::-webkit-scrollbar {
+    display: none; /* Hide scrollbar for Chrome/Safari */
+}
+
+.collection-grid {
+    display: flex;
+    gap: 20px;
+    padding: 10px;
+}
+
+.collection-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 150px;
+}
+
+.collection-aura-preview {
+    width: 150px;
+    height: 150px;
+    background: #404040;
+    border-radius: 10px;
+    position: relative;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.collection-aura {
+    position: absolute;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+}
+
+.collection-aura.common-blue {
+    background: radial-gradient(circle at center, #0066ff40 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #0066ff !important;
+}
+
+.collection-aura.common-green {
+    background: radial-gradient(circle at center, #00cc0040 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #00cc00 !important;
+}
+
+.collection-aura.common-red {
+    background: radial-gradient(circle at center, #ff333340 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #ff3333 !important;
+}
+
+.collection-aura.uncommon-sapphire {
+    background: radial-gradient(circle at center, #0099ff40 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #0099ff !important;
+}
+
+.collection-aura.uncommon-emerald {
+    background: radial-gradient(circle at center, #00ff0040 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #00ff00 !important;
+}
+
+.collection-aura.uncommon-ruby {
+    background: radial-gradient(circle at center, #ff000040 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #ff0000 !important;
+}
+
+.collection-aura.uncommon-amber {
+    background: radial-gradient(circle at center, #ffaa0040 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #ffaa00 !important;
+}
+
+.collection-aura.rare-crystal {
+    background: radial-gradient(circle at center, #e6e6ff40 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #e6e6ff !important;
+}
+
+.collection-aura.rare-plasma {
+    background: radial-gradient(circle at center, #cc00ff40 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #cc00ff !important;
+}
+
+.collection-aura.rare-sunset {
+    background: radial-gradient(circle at center, #ff660040 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #ff6600 !important;
+}
+
+.collection-aura.rare-ocean {
+    background: radial-gradient(circle at center, #0066cc40 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #0066cc !important;
+}
+
+.collection-aura.rare-forest {
+    background: radial-gradient(circle at center, #00660040 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #006600 !important;
+}
+
+.collection-aura.epic-rainbow {
+    background: linear-gradient(45deg, 
+        #ff0000 0%,
+        #ff9900 20%,
+        #ffff00 40%,
+        #33cc33 60%,
+        #3399ff 80%,
+        #cc33ff 100%) !important;
+    animation: rainbow-rotate 3s linear infinite !important;
+}
+
+.collection-aura.epic-galaxy {
+    background: radial-gradient(circle at center,
+        #000033 0%,
+        #3300cc 40%,
+        #6600ff 70%,
+        transparent 90%) !important;
+    box-shadow: 0 0 60px #3300cc !important;
+}
+
+.collection-aura.epic-phoenix {
+    background: radial-gradient(circle at center,
+        #ff3300 0%,
+        #ff6600 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 60px #ff3300 !important;
+}
+
+.collection-aura.epic-frost {
+    background: radial-gradient(circle at center,
+        #99ffff 0%,
+        #66ccff 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 60px #99ffff !important;
+}
+
+.collection-aura.legendary-dragon {
+    background: radial-gradient(circle at center,
+        #ff0000 0%,
+        #cc0000 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 80px #ff0000 !important;
+}
+
+.collection-aura.legendary-celestial {
+    background: radial-gradient(circle at center,
+        #ffcc00 0%,
+        #ffaa00 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 80px #ffcc00 !important;
+}
+
+.collection-aura.legendary-void {
+    background: radial-gradient(circle at center,
+        #000000 0%,
+        #1a0033 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 80px #000000 !important;
+}
+
+.collection-aura.legendary-nature {
+    background: radial-gradient(circle at center,
+        #33cc33 0%,
+        #009900 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 80px #33cc33 !important;
+}
+
+.collection-aura.legendary-storm {
+    background: radial-gradient(circle at center,
+        #0033cc 0%,
+        #000099 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 80px #0033cc !important;
+}
+
+/* Stats button and modal styles */
+.stats-button {
+    position: fixed;
+    left: 20px;
+    top: 40%; /* Moved up */
+    transform: translateY(-50%);
+    background: #4a4a4a;
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 24px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    transition: background 0.3s;
+}
+
+.settings-button {
+    position: fixed;
+    left: 20px;
+    top: 60%; /* Moved down */
+    transform: translateY(-50%);    
+    background: #4a4a4a;
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 24px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    transition: background 0.3s;
+}
+
+.collection-button {
+    position: fixed;
+    left: 20px;
+    top: 50%; /* Centered */
+    transform: translateY(-50%);    
+    background: #4a4a4a;
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 24px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    transition: background 0.3s;
+}
+
+/* Update crafting button style */
+.crafting-button {
+    position: fixed;
+    left: 20px;
+    top: 30%; /* Above Aura Storage */
+    transform: translateY(-50%);
+    background: #4a4a4a;
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 24px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    transition: background 0.3s;
+}
+
+/* Update stats modal styles */
+.stats-modal,
+.settings-modal,
+.crafting-modal,
+.collection-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    z-index: 1000;
+}
+
+.stats-content {
+    position: absolute;
+    left: 100px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #2a2a2a;
+    padding: 20px;
+    border-radius: 10px;
+    max-height: 80vh;
+    overflow-y: auto;
+    transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    display: block;
+}
+
+.crafting-modal {
+    display: none;
+}
+
+.crafting-content {
+    background: #2a2a2a;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 800px;
+    margin: 50px auto;
+    position: relative;
+}
+
+.collection-modal {
+    display: none;
+}
+
+.collection-content {
+    background: #2a2a2a;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 800px;
+    margin: 50px auto;
+    position: relative;
+    overflow-x: auto;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    scrollbar-width: none; /* Hide scrollbar for Firefox */
+    -ms-overflow-style: none; /* Hide scrollbar for IE/Edge */
+}
+
+.collection-content::-webkit-scrollbar {
+    display: none; /* Hide scrollbar for Chrome/Safari */
+}
+
+.collection-grid {
+    display: flex;
+    gap: 20px;
+    padding: 10px;
+}
+
+.collection-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 150px;
+}
+
+.collection-aura-preview {
+    width: 150px;
+    height: 150px;
+    background: #404040;
+    border-radius: 10px;
+    position: relative;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.collection-aura {
+    position: absolute;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+}
+
+.collection-aura.common-blue {
+    background: radial-gradient(circle at center, #0066ff40 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #0066ff !important;
+}
+
+.collection-aura.common-green {
+    background: radial-gradient(circle at center, #00cc0040 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #00cc00 !important;
+}
+
+.collection-aura.common-red {
+    background: radial-gradient(circle at center, #ff333340 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #ff3333 !important;
+}
+
+.collection-aura.uncommon-sapphire {
+    background: radial-gradient(circle at center, #0099ff40 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #0099ff !important;
+}
+
+.collection-aura.uncommon-emerald {
+    background: radial-gradient(circle at center, #00ff0040 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #00ff00 !important;
+}
+
+.collection-aura.uncommon-ruby {
+    background: radial-gradient(circle at center, #ff000040 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #ff0000 !important;
+}
+
+.collection-aura.uncommon-amber {
+    background: radial-gradient(circle at center, #ffaa0040 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #ffaa00 !important;
+}
+
+.collection-aura.rare-crystal {
+    background: radial-gradient(circle at center, #e6e6ff40 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #e6e6ff !important;
+}
+
+.collection-aura.rare-plasma {
+    background: radial-gradient(circle at center, #cc00ff40 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #cc00ff !important;
+}
+
+.collection-aura.rare-sunset {
+    background: radial-gradient(circle at center, #ff660040 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #ff6600 !important;
+}
+
+.collection-aura.rare-ocean {
+    background: radial-gradient(circle at center, #0066cc40 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #0066cc !important;
+}
+
+.collection-aura.rare-forest {
+    background: radial-gradient(circle at center, #00660040 0%, transparent 70%) !important;
+    box-shadow: 0 0 40px #006600 !important;
+}
+
+.collection-aura.epic-rainbow {
+    background: linear-gradient(45deg, 
+        #ff0000 0%,
+        #ff9900 20%,
+        #ffff00 40%,
+        #33cc33 60%,
+        #3399ff 80%,
+        #cc33ff 100%) !important;
+    animation: rainbow-rotate 3s linear infinite !important;
+}
+
+.collection-aura.epic-galaxy {
+    background: radial-gradient(circle at center,
+        #000033 0%,
+        #3300cc 40%,
+        #6600ff 70%,
+        transparent 90%) !important;
+    box-shadow: 0 0 60px #3300cc !important;
+}
+
+.collection-aura.epic-phoenix {
+    background: radial-gradient(circle at center,
+        #ff3300 0%,
+        #ff6600 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 60px #ff3300 !important;
+}
+
+.collection-aura.epic-frost {
+    background: radial-gradient(circle at center,
+        #99ffff 0%,
+        #66ccff 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 60px #99ffff !important;
+}
+
+.collection-aura.legendary-dragon {
+    background: radial-gradient(circle at center,
+        #ff0000 0%,
+        #cc0000 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 80px #ff0000 !important;
+}
+
+.collection-aura.legendary-celestial {
+    background: radial-gradient(circle at center,
+        #ffcc00 0%,
+        #ffaa00 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 80px #ffcc00 !important;
+}
+
+.collection-aura.legendary-void {
+    background: radial-gradient(circle at center,
+        #000000 0%,
+        #1a0033 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 80px #000000 !important;
+}
+
+.collection-aura.legendary-nature {
+    background: radial-gradient(circle at center,
+        #33cc33 0%,
+        #009900 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 80px #33cc33 !important;
+}
+
+.collection-aura.legendary-storm {
+    background: radial-gradient(circle at center,
+        #0033cc 0%,
+        #000099 50%,
+        transparent 80%) !important;
+    box-shadow: 0 0 80px #0033cc !important;
+}
+
+/* Edit the javascript code */
+function populateCollection() {
+    const grid = document.getElementById('collectionGrid');
+    grid.innerHTML = '';
+    
+    auras.forEach(aura => {
+        if (game.rarityCounts[aura.name] > 0) {
+            const item = document.createElement('div');
+            item.className = 'collection-item';
+            
+            const preview = document.createElement('div');
+            preview.className = 'collection-aura-preview';
+            
+            // Add the aura div with the correct class name for styling
+            const auraDiv = document.createElement('div');
+            const auraClass = aura.name.toLowerCase().replace(/\s+/g, '-');
+            auraDiv.className = `collection-aura ${auraClass}`;
+            
+            preview.appendChild(auraDiv);
+            
+            const label = document.createElement('div');
+            label.className = 'collection-label';
+            label.textContent = aura.name;
+            label.style.color = aura.color;
+            
+            item.appendChild(preview);
+            item.appendChild(label);
+            grid.appendChild(item);
+        }
+    });
+}
+</style></head><body><div class="game-container">
+    <h1>Sol's RNG but Made by AI</h1>
+    <div class="character">
+        <div class="aura"></div>
+        <svg width="100" height="150" viewBox="0 0 100 150">
+            <!-- Head -->
+            <circle cx="50" cy="40" r="35" fill="#808080"></circle>
+            <!-- Eyes -->
+            <circle cx="40" cy="30" r="5" fill="#000"></circle>
+            <circle cx="60" cy="30" r="5" fill="#000"></circle>
+            <!-- Smile -->
+            <path d="M 35 50 Q 50 60 65 50" stroke="#000" fill="none" stroke-width="3"></path>
+            
+            <!-- Body -->
+            <rect x="30" y="75" width="40" height="50" rx="10" fill="#808080"></rect>
+            <!-- Arms -->
+            <rect x="10" y="80" width="20" height="35" rx="8" fill="#808080"></rect>
+            <rect x="70" y="80" width="20" height="35" rx="8" fill="#808080"></rect>
+            <!-- Legs -->
+            <rect x="35" y="125" width="12" height="25" rx="6" fill="#808080"></rect>
+            <rect x="53" y="125" width="12" height="25" rx="6" fill="#808080"></rect>
+        </svg>
+    </div>
+    <div class="button-group">
+        <div class="auto-roll-toggle-container">
+            <label class="switch">
+                <input type="checkbox" id="autoRollToggle" disabled="">
+                <span class="slider"></span>
+            </label>
+            <div class="quick-roll-text">Auto Roll</div>
+        </div>
+        <button id="rollButton">Roll for Aura</button>
+        <div class="quick-roll-toggle-container">
+            <label class="switch">
+                <input type="checkbox" id="quickRollToggle" disabled="">
+                <span class="slider"></span>
+            </label>
+            <div class="quick-roll-text">Quick Roll</div>
+        </div>
+        <div id="craftingButton" class="crafting-button disabled">🧪</div>
+    </div>
+    <div class="stats">
+        <p>Rolls: <span id="rollCount">0</span></p>
+        <p>Current Aura: <span id="currentAura">None</span></p>
+    </div>
+    
+    <div id="auraConfirmation" class="aura-confirmation">
+        <div class="confirmation-dialog">
+            <h2>You rolled: <span id="rolledAuraName"></span></h2>
+            <div class="confirmation-buttons">
+                <button class="skip-button" id="skipAura">Skip</button>
+                <button class="equip-button" id="equipRolledAura">Equip</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="statsButton" class="stats-button">📊</div>
+<div id="settingsButton" class="settings-button">⚙️</div>
+<div id="collectionButton" class="collection-button">📚</div>
+<div id="statsModal" class="stats-modal">
+    <div class="stats-content">
+        <span class="close-stats">×</span>
+        <h2>Aura Storage</h2>
+        <div class="rarity-stats">
+            <div class="rarity-group">
+                <div class="rarity-group-title rarity-common">Common Auras</div>
+                <div class="rarity-stat" style="color: #0066ff">
+                    Common Blue: <span id="commonBlueCount">0</span>
+                    <button class="equip-button" data-aura="Common Blue" disabled="">Equip</button>
+                </div>
+                <div class="rarity-stat" style="color: #00cc00">
+                    Common Green: <span id="commonGreenCount">0</span>
+                    <button class="equip-button" data-aura="Common Green" disabled="">Equip</button>
+                </div>
+                <div class="rarity-stat" style="color: #ff3333">
+                    Common Red: <span id="commonRedCount">0</span>
+                    <button class="equip-button" data-aura="Common Red" disabled="">Equip</button>
+                </div>
+            </div>
+            <div class="rarity-group">
+                <div class="rarity-group-title rarity-uncommon">Uncommon Auras</div>
+                <div class="rarity-stat" style="color: #0099ff">
+                    Uncommon Sapphire: <span id="uncommonSapphireCount">0</span>
+                    <button class="equip-button" data-aura="Uncommon Sapphire" disabled="">Equip</button>
+                </div>
+                <div class="rarity-stat" style="color: #00ff00">
+                    Uncommon Emerald: <span id="uncommonEmeraldCount">0</span>
+                    <button class="equip-button" data-aura="Uncommon Emerald" disabled="">Equip</button>
+                </div>
+                <div class="rarity-stat" style="color: #ff0000">
+                    Uncommon Ruby: <span id="uncommonRubyCount">0</span>
+                    <button class="equip-button" data-aura="Uncommon Ruby" disabled="">Equip</button>
+                </div>
+                <div class="rarity-stat" style="color: #ffaa00">
+                    Uncommon Amber: <span id="uncommonAmberCount">0</span>
+                    <button class="equip-button" data-aura="Uncommon Amber" disabled="">Equip</button>
+                </div>
+            </div>
+            <div class="rarity-group">
+                <div class="rarity-group-title rarity-rare">Rare Auras</div>
+                <div class="rarity-stat" style="color: #e6e6ff">
+                    Rare Crystal: <span id="rareCrystalCount">0</span>
+                    <button class="equip-button" data-aura="Rare Crystal" disabled="">Equip</button>
+                </div>
+                <div class="rarity-stat" style="color: #cc00ff">
+                    Rare Plasma: <span id="rarePlasmaCount">0</span>
+                    <button class="equip-button" data-aura="Rare Plasma" disabled="">Equip</button>
+                </div>
+                <div class="rarity-stat" style="color: #ff6600">
+                    Rare Sunset: <span id="rareSunsetCount">0</span>
+                    <button class="equip-button" data-aura="Rare Sunset" disabled="">Equip</button>
+                </div>
+                <div class="rarity-stat" style="color: #0066cc">
+                    Rare Ocean: <span id="rareOceanCount">0</span>
+                    <button class="equip-button" data-aura="Rare Ocean" disabled="">Equip</button>
+                </div>
+                <div class="rarity-stat" style="color: #006600">
+                    Rare Forest: <span id="rareForestCount">0</span>
+                    <button class="equip-button" data-aura="Rare Forest" disabled="">Equip</button>
+                </div>
+            </div>
+            <div class="rarity-group">
+                <div class="rarity-group-title rarity-epic">Epic Auras</div>
+                <div class="rarity-stat" style="color: #ff00ff">
+                    Epic Rainbow: <span id="epicRainbowCount">0</span>
+                    <button class="equip-button" data-aura="Epic Rainbow" disabled="">Equip</button>
+                </div>
+                <div class="rarity-stat" style="color: #3300cc">
+                    Epic Galaxy: <span id="epicGalaxyCount">0</span>
+                    <button class="equip-button" data-aura="Epic Galaxy" disabled="">Equip</button>
+                </div>
+                <div class="rarity-stat" style="color: #ff3300">
+                    Epic Phoenix: <span id="epicPhoenixCount">0</span>
+                    <button class="equip-button" data-aura="Epic Phoenix" disabled="">Equip</button>
+                </div>
+                <div class="rarity-stat" style="color: #99ffff">
+                    Epic Frost: <span id="epicFrostCount">0</span>
+                    <button class="equip-button" data-aura="Epic Frost" disabled="">Equip</button>
+                </div>
+            </div>
+            <div class="rarity-group">
+                <div class="rarity-group-title rarity-legendary">Legendary Auras</div>
+                <div class="rarity-stat" style="color: #ff0000">
+                    Legendary Dragon: <span id="legendaryDragonCount">0</span>
+                    <button class="equip-button" data-aura="Legendary Dragon" disabled="">Equip</button>
+                </div>
+                <div class="rarity-stat" style="color: #ffcc00">
+                    Legendary Celestial: <span id="legendaryCelestialCount">0</span>
+                    <button class="equip-button" data-aura="Legendary Celestial" disabled="">Equip</button>
+                </div>
+                <div class="rarity-stat" style="color: #000000">
+                    Legendary Void: <span id="legendaryVoidCount">0</span>
+                    <button class="equip-button" data-aura="Legendary Void" disabled="">Equip</button>
+                </div>
+                <div class="rarity-stat" style="color: #33cc33">
+                    Legendary Nature: <span id="legendaryNatureCount">0</span>
+                    <button class="equip-button" data-aura="Legendary Nature" disabled="">Equip</button>
+                </div>
+                <div class="rarity-stat" style="color: #0033cc">
+                    Legendary Storm: <span id="legendaryStormCount">0</span>
+                    <button class="equip-button" data-aura="Legendary Storm" disabled="">Equip</button>
+                </div>
+            </div>
+            <div class="rarity-group">
+                <div class="rarity-group-title rarity-exclusive">Exclusive Auras</div>
+                <div class="rarity-stat" style="color: #ff00ff">
+                    Mystical Potion Exclusive: <span id="mysticalPotionCount">0</span>
+                    <button class="equip-button" data-aura="Mystical Potion Exclusive" disabled="">Equip</button>
+                </div>
+                <div class="rarity-stat" style="color: #1a0033">
+                    Dark Matter Potion Exclusive: <span id="darkMatterPotionCount">0</span>
+                    <button class="equip-button" data-aura="Dark Matter Potion Exclusive" disabled="">Equip</button>
+                </div>
+                <div class="rarity-stat" style="color: #c17e11">
+                    Ancient Relic Potion Exclusive: <span id="ancientRelicPotionCount">0</span>
+                    <button class="equip-button" data-aura="Ancient Relic Potion Exclusive" disabled="">Equip</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="roll-animation" id="rollAnimation">
+    <div class="spinner">
+        <div class="sparkle" style="left: 90px; top: 0px;"></div>
+        <div class="sparkle" style="right: 90px; top: 0px;"></div>
+        <div class="sparkle" style="left: 90px; bottom: 0px;"></div>
+        <div class="sparkle" style="right: 90px; bottom: 0px;"></div>
+    </div>
+</div>
+
+<div id="settingsModal" class="settings-modal">
+    <div class="settings-content">
+        <span class="close-settings">×</span>
+        <h2>Auto-Equip Settings</h2>
+        <div id="auraSettings">
+            <!-- Will be populated by JS -->
+        </div>
+    </div>
+</div>
+
+<div id="craftingModal" class="crafting-modal">
+    <div class="crafting-content">
+        <span class="close-crafting">×</span>
+        <h2>Potion Crafting</h2>
+        <div class="crafting-container">
+            <div class="crafting-recipe">
+                <h3>Lucky Potion</h3>
+                <p>Required: 5 Legendary Auras</p>
+                <p>Available Legendaries: <span id="legendaryAvailable">0</span></p>
+                <button id="craftLuckyButton" disabled="">Craft Lucky Potion</button>
+                <button id="useLuckyButton" disabled="">Use Lucky Potion (<span id="luckyCount">0</span>)</button>
+            </div>
+            <div class="crafting-recipe">
+                <h3>Mystical Potion</h3>
+                <p>Required: 5 Epic Auras</p>
+                <p>Available Epics: <span id="epicAvailable">0</span></p>
+                <button id="craftMysticalButton" disabled="">Craft Mystical Potion</button>
+                <button id="useMysticalButton" disabled="">Use Mystical Potion (<span id="mysticalCount">0</span>)</button>
+            </div>
+            <div class="crafting-recipe">
+                <h3>Dark Matter Potion</h3>
+                <p>Required: 10 Rare Auras</p>
+                <p>Available Rares: <span id="rareAvailable">0</span></p>
+                <button id="craftDarkMatterButton" disabled="">Craft Dark Matter Potion</button>
+                <button id="useDarkMatterButton" disabled="">Use Dark Matter Potion (<span id="darkMatterCount">0</span>)</button>
+            </div>
+            <div class="crafting-recipe">
+                <h3>Ancient Relic Potion</h3>
+                <p>Required: 15 Uncommon Auras</p>
+                <p>Available Uncommons: <span id="uncommonAvailable">0</span></p>
+                <button id="craftAncientButton" disabled="">Craft Ancient Relic Potion</button>
+                <button id="useAncientButton" disabled="">Use Ancient Relic Potion (<span id="ancientCount">0</span>)</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="collectionModal" class="collection-modal">
+    <div class="collection-content">
+        <div class="collection-grid" id="collectionGrid">
+            <!-- Will be populated by JavaScript -->
+        </div>
+    </div>
+</div>
+
+<script>
+class SolRNG {
+    constructor() {
+        this.rollCount = 0;
+        this.rarityCounts = {
+            // Common Tier
+            'Common Blue': 0,
+            'Common Green': 0,
+            'Common Red': 0,
+            
+            // Uncommon Tier
+            'Uncommon Sapphire': 0,
+            'Uncommon Emerald': 0,
+            'Uncommon Ruby': 0,
+            'Uncommon Amber': 0,
+            
+            // Rare Tier
+            'Rare Crystal': 0,
+            'Rare Plasma': 0,
+            'Rare Sunset': 0,
+            'Rare Ocean': 0,
+            'Rare Forest': 0,
+            
+            // Epic Tier
+            'Epic Rainbow': 0,
+            'Epic Galaxy': 0,
+            'Epic Phoenix': 0,
+            'Epic Frost': 0,
+            
+            // Legendary Tier
+            'Legendary Dragon': 0,
+            'Legendary Celestial': 0,
+            'Legendary Void': 0,
+            'Legendary Nature': 0,
+            'Legendary Storm': 0,
+            
+            // Exclusive Auras
+            'Ultra Cool Lucky Potion Exclusive': 0,
+            'Mystical Potion Exclusive': 0,
+            'Dark Matter Potion Exclusive': 0,
+            'Ancient Relic Potion Exclusive': 0
+        };
+    }
+
+    roll() {
+        this.rollCount++;
+        
+        const totalWeight = auras.reduce((sum, aura) => sum + aura.weight, 0);
+        let random = Math.random() * totalWeight;
+        
+        for (const aura of auras) {
+            random -= aura.weight;
+            if (random <= 0) {
+                // Increment the count for the rolled aura
+                this.rarityCounts[aura.name]++;
+                // Update the stats display
+                updateStatsDisplay();
+                return aura;
+            }
+        }
+        
+        return auras[0];
+    }
+}
+
+// Add this function after the SolRNG class definition
+function updateStatsDisplay() {
+    // Update roll count display
+    document.getElementById('rollCount').textContent = game.rollCount;
+    
+    // Update all aura counts
+    for (const aura in game.rarityCounts) {
+        const countElement = document.getElementById(aura.toLowerCase().replace(/\s+/g, '') + 'Count');
+        if (countElement) {
+            countElement.textContent = game.rarityCounts[aura];
+        }
+        
+        // Update equip buttons
+        const equipButton = document.querySelector(`button[data-aura="${aura}"]`);
+        if (equipButton) {
+            equipButton.disabled = game.rarityCounts[aura] === 0;
+            if (game.rarityCounts[aura] > 0) {
+                equipButton.disabled = false;
+            }
+        }
+    }
+
+    // Update crafting material counts
+    const legendaryTotal = [
+        'Legendary Dragon', 'Legendary Celestial', 'Legendary Void',
+        'Legendary Nature', 'Legendary Storm'
+    ].reduce((sum, aura) => sum + game.rarityCounts[aura], 0);
+    
+    const epicTotal = [
+        'Epic Rainbow', 'Epic Galaxy', 'Epic Phoenix', 'Epic Frost'
+    ].reduce((sum, aura) => sum + game.rarityCounts[aura], 0);
+    
+    const rareTotal = [
+        'Rare Crystal', 'Rare Plasma', 'Rare Sunset', 'Rare Ocean', 'Rare Forest'
+    ].reduce((sum, aura) => sum + game.rarityCounts[aura], 0);
+    
+    const uncommonTotal = [
+        'Uncommon Sapphire', 'Uncommon Emerald', 'Uncommon Ruby', 'Uncommon Amber'
+    ].reduce((sum, aura) => sum + game.rarityCounts[aura], 0);
+
+    // Update available materials display
+    document.getElementById('legendaryAvailable').textContent = legendaryTotal;
+    document.getElementById('epicAvailable').textContent = epicTotal;
+    document.getElementById('rareAvailable').textContent = rareTotal;
+    document.getElementById('uncommonAvailable').textContent = uncommonTotal;
+
+    // Enable/disable craft buttons based on available materials
+    document.getElementById('craftLuckyButton').disabled = legendaryTotal < 5;
+    document.getElementById('craftMysticalButton').disabled = epicTotal < 5;
+    document.getElementById('craftDarkMatterButton').disabled = rareTotal < 10;
+    document.getElementById('craftAncientButton').disabled = uncommonTotal < 15;
+}
+
+const game = new SolRNG();
+
+const auras = [
+    // Common Tier
+    { name: 'Common Blue', color: '#0066ff', weight: 50 },    // 1 in 2
+    { name: 'Common Green', color: '#00cc00', weight: 33.33 }, // 1 in 3 
+    { name: 'Common Red', color: '#ff3333', weight: 25 },     // 1 in 4
+    
+    // Uncommon Tier  
+    { name: 'Uncommon Sapphire', color: '#0099ff', weight: 20 },  // 1 in 5
+    { name: 'Uncommon Emerald', color: '#00ff00', weight: 16.67 }, // 1 in 6
+    { name: 'Uncommon Ruby', color: '#ff0000', weight: 14.29 },   // 1 in 7
+    { name: 'Uncommon Amber', color: '#ffaa00', weight: 12.5 },   // 1 in 8
+    
+    // Rare Tier
+    { name: 'Rare Crystal', color: '#e6e6ff', weight: 11.11 },   // 1 in 9
+    { name: 'Rare Plasma', color: '#cc00ff', weight: 10 },      // 1 in 10
+    { name: 'Rare Sunset', color: '#ff6600', weight: 9.09 },    // 1 in 11
+    { name: 'Rare Ocean', color: '#0066cc', weight: 8.33 },     // 1 in 12
+    { name: 'Rare Forest', color: '#006600', weight: 7.69 },    // 1 in 13
+    
+    // Epic Tier
+    { name: 'Epic Rainbow', color: '#ff00ff', weight: 7.14 },   // 1 in 14
+    { name: 'Epic Galaxy', color: '#3300cc', weight: 6.67 },    // 1 in 15
+    { name: 'Epic Phoenix', color: '#ff3300', weight: 6.25 },   // 1 in 16
+    { name: 'Epic Frost', color: '#99ffff', weight: 5.88 },     // 1 in 17
+    
+    // Legendary Tier
+    { name: 'Legendary Dragon', color: '#ff0000', weight: 5.56 },    // 1 in 18
+    { name: 'Legendary Celestial', color: '#ffcc00', weight: 5.26 }, // 1 in 19
+    { name: 'Legendary Void', color: '#000000', weight: 5 },         // 1 in 20
+    { name: 'Legendary Nature', color: '#33cc33', weight: 4.76 },    // 1 in 21
+    { name: 'Legendary Storm', color: '#0033cc', weight: 4.55 },     // 1 in 22
+    
+    // Exclusive Auras (all with weight 0 by default)
+    { name: 'Ultra Cool Lucky Potion Exclusive', color: '#ff00ff', weight: 0 },
+    { name: 'Mystical Potion Exclusive', color: '#4b0082', weight: 0 },
+    { name: 'Dark Matter Potion Exclusive', color: '#1a0033', weight: 0 },
+    { name: 'Ancient Relic Potion Exclusive', color: '#c17e11', weight: 0 }
+];
+
+function getRarityText(auraName) {
+    const aura = auras.find(a => a.name === auraName);
+    const totalWeight = auras.reduce((sum, a) => sum + a.weight, 0);
+    const chance = (aura.weight / totalWeight);
+    const ratio = Math.round(1 / chance);
+    return `(1 in ${ratio})`;
+}
+
+let equippedAura = null;
+let luckyPotions = 0;
+let mysticalPotions = 0;
+let darkMatterPotions = 0;
+let ancientRelicPotions = 0;
+
+// Add to top of script section
+const auraSettings = {
+    'Common Blue': 'ask',
+    'Common Green': 'ask',
+    'Common Red': 'ask',
+    'Uncommon Sapphire': 'ask',
+    'Uncommon Emerald': 'ask',
+    'Uncommon Ruby': 'ask',
+    'Uncommon Amber': 'ask',
+    'Rare Crystal': 'ask',
+    'Rare Plasma': 'ask',
+    'Rare Sunset': 'ask',
+    'Rare Ocean': 'ask',
+    'Rare Forest': 'ask',
+    'Epic Rainbow': 'ask',
+    'Epic Galaxy': 'ask',
+    'Epic Phoenix': 'ask',
+    'Epic Frost': 'ask',
+    'Legendary Dragon': 'ask',
+    'Legendary Celestial': 'ask',
+    'Legendary Void': 'ask',
+    'Legendary Nature': 'ask',
+    'Legendary Storm': 'ask',
+    'Ultra Cool Lucky Potion Exclusive': 'ask',
+    'Mystical Potion Exclusive': 'ask',
+    'Dark Matter Potion Exclusive': 'ask',
+    'Ancient Relic Potion Exclusive': 'ask'
+};
+
+function refreshSettings() {
+    const settingsContainer = document.getElementById('auraSettings');
+    settingsContainer.innerHTML = '';
+    
+    auras.forEach(aura => {
+        const setting = document.createElement('div');
+        setting.className = 'aura-setting';
+        
+        // Create label with aura name and color
+        const label = document.createElement('span');
+        label.textContent = aura.name;
+        label.style.color = aura.color;
+        
+        // Add lock indicator if aura hasn't been obtained
+        if (game.rarityCounts[aura.name] === 0) {
+            label.style.color = '#ff9900';
+            label.textContent += ' 🔒';
+        }
+        
+        // Create select dropdown
+        const select = document.createElement('select');
+        select.disabled = game.rarityCounts[aura.name] === 0;
+        
+        const options = ['ask', 'auto-equip', 'auto-skip'];
+        options.forEach(option => {
+            const optionElement = document.createElement('option');
+            optionElement.value = option;
+            optionElement.textContent = option.replace('-', ' ');
+            optionElement.selected = auraSettings[aura.name] === option;
+            select.appendChild(optionElement);
+        });
+        
+        // Add change event listener
+        select.addEventListener('change', (e) => {
+            auraSettings[aura.name] = e.target.value;
+        });
+        
+        setting.appendChild(label);
+        setting.appendChild(select);
+        settingsContainer.appendChild(setting);
+    });
+}
+
+function initializeSettings() {
+    // Initialize aura settings with 'ask' as default
+    auras.forEach(aura => {
+        auraSettings[aura.name] = 'ask';
+    });
+    
+    // Initial refresh of settings UI
+    refreshSettings();
+}
+
+// Add the checkUnlocks function
+function checkUnlocks() {
+    // Get the elements
+    const quickRollToggle = document.getElementById('quickRollToggle');
+    const autoRollToggle = document.getElementById('autoRollToggle');
+    const quickRollContainer = document.querySelector('.quick-roll-toggle-container');
+    const autoRollContainer = document.querySelector('.auto-roll-toggle-container');
+    const craftingButton = document.getElementById('craftingButton');
+
+    // Check for quick roll unlock
+    if (game.rollCount >= 15 && quickRollToggle && quickRollContainer) {
+        quickRollToggle.disabled = false;
+        quickRollContainer.classList.add('unlocked');
+    }
+    
+    // Check for auto roll unlock
+    if (game.rollCount >= 100 && autoRollToggle && autoRollContainer) {
+        autoRollToggle.disabled = false;
+        autoRollContainer.classList.add('unlocked');
+    }
+
+    // Check for crafting unlock
+    if (game.rollCount >= 500 && craftingButton) {
+        craftingButton.classList.remove('disabled');
+    }
+}
+
+// Update the performRoll function
+async function performRoll() {
+    // Add DOM element references at the start
+    const rollButton = document.getElementById('rollButton');
+    const quickRollToggle = document.getElementById('quickRollToggle');
+    const rollAnimation = document.getElementById('rollAnimation');
+    const rollCountElement = document.getElementById('rollCount');
+    const currentAuraElement = document.getElementById('currentAura'); // Add this line
+    
+    const quickRollEnabled = quickRollToggle.checked;
+    
+    rollButton.disabled = true;
+    
+    // Check which potion is active and change button text
+    if (window.activePotionType) {
+        rollButton.textContent = 'Roll for Super Cool Aura';
+        // Close the crafting menu when using a potion
+        document.getElementById('craftingModal').style.display = 'none';
+    } else {
+        rollButton.textContent = 'Roll for Aura';
+    }
+
+    if (window.activePotionType) {
+        // Roll with active potion
+        if (!quickRollEnabled) {
+            await playRollAnimation();
+        }
+        
+        let exclusiveAuraName;
+        switch(window.activePotionType) {
+            case 'lucky':
+                exclusiveAuraName = 'Ultra Cool Lucky Potion Exclusive';
+                break;
+            case 'mystical':
+                exclusiveAuraName = 'Mystical Potion Exclusive';
+                break;
+            case 'dark-matter':
+                exclusiveAuraName = 'Dark Matter Potion Exclusive';
+                break;
+            case 'ancient':
+                exclusiveAuraName = 'Ancient Relic Potion Exclusive';
+                break;
+        }
+        
+        // After the roll animation and getting the result
+        const exclusiveAura = auras.find(a => a.name === exclusiveAuraName);
+        game.rarityCounts[exclusiveAura.name]++; // Make sure we increment the count
+        updateStatsDisplay(); // Update the display
+        
+        // Force show the confirmation dialog for exclusive auras
+        const auraConfirmation = document.getElementById('auraConfirmation');
+        const rolledAuraName = document.getElementById('rolledAuraName');
+        rolledAuraName.textContent = exclusiveAuraName;
+        rolledAuraName.style.color = exclusiveAura.color;
+        auraConfirmation.style.display = 'block';
+        
+        // Reset active potion
+        window.activePotionType = null;
+    } else {
+        // Normal roll without potion
+        if (!quickRollEnabled) {
+            await playRollAnimation();
+        }
+        const result = game.roll();
+        rollCountElement.textContent = game.rollCount;
+        
+        if (game.rarityCounts[result.name] === 1) {
+            refreshSettings();
+        }
+        
+        const setting = auraSettings[result.name];
+        if (setting === 'auto-equip') {
+            equipAura(result.name);
+        } else if (setting === 'auto-skip') {
+            currentAuraElement.textContent = equippedAura ? equippedAura + ' (Equipped)' : 'None';
+        } else {
+            const auraConfirmation = document.getElementById('auraConfirmation');
+            const rolledAuraName = document.getElementById('rolledAuraName');
+            rolledAuraName.textContent = `${result.name} ${getRarityText(result.name)}`;
+            rolledAuraName.style.color = result.color;
+            auraConfirmation.style.display = 'block';
+        }
+    }
+    
+    checkUnlocks();
+    updateStatsDisplay(); // Add an extra update here to ensure stats are current
+    rollButton.disabled = false;
+}
+
+async function playRollAnimation() {
+    return new Promise((resolve) => {
+        // Remove existing animation div if it exists
+        const existingAnim = document.querySelector('.roll-animation');
+        if (existingAnim) {
+            existingAnim.remove();
+        }
+
+        // Create video element
+        const videoContainer = document.createElement('div');
+        videoContainer.className = 'roll-animation';
+        videoContainer.style.display = 'flex';
+        videoContainer.style.justifyContent = 'center';
+        videoContainer.style.alignItems = 'center';
+        videoContainer.style.background = 'rgba(0,0,0,0.8)';
+
+        const video = document.createElement('video');
+        video.src = 'Untitled video - Made with Clipchamp.mp4';
+        video.style.maxWidth = '80%';
+        video.style.maxHeight = '80vh';
+        
+        videoContainer.appendChild(video);
+        document.body.appendChild(videoContainer);
+
+        // Play video and resolve when finished
+        video.play();
+        video.onended = () => {
+            videoContainer.remove(); // Remove the animation container when video ends
+            resolve();
+        };
+    });
+}
+
+function equipAura(auraName) {
+    const cleanAuraName = auraName.split(' (')[0];
+    const aura = auras.find(a => a.name === cleanAuraName);
+    
+    if (!aura) {
+        console.error('Aura not found:', cleanAuraName);
+        return;
+    }
+    
+    equippedAura = cleanAuraName;
+    
+    // Apply the equipped aura visual
+    const auraElement = document.querySelector('.aura');
+    if (auraElement) {
+        // Remove all existing aura classes
+        auraElement.className = 'aura';
+        
+        // Add the new aura class
+        const className = cleanAuraName.toLowerCase().replace(/\s+/g, '-');
+        auraElement.classList.add(className);
+    }
+    
+    // Update current aura display with rarity
+    const currentAuraElement = document.getElementById('currentAura');
+    if (currentAuraElement) {
+        const rarityText = getRarityText(cleanAuraName);
+        currentAuraElement.textContent = `${cleanAuraName} (Equipped)`;
+        currentAuraElement.innerHTML += `<br><span style="font-size: 0.8em; opacity: 0.8;">${rarityText}</span>`;
+    }
+    
+    // Hide confirmation dialog
+    document.getElementById('auraConfirmation').style.display = 'none';
+    
+    // Update all equip buttons
+    updateStatsDisplay();
+
+    // Add ability button if it's a potion exclusive aura
+    const character = document.querySelector('.character');
+    let existingButton = document.querySelector('.ability-button');
+    if (existingButton) {
+        existingButton.remove();
+    }
+
+    if (cleanAuraName.includes('Exclusive')) {
+        const abilityButton = document.createElement('button');
+        abilityButton.className = 'ability-button';
+        abilityButton.textContent = 'X';
+        abilityButton.style.display = 'block';
+        
+        abilityButton.addEventListener('click', () => {
+            triggerAbility(cleanAuraName);
+        });
+        
+        character.appendChild(abilityButton);
+    }
+}
+
+// Update the confirmation handlers to prevent exclusive auras from being skipped
+document.getElementById('skipAura').addEventListener('click', () => {
+    const currentAuraElement = document.getElementById('currentAura');
+    const rolledAuraNameElement = document.getElementById('rolledAuraName');
+    const auraName = rolledAuraNameElement.textContent.split(' (')[0];
+    
+    // If it's an exclusive aura, force equip it
+    if (auraName.includes('Exclusive')) {
+        equipAura(auraName);
+    } else {
+        // For non-exclusive auras, allow skipping but maintain formatting
+        document.getElementById('auraConfirmation').style.display = 'none';
+        if (equippedAura) {
+            const rarityText = getRarityText(equippedAura);
+            currentAuraElement.textContent = `${equippedAura} (Equipped)`;
+            currentAuraElement.innerHTML += `<br><span style="font-size: 0.8em; opacity: 0.8;">${rarityText}</span>`;
+        } else {
+            currentAuraElement.textContent = 'None';
+        }
+    }
+});
+
+// Update the equip button event listeners
+document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('equip-button')) {
+        const auraName = e.target.dataset.aura;
+        if (auraName && game.rarityCounts[auraName] > 0) {
+            equipAura(auraName);
+        }
+    }
+});
+
+// Update the equipRolledAura button handler
+document.getElementById('equipRolledAura').addEventListener('click', () => {
+    const rolledAuraNameElement = document.getElementById('rolledAuraName');
+    if (rolledAuraNameElement) {
+        const rolledAuraText = rolledAuraNameElement.textContent;
+        const auraName = rolledAuraText.split(' (')[0]; // Remove rarity text
+        equipAura(auraName);
+        document.getElementById('auraConfirmation').style.display = 'none';
+    }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Move all DOM element queries here
+    const rollButton = document.getElementById('rollButton');
+    const rollAnimation = document.getElementById('rollAnimation');
+    const quickRollToggle = document.getElementById('quickRollToggle');
+    const autoRollToggle = document.getElementById('autoRollToggle');
+    const craftButton = document.getElementById('craftButton');
+    const craftingButton = document.getElementById('craftingButton');
+    const quickRollContainer = document.querySelector('.quick-roll-toggle-container');
+    const autoRollContainer = document.querySelector('.auto-roll-toggle-container');
+    const auraElement = document.querySelector('.aura');
+    const rollCountElement = document.getElementById('rollCount');
+    const currentAuraElement = document.getElementById('currentAura');
+    const statsModal = document.getElementById('statsModal');
+    const statsButton = document.getElementById('statsButton');
+    const settingsModal = document.getElementById('settingsModal');
+    const settingsButton = document.getElementById('settingsButton');
+    const closeSettings = document.querySelector('.close-settings');
+    let autoRollInterval = null;
+
+    // Initialize event listeners after elements are available
+    rollButton.addEventListener('click', performRoll);
+
+    // Quick roll toggle handler
+    quickRollToggle.addEventListener('change', (e) => {
+        if (e.target.checked) {
+            quickRollContainer.classList.add('active');
+        } else {
+            quickRollContainer.classList.remove('active');
+        }
+    });
+
+    // Auto roll toggle handler
+    autoRollToggle.addEventListener('change', (e) => {
+        if (e.target.checked) {
+            autoRollContainer.classList.add('active');
+            autoRollInterval = setInterval(() => {
+                if (!rollButton.disabled) {
+                    performRoll();
+                }
+            }, 50);
+        } else {
+            autoRollContainer.classList.remove('active');
+            if (autoRollInterval) {
+                clearInterval(autoRollInterval);
+                autoRollInterval = null;
+            }
+        }
+    });
+
+    // Stats modal event listeners
+    const closeStats = document.querySelector('.close-stats');
+    statsButton.addEventListener('click', () => {
+        statsModal.style.display = 'block';
+        // Trigger reflow
+        statsModal.offsetHeight;
+        statsModal.classList.add('show');
+    });
+
+    closeStats.addEventListener('click', () => {
+        statsModal.classList.remove('show');
+        setTimeout(() => {
+            statsModal.style.display = 'none';
+        }, 300); // Match transition duration
+    });
+
+    // Close modal when clicking outside
+    statsModal.addEventListener('click', (e) => {
+        if (e.target === statsModal) {
+            closeStats.click();
+        }
+    });
+
+    // Crafting button click handler
+    craftingButton.addEventListener('click', () => {
+        if (!craftingButton.classList.contains('disabled')) {
+            const craftingModal = document.getElementById('craftingModal');
+            craftingModal.style.display = 'block';
+            // Trigger reflow
+            craftingModal.offsetHeight;
+            craftingModal.classList.add('show');
+        }
+    });
+
+    // Close crafting modal when clicking X
+    const closeCrafting = document.querySelector('.close-crafting');
+    closeCrafting.addEventListener('click', () => {
+        const craftingModal = document.getElementById('craftingModal');
+        craftingModal.classList.remove('show');
+        setTimeout(() => {
+            craftingModal.style.display = 'none';
+        }, 300);
+    });
+
+    // Close crafting modal when clicking outside
+    const craftingModal = document.getElementById('craftingModal');
+    craftingModal.addEventListener('click', (e) => {
+        if (e.target === craftingModal) {
+            closeCrafting.click();
+        }
+    });
+
+    // Settings modal event listeners
+    settingsButton.addEventListener('click', () => {
+        settingsModal.style.display = 'block';
+        // Trigger reflow
+        settingsModal.offsetHeight;
+        settingsModal.classList.add('show');
+        refreshSettings(); // Refresh settings when opening modal
+    });
+
+    closeSettings.addEventListener('click', () => {
+        settingsModal.classList.remove('show');
+        setTimeout(() => {
+            settingsModal.style.display = 'none';
+        }, 300); // Match transition duration
+    });
+
+    // Close modal when clicking outside
+    settingsModal.addEventListener('click', (e) => {
+        if (e.target === settingsModal) {
+            closeSettings.click();
+        }
+    });
+
+    // Collection modal event listeners
+    const collectionButton = document.getElementById('collectionButton');
+    const collectionModal = document.getElementById('collectionModal');
+
+    collectionButton.addEventListener('click', () => {
+        collectionModal.style.display = 'block';
+        populateCollection();
+    });
+
+    // Close collection modal when clicking outside content
+    collectionModal.addEventListener('click', (e) => {
+        if (e.target === collectionModal) {
+            collectionModal.style.display = 'none';
+        }
+    });
+
+    // Potion crafting event listeners
+    // Craft Lucky Potion
+    document.getElementById('craftLuckyButton').addEventListener('click', () => {
+        const legendaryTotal = [
+            'Legendary Dragon', 'Legendary Celestial', 'Legendary Void',
+            'Legendary Nature', 'Legendary Storm'
+        ].reduce((sum, aura) => sum + game.rarityCounts[aura], 0);
+        
+        if (legendaryTotal >= 5) {
+            // Deduct 5 legendary auras randomly
+            let remainingToDeduce = 5;
+            while (remainingToDeduce > 0) {
+                const legendaryAuras = ['Legendary Dragon', 'Legendary Celestial', 'Legendary Void', 
+                                      'Legendary Nature', 'Legendary Storm'];
+                for (const aura of legendaryAuras) {
+                    if (game.rarityCounts[aura] > 0 && remainingToDeduce > 0) {
+                        game.rarityCounts[aura]--;
+                        remainingToDeduce--;
+                    }
+                }
+            }
+            luckyPotions++;
+            document.getElementById('luckyCount').textContent = luckyPotions;
+            document.getElementById('useLuckyButton').disabled = false;
+            updateStatsDisplay();
+        }
+    });
+
+    // Craft Mystical Potion
+    document.getElementById('craftMysticalButton').addEventListener('click', () => {
+        const epicTotal = [
+            'Epic Rainbow', 'Epic Galaxy', 'Epic Phoenix', 'Epic Frost'
+        ].reduce((sum, aura) => sum + game.rarityCounts[aura], 0);
+        
+        if (epicTotal >= 5) {
+            // Deduct 5 epic auras randomly
+            let remainingToDeduce = 5;
+            while (remainingToDeduce > 0) {
+                const epicAuras = ['Epic Rainbow', 'Epic Galaxy', 'Epic Phoenix', 'Epic Frost'];
+                for (const aura of epicAuras) {
+                    if (game.rarityCounts[aura] > 0 && remainingToDeduce > 0) {
+                        game.rarityCounts[aura]--;
+                        remainingToDeduce--;
+                    }
+                }
+            }
+            mysticalPotions++;
+            document.getElementById('mysticalCount').textContent = mysticalPotions;
+            document.getElementById('useMysticalButton').disabled = false;
+            updateStatsDisplay();
+        }
+    });
+
+    // Craft Dark Matter Potion
+    document.getElementById('craftDarkMatterButton').addEventListener('click', () => {
+        const rareTotal = [
+            'Rare Crystal', 'Rare Plasma', 'Rare Sunset', 'Rare Ocean', 'Rare Forest'
+        ].reduce((sum, aura) => sum + game.rarityCounts[aura], 0);
+        
+        if (rareTotal >= 10) {
+            // Deduct 10 rare auras randomly
+            let remainingToDeduce = 10;
+            while (remainingToDeduce > 0) {
+                const rareAuras = ['Rare Crystal', 'Rare Plasma', 'Rare Sunset', 'Rare Ocean', 'Rare Forest'];
+                for (const aura of rareAuras) {
+                    if (game.rarityCounts[aura] > 0 && remainingToDeduce > 0) {
+                        game.rarityCounts[aura]--;
+                        remainingToDeduce--;
+                    }
+                }
+            }
+            darkMatterPotions++;
+            document.getElementById('darkMatterCount').textContent = darkMatterPotions;
+            document.getElementById('useDarkMatterButton').disabled = false;
+            updateStatsDisplay();
+        }
+    });
+
+    // Craft Ancient Relic Potion
+    document.getElementById('craftAncientButton').addEventListener('click', () => {
+        const uncommonTotal = [
+            'Uncommon Sapphire', 'Uncommon Emerald', 'Uncommon Ruby', 'Uncommon Amber'
+        ].reduce((sum, aura) => sum + game.rarityCounts[aura], 0);
+        
+        if (uncommonTotal >= 15) {
+            // Deduct 15 uncommon auras randomly
+            let remainingToDeduce = 15;
+            while (remainingToDeduce > 0) {
+                const uncommonAuras = ['Uncommon Sapphire', 'Uncommon Emerald', 'Uncommon Ruby', 'Uncommon Amber'];
+                for (const aura of uncommonAuras) {
+                    if (game.rarityCounts[aura] > 0 && remainingToDeduce > 0) {
+                        game.rarityCounts[aura]--;
+                        remainingToDeduce--;
+                    }
+                }
+            }
+            ancientRelicPotions++;
+            document.getElementById('ancientCount').textContent = ancientRelicPotions;
+            document.getElementById('useAncientButton').disabled = false;
+            updateStatsDisplay();
+        }
+    });
+
+    // Use potion event listeners
+    document.getElementById('useLuckyButton').addEventListener('click', () => {
+        if (luckyPotions > 0) {
+            window.activePotionType = 'lucky';
+            luckyPotions--;
+            document.getElementById('luckyCount').textContent = luckyPotions;
+            document.getElementById('useLuckyButton').disabled = luckyPotions === 0;
+        }
+    });
+
+    document.getElementById('useMysticalButton').addEventListener('click', () => {
+        if (mysticalPotions > 0) {
+            window.activePotionType = 'mystical';
+            mysticalPotions--;
+            document.getElementById('mysticalCount').textContent = mysticalPotions;
+            document.getElementById('useMysticalButton').disabled = mysticalPotions === 0;
+        }
+    });
+
+    document.getElementById('useDarkMatterButton').addEventListener('click', () => {
+        if (darkMatterPotions > 0) {
+            window.activePotionType = 'dark-matter';
+            darkMatterPotions--;
+            document.getElementById('darkMatterCount').textContent = darkMatterPotions;
+            document.getElementById('useDarkMatterButton').disabled = darkMatterPotions === 0;
+        }
+    });
+
+    document.getElementById('useAncientButton').addEventListener('click', () => {
+        if (ancientRelicPotions > 0) {
+            window.activePotionType = 'ancient';
+            ancientRelicPotions--;
+            document.getElementById('ancientCount').textContent = ancientRelicPotions;
+            document.getElementById('useAncientButton').disabled = ancientRelicPotions === 0;
+        }
+    });
+});
+
+// Function to populate collection
+function populateCollection() {
+    const grid = document.getElementById('collectionGrid');
+    grid.innerHTML = '';
+    
+    auras.forEach(aura => {
+        if (game.rarityCounts[aura.name] > 0) {
+            const item = document.createElement('div');
+            item.className = 'collection-item';
+            
+            const preview = document.createElement('div');
+            preview.className = 'collection-aura-preview';
+            
+            // Add the aura div with the correct class name for styling
+            const auraDiv = document.createElement('div');
+            const auraClass = aura.name.toLowerCase().replace(/\s+/g, '-');
+            auraDiv.className = `collection-aura ${auraClass}`;
+            
+            preview.appendChild(auraDiv);
+            
+            const label = document.createElement('div');
+            label.className = 'collection-label';
+            label.textContent = aura.name;
+            label.style.color = aura.color;
+            
+            item.appendChild(preview);
+            item.appendChild(label);
+            grid.appendChild(item);
+        }
+    });
+}
+
+// Add smooth horizontal scrolling
+document.querySelector('.collection-content').addEventListener('wheel', (e) => {
+    e.preventDefault();
+    e.currentTarget.scrollLeft += e.deltaY;
+}, { passive: false });
+
+// Add drag scrolling
+document.addEventListener('DOMContentLoaded', () => {
+    const collectionContent = document.querySelector('.collection-content');
+    
+    let isDown = false;
+    let startX;
+    let scrollLeft;
+
+    collectionContent.addEventListener('mousedown', (e) => {
+        isDown = true;
+        startX = e.pageX - collectionContent.offsetLeft;
+        scrollLeft = collectionContent.scrollLeft;
+    });
+
+    collectionContent.addEventListener('mouseleave', () => {
+        isDown = false;
+    });
+
+    collectionContent.addEventListener('mouseup', () => {
+        isDown = false;
+    });
+
+    collectionContent.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - collectionContent.offsetLeft;
+        const walk = (x - startX) * 2;
+        collectionContent.scrollLeft = scrollLeft - walk;
+    });
+});
+</script></body></html>
