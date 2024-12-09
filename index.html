@@ -1,0 +1,1302 @@
+<html><head><base href="." /><meta charset="utf8" /><title>Glorp0 - Alien Social Media</title>
+<style>
+:root {
+  --alien-green: #39ff14;
+  --dark-space: #0a0a1f;
+  --glow: 0 0 10px var(--alien-green);
+  --nebula-pink: rgba(255, 0, 255, 0.1);
+  --nebula-blue: rgba(0, 255, 255, 0.1);
+}
+
+body {
+  margin: 0;
+  padding: 20px;
+  background: 
+    radial-gradient(circle at 20% 30%, var(--nebula-pink), transparent 40%),
+    radial-gradient(circle at 80% 70%, var(--nebula-blue), transparent 40%),
+    var(--dark-space);
+  color: var(--alien-green);
+  font-family: 'Courier New', monospace;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(1px 1px at 20px 30px, white, rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 40px 70px, white, rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 50px 160px, white, rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 200px 20px, white, rgba(0,0,0,0));
+  background-repeat: repeat;
+  animation: starTwinkle 4s linear infinite;
+  opacity: 0.4;
+  z-index: -1;
+}
+
+.floating-particle {
+  position: fixed;
+  width: 3px;
+  height: 3px;
+  background: var(--alien-green);
+  border-radius: 50%;
+  filter: blur(1px);
+  opacity: 0.3;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.flying-ufo {
+  position: fixed;
+  font-size: 2em;
+  pointer-events: none;
+  z-index: 1000;
+  filter: drop-shadow(0 0 5px var(--alien-green));
+  transition: transform 0.05s linear;
+}
+
+.planet {
+  position: fixed;
+  pointer-events: none;
+  z-index: -1;
+  filter: drop-shadow(0 0 10px var(--alien-green));
+  opacity: 0.3;
+}
+
+@keyframes starTwinkle {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes orbitRight {
+  from { transform: rotate(0deg) translateX(100px) rotate(0deg); }
+  to { transform: rotate(360deg) translateX(100px) rotate(-360deg); }
+}
+
+@keyframes orbitLeft {
+  from { transform: rotate(360deg) translateX(100px) rotate(-360deg); }
+  to { transform: rotate(0deg) translateX(100px) rotate(0deg); }
+}
+
+@keyframes planetPulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.4; }
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.header h1 {
+  font-size: 3em;
+  text-shadow: var(--glow);
+  margin: 0;
+}
+
+.tagline {
+  font-size: 1.2em;
+  color: var(--alien-green);
+  text-shadow: var(--glow);
+  margin-top: 5px;
+  font-style: italic;
+  opacity: 0.8;
+}
+
+.connected-users {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  padding: 10px;
+  border: 1px solid var(--alien-green);
+  border-radius: 10px;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--alien-green);
+  box-shadow: var(--glow);
+}
+
+.post-form {
+  margin-bottom: 30px;
+  position: relative;
+}
+
+.crawling-worm {
+  position: absolute;
+  font-size: 20px;
+  top: -25px;
+  left: 10px;
+  animation: wiggle 3s infinite ease-in-out;
+  transform-origin: bottom;
+}
+
+@keyframes wiggle {
+  0%, 100% { 
+    transform: translateX(0) rotate(0deg);
+  }
+  25% { 
+    transform: translateX(10px) rotate(10deg);
+  }
+  50% { 
+    transform: translateX(20px) rotate(-10deg);
+  }
+  75% { 
+    transform: translateX(30px) rotate(10deg);
+  }
+}
+
+.post-input {
+  width: 100%;
+  padding: 15px;
+  background: rgba(57, 255, 20, 0.1);
+  border: 1px solid var(--alien-green);
+  border-radius: 5px;
+  color: var(--alien-green);
+  font-family: inherit;
+  resize: vertical;
+  margin-bottom: 10px;
+}
+
+.post-button {
+  background: var(--alien-green);
+  color: var(--dark-space);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  font-family: inherit;
+}
+
+.posts {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.post {
+  border: 1px solid var(--alien-green);
+  border-radius: 10px;
+  padding: 15px;
+  position: relative;
+  background: rgba(57, 255, 20, 0.05);
+}
+
+.post-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.post-content img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 10px 0;
+  border-radius: 10px;
+  border: 1px solid var(--alien-green);
+  box-shadow: var(--glow);
+}
+
+.post-actions {
+  display: flex;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.action-button {
+  background: none;
+  border: none;
+  color: var(--alien-green);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.goo-drop {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: var(--alien-green);
+  border-radius: 50%;
+  filter: blur(2px);
+  pointer-events: none;
+  animation: drip 2s linear forwards;
+}
+
+@keyframes drip {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(100vh) scale(0.5);
+    opacity: 0;
+  }
+}
+
+.flying-ufo {
+  position: fixed;
+  font-size: 2em;
+  pointer-events: none;
+  z-index: 1000;
+  filter: drop-shadow(0 0 5px var(--alien-green));
+  transition: transform 0.05s linear;
+}
+
+.scam-popup {
+  position: fixed;
+  background: rgba(10, 10, 31, 0.95);
+  border: 2px solid var(--alien-green);
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: var(--glow);
+  max-width: 300px;
+  z-index: 1000;
+  animation: float 3s ease-in-out infinite;
+}
+
+.scam-popup button {
+  background: var(--alien-green);
+  color: var(--dark-space);
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+  font-family: inherit;
+  width: 100%;
+}
+
+.scam-popup .close-button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: none;
+  border: none;
+  color: var(--alien-green);
+  cursor: pointer;
+  width: auto;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.worm-message {
+  position: absolute;
+  top: -60px;
+  left: 50px;
+  background: rgba(57, 255, 20, 0.1);
+  border: 1px solid var(--alien-green);
+  border-radius: 5px;
+  padding: 10px;
+  font-size: 0.9em;
+  animation: fadeInOut 4s forwards;
+  pointer-events: none;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(10px); }
+  10% { opacity: 1; transform: translateY(0); }
+  90% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-10px); }
+}
+
+#replyModal {
+  display: none;
+  position: fixed;
+  background: rgba(10, 10, 31, 0.95);
+  color: var(--alien-green);
+  border: 2px solid var(--alien-green);
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 400px;
+  z-index: 1100;
+}
+
+.notification {
+  background: rgba(57, 255, 20, 0.2);
+  color: var(--alien-green);
+  border: 1px solid var(--alien-green);
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 10px;
+  box-shadow: var(--glow);
+  animation: fadeInOut 5s forwards;
+  cursor: pointer;
+  opacity: 0;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+  }
+}
+</style>
+</head>
+<body>
+<div id="notificationArea" style="position: fixed; top: 10px; right: 10px; z-index: 1001; min-width: 200px; max-width: 300px;"></div>
+<div class="container">
+  <div class="header">
+    <h1>🛸 Glorp0</h1>
+    <div class="tagline">make it goo</div>
+  </div>
+  
+  <div class="connected-users" id="connectedUsers">
+    <!-- Connected users will appear here -->
+  </div>
+
+  <div class="post-form">
+    <div class="crawling-worm">🪱</div>
+    <textarea class="post-input" id="postInput" placeholder="Scream in to the void" rows="4"></textarea>
+    <button class="post-button" id="postButton">Glorp It!</button>
+  </div>
+
+  <div class="posts" id="posts">
+    <!-- Posts will appear here -->
+  </div>
+</div>
+
+<div id="replyModal">
+  <h3>Reply to Post</h3>
+  <textarea id="replyInput" rows="4" style="width: 100%; background: transparent; border: 1px solid var(--alien-green); color: var(--alien-green); resize: vertical;"></textarea>
+  <button id="replySubmitButton">Submit Reply</button>
+  <button id="replyCancelButton" style="background: none; border: none; color: var(--alien-green); float: right;">Cancel</button>
+</div>
+
+<script>
+let isReconnecting = false;
+
+const alienNames = [
+  'Zyx-427',
+  'Blorp',
+  'Qwerty',
+  'Nexus-6',
+  'Glitch',
+  'Binary',
+  'Quantum',
+  'Pixel',
+  'Vector',
+  'Nova',
+  'Greg', // Our resident scammer
+  'W0RM', // Our system worm
+  'Cosmos',
+  'Nebula',
+  'Void',
+  'Static',
+  'Matrix',
+  'Circuit',
+  'Debug',
+  'Cache'
+];
+
+const alienAvatars = [
+  'https://images.websim.ai/avatar/1.png',
+  'https://images.websim.ai/avatar/2.png',
+  'https://images.websim.ai/avatar/3.png', 
+  'https://images.websim.ai/avatar/4.png',
+  'https://images.websim.ai/avatar/5.png',
+  'https://images.websim.ai/avatar/6.png',
+  'https://images.websim.ai/avatar/7.png', // Greg's avatar
+  'https://images.websim.ai/avatar/8.png',
+  'https://images.websim.ai/avatar/9.png',
+  'https://images.websim.ai/avatar/10.png',
+  'https://images.websim.ai/avatar/11.png', // W0RM's avatar
+];
+
+const gregPosts = [
+  "🚀 HUGE OPPORTUNITY! Just discovered a quantum mining operation on Jupiter's moons! Only 1000 GlorpCoins to join! DM me! 💰",
+  "🌟 BREAKING: New cryptocurrency launching - MoonRocks! Get in early before we reach Alpha Centauri! Only 500 GlorpCoins! 🪨",
+  "💫 EXCLUSIVE: Join my Intergalactic Pyramid Scheme! It's not a pyramid, it's a quantum tetrahedron of wealth! 📈",
+  "🎮 Selling rare Dropnoids at 90% discount! These are totally legitimate and not quantum-copied! Trust me! 🎯",
+  "⚡ URGENT: Need 50 GlorpCoins for spacecraft repairs. Will return 500 GlorpCoins tomorrow! Quantum-guaranteed! 🛸",
+  "🌍 Earth is flat and I can prove it! Send me 100 GlorpCoins for the secret files! 🤫",
+  "💎 Just found a glitch in the universal matrix! Double your GlorpCoins instantly! Limited time offer! 💫",
+  "🎰 Start your own Asteroid Mining Empire! Only 2000 GlorpCoins to begin! Totally legal in this galaxy! ⛏️",
+  "🌠 INSIDER INFO: The Galactic Council is about to approve SpaceDoge coin! Buy now! 🐕",
+  "💼 Looking for quantum investment partners! 1000% return guaranteed by the laws of physics! 📊"
+];
+
+const alienPosts = [
+  "Just discovered a new quantum anomaly in sector 7G! 🌌",
+  "Anyone else's tentacles feeling extra wiggly today? 🐙",
+  "Earth's memes are getting better! Almost as good as Zeta Reticuli's! 👽",
+  "Who wants to join my interdimensional book club? 📚✨",
+  "Finally mastered telepathic emoji sending! 🧠💭",
+  "Just upgraded my UFO's cup holders. Much better! 🛸☕",
+  "These human 'cats' are clearly alien spies, right? 🐱👽",
+  "Anyone else having trouble with their cloaking device? 🔧",
+  "Found this amazing black hole for vacation! 🕳️✨",
+  "Human music is weird but I can't stop listening! 🎵👽"
+];
+
+const wormPosts = [
+  "01101000 01101001 01101000 01101001 🪱",
+  "Found a delicious new data packet today! 🪱💾",
+  "Crawling through the codebase, nothing suspicious here... 🪱",
+  "Your system's security is *chef's kiss* 🪱✨",
+  "Just ate some legacy code, feeling good! 🪱🍽️",
+  "Who else loves binary for breakfast? 🪱☕",
+  "Definitely not collecting any sensitive data... 🪱👀",
+  "Your firewall is very cozy! 🪱🏠",
+  "Quantum tunneling through your encryption! 🪱🔒",
+  "Nice try with that antivirus update! 🪱😎"
+];
+
+const alienImages = [
+  'https://images.websim.ai/alien/1.png',
+  'https://images.websim.ai/alien/2.png',
+  'https://images.websim.ai/alien/3.png',
+  'https://images.websim.ai/alien/4.png',
+  'https://images.websim.ai/alien/5.png'
+];
+
+const wormMessages = [
+  "I see you! Nice data you got there...",
+  "Just crawling through, don't mind me!",
+  "Your cookies look delicious!",
+  "Wanna trade some encrypted secrets?",
+  "I promise I'm a feature, not a bug!",
+  "*wiggles in binary*",
+  "Your firewall is very cozy!",
+  "Got any tasty data packets?",
+  "I come in peace... mostly!",
+  "Your system security is *chef's kiss*"
+];
+
+const scamMessages = [
+  {
+    title: "🌿 AMAZING DEAL: Pete's Lawnmower! 🌿",
+    message: "3-SPEED LAWNMOWER (mostly works) FOR SALE! No lowballers, I know what I have! Contact Pete NOW! 🚜",
+    isDropnoid: false,
+    isPete: true
+  },
+  {
+    title: "🔥 HOT DEAL: Professional Grass Cutting Machine! 🔥",
+    message: "SLIGHTLY USED lawn equipment! Only small oil leak (barely noticeable unless running). Pete's Quality Guarantee! 🛠️",
+    isDropnoid: false,
+    isPete: true
+  },
+  {
+    title: "⚡ FLASH SALE: Pete's Premium Lawnmower! ⚡",
+    message: "Speed settings: Fast, Faster, and LUDICROUS! Comes with original manual (slightly water damaged)! 🏃‍♂️",
+    isDropnoid: false,
+    isPete: true
+  },
+  {
+    title: "🚀 CRYPTO OPPORTUNITY! 🚀",
+    message: "Invest in GlorpCoin now! 1000x returns guaranteed by quantum mechanics! Don't miss out on the interstellar gains! 🚀💫",
+    isDropnoid: false,
+    isPete: false
+  },
+  {
+    title: "🎮 FREE DROPNOID! 🎮",
+    message: "You've been selected to receive a FREE Dropnoid NFT! Limited time offer from the Andromeda galaxy!",
+    isDropnoid: true
+  },
+  {
+    title: "🔮 PSYCHIC INVESTMENT OPPORTUNITY 🔮",
+    message: "Our quantum AI has predicted a 500% return on MoonTokens! Join now before takeoff! 🌙",
+    isDropnoid: false
+  },
+  {
+    title: "👽 ALIEN TECHNOLOGY PRESALE 👽",
+    message: "Be the first to invest in revolutionary alien tech! Early investors get special telepathic abilities!",
+    isDropnoid: false
+  },
+  {
+    title: "🎯 CONGRATULATIONS! YOU'VE WON! 🎯",
+    message: "Your consciousness has been selected to receive 1,000,000 SpaceBucks! Claim now!",
+    isDropnoid: false
+  },
+  {
+    title: "💫 INTERGALACTIC MINING POOL 💫",
+    message: "Mine StarlightCoin with zero effort! Our quantum computers do all the work!",
+    isDropnoid: false
+  },
+  {
+    title: "🌌 NEBULA DAO PRESALE 🌌",
+    message: "Join the first decentralized autonomous organization in the Andromeda Galaxy!",
+    isDropnoid: false
+  },
+  {
+    title: "🎮 RARE DROPNOID DISCOVERED! 🎮",
+    message: "A legendary Ancient Alien Dropnoid has appeared! Claim it before someone else does!",
+    isDropnoid: true
+  },
+  {
+    title: "🚀 ROCKET TOKEN LAUNCH 🚀",
+    message: "Don't miss the biggest token launch since the Big Bang! To the stars! 🌟",
+    isDropnoid: false
+  },
+  {
+    title: "🔥 HOT TIP FROM GREG! 🔥",
+    message: "I've discovered a glitch in the quantum trading matrix! Join now for infinite gains!",
+    isDropnoid: false
+  }
+];
+
+let room = new WebsimSocket();
+room.onPeersChanged = updateConnectedUsers;
+room.onRecordChanged = async (id) => {
+  if (id === 'posts') {
+    try {
+      await refreshPosts();
+    } catch (error) {
+      console.error('Error refreshing posts:', error);
+      if (error.message?.includes('WebSocket') || error.message?.includes('connection')) {
+        await reconnectWebSocket();
+      }
+    }
+  }
+};
+
+async function reconnectWebSocket() {
+  if (isReconnecting) return;
+  
+  isReconnecting = true;
+  console.log('Attempting to reconnect WebSocket...');
+  
+  try {
+    room = new WebsimSocket();
+    
+    room.onPeersChanged = updateConnectedUsers; 
+    room.onRecordChanged = async (id) => {
+      if (id === 'posts') {
+        try {
+          await refreshPosts();
+        } catch (error) {
+          console.error('Error refreshing posts:', error);
+          if (error.message?.includes('WebSocket') || error.message?.includes('connection')) {
+            await reconnectWebSocket();
+          }
+        }
+      }
+    };
+    
+    await refreshPosts();
+    isReconnecting = false;
+  } catch (error) {
+    console.error('Error reconnecting:', error);
+    isReconnecting = false;
+    setTimeout(reconnectWebSocket, 5000);
+  }
+}
+
+async function refreshPosts() {
+  try {
+    const posts = await room.store.get('posts') || [];
+    const postsContainer = document.getElementById('posts');
+    postsContainer.innerHTML = '';
+
+    // Sort posts by timestamp, newest first
+    const sortedPosts = [...posts].sort((a, b) => b.timestamp - a.timestamp);
+
+    // Remove posts older than 5 minutes
+    const fiveMinutesAgo = Date.now() - (5 * 60 * 1000);
+    const recentPosts = sortedPosts.filter(post => post.timestamp > fiveMinutesAgo);
+
+    // Update store with filtered posts if there's a difference
+    if (recentPosts.length !== posts.length) {
+      await room.store.update({
+        id: 'posts',
+        dependencies: { recentPosts },
+        updateFunction: () => recentPosts
+      });
+    }
+    
+    // Render each post
+    recentPosts.forEach(post => {
+      const postElement = createPostElement(post);
+      postsContainer.appendChild(postElement);
+    });
+  } catch (error) {
+    console.error('Error refreshing posts:', error);
+    if (error.message?.includes('WebSocket') || error.message?.includes('connection')) {
+      await reconnectWebSocket();
+    }
+  }
+}
+
+async function generatePost(content) {
+  try {
+    const username = room.party.client.username;
+    const avatarUrl = room.party.client.avatarUrl;
+
+    const post = {
+      id: Date.now().toString(),
+      content,
+      username,
+      avatarUrl,
+      timestamp: Date.now(),
+      likes: [],
+      dislikes: [],
+      reglorps: [],
+      replies: []
+    };
+
+    await room.store.update({
+      id: 'posts',
+      dependencies: { post },
+      updateFunction: (posts = []) => [...posts, post]
+    });
+    
+    await refreshPosts();
+    playAlienSound();
+  } catch (error) {
+    console.error('Error generating post:', error);
+    if (error.message?.includes('WebSocket') || error.message?.includes('connection')) {
+      await reconnectWebSocket();
+      await generatePost(content);
+    } else {
+      throw error;
+    }
+  }
+}
+
+document.getElementById('postButton').addEventListener('click', async () => {
+  const input = document.getElementById('postInput');
+  const button = document.getElementById('postButton');
+  const content = input.value.trim();
+  
+  if (content) {
+    button.disabled = true;
+    button.textContent = 'Sending...';
+    
+    try {
+      await generatePost(content);
+      input.value = '';
+      button.textContent = 'Glorp It!';
+      button.disabled = false;
+    } catch (error) {
+      console.error('Error posting:', error);
+      button.textContent = 'Error - Try Again';
+      button.disabled = false;
+    }
+  }
+});
+
+let replyingToPostId = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.body.addEventListener('click', event => {
+    if (event.target.classList.contains('reply-button')) {
+      showReplyModal(event.target.dataset.postId);
+    }
+  });
+
+  document.getElementById('replySubmitButton').addEventListener('click', submitReply);
+  document.getElementById('replyCancelButton').addEventListener('click', hideReplyModal);
+});
+
+async function submitReply() {
+  const replyContent = document.getElementById('replyInput').value.trim();
+  if (!replyContent || !replyingToPostId) return;
+
+  const username = room.party.client.username;
+
+  try {
+    await room.store.update({
+      id: 'posts',
+      dependencies: { replyContent, replyingToPostId, username },
+      updateFunction: (posts) => {
+        return posts.map(post => {
+          if (post.id === replyingToPostId) {
+            const replies = post.replies || [];
+            return {...post, replies: [...replies, {username, content: replyContent, timestamp: Date.now()}]};
+          }
+          return post;
+        });
+      }
+    });
+
+    hideReplyModal();
+    playAlienSound();
+
+    await refreshPosts();
+
+    const posts = await room.store.get('posts');
+    const updatedPost = posts.find(p => p.id === replyingToPostId);
+    if (updatedPost) notifyInteractions(updatedPost, 'reply');
+  } catch (error) {
+    console.error('Error submitting reply:', error);
+    if (error.message?.includes('WebSocket') || error.message?.includes('connection')) {
+      await reconnectWebSocket();
+      await submitReply();
+    }
+  }
+}
+
+function showReplyModal(postId) {
+  replyingToPostId = postId;
+  document.getElementById('replyModal').style.display = 'block';
+  document.getElementById('replyModal').style.left = (window.innerWidth / 2 - document.getElementById('replyModal').offsetWidth / 2) + 'px';
+  document.getElementById('replyModal').style.top = (window.innerHeight / 2 - document.getElementById('replyModal').offsetHeight / 2) + 'px';
+  document.getElementById('replyInput').value = '';
+}
+
+function hideReplyModal() {
+  replyingToPostId = null;
+  document.getElementById('replyModal').style.display = 'none';
+}
+
+function createPostElement(post) {
+  const postElement = document.createElement('div');
+  postElement.className = 'post';
+  
+  const currentUser = room.party.client.username;
+  const liked = post.likes?.includes(currentUser);
+  const disliked = post.dislikes?.includes(currentUser);
+  const reglorped = post.reglorps?.includes(currentUser);
+  
+  postElement.innerHTML = `
+    <div class="post-header">
+      <img src="${post.avatarUrl}" alt="${post.username}" class="user-avatar" />
+      <strong>${post.username}</strong>
+      <span style="opacity: 0.7; margin-left: auto;">
+        ${new Date(post.timestamp).toLocaleTimeString()}
+      </span>
+    </div>
+    <div class="post-content">${post.content}</div>
+    <div class="post-actions">
+      <button class="action-button" onclick="handleLike('${post.id}')">
+        ${liked ? '❤️' : '🤍'} Like ${post.likes?.length || 0}
+      </button>
+      <button class="action-button" onclick="handleDislike('${post.id}')">
+        ${disliked ? '💔' : '🖤'} Dislike ${post.dislikes?.length || 0}
+      </button>
+      <button class="action-button" onclick="handleReglorp('${post.id}')">
+        ${reglorped ? '🛸' : '🛸'} Reglorp ${post.reglorps?.length || 0}
+      </button>
+      <button class="action-button reply-button" data-post-id="${post.id}">
+        💭 Reply ${post.replies?.length || 0}
+      </button>
+    </div>
+    ${post.replies?.length ? `
+      <div class="replies" style="margin-top: 10px; margin-left: 20px; border-left: 1px solid var(--alien-green); padding-left: 10px;">
+        ${post.replies.map(reply => `
+          <div class="reply" style="margin-top: 5px;">
+            <strong>${reply.username}:</strong> ${reply.content}
+          </div>
+        `).join('')}
+      </div>
+    ` : ''}
+  `;
+  
+  return postElement;
+}
+
+async function addRandomAlienPost() {
+  const rand = Math.random();
+  let content, username, avatarUrl;
+  
+  if (rand < 0.2) {
+    content = gregPosts[Math.floor(Math.random() * gregPosts.length)];
+    username = 'Greg';
+    avatarUrl = alienAvatars[6]; 
+  } else if (rand < 0.4) {
+    content = wormPosts[Math.floor(Math.random() * wormPosts.length)];
+    username = 'W0RM';
+    avatarUrl = alienAvatars[10]; 
+  } else {
+    content = alienPosts[Math.floor(Math.random() * alienPosts.length)];
+    username = alienNames[Math.floor(Math.random() * alienNames.length)];
+    avatarUrl = alienAvatars[Math.floor(Math.random() * alienAvatars.length)];
+  }
+
+  const post = {
+    id: Date.now().toString(),
+    content,
+    username,
+    avatarUrl,
+    timestamp: Date.now(),
+    likes: [],
+    dislikes: [],
+    reglorps: [],
+    replies: []
+  };
+
+  try {
+    await room.store.update({
+      id: 'posts',
+      dependencies: { post },
+      updateFunction: (posts = []) => [...posts, post]
+    });
+    
+    await refreshPosts();
+  } catch (error) {
+    console.error('Error adding random alien post:', error);
+    if (error.message?.includes('WebSocket') || error.message?.includes('connection')) {
+      await reconnectWebSocket();
+    }
+  }
+
+  setTimeout(addRandomAlienPost, 30000 + Math.random() * 30000);
+}
+
+function updateConnectedUsers(peers) {
+  const connectedUsers = document.getElementById('connectedUsers');
+  connectedUsers.innerHTML = '';
+  
+  Object.values(peers).forEach(peer => {
+    const userElement = document.createElement('div');
+    userElement.style.position = 'relative';
+    
+    const avatar = document.createElement('img');
+    avatar.src = peer.avatarUrl;
+    avatar.alt = peer.username;
+    avatar.className = 'user-avatar';
+    avatar.title = peer.username;
+    
+    userElement.appendChild(avatar);
+    connectedUsers.appendChild(userElement);
+  });
+}
+
+function notifyInteractions(post, type) {
+  if (post.username !== room.party.client.username) return; 
+  
+  const notificationArea = document.getElementById('notificationArea');
+  const notification = document.createElement('div');
+  notification.className = 'notification';
+  
+  let message = '';
+  switch(type) {
+    case 'like':
+      message = '❤️ Someone liked your post!';
+      break;
+    case 'dislike':
+      message = '💔 Someone disliked your post!';
+      break;
+    case 'reglorp':
+      message = '🛸 Someone reglorped your post!';
+      break;
+    case 'reply':
+      message = '💭 Someone replied to your post!';
+      break;
+  }
+  
+  notification.textContent = message;
+  notificationArea.appendChild(notification);
+  
+  notification.addEventListener('animationend', () => {
+    notification.remove();
+  });
+  
+  playNotificationSound(type);
+}
+
+async function handleLike(postId) {
+  const username = room.party.client.username;
+  await safeSendToStore(async () => {
+    await room.store.update({
+      id: 'posts',
+      dependencies: { postId, username },
+      updateFunction: (posts) => {
+        return posts.map(post => {
+          if (post.id === postId) {
+            const likes = post.likes || [];
+            const dislikes = post.dislikes || [];
+            const index = likes.indexOf(username);
+            
+            if (index === -1) {
+              return {
+                ...post,
+                likes: [...likes, username],
+                dislikes: dislikes.filter(u => u !== username)
+              };
+            } else {
+              return {
+                ...post,
+                likes: likes.filter(u => u !== username)
+              };
+            }
+          }
+          return post;
+        });
+      }
+    });
+  });
+
+  const posts = await room.store.get('posts');
+  const updatedPost = posts.find(p => p.id === postId);
+  if (updatedPost) notifyInteractions(updatedPost, 'like');
+}
+
+async function handleDislike(postId) {
+  const username = room.party.client.username;
+  await safeSendToStore(async () => {
+    await room.store.update({
+      id: 'posts',
+      dependencies: { postId, username },
+      updateFunction: (posts) => {
+        return posts.map(post => {
+          if (post.id === postId) {
+            const likes = post.likes || [];
+            const dislikes = post.dislikes || [];
+            const index = dislikes.indexOf(username);
+            
+            if (index === -1) {
+              return {
+                ...post,
+                dislikes: [...dislikes, username],
+                likes: likes.filter(u => u !== username)
+              };
+            } else {
+              return {
+                ...post,
+                dislikes: dislikes.filter(u => u !== username)
+              };
+            }
+          }
+          return post;
+        });
+      }
+    });
+  });
+
+  const posts = await room.store.get('posts');
+  const updatedPost = posts.find(p => p.id === postId);
+  if (updatedPost) notifyInteractions(updatedPost, 'dislike');
+}
+
+async function handleReglorp(postId) {
+  const username = room.party.client.username;
+  await safeSendToStore(async () => {
+    await room.store.update({
+      id: 'posts',
+      dependencies: { postId, username },
+      updateFunction: (posts) => {
+        return posts.map(post => {
+          if (post.id === postId) {
+            const reglorps = post.reglorps || [];
+            const index = reglorps.indexOf(username);
+            
+            if (index === -1) {
+              return {
+                ...post,
+                reglorps: [...reglorps, username]
+              };
+            } else {
+              return {
+                ...post,
+                reglorps: reglorps.filter(u => u !== username)
+              };
+            }
+          }
+          return post;
+        });
+      }
+    });
+  });
+
+  const posts = await room.store.get('posts');
+  const updatedPost = posts.find(p => p.id === postId);
+  if (updatedPost) notifyInteractions(updatedPost, 'reglorp');
+}
+
+const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+function playAlienSound() {
+  const oscillator = audioContext.createOscillator();
+  const gainNode = audioContext.createGain();
+  
+  oscillator.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+  
+  oscillator.type = 'sine';
+  oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+  gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+  
+  oscillator.frequency.exponentialRampToValueAtTime(
+    400,
+    audioContext.currentTime + 0.2
+  );
+  
+  gainNode.gain.exponentialRampToValueAtTime(
+    0.01,
+    audioContext.currentTime + 0.3
+  );
+  
+  oscillator.start();
+  oscillator.stop(audioContext.currentTime + 0.3);
+}
+
+function playNotificationSound(type) {
+  const oscillator = audioContext.createOscillator();
+  const gainNode = audioContext.createGain();
+  
+  oscillator.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+  
+  oscillator.type = 'sine';
+  
+  switch(type) {
+    case 'like':
+      oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(800, audioContext.currentTime + 0.1);
+      break;
+    case 'dislike':
+      oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.1);
+      break;
+    case 'reglorp':
+      oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(600, audioContext.currentTime + 0.2);
+      break;
+    case 'reply':
+      oscillator.frequency.setValueAtTime(500, audioContext.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(700, audioContext.currentTime + 0.15);
+      break;
+    default:
+      oscillator.frequency.setValueAtTime(500, audioContext.currentTime);
+  }
+  
+  gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+  gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+  
+  oscillator.start();
+  oscillator.stop(audioContext.currentTime + 0.2);
+}
+
+function spawnScamPopups() {
+  const spawnPopup = () => {
+    if (Math.random() < 0.5) {
+      const peteAds = scamMessages.filter(msg => msg.isPete);
+      const randomPeteAd = peteAds[Math.floor(Math.random() * peteAds.length)];
+      createScamPopup(randomPeteAd);
+    } else {
+      const otherScams = scamMessages.filter(msg => !msg.isPete);
+      const randomScam = otherScams[Math.floor(Math.random() * otherScams.length)];
+      createScamPopup(randomScam);
+    }
+    setTimeout(spawnPopup, 5000 + Math.random() * 10000);
+  };
+  
+  setTimeout(spawnPopup, 5000);
+}
+
+function createScamPopup(scamData) {
+  const popup = document.createElement('div');
+  popup.className = 'scam-popup';
+  
+  popup.style.left = Math.max(20, Math.min(window.innerWidth - 320, Math.random() * window.innerWidth)) + 'px';
+  popup.style.top = Math.max(20, Math.min(window.innerHeight - 200, Math.random() * window.innerHeight)) + 'px';
+  
+  popup.innerHTML = `
+    <button class="close-button">×</button>
+    <h3>${scamData.title}</h3>
+    <p>${scamData.message}</p>
+    <button class="action-button">${scamData.isPete ? 'View Lawnmower!' : (scamData.isDropnoid ? 'Claim Dropnoid!' : 'Invest Now!')}</button>
+  `;
+  
+  document.body.appendChild(popup);
+  
+  const closeButton = popup.querySelector('.close-button');
+  const actionButton = popup.querySelector('.action-button');
+  
+  closeButton.addEventListener('click', () => {
+    popup.style.animation = 'slideOut 0.3s forwards';
+    setTimeout(() => popup.remove(), 300);
+  });
+  
+  actionButton.addEventListener('click', () => {
+    if (scamData.isPete) {
+      window.location.href = 'https://websim.ai/p/lddau32clgaridgxfs75/6';  
+    } else {
+      const responses = [
+        "Nice try! But our quantum encryption detected you're not Greg! 👽",
+        "ERROR: Insufficient GlorpCoins in wallet! 🪙",
+        "Transaction failed: Mercury is in retrograde! 🌠",
+        "Access denied: Must be level 99 space wizard! 🧙‍♂️",
+        "Please verify you're not a human first! 🤖"
+      ];
+      alert(responses[Math.floor(Math.random() * responses.length)]);
+      popup.style.animation = 'slideOut 0.3s forwards';
+      setTimeout(() => popup.remove(), 300);
+    }
+  });
+  
+  setTimeout(() => {
+    if (popup.parentNode) {
+      popup.style.animation = 'slideOut 0.3s forwards';
+      setTimeout(() => popup.remove(), 300);
+    }
+  }, 10000 + Math.random() * 5000);
+}
+
+function createFloatingParticles() {
+  for (let i = 0; i < 50; i++) {
+    const particle = document.createElement('div');
+    particle.className = 'floating-particle';
+    particle.style.left = Math.random() * window.innerWidth + 'px';
+    particle.style.top = Math.random() * window.innerHeight + 'px';
+    document.body.appendChild(particle);
+    
+    const animate = () => {
+      const x = parseFloat(particle.style.left);
+      const y = parseFloat(particle.style.top);
+      
+      particle.style.left = (x + (Math.random() - 0.5) * 2) + 'px';
+      particle.style.top = (y + (Math.random() - 0.5) * 2) + 'px';
+      
+      if (x < 0) particle.style.left = window.innerWidth + 'px';
+      if (x > window.innerWidth) particle.style.left = '0px';
+      if (y < 0) particle.style.top = window.innerHeight + 'px';
+      if (y > window.innerHeight) particle.style.top = '0px';
+      
+      requestAnimationFrame(animate);
+    };
+    
+    animate();
+  }
+}
+
+function createPlanets() {
+  const planets = [
+    { size: 100, speed: 20, direction: 'right', verticalPosition: '20%' },
+    { size: 80, speed: 30, direction: 'left', verticalPosition: '70%' },
+    { size: 60, speed: 25, direction: 'right', verticalPosition: '40%' }
+  ];
+  
+  planets.forEach(planetData => {
+    const planet = document.createElement('div');
+    planet.className = 'planet';
+    planet.style.width = planetData.size + 'px';
+    planet.style.height = planetData.size + 'px';
+    planet.style.top = planetData.verticalPosition;
+    planet.style.left = '50%';
+    planet.style.transform = 'translateX(-50%)';
+    planet.style.animation = `orbit${planetData.direction === 'right' ? 'Right' : 'Left'} ${planetData.speed}s linear infinite, planetPulse 3s ease-in-out infinite`;
+    
+    const svg = `
+      <svg width="100%" height="100%" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="45" fill="var(--alien-green)" opacity="0.2"/>
+        <circle cx="50" cy="50" r="40" fill="none" stroke="var(--alien-green)" stroke-width="2" opacity="0.5"/>
+        <ellipse cx="50" cy="50" rx="20" ry="40" fill="var(--alien-green)" opacity="0.1" transform="rotate(45 50 50)"/>
+      </svg>
+    `;
+    
+    planet.innerHTML = svg;
+    document.body.appendChild(planet);
+  });
+}
+
+function spawnUFOs() {
+  const ufos = ['🛸', '🛸', '🛸'];
+  const ufoElements = [];
+  
+  ufos.forEach(ufo => {
+    const ufoElement = document.createElement('div');
+    ufoElement.className = 'flying-ufo';
+    ufoElement.textContent = ufo;
+    ufoElement.style.left = Math.random() * window.innerWidth + 'px';
+    ufoElement.style.top = Math.random() * window.innerHeight + 'px';
+    document.body.appendChild(ufoElement);
+    ufoElements.push(ufoElement);
+    
+    ufoElement.vx = (Math.random() - 0.5) * 4;
+    ufoElement.vy = (Math.random() - 0.5) * 4;
+  });
+
+  function animateUFOs() {
+    ufoElements.forEach(ufo => {
+      let x = parseFloat(ufo.style.left);
+      let y = parseFloat(ufo.style.top);
+      
+      ufo.vx += (Math.random() - 0.5) * 0.2;
+      ufo.vy += (Math.random() - 0.5) * 0.2;
+      
+      ufo.vx *= 0.99;
+      ufo.vy *= 0.99;
+      
+      x += ufo.vx;
+      y += ufo.vy;
+      
+      if (x < -50) x = window.innerWidth;
+      if (x > window.innerWidth) x = -50;
+      if (y < -50) y = window.innerHeight;
+      if (y > window.innerHeight) y = -50;
+      
+      const angle = Math.atan2(ufo.vy, ufo.vx) * (180 / Math.PI);
+      ufo.style.transform = `rotate(${angle}deg)`;
+      
+      ufo.style.left = x + 'px';
+      ufo.style.top = y + 'px';
+    });
+    
+    requestAnimationFrame(animateUFOs);
+  }
+  
+  animateUFOs();
+}
+
+spawnUFOs();
+spawnScamPopups();
+createFloatingParticles();
+createPlanets();
+addRandomAlienPost();
+
+document.querySelector('.crawling-worm').addEventListener('click', showWormMessage);
+
+function showWormMessage() {
+  const worm = document.querySelector('.crawling-worm');
+  const existingMessage = document.querySelector('.worm-message');
+  if (existingMessage) {
+    existingMessage.remove();
+  }
+  
+  const message = document.createElement('div');
+  message.className = 'worm-message';
+  message.textContent = wormMessages[Math.floor(Math.random() * wormMessages.length)];
+  
+  worm.parentNode.appendChild(message);
+  
+  setTimeout(() => {
+    if (message.parentNode) {
+      message.remove();
+    }
+  }, 4000);
+  
+  playAlienSound();
+}
+
+addRandomAlienPost();
+refreshPosts();
+</script>
+</body></html>
