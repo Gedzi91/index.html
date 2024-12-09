@@ -1,0 +1,91 @@
+<html><head><base href="https://example.com"><title>High-Definition Duck Character</title></head><body>
+<style>
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f0f8ff;
+  }
+  svg {
+    max-width: 90%;
+    max-height: 90%;
+  }
+</style>
+
+<svg width="600" height="600" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Precise outline filter -->
+    <filter id="precise-outline" x="-5%" y="-5%" width="110%" height="110%">
+      <feMorphology in="SourceAlpha" result="DILATED" operator="dilate" radius="2"/>
+      <feFlood flood-color="#4b3621" flood-opacity="1" result="OUTLINE_COLOR"/>
+      <feComposite in="OUTLINE_COLOR" in2="DILATED" operator="in" result="OUTLINE"/>
+      <feMerge>
+        <feMergeNode in="OUTLINE"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Feather texture -->
+    <pattern id="feather-texture" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+      <path d="M0 0 Q30 30 0 60 M60 0 Q30 30 60 60 M30 0 Q45 30 30 60 M15 0 Q0 30 15 60 M45 0 Q60 30 45 60" 
+            stroke="#d2b48c" stroke-width="0.5" fill="none" opacity="0.3"/>
+    </pattern>
+
+    <!-- Gradient for body -->
+    <linearGradient id="body-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#e6c388"/>
+      <stop offset="100%" style="stop-color:#d2b48c"/>
+    </linearGradient>
+  </defs>
+
+  <g filter="url(#precise-outline)">
+    <!-- Body -->
+    <path d="M210 300 Q300 480 390 300 Q420 270 420 210 Q420 120 300 120 Q180 120 180 210 Q180 270 210 300 Z" 
+          fill="url(#body-gradient)" />
+    <path d="M240 300 Q300 450 360 300 Q390 270 390 225 Q390 150 300 150 Q210 150 210 225 Q210 270 240 300 Z" 
+          fill="url(#feather-texture)" />
+    
+    <!-- Belly -->
+    <ellipse cx="300" cy="330" rx="75" ry="90" fill="#f0e68c" />
+    
+    <!-- Head -->
+    <circle cx="300" cy="180" r="120" fill="#e6c388" />
+    <circle cx="300" cy="180" r="110" fill="url(#feather-texture)" />
+    
+    <!-- Eyes -->
+    <g>
+      <circle cx="262" cy="150" r="22" fill="#ffffff" />
+      <circle cx="338" cy="150" r="22" fill="#ffffff" />
+      <circle cx="262" cy="150" r="12" fill="#4b3621" />
+      <circle cx="338" cy="150" r="12" fill="#4b3621" />
+      <circle cx="266" cy="146" r="4" fill="#ffffff" />
+      <circle cx="342" cy="146" r="4" fill="#ffffff" />
+    </g>
+    
+    <!-- Beak -->
+    <path d="M277 195 Q300 210 323 195 L300 225 Z" fill="#ffa500" />
+    
+    <!-- Legs (attached higher to body) -->
+    <path d="M270 375 L270 510 Q277 517 285 510 L285 375" fill="#ffa500" />
+    <path d="M315 375 L315 510 Q322 517 330 510 L330 375" fill="#ffa500" />
+    
+    <!-- Improved Webbed Feet -->
+    <g>
+      <path d="M240 510 Q270 502 300 510 Q330 502 360 510 L345 532 Q300 525 255 532 Z" fill="#ffa500" />
+      <path d="M255 532 Q270 517 285 532 M300 525 Q300 510 300 532 M345 532 Q330 517 315 532" 
+            stroke="#ff8c00" stroke-width="3" stroke-linecap="round" />
+    </g>
+    
+    <!-- Hat -->
+    <path d="M210 90 Q300 45 390 90 Q360 30 300 30 Q240 30 210 90 Z" fill="#4169e1" />
+    <ellipse cx="300" cy="90" rx="97" ry="22" fill="#f0e68c" />
+    
+    <!-- Blush -->
+    <circle cx="240" cy="195" r="22" fill="#ffb6c1" opacity="0.6" />
+    <circle cx="360" cy="195" r="22" fill="#ffb6c1" opacity="0.6" />
+  </g>
+</svg>
+
+</body></html>
