@@ -1,0 +1,428 @@
+<html><head><base href="https://www.thegameoflife.com"><title>The Game of Life - Infinite Digital Evolution Simulator</title>
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', sans-serif;
+    background: #000;
+    color: #0f0;
+    height: 100%;
+    overflow: hidden;
+  }
+  .container {
+    display: flex;
+    height: 100vh;
+  }
+  .sidebar {
+    width: 300px;
+    background: rgba(0, 20, 0, 0.8);
+    padding: 20px;
+    overflow-y: auto;
+  }
+  .main-content {
+    flex-grow: 1;
+    position: relative;
+    overflow: hidden;
+  }
+  #life-grid {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+  }
+  h1, h2, h3 {
+    color: #0f0;
+    text-shadow: 0 0 5px #0f0;
+  }
+  .control-panel, .patterns-panel {
+    margin-top: 20px;
+  }
+  .control-btn, .pattern-btn {
+    background: rgba(0, 255, 0, 0.2);
+    color: #0f0;
+    border: 1px solid #0f0;
+    padding: 10px 20px;
+    margin: 5px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .control-btn:hover, .pattern-btn:hover {
+    background: rgba(0, 255, 0, 0.4);
+  }
+  #generation-counter, #population-counter {
+    font-size: 1.2em;
+    margin: 10px 0;
+  }
+  .slider-container {
+    margin: 20px 0;
+  }
+  .slider {
+    width: 100%;
+    -webkit-appearance: none;
+    background: #0f0;
+    outline: none;
+    opacity: 0.7;
+    transition: opacity .2s;
+  }
+  .slider:hover {
+    opacity: 1;
+  }
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    background: #000;
+    cursor: pointer;
+    border: 2px solid #0f0;
+  }
+  .slider::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    background: #000;
+    cursor: pointer;
+    border: 2px solid #0f0;
+  }
+  #current-pattern {
+    margin-top: 10px;
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="sidebar">
+    <h1>The Game of Life</h1>
+    <h2>Infinite Digital Evolution Simulator</h2>
+    <div id="generation-counter">Generation: 0</div>
+    <div id="population-counter">Population: 0</div>
+    <div class="control-panel">
+      <button class="control-btn" onclick="startSimulation()">Start</button>
+      <button class="control-btn" onclick="pauseSimulation()">Pause</button>
+      <button class="control-btn" onclick="resetSimulation()">Reset</button>
+      <button class="control-btn" onclick="randomizeGrid()">Randomize</button>
+    </div>
+    <div class="slider-container">
+      <label for="speed-slider">Simulation Speed:</label>
+      <input type="range" min="1" max="100" value="50" class="slider" id="speed-slider">
+    </div>
+    <div class="patterns-panel">
+      <h3>Patterns:</h3>
+      <button class="pattern-btn" onclick="selectPattern('pixel')">Single Pixel</button>
+      <button class="pattern-btn" onclick="selectPattern('glider')">Glider</button>
+      <button class="pattern-btn" onclick="selectPattern('spaceship')">Spaceship</button>
+      <button class="pattern-btn" onclick="selectPattern('gosperGliderGun')">Gosper Glider Gun</button>
+    </div>
+    <div id="current-pattern">Current Pattern: Single Pixel</div>
+    <h3>Controls:</h3>
+    <ul>
+      <li>Click to add pattern</li>
+      <li>Hold middle mouse button and drag to move</li>
+      <li>Use mouse wheel to zoom in/out</li>
+    </ul>
+    <h3>Rules:</h3>
+    <ul>
+      <li>Any live cell with fewer than two live neighbours dies, as if by underpopulation.</li>
+      <li>Any live cell with two or three live neighbours lives on to the next generation.</li>
+      <li>Any live cell with more than three live neighbours dies, as if by overpopulation.</li>
+      <li>Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.</li>
+    </ul>
+  </div>
+  <div class="main-content">
+    <canvas id="life-grid"></canvas>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('life-grid');
+const ctx = canvas.getContext('2d');
+let grid = new Map();
+let cellSize = 10;
+let generation = 0;
+let population = 0;
+let intervalId;
+let currentPattern = 'pixel';
+let offsetX = 0;
+let offsetY = 0;
+let isDragging = false;
+let lastMouseX = 0;
+let lastMouseY = 0;
+
+const patterns = {
+  pixel: [[1]],
+  glider: [
+    [0, 1, 0],
+    [0, 0, 1],
+    [1, 1, 1]
+  ],
+  spaceship: [
+    [0, 1, 1, 1, 1],
+    [1, 0, 0, 0, 1],
+    [0, 0, 0, 0, 1],
+    [1, 0, 0, 1, 0]
+  ],
+  gosperGliderGun: [
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+    [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+    [1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [1,1,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+  ]
+};
+
+function setCellState(x, y, state) {
+  const key = `${x},${y}`;
+  if (state) {
+    grid.set(key, 1);
+  } else {
+    grid.delete(key);
+  }
+}
+
+function getCellState(x, y) {
+  return grid.has(`${x},${y}`) ? 1 : 0;
+}
+
+function randomizeGrid() {
+  grid.clear();
+  const width = Math.ceil(canvas.width / cellSize);
+  const height = Math.ceil(canvas.height / cellSize);
+  for (let i = 0; i < width; i++) {
+    for (let j = 0; j < height; j++) {
+      if (Math.random() > 0.7) {
+        setCellState(i, j, 1);
+      }
+    }
+  }
+  updateCounters();
+  drawGrid();
+}
+
+function drawGrid() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  const startX = Math.floor(offsetX / cellSize);
+  const startY = Math.floor(offsetY / cellSize);
+  const endX = startX + Math.ceil(canvas.width / cellSize);
+  const endY = startY + Math.ceil(canvas.height / cellSize);
+
+  // Draw grid lines
+  ctx.strokeStyle = 'rgba(0, 255, 0, 0.2)';
+  for (let x = startX; x <= endX; x++) {
+    const screenX = x * cellSize - offsetX;
+    ctx.beginPath();
+    ctx.moveTo(screenX, 0);
+    ctx.lineTo(screenX, canvas.height);
+    ctx.stroke();
+  }
+  for (let y = startY; y <= endY; y++) {
+    const screenY = y * cellSize - offsetY;
+    ctx.beginPath();
+    ctx.moveTo(0, screenY);
+    ctx.lineTo(canvas.width, screenY);
+    ctx.stroke();
+  }
+
+  // Draw cells
+  ctx.fillStyle = '#0f0';
+  for (let x = startX; x <= endX; x++) {
+    for (let y = startY; y <= endY; y++) {
+      if (getCellState(x, y)) {
+        ctx.fillRect(
+          x * cellSize - offsetX,
+          y * cellSize - offsetY,
+          cellSize - 1,
+          cellSize - 1
+        );
+      }
+    }
+  }
+}
+
+function updateGrid() {
+  const newGrid = new Map();
+  const cellsToCheck = new Set();
+
+  // Collect all live cells and their neighbors
+  for (const [key] of grid) {
+    const [x, y] = key.split(',').map(Number);
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        cellsToCheck.add(`${x + dx},${y + dy}`);
+      }
+    }
+  }
+
+  population = 0;
+  for (const key of cellsToCheck) {
+    const [x, y] = key.split(',').map(Number);
+    const neighbors = countNeighbors(x, y);
+    if (getCellState(x, y)) {
+      if (neighbors === 2 || neighbors === 3) {
+        newGrid.set(key, 1);
+        population++;
+      }
+    } else if (neighbors === 3) {
+      newGrid.set(key, 1);
+      population++;
+    }
+  }
+
+  grid = newGrid;
+  generation++;
+  updateCounters();
+}
+
+function countNeighbors(x, y) {
+  let count = 0;
+  for (let dx = -1; dx <= 1; dx++) {
+    for (let dy = -1; dy <= 1; dy++) {
+      if (dx === 0 && dy === 0) continue;
+      count += getCellState(x + dx, y + dy);
+    }
+  }
+  return count;
+}
+
+function updateCounters() {
+  document.getElementById('generation-counter').textContent = `Generation: ${generation}`;
+  document.getElementById('population-counter').textContent = `Population: ${population}`;
+}
+
+function startSimulation() {
+  if (!intervalId) {
+    const speed = 101 - document.getElementById('speed-slider').value;
+    intervalId = setInterval(() => {
+      updateGrid();
+      drawGrid();
+    }, speed);
+  }
+}
+
+function pauseSimulation() {
+  if (intervalId) {
+    clearInterval(intervalId);
+    intervalId = null;
+  }
+}
+
+function resetSimulation() {
+  pauseSimulation();
+  grid.clear();
+  generation = 0;
+  population = 0;
+  updateCounters();
+  drawGrid();
+}
+
+function resizeCanvas() {
+  const mainContent = document.querySelector('.main-content');
+  canvas.width = mainContent.clientWidth;
+  canvas.height = mainContent.clientHeight;
+  drawGrid();
+}
+
+function selectPattern(patternName) {
+  currentPattern = patternName;
+  document.getElementById('current-pattern').textContent = `Current Pattern: ${patternName}`;
+}
+
+function addPattern(x, y) {
+  const pattern = patterns[currentPattern];
+  const startX = x - Math.floor(pattern[0].length / 2);
+  const startY = y - Math.floor(pattern.length / 2);
+
+  for (let i = 0; i < pattern.length; i++) {
+    for (let j = 0; j < pattern[i].length; j++) {
+      if (pattern[i][j]) {
+        setCellState(startX + j, startY + i, 1);
+      }
+    }
+  }
+
+  updateCounters();
+  drawGrid();
+}
+
+function zoom(delta, mouseX, mouseY) {
+  const zoomFactor = delta > 0 ? 1.1 : 0.9;
+  const newCellSize = Math.max(1, Math.min(50, cellSize * zoomFactor));
+  
+  // Calculate the position of the mouse in the grid
+  const gridX = (mouseX + offsetX) / cellSize;
+  const gridY = (mouseY + offsetY) / cellSize;
+
+  // Adjust the offset to keep the mouse position fixed
+  offsetX = gridX * newCellSize - mouseX;
+  offsetY = gridY * newCellSize - mouseY;
+
+  cellSize = newCellSize;
+  drawGrid();
+}
+
+canvas.addEventListener('click', function(event) {
+  const rect = canvas.getBoundingClientRect();
+  const x = Math.floor((event.clientX - rect.left + offsetX) / cellSize);
+  const y = Math.floor((event.clientY - rect.top + offsetY) / cellSize);
+  
+  addPattern(x, y);
+});
+
+canvas.addEventListener('mousedown', function(event) {
+  if (event.button === 1) { // Middle mouse button
+    isDragging = true;
+    lastMouseX = event.clientX;
+    lastMouseY = event.clientY;
+    event.preventDefault(); // Prevent default scrolling behavior
+  }
+});
+
+canvas.addEventListener('mousemove', function(event) {
+  if (isDragging) {
+    const dx = event.clientX - lastMouseX;
+    const dy = event.clientY - lastMouseY;
+    offsetX -= dx;
+    offsetY -= dy;
+    lastMouseX = event.clientX;
+    lastMouseY = event.clientY;
+    drawGrid();
+  }
+});
+
+canvas.addEventListener('mouseup', function(event) {
+  if (event.button === 1) { // Middle mouse button
+    isDragging = false;
+  }
+});
+
+canvas.addEventListener('mouseleave', function() {
+  isDragging = false;
+});
+
+canvas.addEventListener('wheel', function(event) {
+  event.preventDefault();
+  const rect = canvas.getBoundingClientRect();
+  const mouseX = event.clientX - rect.left;
+  const mouseY = event.clientY - rect.top;
+  zoom(-event.deltaY, mouseX, mouseY);
+});
+
+document.getElementById('speed-slider').addEventListener('input', function() {
+  if (intervalId) {
+    pauseSimulation();
+    startSimulation();
+  }
+});
+
+window.addEventListener('resize', resizeCanvas);
+
+resizeCanvas();
+randomizeGrid();
+</script>
+</body></html>
