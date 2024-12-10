@@ -1,0 +1,1117 @@
+<html><head><base href="." /><link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet"><style>
+body {
+  font-family: 'Press Start 2P', cursive;
+  background: #432818;  /* Brown background */
+  color: #FFE135;  /* Banana yellow */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  padding: 20px;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+#start-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #432818;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.title-container {
+  text-align: center;
+  padding: 20px;
+  background: rgba(51, 51, 51, 0.8);
+  border-radius: 15px;
+  border: 3px solid #FFE135;
+  box-shadow: 0 0 30px rgba(255, 225, 53, 0.3);
+}
+
+.game-title {
+  font-size: 48px;
+  color: #FFE135;
+  text-shadow: 0 0 20px rgba(255, 225, 53, 0.5);
+  margin-bottom: 30px;
+}
+
+.game-description {
+  color: #FFE135;
+  margin-top: 20px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.banana-animation {
+  margin: 30px 0;
+}
+
+.rotating-banana {
+  font-size: 40px;
+  display: inline-block;
+  margin: 0 10px;
+  animation: rotateBanana 2s infinite linear;
+}
+
+.rotating-banana:nth-child(2) {
+  animation-delay: 0.3s;
+}
+
+.rotating-banana:nth-child(3) {
+  animation-delay: 0.6s;
+}
+
+@keyframes rotateBanana {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.2); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+#game-container {
+  display: flex;
+  gap: 40px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+#click-area {
+  width: 200px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 120px; /* Make banana bigger */
+  position: relative;
+  overflow: hidden;
+  background: none; /* Remove gradient background */
+  box-shadow: none; /* Remove glow effect */
+}
+
+#click-area:active {
+  transform: scale(0.95);
+}
+
+/* Add simple hover effect */
+#click-area:hover {
+  transform: scale(1.05);
+}
+
+#stats {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 24px;
+  color: #FFE135;  /* Banana yellow */
+  text-shadow: 0 0 10px rgba(255, 225, 53, 0.5);
+}
+
+#upgrades {
+  background: rgba(67, 40, 24, 0.9);  /* Brown background */
+  padding: 20px;
+  border-radius: 10px;
+  min-width: 300px;
+  box-shadow: 0 0 20px rgba(255, 225, 53, 0.2);
+}
+
+.upgrade-btn {
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0;
+  background: rgba(51, 51, 51, 0.8);
+  border: 2px solid #FFE135;  /* Banana yellow */
+  color: #FFE135;  /* Banana yellow */
+  font-family: 'Press Start 2P';
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.upgrade-btn:hover {
+  background: rgba(51, 51, 51, 0.9);
+  transform: scale(1.02);
+}
+
+.upgrade-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  border-color: #666;
+  color: #666;
+}
+
+#leaderboard {
+  background: rgba(67, 40, 24, 0.9);
+  padding: 20px;
+  border-radius: 10px;
+  min-width: 300px;
+  box-shadow: 0 0 20px rgba(255, 225, 53, 0.2);
+}
+
+#leaderboard h2, #upgrades h2 {
+  margin-top: 0;
+  color: #FFE135;  /* Banana yellow */
+  text-align: center;
+  text-shadow: 0 0 10px rgba(255, 225, 53, 0.5);
+}
+
+.leaderboard-entry {
+  display: flex;
+  justify-content: space-between;
+  margin: 10px 0;
+  padding: 10px;
+  background: rgba(51, 51, 51, 0.8);
+  border-radius: 5px;
+  transition: transform 0.2s;
+}
+
+.leaderboard-entry:hover {
+  transform: scale(1.02);
+  background: rgba(51, 51, 51, 0.9);
+}
+
+.player {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid #FFE135;  /* Banana yellow */
+  box-shadow: 0 0 10px rgba(255, 225, 53, 0.3);
+}
+
+#connected-users {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 800px;
+}
+
+.user-pill {
+  background: rgba(51, 51, 51, 0.8);
+  padding: 8px 15px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.2s;
+  box-shadow: 0 0 15px rgba(255, 225, 53, 0.1);
+}
+
+.user-pill:hover {
+  transform: scale(1.05);
+}
+
+.click-animation {
+  position: absolute;
+  pointer-events: none;
+  font-size: 20px;
+  animation: floatUp 1s ease-out forwards;
+  color: #FFE135;  /* Banana yellow */
+  text-shadow: 0 0 10px rgba(255, 225, 53, 0.5);
+}
+
+@keyframes floatUp {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.pulse {
+  animation: pulse 0.5s ease;
+}
+
+#shop {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(67, 40, 24, 0.95);
+  padding: 30px;
+  border-radius: 15px;
+  border: 3px solid #FFE135;
+  min-width: 400px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 0 30px rgba(255, 225, 53, 0.3);
+  z-index: 1000;
+}
+
+#cosmetics-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 15px;
+  margin: 20px 0;
+}
+
+.cosmetic-item {
+  background: rgba(51, 51, 51, 0.8);
+  padding: 15px;
+  border-radius: 10px;
+  text-align: center;
+  border: 2px solid #FFE135;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cosmetic-item:hover {
+  transform: scale(1.05);
+  background: rgba(51, 51, 51, 0.9);
+}
+
+.cosmetic-item.selected {
+  background: rgba(255, 225, 53, 0.2);
+  box-shadow: 0 0 15px rgba(255, 225, 53, 0.5);
+}
+
+.cosmetic-preview {
+  font-size: 40px;
+  margin: 10px 0;
+}
+
+.cosmetic-price {
+  color: #FFE135;
+  margin-top: 10px;
+}
+
+.cosmetic-locked {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#leaderboard-cosmetics-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 15px;
+  margin: 20px 0;
+  border-top: 2px solid #FFE135;
+  padding-top: 20px;
+}
+
+.name-preview {
+  font-size: 14px;
+  margin: 10px 0;
+  word-break: break-word;
+  padding: 5px;
+  background: rgba(51, 51, 51, 0.5);
+}
+</style></head><body>
+
+<div id="start-screen">
+  <div class="title-container">
+    <h1 class="game-title">🍌 BANANA CLICKER 🍌</h1>
+    <div class="banana-animation">
+      <span class="rotating-banana">🍌</span>
+      <span class="rotating-banana">🍌</span>
+      <span class="rotating-banana">🍌</span>
+    </div>
+    <button id="start-button" class="upgrade-btn pulse">START GAME</button>
+    <p class="game-description">Click bananas, earn upgrades, become the ultimate Banana Lord!</p>
+    
+    <!-- Add mini game container -->
+    <div id="mini-game-container" style="margin-top: 30px; padding: 20px; border: 2px dashed #FFE135; border-radius: 10px;">
+      <h3 style="color: #FFE135; margin-bottom: 15px;">🎮 Mini Banana Clicker</h3>
+      <div style="display: flex; justify-content: center; gap: 20px; align-items: center;">
+        <div id="mini-click-area" style="font-size: 40px; cursor: pointer; transition: transform 0.2s;">🍌</div>
+        <div style="color: #FFE135;">
+          Score: <span id="mini-score">0</span>
+        </div>
+      </div>
+      <button id="play-full-version" class="upgrade-btn" style="margin-top: 15px;">
+        Play Full Version
+      </button>
+    </div>
+  </div>
+</div>
+
+<button id="open-shop" class="upgrade-btn" style="margin-bottom: 20px;">
+  🏪 Banana Shop
+</button>
+
+<div id="stats">
+  Your Bananas: <span id="click-count">0</span>
+</div>
+
+<div id="connected-users"></div>
+
+<div id="game-container">
+  <div id="upgrades">
+    <h2>Banana Upgrades</h2>
+    <button class="upgrade-btn" id="autoClicker">
+      Automatic Banana Peeler (Cost: 10)
+    </button>
+    <button class="upgrade-btn" id="doubleClick">
+      Double Banana Power (Cost: 50)
+    </button>
+    <button class="upgrade-btn" id="criticalClick">
+      Critical Banana Chance (Cost: 100)
+    </button>
+    <button class="upgrade-btn" id="clickFrenzy">
+      Banana Frenzy (Cost: 200)
+    </button>
+    <button class="upgrade-btn" id="goldClick">
+      Golden Banana Chance (Cost: 500)
+    </button>
+  </div>
+
+  <div id="click-area">🍌</div>
+  
+  <div id="leaderboard">
+    <h2>Banana Leaderboard</h2>
+    <div id="leaderboard-list"></div>
+  </div>
+</div>
+
+<div id="shop" style="display: none;">
+  <h2>Banana Shop</h2>
+  <div id="cosmetics-container"></div>
+  <h2>Leaderboard Cosmetics</h2>
+  <div id="leaderboard-cosmetics-container"></div>
+  <button id="close-shop" class="upgrade-btn">Close Shop</button>
+</div>
+
+<div id="feedback-container" style="margin-top: 40px; width: 100%; max-width: 800px;">
+  <h2 style="color: #FFE135; text-align: center; margin-bottom: 20px;">🍌 Game Feedback 🍌</h2>
+  <div style="text-align: center; margin-bottom: 10px;">
+    Game Owner: <span style="color: #FFE135;">@Domopremo</span>
+  </div>
+  <div style="display: flex; gap: 20px; align-items: flex-start;">
+    <div style="flex: 1;">
+      <textarea id="feedback-input" 
+                placeholder="Share your suggestions to improve the game..." 
+                style="width: 100%; 
+                       height: 100px; 
+                       background: rgba(51, 51, 51, 0.8);
+                       border: 2px solid #FFE135;
+                       color: #FFE135;
+                       padding: 10px;
+                       font-family: 'Press Start 2P', cursive;
+                       font-size: 12px;
+                       resize: vertical;
+                       border-radius: 5px;"></textarea>
+      <button id="submit-feedback" 
+              class="upgrade-btn" 
+              style="margin-top: 10px; width: 100%;">
+        Submit Feedback
+      </button>
+    </div>
+    <div id="feedback-list" 
+         style="flex: 1;
+                background: rgba(51, 51, 51, 0.8);
+                border: 2px solid #FFE135;
+                padding: 15px;
+                border-radius: 5px;
+                max-height: 300px;
+                overflow-y: auto;">
+      <h3 style="color: #FFE135; margin-top: 0; text-align: center; font-size: 14px;">
+        Feedback List
+      </h3>
+    </div>
+  </div>
+</div>
+
+<script>
+let clickSound;
+try {
+  clickSound = new Audio('data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAASAAAeMwAUFBQUFCIiIiIiIjAwMDAwPz8/Pz8/TU1NTU1NW1tbW1tbamtra2tra3l5eXl5iYmJiYmJmZmZmZmZqampqampu7u7u7u7xMTExMTE0dHR0dHR3d3d3d3d5ubm5ubm8vLy8vLy////////////AAAAAExhdmM1OC4xMwAAAAAAAAAAAAAAACQCgAAAAAAAAAx5E3kIAAAAAAAAAAAAAAAAAP/7kARpQAAAW0eNJFQMoNlj/tQRjQEAACkAAAAgVAX/AE5/i+++JR/JB8OD5dWKH5P4P22H4444fh+GH44Pxx+HD8Pjjh+OHx+GOH44ff14PwQDg/BA+/BA+/fh9+H34ffffh9+H334ffdBAOD79+CAdVG6qbutG6qNxTc1N1TdVTdU3VOaamaprNTWampaatU1LU1mprShAABQCgUCgVAwMDAwMDAwMDAwMDAwMDAwMDAwMDE0MTQxNDE0TTYzNjc3Nzc3Nzc3N0dHR0dHR1paWlpaWlpaXzExMTExMS+AgICAgICAv8PDw8PDw8PD7+/v7+/v7+/v7+/v7+/v7+/v//////////////////////////9MQU1FMy45OSByAQAAAAAAAAAANEEAAABCAAABQJAEAIAAAQEg7QbqAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP/7UGTUDwAAA0gAAAAQAAA0gAAABAAADSAAAACAAACXAAAAEMAAAAAAPn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+TkxBTUUzLjk5LjVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVQQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBA//sQZOIP8AAAaQAAAAgAAA0gAAABAAABpAAAACAAADSAAAAEQEBAQEBAQEBAQEBAQEBAQEBB');
+  
+  // Test if audio is playable
+  clickSound.addEventListener('error', () => {
+    console.warn('Audio failed to load, using fallback');
+    clickSound = {
+      play: () => {},
+      currentTime: 0
+    };
+  });
+} catch (e) {
+  console.warn('Audio creation failed, using fallback');
+  clickSound = {
+    play: () => {},
+    currentTime: 0
+  };
+}
+
+const room = new WebsimSocket();
+let myClicks = 0;
+let autoClickerCount = 0;
+let doubleClickPower = 1;
+let criticalChance = 0;
+let clickFrenzyActive = false;
+let goldClickChance = 0;
+
+const startBananas = document.querySelectorAll('.rotating-banana');
+const middleBanana = startBananas[1]; // Get middle banana
+let middleBananaClicks = 0;
+
+// Add event listener for middle banana
+middleBanana.style.cursor = 'pointer';
+middleBanana.addEventListener('click', (e) => {
+  e.stopPropagation(); // Prevent clicks from bubbling up
+  middleBananaClicks++;
+  
+  // Add click animation
+  const clickAnim = document.createElement('div');
+  clickAnim.className = 'click-animation';
+  clickAnim.textContent = '+1';
+  clickAnim.style.position = 'absolute';
+  clickAnim.style.left = `${e.clientX - 10}px`;
+  clickAnim.style.top = `${e.clientY - 10}px`;
+  document.body.appendChild(clickAnim);
+  setTimeout(() => clickAnim.remove(), 1000);
+
+  // Scale animation
+  middleBanana.style.transform = 'scale(0.9) rotate(180deg)';
+  setTimeout(() => {
+    middleBanana.style.transform = 'rotate(180deg)';
+  }, 100);
+  
+  // Change to kiwi after 5 clicks
+  if (middleBananaClicks === 5) {
+    middleBanana.textContent = '🥝';
+    
+    // Create celebration effect
+    const celebration = document.createElement('div');
+    celebration.textContent = '🎉 Secret Kiwi Found! 🎉';
+    celebration.style.position = 'absolute';
+    celebration.style.left = '50%';
+    celebration.style.top = '70%';
+    celebration.style.transform = 'translate(-50%, -50%)';
+    celebration.style.color = '#FFE135';
+    celebration.style.fontFamily = '"Press Start 2P", cursive';
+    celebration.style.fontSize = '16px';
+    celebration.style.textAlign = 'center';
+    celebration.style.animation = 'floatUp 3s ease-out forwards';
+    document.body.appendChild(celebration);
+    setTimeout(() => celebration.remove(), 3000);
+    
+    // Give bonus points when starting game
+    miniScore += 50;
+    document.getElementById('mini-score').textContent = miniScore;
+  }
+  
+  // Change to apple after 20 clicks
+  if (middleBananaClicks === 20) {
+    middleBanana.textContent = '🍎';
+    
+    // Create celebration effect for apple
+    const celebration = document.createElement('div');
+    celebration.textContent = '🎉 Legendary Apple Banana Found! 🎉';
+    celebration.style.position = 'absolute';
+    celebration.style.left = '50%';
+    celebration.style.top = '70%';
+    celebration.style.transform = 'translate(-50%, -50%)';
+    celebration.style.color = '#FFE135';
+    celebration.style.fontFamily = '"Press Start 2P", cursive';
+    celebration.style.fontSize = '16px';
+    celebration.style.textAlign = 'center';
+    celebration.style.animation = 'floatUp 3s ease-out forwards';
+    document.body.appendChild(celebration);
+    setTimeout(() => celebration.remove(), 3000);
+    
+    // Give bigger bonus for finding the apple
+    miniScore += 100;
+    document.getElementById('mini-score').textContent = miniScore;
+  }
+
+  // Change to blueberry after 60 clicks 
+  if (middleBananaClicks === 60) {
+    middleBanana.textContent = '🫐';
+    
+    // Create celebration effect for blueberry
+    const celebration = document.createElement('div');
+    celebration.textContent = '🎉 Mythical Blueberry Banana Found! 🎉';
+    celebration.style.position = 'absolute';
+    celebration.style.left = '50%';
+    celebration.style.top = '70%';
+    celebration.style.transform = 'translate(-50%, -50%)';
+    celebration.style.color = '#FFE135';
+    celebration.style.fontFamily = '"Press Start 2P", cursive';
+    celebration.style.fontSize = '16px';
+    celebration.style.textAlign = 'center';
+    celebration.style.animation = 'floatUp 3s ease-out forwards';
+    document.body.appendChild(celebration);
+    setTimeout(() => celebration.remove(), 3000);
+    
+    // Give massive bonus for finding the blueberry
+    miniScore += 250;
+    document.getElementById('mini-score').textContent = miniScore;
+  }
+
+  // Change to pear after 100 clicks
+  if (middleBananaClicks === 100) {
+    middleBanana.textContent = '🍐';
+    
+    // Create celebration effect for pear
+    const celebration = document.createElement('div');
+    celebration.textContent = '🎉 Divine Pear Banana Found! 🎉';
+    celebration.style.position = 'absolute';
+    celebration.style.left = '50%';
+    celebration.style.top = '70%';
+    celebration.style.transform = 'translate(-50%, -50%)';
+    celebration.style.color = '#FFE135';
+    celebration.style.fontFamily = '"Press Start 2P", cursive';
+    celebration.style.fontSize = '16px';
+    celebration.style.textAlign = 'center';
+    celebration.style.animation = 'floatUp 3s ease-out forwards';
+    document.body.appendChild(celebration);
+    setTimeout(() => celebration.remove(), 3000);
+    
+    // Give massive bonus for finding the pear
+    miniScore += 500;
+    document.getElementById('mini-score').textContent = miniScore;
+  }
+});
+
+// Add CSS for the middle banana hovering
+const styleSheet = document.createElement('style');
+styleSheet.textContent = `
+.rotating-banana:nth-child(2) {
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.rotating-banana:nth-child(2):hover {
+  animation-play-state: paused;
+  filter: brightness(1.2);
+}
+`;
+document.head.appendChild(styleSheet);
+
+let unlockedCosmetics = ['🍌']; // Default banana
+let selectedCosmetic = '🍌';
+
+const upgradeCosts = {
+  autoClicker: 10,
+  doubleClick: 50,
+  criticalClick: 100,
+  clickFrenzy: 200,
+  goldClick: 500
+};
+
+const cosmeticsData = [
+  { id: 'default', emoji: '🍌', name: 'Classic Banana', price: 0 },
+  { id: 'green', emoji: '🥝', name: 'Kiwi Banana', price: 1000 },
+  { id: 'red', emoji: '🍎', name: 'Apple Banana', price: 2000 },
+  { id: 'golden', emoji: '⭐', name: 'Star Banana', price: 5000 },
+  { id: 'rainbow', emoji: '🌈', name: 'Rainbow Banana', price: 10000 },
+  { id: 'diamond', emoji: '💎', name: 'Diamond Banana', price: 20000 },
+  { id: 'royal', emoji: '👑', name: 'Royal Banana', price: 50000 },
+  { id: 'magic', emoji: '🔮', name: 'Magic Banana', price: 100000 }
+];
+
+const leaderboardCosmeticsData = [
+  { id: 'default', prefix: '', suffix: '', name: 'Classic Name', price: 0 },
+  { id: 'banana_lord', prefix: '🍌 ', suffix: ' 👑', name: 'Banana Lord', price: 3000 },
+  { id: 'star_player', prefix: '⭐ ', suffix: ' ⭐', name: 'Star Player', price: 5000 },
+  { id: 'diamond', prefix: '💎 ', suffix: ' 💎', name: 'Diamond Player', price: 10000 },
+  { id: 'royal', prefix: '👑 ', suffix: ' 👑', name: 'Royal Player', price: 15000 },
+  { id: 'legendary', prefix: '🌟 ', suffix: ' 🔥', name: 'Legendary Player', price: 25000 },
+  { id: 'mythic', prefix: '🌈 ', suffix: ' ✨', name: 'Mythic Player', price: 50000 }
+];
+
+let unlockedLeaderboardCosmetics = ['default'];
+let selectedLeaderboardCosmetic = 'default';
+
+async function initializeClicks() {
+  // Get clicks from store
+  const clicks = await room.store.get('clicks') || {};
+  const username = room.party.client.username;
+  
+  // Initialize or restore click count
+  myClicks = clicks[username] || 0;
+  document.getElementById('click-count').textContent = myClicks;
+  updateUpgradeButtons();
+
+  // Load saved cosmetics
+  const savedCosmetics = await room.store.get(`cosmetics_${username}`);
+  if (savedCosmetics) {
+    unlockedCosmetics = savedCosmetics.unlockedCosmetics;
+    selectedCosmetic = savedCosmetics.selectedCosmetic;
+    document.getElementById('click-area').textContent = selectedCosmetic;
+  }
+
+  // Load saved leaderboard cosmetics
+  const savedLeaderboardCosmetics = await room.store.get(`leaderboard_cosmetics_${username}`);
+  if (savedLeaderboardCosmetics) {
+    unlockedLeaderboardCosmetics = savedLeaderboardCosmetics.unlockedCosmetics;
+    selectedLeaderboardCosmetic = savedLeaderboardCosmetics.selectedCosmetic;
+  }
+}
+
+// Hide start screen and show game when start button is clicked
+document.getElementById('start-button').addEventListener('click', () => {
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('stats').style.display = 'block';
+  document.getElementById('connected-users').style.display = 'flex';
+  document.getElementById('game-container').style.display = 'flex';
+  document.getElementById('open-shop').style.display = 'block';
+});
+
+// Mini game functionality
+let miniScore = 0;
+
+document.getElementById('mini-click-area').addEventListener('click', () => {
+  miniScore++;
+  document.getElementById('mini-score').textContent = miniScore;
+  
+  // Add click animation
+  const clickAnim = document.createElement('div');
+  clickAnim.className = 'click-animation';
+  clickAnim.textContent = '+1 🍌';
+  clickAnim.style.left = `${Math.random() * 40}px`;
+  clickAnim.style.top = `${Math.random() * 40}px`;
+  document.getElementById('mini-click-area').appendChild(clickAnim);
+  setTimeout(() => clickAnim.remove(), 1000);
+  
+  // Add scale animation to banana
+  const banana = document.getElementById('mini-click-area');
+  banana.style.transform = 'scale(0.9)';
+  setTimeout(() => banana.style.transform = 'scale(1)', 100);
+});
+
+// Add click handler for the "Play Full Version" button
+document.getElementById('play-full-version').addEventListener('click', () => {
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('stats').style.display = 'block';
+  document.getElementById('connected-users').style.display = 'flex';
+  document.getElementById('game-container').style.display = 'flex';
+  document.getElementById('open-shop').style.display = 'block';
+  
+  // Transfer mini game score to main game if there is any
+  if (miniScore > 0) {
+    updateClickCount(miniScore);
+    const notification = document.createElement('div');
+    notification.textContent = `+${miniScore} Bonus Bananas Added!`;
+    notification.style.position = 'fixed';
+    notification.style.top = '20px';
+    notification.style.left = '50%';
+    notification.style.transform = 'translateX(-50%)';
+    notification.style.background = 'rgba(255, 225, 53, 0.9)';
+    notification.style.color = '#432818';
+    notification.style.padding = '10px 20px';
+    notification.style.borderRadius = '5px';
+    notification.style.fontFamily = '"Press Start 2P", cursive';
+    document.body.appendChild(notification);
+    setTimeout(() => notification.remove(), 3000);
+  }
+});
+
+// Update connected users
+room.onPeersChanged = (peers) => {
+  const connectedUsers = document.getElementById('connected-users');
+  connectedUsers.innerHTML = '';
+  Object.entries(peers).forEach(([clientId, {username, avatarUrl}]) => {
+    const userPill = document.createElement('div');
+    userPill.className = 'user-pill';
+    userPill.innerHTML = `
+      <img src="${avatarUrl}" alt="Avatar for ${username}" class="avatar">
+      <span>${username}</span>
+    `;
+    connectedUsers.appendChild(userPill);
+  });
+};
+
+// Initialize the store
+room.store.update({
+  id: 'clicks',
+  dependencies: {},
+  updateFunction: (clicks) => clicks || {}
+});
+
+// Initialize feedback in the store
+room.store.update({
+  id: 'gameFeedback',
+  dependencies: {},
+  updateFunction: (feedback) => feedback || []
+});
+
+// Handle feedback submission
+document.getElementById('submit-feedback').addEventListener('click', async () => {
+  const feedbackInput = document.getElementById('feedback-input');
+  const feedback = feedbackInput.value.trim();
+  
+  if (feedback) {
+    await room.store.update({
+      id: 'gameFeedback',
+      dependencies: { feedback, username: room.party.client.username },
+      updateFunction: (currentFeedback) => {
+        const newFeedback = currentFeedback || [];
+        newFeedback.push({
+          text: feedback,
+          username: room.party.client.username,
+          timestamp: new Date().toISOString()
+        });
+        return newFeedback;
+      }
+    });
+    
+    feedbackInput.value = '';
+    updateFeedbackList();
+  }
+});
+
+// Update feedback list when store changes
+room.onRecordChanged = async (id) => {
+  if (id === 'clicks') {
+    const clicks = await room.store.get('clicks');
+    const leaderboard = document.getElementById('leaderboard-list');
+    
+    // Sort players by clicks
+    const sortedPlayers = Object.entries(clicks)
+      .sort(([,a], [,b]) => b - a);
+
+    // Build leaderboard entries
+    const entries = [];
+    for (const [username, score] of sortedPlayers) {
+      const userCosmetics = await room.store.get(`leaderboard_cosmetics_${username}`);
+      const cosmetic = userCosmetics ? leaderboardCosmeticsData.find(c => c.id === userCosmetics.selectedCosmetic) || leaderboardCosmeticsData[0] : leaderboardCosmeticsData[0];
+      
+      entries.push(`
+        <div class="leaderboard-entry">
+          <div class="player">
+            <img src="https://images.websim.ai/avatar/${username}" 
+                 alt="Avatar" class="avatar">
+            <span>${cosmetic.prefix}${username}${cosmetic.suffix}</span>
+          </div>
+          <span>${score}</span>
+        </div>
+      `);
+    }
+
+    // Update leaderboard HTML
+    leaderboard.innerHTML = entries.join('');
+  } else if (id === 'gameFeedback') {
+    updateFeedbackList();
+  }
+};
+
+async function updateFeedbackList() {
+  const feedbackList = document.getElementById('feedback-list');
+  const feedback = await room.store.get('gameFeedback') || [];
+  
+  // Only show feedback if user is the game owner (Domopremo)
+  if (room.party.client.username === 'Domopremo') {
+    const feedbackHtml = feedback.map(item => `
+      <div style="margin-bottom: 15px; border-bottom: 1px solid #FFE135; padding-bottom: 10px;">
+        <div style="color: #FFE135; margin-bottom: 5px;">
+          From: ${item.username}
+        </div>
+        <div style="color: white; font-size: 12px;">
+          ${item.text}
+        </div>
+        <div style="color: #FFE135; font-size: 10px; margin-top: 5px;">
+          ${new Date(item.timestamp).toLocaleString()}
+        </div>
+      </div>
+    `).join('');
+    
+    feedbackList.innerHTML = `
+      <h3 style="color: #FFE135; margin-top: 0; text-align: center; font-size: 14px;">
+        Feedback List
+      </h3>
+      ${feedbackHtml || '<div style="text-align: center; color: #FFE135;">No feedback yet</div>'}
+    `;
+  } else {
+    feedbackList.innerHTML = `
+      <h3 style="color: #FFE135; margin-top: 0; text-align: center; font-size: 14px;">
+        Feedback List
+      </h3>
+      <div style="text-align: center; color: #FFE135;">
+        Only visible to Game Owner (@Domopremo)
+      </div>
+    `;
+  }
+}
+
+// Initialize click count from store
+initializeClicks();
+
+// Add click event listener for clicking on the banana
+document.getElementById('click-area').addEventListener('click', async () => {
+  let clickValue = doubleClickPower;
+  
+  // Critical click chance
+  if (Math.random() < criticalChance) {
+    clickValue *= 3;
+  }
+  
+  // Gold click chance
+  if (Math.random() < goldClickChance) {
+    clickValue *= 5;
+  }
+  
+  // Click frenzy multiplier
+  if (clickFrenzyActive) {
+    clickValue *= 2;
+  }
+  
+  updateClickCount(clickValue);
+  clickSound.currentTime = 0;
+  clickSound.play();
+
+  // Create click animation with banana
+  const clickAnim = document.createElement('div');
+  clickAnim.className = 'click-animation';
+  clickAnim.textContent = `+${clickValue} 🍌`;
+  clickAnim.style.left = `${Math.random() * 160 + 20}px`;
+  clickAnim.style.top = `${Math.random() * 160 + 20}px`;
+  document.getElementById('click-area').appendChild(clickAnim);
+  setTimeout(() => clickAnim.remove(), 1000);
+});
+
+function updateClickCount(amount) {
+  myClicks += amount;
+  document.getElementById('click-count').textContent = myClicks;
+  updateUpgradeButtons();
+  
+  // Update store
+  const username = room.party.client.username;
+  room.store.update({
+    id: 'clicks',
+    dependencies: { username, myClicks },
+    updateFunction: (clicks) => {
+      clicks[username] = myClicks;
+      return clicks;
+    }
+  });
+}
+
+function updateUpgradeButtons() {
+  document.getElementById('autoClicker').textContent = 
+    `Automatic Banana Peeler (Cost: ${upgradeCosts.autoClicker})`;
+  document.getElementById('autoClicker').disabled = myClicks < upgradeCosts.autoClicker;
+  
+  document.getElementById('doubleClick').textContent = 
+    `Double Banana Power (Cost: ${upgradeCosts.doubleClick})`;
+  document.getElementById('doubleClick').disabled = myClicks < upgradeCosts.doubleClick;
+  
+  document.getElementById('criticalClick').textContent = 
+    `Critical Banana Chance (Cost: ${upgradeCosts.criticalClick})`;
+  document.getElementById('criticalClick').disabled = myClicks < upgradeCosts.criticalClick;
+  
+  document.getElementById('clickFrenzy').textContent = 
+    `Banana Frenzy (Cost: ${upgradeCosts.clickFrenzy})`;
+  document.getElementById('clickFrenzy').disabled = myClicks < upgradeCosts.clickFrenzy;
+  
+  document.getElementById('goldClick').textContent = 
+    `Golden Banana Chance (Cost: ${upgradeCosts.goldClick})`;
+  document.getElementById('goldClick').disabled = myClicks < upgradeCosts.goldClick;
+}
+
+// Auto clicker
+document.getElementById('autoClicker').addEventListener('click', () => {
+  if (myClicks >= upgradeCosts.autoClicker) {
+    updateClickCount(-upgradeCosts.autoClicker);
+    autoClickerCount++;
+    upgradeCosts.autoClicker = Math.floor(upgradeCosts.autoClicker * 1.5);
+    setInterval(() => updateClickCount(1), 1000);
+  }
+});
+
+// Double click power
+document.getElementById('doubleClick').addEventListener('click', () => {
+  if (myClicks >= upgradeCosts.doubleClick) {
+    updateClickCount(-upgradeCosts.doubleClick);
+    doubleClickPower *= 2;
+    upgradeCosts.doubleClick = Math.floor(upgradeCosts.doubleClick * 2);
+  }
+});
+
+// Critical click chance
+document.getElementById('criticalClick').addEventListener('click', () => {
+  if (myClicks >= upgradeCosts.criticalClick) {
+    updateClickCount(-upgradeCosts.criticalClick);
+    criticalChance += 0.1;
+    upgradeCosts.criticalClick = Math.floor(upgradeCosts.criticalClick * 1.8);
+  }
+});
+
+// Click frenzy
+document.getElementById('clickFrenzy').addEventListener('click', () => {
+  if (myClicks >= upgradeCosts.clickFrenzy) {
+    updateClickCount(-upgradeCosts.clickFrenzy);
+    clickFrenzyActive = true;
+    upgradeCosts.clickFrenzy = Math.floor(upgradeCosts.clickFrenzy * 2);
+    setTimeout(() => {
+      clickFrenzyActive = false;
+    }, 10000);
+  }
+});
+
+// Gold click chance
+document.getElementById('goldClick').addEventListener('click', () => {
+  if (myClicks >= upgradeCosts.goldClick) {
+    updateClickCount(-upgradeCosts.goldClick);
+    goldClickChance += 0.05;
+    upgradeCosts.goldClick = Math.floor(upgradeCosts.goldClick * 2.5);
+  }
+});
+
+// Update leaderboard when store changes
+room.onRecordChanged = async (id) => {
+  if (id === 'clicks') {
+    const clicks = await room.store.get('clicks');
+    const leaderboard = document.getElementById('leaderboard-list');
+    
+    // Sort players by clicks
+    const sortedPlayers = Object.entries(clicks)
+      .sort(([,a], [,b]) => b - a);
+
+    // Build leaderboard entries
+    const entries = [];
+    for (const [username, score] of sortedPlayers) {
+      const userCosmetics = await room.store.get(`leaderboard_cosmetics_${username}`);
+      const cosmetic = userCosmetics ? leaderboardCosmeticsData.find(c => c.id === userCosmetics.selectedCosmetic) || leaderboardCosmeticsData[0] : leaderboardCosmeticsData[0];
+      
+      entries.push(`
+        <div class="leaderboard-entry">
+          <div class="player">
+            <img src="https://images.websim.ai/avatar/${username}" 
+                 alt="Avatar" class="avatar">
+            <span>${cosmetic.prefix}${username}${cosmetic.suffix}</span>
+          </div>
+          <span>${score}</span>
+        </div>
+      `);
+    }
+
+    // Update leaderboard HTML
+    leaderboard.innerHTML = entries.join('');
+  }
+};
+
+// Initialize click count from store
+initializeClicks();
+
+// Add shop functionality
+document.getElementById('open-shop').addEventListener('click', () => {
+  document.getElementById('shop').style.display = 'block';
+  renderShop();
+});
+
+document.getElementById('close-shop').addEventListener('click', () => {
+  document.getElementById('shop').style.display = 'none';
+});
+
+function renderShop() {
+  const container = document.getElementById('cosmetics-container');
+  container.innerHTML = '';
+  
+  cosmeticsData.forEach(cosmetic => {
+    const isUnlocked = unlockedCosmetics.includes(cosmetic.emoji);
+    const isSelected = selectedCosmetic === cosmetic.emoji;
+    
+    const item = document.createElement('div');
+    item.className = `cosmetic-item ${isUnlocked ? '' : 'cosmetic-locked'} ${isSelected ? 'selected' : ''}`;
+    
+    item.innerHTML = `
+      <div class="cosmetic-preview">${cosmetic.emoji}</div>
+      <div>${cosmetic.name}</div>
+      <div class="cosmetic-price">
+        ${isUnlocked ? (isSelected ? 'Selected' : 'Click to Select') : `Cost: ${cosmetic.price} 🍌`}
+      </div>
+    `;
+    
+    item.addEventListener('click', () => {
+      if (isUnlocked) {
+        selectedCosmetic = cosmetic.emoji;
+        document.getElementById('click-area').textContent = cosmetic.emoji;
+        renderShop();
+      } else if (myClicks >= cosmetic.price) {
+        updateClickCount(-cosmetic.price);
+        unlockedCosmetics.push(cosmetic.emoji);
+        selectedCosmetic = cosmetic.emoji;
+        document.getElementById('click-area').textContent = cosmetic.emoji;
+        renderShop();
+        
+        // Save unlocked cosmetics to store
+        room.store.update({
+          id: `cosmetics_${room.party.client.username}`,
+          dependencies: { unlockedCosmetics, selectedCosmetic },
+          updateFunction: () => ({
+            unlockedCosmetics,
+            selectedCosmetic
+          })
+        });
+      }
+    });
+    
+    container.appendChild(item);
+  });
+
+  // Add leaderboard cosmetics
+  const leaderboardContainer = document.getElementById('leaderboard-cosmetics-container');
+  leaderboardContainer.innerHTML = '';
+  
+  leaderboardCosmeticsData.forEach(cosmetic => {
+    const isUnlocked = unlockedLeaderboardCosmetics.includes(cosmetic.id);
+    const isSelected = selectedLeaderboardCosmetic === cosmetic.id;
+    
+    const item = document.createElement('div');
+    item.className = `cosmetic-item ${isUnlocked ? '' : 'cosmetic-locked'} ${isSelected ? 'selected' : ''}`;
+    
+    item.innerHTML = `
+      <div class="name-preview">
+        ${cosmetic.prefix}${room.party.client.username}${cosmetic.suffix}
+      </div>
+      <div>${cosmetic.name}</div>
+      <div class="cosmetic-price">
+        ${isUnlocked ? (isSelected ? 'Selected' : 'Click to Select') : `Cost: ${cosmetic.price} 🍌`}
+      </div>
+    `;
+    
+    item.addEventListener('click', () => {
+      if (isUnlocked) {
+        selectedLeaderboardCosmetic = cosmetic.id;
+        renderShop();
+        saveLeaderboardCosmetics();
+      } else if (myClicks >= cosmetic.price) {
+        updateClickCount(-cosmetic.price);
+        unlockedLeaderboardCosmetics.push(cosmetic.id);
+        selectedLeaderboardCosmetic = cosmetic.id;
+        renderShop();
+        saveLeaderboardCosmetics();
+      }
+    });
+    
+    leaderboardContainer.appendChild(item);
+  });
+}
+
+function saveLeaderboardCosmetics() {
+  room.store.update({
+    id: `leaderboard_cosmetics_${room.party.client.username}`,
+    dependencies: { unlockedLeaderboardCosmetics, selectedLeaderboardCosmetic },
+    updateFunction: () => ({
+      unlockedCosmetics: unlockedLeaderboardCosmetics,
+      selectedCosmetic: selectedLeaderboardCosmetic
+    })
+  });
+}
+
+// Initialize feedback list on load
+updateFeedbackList();
+</script>
+</body></html>
