@@ -1,0 +1,344 @@
+<html><head><base href="https://pollinations-ai-image-generator.com/">
+    <title>Image Imagine (Uncensored): Dynamic AI Art Creation</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #000000;
+            color: #ffffff;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .logo {
+            width: 100px;
+            height: 100px;
+            margin-right: 20px;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        h1 {
+            text-align: center;
+            color: #3498db;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        select, input, button {
+            padding: 10px;
+            font-size: 16px;
+            background-color: #333333;
+            color: #ffffff;
+            border: 1px solid #555555;
+        }
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        .art-piece {
+            background-color: #222222;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(255,255,255,0.1);
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+        .art-piece:hover {
+            transform: scale(1.05);
+        }
+        .art-piece img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            cursor: pointer;
+            max-width: 600px;
+            max-height: 600px;
+        }
+        .art-info {
+            padding: 15px;
+        }
+        .art-info h3 {
+            margin: 0 0 10px 0;
+            font-size: 18px;
+            color: #ffffff;
+        }
+        .art-info p {
+            margin: 0;
+            font-size: 14px;
+            color: #aaaaaa;
+        }
+        .similar-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #3498db;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            font-size: 16px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .similar-btn:hover {
+            background-color: #2980b9;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+        }
+        .modal-content {
+            margin: auto;
+            display: block;
+            max-width: 90%;
+            max-height: 90%;
+        }
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        #loadingIndicator {
+            text-align: center;
+            padding: 20px;
+            font-size: 18px;
+            color: #ffffff;
+            display: none;
+        }
+        .prompt-sign {
+            color: #3498db;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        .download-instructions {
+            background-color: #3498db;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            padding: 20px;
+            background-color: #222222;
+            border-radius: 10px;
+        }
+        .footer a {
+            color: #3498db;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <img src="https://pollinations.ai/p/colorful%20abstract%20flower%20logo%2C%20geometric%20shapes%2C%20vibrant%20colors%2C%20minimalist%20design?seed=14" alt="AI Image Generator Logo">
+            </div>
+            <h1>Image Imagine (Uncensored)</h1>
+        </div>
+        <div class="download-instructions">
+            To download an image: Click on the image, then right-click and select "Open image in new tab", then save from there.
+        </div>
+        <div class="controls">
+            <select id="styleSelect">
+                <option value="Ukiyo-e">Ukiyo-e</option>
+                <!-- Other options will be dynamically added here -->
+            </select>
+            <div>
+                <div class="prompt-sign">Enter your prompt:</div>
+                <input type="text" id="promptInput" placeholder="Enter your prompt..." value="blueprint of a robobee">
+            </div>
+            <select id="ratioSelect">
+                <option value="1:1">1:1 (Square)</option>
+                <option value="16:9">16:9 (Widescreen)</option>
+                <option value="3:2">3:2</option>
+                <option value="2:3">2:3</option>
+                <option value="9:16">9:16 (Portrait)</option>
+            </select>
+            <button id="generateBtn">Generate Detailed Art</button>
+        </div>
+        <div class="gallery" id="artGallery">
+            <!-- Art pieces will be dynamically added here -->
+        </div>
+        <div id="loadingIndicator">Generating images...</div>
+        <div class="footer">
+            <a href="https://pollinations.ai" target="_blank">Visit Pollinations.AI</a>
+            <a href="https://discord.gg/k9F7SyTgqn" target="_blank">Join our Discord</a>
+        </div>
+    </div>
+
+    <div id="imageModal" class="modal">
+        <span class="close">×</span>
+        <img class="modal-content" id="modalImage" src="">
+    </div>
+
+    <script>
+        const styles = [
+            "Ukiyo-e", "Photorealism", "Hyperrealism", "Digital Art", "Abstract Expressionism", "Art Deco", 
+            "Art Nouveau", "Baroque", "Bauhaus", "Cubism", "Expressionism", "Fauvism", 
+            "Impressionism", "Minimalism", "Pop Art", "Renaissance", "Romanticism", 
+            "Surrealism", "Street Art"
+        ];
+
+        const styleSelect = document.getElementById('styleSelect');
+        const promptInput = document.getElementById('promptInput');
+        const ratioSelect = document.getElementById('ratioSelect');
+        const generateBtn = document.getElementById('generateBtn');
+        const artGallery = document.getElementById('artGallery');
+        const modal = document.getElementById('imageModal');
+        const modalImg = document.getElementById("modalImage");
+        const closeBtn = document.getElementsByClassName("close")[0];
+        const loadingIndicator = document.getElementById('loadingIndicator');
+
+        let isLoading = false;
+
+        // Populate style select options
+        styles.forEach(style => {
+            if (style !== "Ukiyo-e") {  // Skip Ukiyo-e as it's already the first option
+                const option = document.createElement('option');
+                option.value = style;
+                option.textContent = style;
+                styleSelect.appendChild(option);
+            }
+        });
+
+        function enhancePrompt(prompt, style) {
+            const enhancers = [
+                "highly detailed", "intricate", "photorealistic", "4k resolution",
+                "vibrant colors", "dramatic lighting", "professional photography",
+                "cinematic", "award-winning", "masterpiece", "ultra-realistic",
+                "lifelike", "hyper-detailed", "studio quality", "perfect composition"
+            ];
+            const randomEnhancers = enhancers.sort(() => 0.5 - Math.random()).slice(0, 4);
+            return `${style}. ${prompt}, ${randomEnhancers.join(", ")}, trending on artstation, 8k resolution`;
+        }
+
+        const fixedSeeds = [1, 2, 3, 4];
+
+        function getDimensions(ratio) {
+            const maxWidth = 600;
+            const maxHeight = 600;
+            let width, height;
+
+            switch (ratio) {
+                case "16:9":
+                    width = maxWidth;
+                    height = Math.round(width * 9 / 16);
+                    break;
+                case "3:2":
+                    width = maxWidth;
+                    height = Math.round(width * 2 / 3);
+                    break;
+                case "2:3":
+                    height = maxHeight;
+                    width = Math.round(height * 2 / 3);
+                    break;
+                case "9:16":
+                    height = maxHeight;
+                    width = Math.round(height * 9 / 16);
+                    break;
+                default: // 1:1
+                    width = height = Math.min(maxWidth, maxHeight);
+            }
+
+            return { width, height };
+        }
+
+        function generateArt() {
+            if (isLoading) return;
+            isLoading = true;
+            loadingIndicator.style.display = 'block';
+
+            const style = styleSelect.value;
+            const basePrompt = promptInput.value || "blueprint of a robobee";
+            const enhancedPrompt = enhancePrompt(basePrompt, style);
+            const ratio = ratioSelect.value;
+            const { width, height } = getDimensions(ratio);
+            const imageCount = 4;
+
+            artGallery.innerHTML = '';
+
+            for (let i = 0; i < imageCount; i++) {
+                const artPiece = document.createElement('div');
+                artPiece.className = 'art-piece';
+
+                const encodedPrompt = encodeURIComponent(enhancedPrompt);
+                const seed = fixedSeeds[i];
+                const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?seed=${seed}&width=${width}&height=${height}&nologo=true`;
+
+                artPiece.innerHTML = `
+                    <img src="${imageUrl}" alt="${enhancedPrompt}" onclick="openModal(this.src)" width="${width}" height="${height}">
+                    <div class="art-info">
+                        <h3>${basePrompt}</h3>
+                        <p>Style: ${style}</p>
+                        <p>Ratio: ${ratio}</p>
+                        <p>Dimensions: ${width}x${height}</p>
+                        <p>Seed: ${seed}</p>
+                    </div>
+                `;
+
+                artGallery.appendChild(artPiece);
+            }
+
+            isLoading = false;
+            loadingIndicator.style.display = 'none';
+        }
+
+        function openModal(src) {
+            modal.style.display = "block";
+            modalImg.src = src;
+        }
+
+        closeBtn.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        generateBtn.addEventListener('click', generateArt);
+
+        // Generate initial art pieces
+        generateArt();
+    </script>
+</body></html>
