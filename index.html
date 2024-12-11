@@ -1,0 +1,740 @@
+<html><head><base href="https://websim.ai/pixgen" /><title>PixGen - Advanced Procedural Pixel Art Generator</title><style>
+:root {
+  --primary-color: #5294e2;
+  --secondary-color: #5cd1a4;
+  --background-color: #2f343f;
+  --surface-color: #383c4a;
+  --text-color: #d3dae3;
+  --border-color: #404552;
+}
+
+body {
+  font-family: 'Roboto', Arial, sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 1200px;
+  width: 100%;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+h1, h2, h3 {
+  text-align: center;
+  color: var(--primary-color);
+}
+
+#canvas-container {
+  position: relative;
+  margin: 2rem auto;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  overflow: hidden;
+  width: 512px;
+  height: 512px;
+  background-color: var(--surface-color);
+}
+
+#canvas {
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  width: 100%;
+  height: 100%;
+}
+
+#controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+button {
+  background-color: var(--primary-color);
+  border: none;
+  color: var(--text-color);
+  padding: 0.75rem 1.5rem;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 1rem;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #4a84c9;
+}
+
+button:disabled {
+  background-color: #2f343f;
+  cursor: not-allowed;
+}
+
+#formula {
+  width: 100%;
+  height: 100px;
+  margin: 1rem 0;
+  padding: 0.5rem;
+  font-family: 'Fira Code', monospace;
+  font-size: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  resize: vertical;
+  background-color: var(--surface-color);
+  color: var(--text-color);
+}
+
+.hidden {
+  display: none;
+}
+
+#options {
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.option-column {
+  width: 48%;
+}
+
+.option-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+label {
+  flex: 0 0 150px;
+  margin-right: 1rem;
+}
+
+input[type="number"], input[type="text"], input[type="range"] {
+  width: 80px;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 1rem;
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+input[type="range"] {
+  width: 200px;
+}
+
+input[type="checkbox"] {
+  margin-right: 0.5rem;
+}
+
+.examples, .share {
+  margin-top: 2rem;
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+code {
+  background-color: var(--background-color);
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-family: 'Fira Code', monospace;
+}
+
+footer {
+  margin-top: 2rem;
+  text-align: center;
+  padding: 1rem;
+  background-color: var(--surface-color);
+  color: var(--text-color);
+  width: 100%;
+}
+
+footer a {
+  color: var(--secondary-color);
+  text-decoration: none;
+}
+
+footer a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+  
+  #controls {
+    flex-direction: column;
+  }
+  
+  button {
+    width: 100%;
+  }
+
+  .option-column {
+    width: 100%;
+  }
+}
+
+.ctxmenu {
+  position: absolute;
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  padding: 0.5rem 0;
+  list-style-type: none;
+  margin: 0;
+  z-index: 1000;
+}
+
+.ctxmenu li {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.ctxmenu li:hover {
+  background-color: var(--background-color);
+}
+
+.ctxmenu li.interactive {
+  color: var(--primary-color);
+}
+</style></head><body>
+<div class="container">
+  <h1>PixGen</h1>
+  <h2>Advanced Procedural Pixel Art Generator</h2>
+
+  <div id="canvas-container">
+    <canvas id="canvas" width="512" height="512"></canvas>
+  </div>
+
+  <div id="controls">
+    <button id="random">Generate Random Formula</button>
+    <button id="advanced-toggle">Toggle Advanced Options</button>
+    <button id="save-png">Save as PNG</button>
+    <button id="save-frames">Record 5 Seconds of Frames</button>
+  </div>
+
+  <textarea id="formula" placeholder="Enter your formula here"></textarea>
+  
+  <div id="options" class="hidden">
+    <div class="option-column">
+      <h3>Generation Options</h3>
+      <div class="option-group">
+        <label for="width">Width:</label>
+        <input type="number" id="width" value="256" min="1" max="1024">
+      </div>
+      <div class="option-group">
+        <label for="height">Height:</label>
+        <input type="number" id="height" value="256" min="1" max="1024">
+      </div>
+      <div class="option-group">
+        <label for="length">Formula Length:</label>
+        <input type="number" id="length" value="5" min="1" max="20">
+        <input type="checkbox" id="length-random">
+        <label for="length-random">Random</label>
+      </div>
+      <div class="option-group">
+        <label for="operand-ratio">Operand Ratio:</label>
+        <input type="text" id="operand-ratio" value="0.5">
+      </div>
+      <div class="option-group">
+        <label for="variable-ratio">Variable Ratio:</label>
+        <input type="text" id="variable-ratio" value="0.5">
+      </div>
+      <div class="option-group">
+        <label for="bracket-chance">Bracket Chance:</label>
+        <input type="text" id="bracket-chance" value="0.2">
+      </div>
+    </div>
+
+    <div class="option-column">
+      <h3>Glitch Effects</h3>
+      <div class="option-group">
+        <label for="noise">Noise:</label>
+        <input type="range" id="noise" min="0" max="100" value="0">
+      </div>
+      <div class="option-group">
+        <label for="scanlines">Scanlines:</label>
+        <input type="range" id="scanlines" min="0" max="100" value="0">
+      </div>
+      <div class="option-group">
+        <label for="rgb-shift">RGB Shift:</label>
+        <input type="range" id="rgb-shift" min="0" max="10" value="0">
+      </div>
+      <div class="option-group">
+        <label for="vhs-effect">VHS Effect:</label>
+        <input type="range" id="vhs-effect" min="0" max="100" value="0">
+      </div>
+      <div class="option-group">
+        <label for="crt-effect">CRT Effect:</label>
+        <input type="range" id="crt-effect" min="0" max="100" value="0">
+      </div>
+      <div class="option-group">
+        <label for="pixelation">Pixelation:</label>
+        <input type="range" id="pixelation" min="1" max="20" value="1">
+      </div>
+      <div class="option-group">
+        <label for="glitch-lines">Glitch Lines:</label>
+        <input type="range" id="glitch-lines" min="0" max="100" value="0">
+      </div>
+      <div class="option-group">
+        <label for="color-distortion">Color Distortion:</label>
+        <input type="range" id="color-distortion" min="0" max="100" value="0">
+      </div>
+    </div>
+  </div>
+
+  <div class="examples">
+    <h2>Example Formulas:</h2>
+    <ul>
+      <li><code>(x ^ y) + t</code> - Creates a shifting XOR pattern</li>
+      <li><code>Math.sin(x/10) * Math.cos(y/10) * 255</code> - Generates a wavy pattern</li>
+      <li><code>(x*x + y*y + t) % 256</code> - Produces expanding circles</li>
+      <li><code>(x + y + Math.floor(t/100)) & 63</code> - Creates a diagonal striped pattern that shifts over time</li>
+    </ul>
+  </div>
+
+  <div class="share">
+    <h2>Share Your Creation:</h2>
+    <p>To share your pixel art, simply copy the URL of this page. The current formula is encoded in the URL hash, allowing others to see and modify your creation.</p>
+  </div>
+</div>
+
+<footer>
+  <p>PixGen v2.6 - Created with love by the WebSim AI team</p>
+  <p>Original JavaScript functions inspired by <a href="https://daydum.com/random" target="_blank">daydum.com/random</a></p>
+  <p><a href="https://websim.ai/gallery">Explore PixGen Gallery</a> | <a href="https://websim.ai/docs/pixgen">PixGen Documentation</a></p>
+</footer>
+
+<script>
+var canvas,
+    ctx,
+    pixels,
+    glitchCanvas,
+    glitchCtx;
+
+var width,
+    height,
+    scale;
+
+var mouseX = 0,
+    mouseY = 0;
+
+var glitchEffects = {
+    noise: 0,
+    scanlines: 0,
+    rgbShift: 0,
+    vhsEffect: 0,
+    crtEffect: 0,
+    pixelation: 1,
+    glitchLines: 0,
+    colorDistortion: 0
+};
+
+var frameCaptures = [];
+var isRecording = false;
+var saveFramesButton;
+
+function random() {
+    return Math.random();
+}
+
+Array.prototype.random = function() {
+    return this[Math.floor(random() * this.length)];
+};
+
+var funct = function() {};
+
+window.addEventListener("load", function() {
+    canvas = document.getElementById("canvas");
+    ctx = canvas.getContext("2d");
+    
+    glitchCanvas = document.createElement("canvas");
+    glitchCtx = glitchCanvas.getContext("2d");
+    
+    resize();
+    
+    if (window.location.hash) {
+        document.getElementById("formula").value = decodeURIComponent(window.location.hash.slice(1));
+        parse();
+    } else {
+        generate();
+    }
+    
+    window.addEventListener("mousemove", function(event) {
+        var bounds = canvas.getBoundingClientRect();
+        mouseX = (event.clientX - bounds.left) / scale;
+        mouseY = (event.clientY - bounds.top) / scale;
+    });
+    
+    document.getElementById("random").addEventListener("click", function() {
+        generate();
+    });
+    
+    document.getElementById("advanced-toggle").addEventListener("click", function() {
+        document.getElementById("options").classList.toggle("hidden");
+    });
+    
+    document.getElementById("formula").addEventListener("input", function() {
+        parse();
+    });
+    
+    document.getElementById("width").addEventListener("input", resize);
+    document.getElementById("height").addEventListener("input", resize);
+    
+    // Glitch effect sliders
+    document.getElementById("noise").addEventListener("input", updateGlitchEffects);
+    document.getElementById("scanlines").addEventListener("input", updateGlitchEffects);
+    document.getElementById("rgb-shift").addEventListener("input", updateGlitchEffects);
+    document.getElementById("vhs-effect").addEventListener("input", updateGlitchEffects);
+    document.getElementById("crt-effect").addEventListener("input", updateGlitchEffects);
+    document.getElementById("pixelation").addEventListener("input", updateGlitchEffects);
+    document.getElementById("glitch-lines").addEventListener("input", updateGlitchEffects);
+    document.getElementById("color-distortion").addEventListener("input", updateGlitchEffects);
+    
+    document.getElementById("save-png").addEventListener("click", savePNG);
+    saveFramesButton = document.getElementById("save-frames");
+    saveFramesButton.addEventListener("click", recordFrames);
+    
+    genImg();
+});
+
+function updateGlitchEffects() {
+    glitchEffects.noise = parseInt(document.getElementById("noise").value) / 100;
+    glitchEffects.scanlines = parseInt(document.getElementById("scanlines").value) / 100;
+    glitchEffects.rgbShift = parseInt(document.getElementById("rgb-shift").value);
+    glitchEffects.vhsEffect = parseInt(document.getElementById("vhs-effect").value) / 100;
+    glitchEffects.crtEffect = parseInt(document.getElementById("crt-effect").value) / 100;
+    glitchEffects.pixelation = parseInt(document.getElementById("pixelation").value);
+    glitchEffects.glitchLines = parseInt(document.getElementById("glitch-lines").value) / 100;
+    glitchEffects.colorDistortion = parseInt(document.getElementById("color-distortion").value) / 100;
+}
+
+function resize() {
+    width = parseInt(document.getElementById("width").value);
+    height = parseInt(document.getElementById("height").value);
+    scale = Math.min(canvas.width / width, canvas.height / height);
+    
+    glitchCanvas.width = width;
+    glitchCanvas.height = height;
+    
+    ctx.imageSmoothingEnabled = false;
+    glitchCtx.imageSmoothingEnabled = false;
+    
+    pixels = ctx.createImageData(width, height);
+}
+
+function generate() {
+    var length = parseInt(document.getElementById("length").value);
+    if (document.getElementById("length-random").checked) {
+        document.getElementById("formula").value = genForm(Math.floor(random() * (length - 1)) + 1);
+    } else {
+        document.getElementById("formula").value = genForm(length);
+    }
+    parse();
+}
+
+function parse() {
+    var formula = document.getElementById("formula").value;
+    window.location.hash = encodeURIComponent(formula);
+    try {
+        funct = new Function("i", "t", "x", "y", "mx", "my", "return " + formula);
+    } catch(e) {
+        console.log(e);
+    }
+}
+
+var operators = ["+", "-", "*", "/", "%", "&", "|", "^", "<<", ">>"];
+
+function genForm(length) {
+    if (length == 1) {
+        if (random() >= parseFloat(document.getElementById("operand-ratio").value)) {
+            return Math.floor(random() * 100);
+        } else {
+            return random() >= parseFloat(document.getElementById("variable-ratio").value) ? "i" : "t";
+        }
+    } else {
+        var ratio = Math.floor(random() * (length - 1)) + 1;
+        var result = genForm(ratio) + operators[Math.floor(random() * operators.length)] + genForm(length - ratio);
+        return random() >= parseFloat(document.getElementById("bracket-chance").value) ? result : ("(" + result + ")");
+    }
+}
+
+function genImg() {
+    try {
+        var time = Date.now();
+        for (var i=0; i<width*height; i++) {
+            var color = funct(i, time, i % width, Math.floor(i / width), mouseX, mouseY);
+            var c = color - (Math.floor(Math.floor(color) / 16777216) * 16777216);
+
+            pixels.data[i * 4 + 0] = ((color >> 16) & 0xff);
+            pixels.data[i * 4 + 1] = ((color >> 8 ) & 0xff);
+            pixels.data[i * 4 + 2] = ((color      ) & 0xff);
+            pixels.data[i * 4 + 3] = 255;
+        }
+        glitchCtx.putImageData(pixels, 0, 0);
+        
+        // Apply glitch effects
+        applyNoise();
+        applyScanlines();
+        applyRGBShift();
+        applyVHSEffect();
+        applyCRTEffect();
+        applyPixelation();
+        applyGlitchLines();
+        applyColorDistortion();
+        
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(glitchCanvas, 0, 0, width, height, 
+                      (canvas.width - width * scale) / 2, 
+                      (canvas.height - height * scale) / 2, 
+                      width * scale, height * scale);
+        
+        if (isRecording) {
+            frameCaptures.push(canvas.toDataURL());
+            if (frameCaptures.length >= 150) { // 5 seconds at 30 fps
+                saveFrames();
+            }
+        }
+    } catch(e) {
+        console.log(e);
+    }
+    window.requestAnimationFrame(genImg);
+}
+
+function applyNoise() {
+    if (glitchEffects.noise > 0) {
+        var imageData = glitchCtx.getImageData(0, 0, width, height);
+        var data = imageData.data;
+        for (var i = 0; i < data.length; i += 4) {
+            if (Math.random() < glitchEffects.noise) {
+                data[i] = data[i+1] = data[i+2] = Math.random() * 255;
+            }
+        }
+        glitchCtx.putImageData(imageData, 0, 0);
+    }
+}
+
+function applyScanlines() {
+    if (glitchEffects.scanlines > 0) {
+        glitchCtx.fillStyle = `rgba(0, 0, 0, ${glitchEffects.scanlines})`;
+        for (var y = 0; y < height; y += 2) {
+            glitchCtx.fillRect(0, y, width, 1);
+        }
+    }
+}
+
+function applyRGBShift() {
+    if (glitchEffects.rgbShift > 0) {
+        var imageData = glitchCtx.getImageData(0, 0, width, height);
+        var shiftedData = new ImageData(width, height);
+        
+        for (var y = 0; y < height; y++) {
+            for (var x = 0; x < width; x++) {
+                var i = (y * width + x) * 4;
+                var shiftX = x + glitchEffects.rgbShift;
+                if (shiftX < width) {
+                    var shiftI = (y * width + shiftX) * 4;
+                    shiftedData.data[shiftI] = imageData.data[i];
+                    shiftedData.data[shiftI + 3] = imageData.data[i + 3];
+                }
+                shiftedData.data[i + 1] = imageData.data[i + 1];
+                shiftedData.data[i + 2] = imageData.data[i + 2];
+                shiftedData.data[i + 3] = imageData.data[i + 3];
+            }
+        }
+        glitchCtx.putImageData(shiftedData, 0, 0);
+    }
+}
+
+function applyVHSEffect() {
+    if (glitchEffects.vhsEffect > 0) {
+        var imageData = glitchCtx.getImageData(0, 0, width, height);
+        var data = imageData.data;
+        for (var y = 0; y < height; y++) {
+            if (Math.random() < glitchEffects.vhsEffect * 0.1) {
+                var offset = Math.floor(Math.random() * 10) - 5;
+                for (var x = 0; x < width; x++) {
+                    var sourceI = (y * width + x) * 4;
+                    var targetX = x + offset;
+                    if (targetX >= 0 && targetX < width) {
+                        var targetI = (y * width + targetX) * 4;
+                        data[targetI] = data[sourceI];
+                        data[targetI + 1] = data[sourceI + 1];
+                        data[targetI + 2] = data[sourceI + 2];
+                    }
+                }
+            }
+        }
+        glitchCtx.putImageData(imageData, 0, 0);
+    }
+}
+
+function applyCRTEffect() {
+    if (glitchEffects.crtEffect > 0) {
+        var imageData = glitchCtx.getImageData(0, 0, width, height);
+        var data = imageData.data;
+        for (var y = 0; y < height; y++) {
+            for (var x = 0; x < width; x++) {
+                var i = (y * width + x) * 4;
+                var distanceFromCenter = Math.sqrt(Math.pow(x - width/2, 2) + Math.pow(y - height/2, 2));
+                var maxDistance = Math.sqrt(Math.pow(width/2, 2) + Math.pow(height/2, 2));
+                var factor = 1 - (distanceFromCenter / maxDistance) * glitchEffects.crtEffect;
+                data[i] *= factor;
+                data[i+1] *= factor;
+                data[i+2] *= factor;
+            }
+        }
+        glitchCtx.putImageData(imageData, 0, 0);
+    }
+}
+
+function applyPixelation() {
+    if (glitchEffects.pixelation > 1) {
+        var imageData = glitchCtx.getImageData(0, 0, width, height);
+        var data = imageData.data;
+        var pixelSize = glitchEffects.pixelation;
+        for (var y = 0; y < height; y += pixelSize) {
+            for (var x = 0; x < width; x += pixelSize) {
+                var i = (y * width + x) * 4;
+                var r = data[i], g = data[i+1], b = data[i+2];
+                for (var py = 0; py < pixelSize && y + py < height; py++) {
+                    for (var px = 0; px < pixelSize && x + px < width; px++) {
+                        var pixelI = ((y + py) * width + (x + px)) * 4;
+                        data[pixelI] = r;
+                        data[pixelI+1] = g;
+                        data[pixelI+2] = b;
+                    }
+                }
+            }
+        }
+        glitchCtx.putImageData(imageData, 0, 0);
+    }
+}
+
+function applyGlitchLines() {
+    if (glitchEffects.glitchLines > 0) {
+        var imageData = glitchCtx.getImageData(0, 0, width, height);
+        var data = imageData.data;
+        for (var y = 0; y < height; y++) {
+            if (Math.random() < glitchEffects.glitchLines) {
+                var glitchWidth = Math.floor(Math.random() * width * 0.1);
+                var glitchStart = Math.floor(Math.random() * (width - glitchWidth));
+                for (var x = glitchStart; x < glitchStart + glitchWidth; x++) {
+                    var i = (y * width + x) * 4;
+                    data[i] = Math.random() * 255;
+                    data[i+1] = Math.random() * 255;
+                    data[i+2] = Math.random() * 255;
+                }
+            }
+        }
+        glitchCtx.putImageData(imageData, 0, 0);
+    }
+}
+
+function applyColorDistortion() {
+    if (glitchEffects.colorDistortion > 0) {
+        var imageData = glitchCtx.getImageData(0, 0, width, height);
+        var data = imageData.data;
+        for (var i = 0; i < data.length; i += 4) {
+            data[i] = Math.min(255, data[i] * (1 + (Math.random() - 0.5) * glitchEffects.colorDistortion));
+            data[i+1] = Math.min(255, data[i+1] * (1 + (Math.random() - 0.5) * glitchEffects.colorDistortion));
+            data[i+2] = Math.min(255, data[i+2] * (1 + (Math.random() - 0.5) * glitchEffects.colorDistortion));
+        }
+        glitchCtx.putImageData(imageData, 0, 0);
+    }
+}
+
+function savePNG() {
+    var link = document.createElement('a');
+    link.download = 'pixgen_' + Date.now() + '.png';
+    link.href = canvas.toDataURL();
+    link.click();
+}
+
+function recordFrames() {
+    if (!isRecording) {
+        isRecording = true;
+        frameCaptures = [];
+        saveFramesButton.textContent = "Recording Frames...";
+        saveFramesButton.disabled = true;
+    }
+}
+
+function saveFrames() {
+    isRecording = false;
+    saveFramesButton.textContent = "Preparing Frames...";
+
+    // Create a zip file
+    var zip = new JSZip();
+    var folder = zip.folder("pixgen_frames");
+
+    // Add each frame to the zip file
+    frameCaptures.forEach((frame, index) => {
+        var filename = `frame_${index.toString().padStart(3, '0')}.png`;
+        folder.file(filename, frame.split(',')[1], {base64: true});
+    });
+
+    // Generate the zip file
+    zip.generateAsync({type:"blob"})
+    .then(function(content) {
+        // Create a download link for the zip file
+        var link = document.createElement('a');
+        link.download = 'pixgen_frames_' + Date.now() + '.zip';
+        link.href = URL.createObjectURL(content);
+        link.click();
+
+        saveFramesButton.textContent = "Record 5 Seconds of Frames";
+        saveFramesButton.disabled = false;
+    });
+
+    frameCaptures = [];
+}
+
+// Context menu functionality
+document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+    var ctxMenu = document.querySelector('.ctxmenu');
+    if (ctxMenu) {
+        ctxMenu.style.display = 'block';
+        ctxMenu.style.left = e.pageX + 'px';
+        ctxMenu.style.top = e.pageY + 'px';
+    }
+});
+
+document.addEventListener('click', function() {
+    var ctxMenu = document.querySelector('.ctxmenu');
+    if (ctxMenu) {
+        ctxMenu.style.display = 'none';
+    }
+});
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+
+</body></html>
