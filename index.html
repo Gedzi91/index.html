@@ -1,0 +1,531 @@
+<html><head><base href="https://websim-creation-engine.example.com/interactive-population-globe-with-framed-flags/" />
+<title>Interactive Global Population Visualization with Framed Flags</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://d3js.org/topojson.v3.min.js"></script>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        background-color: #000;
+        color: #fff;
+        font-family: Arial, sans-serif;
+        overflow: hidden;
+    }
+    #globe {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    #tooltip {
+        position: absolute;
+        background-color: rgba(0, 0, 0, 0.7);
+        color: #fff;
+        padding: 10px;
+        border-radius: 5px;
+        pointer-events: none;
+        display: none;
+    }
+    #instructions {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        background-color: rgba(0, 0, 0, 0.7);
+        padding: 10px;
+        border-radius: 5px;
+    }
+    #population-display {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background-color: rgba(0, 0, 0, 0.7);
+        padding: 10px;
+        border-radius: 5px;
+        font-size: 18px;
+    }
+    #flag-display {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background-color: rgba(0, 0, 0, 0.7);
+        padding: 10px;
+        border-radius: 5px;
+        display: none;
+    }
+    #flag-frame {
+        width: 160px;
+        height: 100px;
+        border: 5px solid #4B5358;
+        border-radius: 10px;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #2B3034;
+    }
+    #flag-frame img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+</style>
+</head>
+<body>
+<div id="globe"></div>
+<div id="tooltip"></div>
+<div id="instructions">
+    Use arrow keys to rotate the globe:<br>
+    ← → : Rotate horizontally<br>
+    ↑ ↓ : Rotate vertically<br>
+    Click on a country to highlight it<br>
+    Hover over a country to see its flag
+</div>
+<div id="population-display"></div>
+<div id="flag-display">
+    <div id="flag-frame">
+        <img id="flag-img" src="" alt="Country flag">
+    </div>
+</div>
+<script>
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const sensitivity = 75;
+
+    const projection = d3.geoOrthographic()
+        .scale(Math.min(width, height) / 2.5)
+        .center([0, 0])
+        .rotate([0, -30])
+        .translate([width / 2, height / 2]);
+
+    const canvas = d3.select('#globe')
+        .append('canvas')
+        .attr('width', width)
+        .attr('height', height);
+
+    const context = canvas.node().getContext('2d');
+
+    const path = d3.geoPath()
+        .projection(projection)
+        .context(context);
+
+    const tooltip = d3.select('#tooltip');
+    const populationDisplay = d3.select('#population-display');
+    const flagDisplay = d3.select('#flag-display');
+    const flagImg = d3.select('#flag-img');
+
+    // Comprehensive population data (2021 estimates)
+    const populationData = {
+        "China": 1439323776,
+        "India": 1380004385,
+        "United States": 331002651,
+        "Indonesia": 273523615,
+        "Pakistan": 220892340,
+        "Brazil": 212559417,
+        "Nigeria": 206139589,
+        "Bangladesh": 164689383,
+        "Russia": 145934462,
+        "Mexico": 128932753,
+        "Japan": 126476461,
+        "Philippines": 109581078,
+        "Egypt": 102334404,
+        "Ethiopia": 114963588,
+        "Vietnam": 97338579,
+        "DR Congo": 89561403,
+        "Turkey": 84339067,
+        "Iran": 83992949,
+        "Germany": 83783942,
+        "Thailand": 69799978,
+        "United Kingdom": 67886011,
+        "France": 65273511,
+        "Italy": 60461826,
+        "South Africa": 59308690,
+        "Tanzania": 59734218,
+        "Myanmar": 54409800,
+        "Kenya": 53771296,
+        "South Korea": 51269185,
+        "Colombia": 50882891,
+        "Spain": 46754778,
+        "Argentina": 45195774,
+        "Algeria": 43851044,
+        "Sudan": 43849260,
+        "Ukraine": 43733762,
+        "Uganda": 45741007,
+        "Iraq": 40222493,
+        "Poland": 37846611,
+        "Canada": 37742154,
+        "Morocco": 36910560,
+        "Saudi Arabia": 34813871,
+        "Uzbekistan": 33469203,
+        "Peru": 32971854,
+        "Angola": 32866272,
+        "Malaysia": 32365999,
+        "Mozambique": 31255435,
+        "Ghana": 31072940,
+        "Yemen": 29825964,
+        "Nepal": 29136808,
+        "Venezuela": 28435940,
+        "Madagascar": 27691018,
+        "Cameroon": 26545863,
+        "Côte d'Ivoire": 26378274,
+        "North Korea": 25778816,
+        "Australia": 25499884,
+        "Niger": 24206644,
+        "Taiwan": 23816775,
+        "Sri Lanka": 21413249,
+        "Burkina Faso": 20903273,
+        "Mali": 20250833,
+        "Romania": 19237691,
+        "Malawi": 19129952,
+        "Chile": 19116201,
+        "Kazakhstan": 18776707,
+        "Zambia": 18383955,
+        "Guatemala": 17915568,
+        "Ecuador": 17643054,
+        "Syria": 17500658,
+        "Netherlands": 17134872,
+        "Senegal": 16743927,
+        "Cambodia": 16718965,
+        "Chad": 16425864,
+        "Somalia": 15893222,
+        "Zimbabwe": 14862924,
+        "Guinea": 13132795,
+        "Rwanda": 12952218,
+        "Benin": 12123200,
+        "Burundi": 11890784,
+        "Tunisia": 11818619,
+        "Bolivia": 11673021,
+        "Belgium": 11589623,
+        "Haiti": 11402528,
+        "Cuba": 11326616,
+        "South Sudan": 11193725,
+        "Dominican Republic": 10847910,
+        "Czech Republic (Czechia)": 10708981,
+        "Greece": 10423054,
+        "Jordan": 10203134,
+        "Portugal": 10196709,
+        "Azerbaijan": 10139177,
+        "Sweden": 10099265,
+        "Honduras": 9904607,
+        "United Arab Emirates": 9890402,
+        "Hungary": 9660351,
+        "Tajikistan": 9537645,
+        "Belarus": 9449323,
+        "Austria": 9006398,
+        "Papua New Guinea": 8947024,
+        "Serbia": 8737371,
+        "Israel": 8655535,
+        "Switzerland": 8654622,
+        "Togo": 8278724,
+        "Sierra Leone": 7976983,
+        "Hong Kong": 7496981,
+        "Laos": 7275560,
+        "Paraguay": 7132538,
+        "Bulgaria": 6948445,
+        "Libya": 6871292,
+        "Lebanon": 6825445,
+        "Nicaragua": 6624554,
+        "Kyrgyzstan": 6524195,
+        "El Salvador": 6486205,
+        "Turkmenistan": 6031200,
+        "Singapore": 5850342,
+        "Denmark": 5792202,
+        "Finland": 5540720,
+        "Congo": 5518087,
+        "Slovakia": 5459642,
+        "Norway": 5421241,
+        "Oman": 5106626,
+        "Palestine": 5101414,
+        "Costa Rica": 5094118,
+        "Liberia": 5057681,
+        "Ireland": 4937786,
+        "Central African Republic": 4829767,
+        "New Zealand": 4822233,
+        "Mauritania": 4649658,
+        "Panama": 4314767,
+        "Kuwait": 4270571,
+        "Croatia": 4105267,
+        "Moldova": 4033963,
+        "Georgia": 3989167,
+        "Eritrea": 3546421,
+        "Uruguay": 3473730,
+        "Bosnia and Herzegovina": 3280819,
+        "Mongolia": 3278290,
+        "Armenia": 2963243,
+        "Jamaica": 2961167,
+        "Qatar": 2881053,
+        "Albania": 2877797,
+        "Puerto Rico": 2860853,
+        "Lithuania": 2722289,
+        "Namibia": 2540905,
+        "Gambia": 2416668,
+        "Botswana": 2351627,
+        "Gabon": 2225734,
+        "Lesotho": 2142249,
+        "North Macedonia": 2083374,
+        "Slovenia": 2078938,
+        "Guinea-Bissau": 1968001,
+        "Latvia": 1886198,
+        "Bahrain": 1701575,
+        "Equatorial Guinea": 1402985,
+        "Trinidad and Tobago": 1399488,
+        "Estonia": 1326535,
+        "Timor-Leste": 1318445,
+        "Mauritius": 1271768,
+        "Cyprus": 1207359,
+        "Eswatini": 1160164,
+        "Djibouti": 988000,
+        "Fiji": 896445,
+        "Réunion": 895312,
+        "Comoros": 869601,
+        "Guyana": 786552,
+        "Bhutan": 771608,
+        "Solomon Islands": 686884,
+        "Macao": 649335,
+        "Montenegro": 628066,
+        "Luxembourg": 625978,
+        "Western Sahara": 597339,
+        "Suriname": 586634,
+        "Cabo Verde": 555987,
+        "Micronesia": 548914,
+        "Maldives": 540544,
+        "Malta": 441543,
+        "Brunei": 437479,
+        "Guadeloupe": 400124,
+        "Belize": 397628,
+        "Bahamas": 393244,
+        "Martinique": 375265,
+        "Iceland": 364134,
+        "Vanuatu": 307145,
+        "French Guiana": 298682,
+        "Barbados": 287375,
+        "New Caledonia": 285498,
+        "French Polynesia": 280908,
+        "Mayotte": 272815,
+        "Sao Tome & Principe": 219159,
+        "Samoa": 198414,
+        "Saint Lucia": 183627,
+        "Channel Islands": 173863,
+        "Guam": 168775,
+        "Curaçao": 164093,
+        "Kiribati": 119449,
+        "Grenada": 112523,
+        "St. Vincent & Grenadines": 110940,
+        "Aruba": 106766,
+        "Tonga": 105695,
+        "U.S. Virgin Islands": 104425,
+        "Seychelles": 98347,
+        "Antigua and Barbuda": 97929,
+        "Isle of Man": 85033,
+        "Andorra": 77265,
+        "Dominica": 71986,
+        "Cayman Islands": 65722,
+        "Bermuda": 62278,
+        "Marshall Islands": 59190,
+        "Northern Mariana Islands": 57559,
+        "Greenland": 56770,
+        "American Samoa": 55191,
+        "Saint Kitts & Nevis": 53199,
+        "Faeroe Islands": 48863,
+        "Sint Maarten": 42876,
+        "Monaco": 39242,
+        "Turks and Caicos": 38717,
+        "Saint Martin": 38666,
+        "Liechtenstein": 38128,
+        "San Marino": 33931,
+        "Gibraltar": 33691,
+        "British Virgin Islands": 30231,
+        "Caribbean Netherlands": 26223,
+        "Palau": 18094,
+        "Cook Islands": 17564,
+        "Anguilla": 15003,
+        "Tuvalu": 11792,
+        "Wallis & Futuna": 11239,
+        "Nauru": 10824,
+        "Saint Barthelemy": 9877,
+        "Saint Helena": 6077,
+        "Saint Pierre & Miquelon": 5794,
+        "Montserrat": 4992,
+        "Falkland Islands": 3480,
+        "Niue": 1626,
+        "Tokelau": 1357,
+        "Holy See": 825
+    };
+
+    // Color scale
+    const colorScale = d3.scaleSequential(d3.interpolateYlOrRd)
+        .domain([0, 1500000000]);  // Max population
+
+    let countries;
+    let countryColors = {};
+    let selectedCountry = null;
+
+    // Function to get country code for flag
+    function getCountryCode(countryName) {
+        const countryCodeMap = {
+            "United States": "us",
+            "United Kingdom": "gb",
+            "DR Congo": "cd",
+            "South Korea": "kr",
+            "North Korea": "kp",
+            "Côte d'Ivoire": "ci",
+            "Czech Republic (Czechia)": "cz",
+            "United Arab Emirates": "ae",
+            "Papua New Guinea": "pg",
+            "Hong Kong": "hk",
+            "El Salvador": "sv",
+            "New Zealand": "nz",
+            "Bosnia and Herzegovina": "ba",
+            "Puerto Rico": "pr",
+            "North Macedonia": "mk",
+            "Guinea-Bissau": "gw",
+            "Trinidad and Tobago": "tt",
+            "Timor-Leste": "tl",
+            "Réunion": "re",
+            "Western Sahara": "eh",
+            "Cabo Verde": "cv",
+            "French Guiana": "gf",
+            "New Caledonia": "nc",
+            "French Polynesia": "pf",
+            "Sao Tome & Principe": "st",
+            "Saint Lucia": "lc",
+            "Channel Islands": "je",
+            "St. Vincent & Grenadines": "vc",
+            "U.S. Virgin Islands": "vi",
+            "Antigua and Barbuda": "ag",
+            "Isle of Man": "im",
+            "Cayman Islands": "ky",
+            "Northern Mariana Islands": "mp",
+            "Saint Kitts & Nevis": "kn",
+            "Faeroe Islands": "fo",
+            "Sint Maarten": "sx",
+            "Turks and Caicos": "tc",
+            "Saint Martin": "mf",
+            "British Virgin Islands": "vg",
+            "Caribbean Netherlands": "bq",
+            "Wallis & Futuna": "wf",
+            "Saint Barthelemy": "bl",
+            "Saint Helena": "sh",
+            "Saint Pierre & Miquelon": "pm",
+            "Falkland Islands": "fk",
+            "Holy See": "va"
+        };
+        return countryCodeMap[countryName] || countryName.toLowerCase().replace(/\s+/g, '-');
+    }
+
+    d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')
+        .then(data => {
+            countries = topojson.feature(data, data.objects.countries);
+
+            // Assign a stable color to each country
+            countries.features.forEach(feature => {
+                const population = populationData[feature.properties.name] || 0;
+                countryColors[feature.properties.name] = colorScale(population);
+            });
+
+            function render() {
+                context.clearRect(0, 0, width, height);
+
+                context.beginPath();
+                path({type: 'Sphere'});
+                context.fillStyle = '#4B5358';
+                context.fill();
+
+                countries.features.forEach(feature => {
+                    context.beginPath();
+                    path(feature);
+                    if (selectedCountry === feature.properties.name) {
+                        context.fillStyle = '#00FF00';  // Green for selected country
+                    } else {
+                        context.fillStyle = countryColors[feature.properties.name];
+                    }
+                    context.fill();
+                    context.strokeStyle = '#2B3034';
+                    context.lineWidth = 0.5;
+                    context.stroke();
+                });
+            }
+
+            function findCountry(x, y) {
+                const pos = projection.invert([x, y]);
+                return countries.features.find(f => d3.geoContains(f, pos));
+            }
+
+            render();
+
+            canvas.on('mousemove', function(event) {
+                const [x, y] = d3.pointer(event, this);
+                const country = findCountry(x, y);
+                
+                if (country) {
+                    let countryName = country.properties.name;
+                    // Special handling for USA
+                    if (countryName === "United States of America") {
+                        countryName = "United States";
+                    }
+                    const population = populationData[countryName] || 'Data not available';
+                    tooltip
+                        .style('display', 'block')
+                        .style('left', `${x + 10}px`)
+                        .style('top', `${y + 10}px`)
+                        .html(`<strong>${countryName}</strong><br>Population: ${typeof population === 'number' ? population.toLocaleString() : population}<br>Click to select`);
+                    
+                    const countryCode = getCountryCode(countryName);
+                    flagDisplay.style('display', 'block');
+                    flagImg
+                        .attr('src', `https://flagcdn.com/w160/${countryCode}.png`)
+                        .attr('alt', `${countryName} flag`)
+                        .on('error', function() {
+                            d3.select(this)
+                                .attr('src', 'https://via.placeholder.com/160x100.png?text=Flag+Not+Available');
+                        });
+                } else {
+                    tooltip.style('display', 'none');
+                    flagDisplay.style('display', 'none');
+                }
+            });
+
+            canvas.on('click', function(event) {
+                const [x, y] = d3.pointer(event, this);
+                const country = findCountry(x, y);
+                
+                if (country) {
+                    let countryName = country.properties.name;
+                    // Special handling for USA
+                    if (countryName === "United States of America") {
+                        countryName = "United States";
+                    }
+                    selectedCountry = countryName;
+                    const population = populationData[countryName] || 'Data not available';
+                    populationDisplay.html(`<strong>${countryName}</strong><br>Population: ${typeof population === 'number' ? population.toLocaleString() : population}`);
+                    render();
+                }
+            });
+
+            // Keyboard controls
+            document.addEventListener('keydown', (event) => {
+                const rotation = projection.rotate();
+                const speed = 5; // Adjust rotation speed
+
+                switch(event.key) {
+                    case 'ArrowLeft':
+                        rotation[0] += speed;
+                        break;
+                    case 'ArrowRight':
+                        rotation[0] -= speed;
+                        break;
+                    case 'ArrowUp':
+                        rotation[1] = Math.max(rotation[1] - speed, -90);
+                        break;
+                    case 'ArrowDown':
+                        rotation[1] = Math.min(rotation[1] + speed, 90);
+                        break;
+                }
+
+                projection.rotate(rotation);
+                render();
+            });
+        });
+</script>
+</body>
+</html>
