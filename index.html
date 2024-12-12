@@ -1,0 +1,1281 @@
+<!DOCTYPE html><html><head><base href="https://api.websim.dev/threejs/"><title>Immersive Audio-Reactive 3D Visualization</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap');
+
+:root {
+    --bg-color: #0a0014;
+    --text-color: #b967ff;
+    --border-color: #b967ff;
+    --highlight-color: #ff00ff;
+}
+
+body {
+    margin: 0;
+    overflow: hidden;
+    font-family: 'Roboto Mono', monospace;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: all 0.3s ease;
+}
+
+body.dark-mode {
+    --bg-color: #f5f5f5;
+    --text-color: #4e0086;
+    --border-color: #4e0086;
+    --highlight-color: #00a0a0;
+}
+
+canvas { 
+    width: 100%;
+    height: 100%;
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+#sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 20%;
+    height: 100vh;
+    background-color: rgba(10, 0, 20, 0.8);
+    border-right: 2px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    z-index: 1000;
+    padding: 20px;
+    box-sizing: border-box;
+    transition: transform 0.3s ease-in-out, background-color 0.3s ease;
+}
+
+.dark-mode #sidebar {
+    background-color: rgba(245, 245, 245, 0.8);
+}
+
+#sidebar.hidden {
+    transform: translateX(-100%);
+}
+
+#sidebarToggle {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 1001;
+    background-color: rgba(185, 103, 255, 0.7);
+    color: var(--bg-color);
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Roboto Mono', monospace;
+    font-weight: 700;
+    transition: all 0.3s ease;
+}
+
+#sidebarToggle:hover {
+    background-color: var(--highlight-color);
+}
+
+#controls, #audioControls, #asciiContainer {
+    background-color: rgba(10, 0, 20, 0.7);
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 0 20px rgba(185, 103, 255, 0.3);
+    transition: all 0.3s ease;
+}
+
+.dark-mode #controls, .dark-mode #audioControls, .dark-mode #asciiContainer {
+    background-color: rgba(245, 245, 245, 0.7);
+    box-shadow: 0 0 20px rgba(78, 0, 134, 0.3);
+}
+
+#controls {
+    order: 1;
+}
+
+#audioControls {
+    order: 2;
+}
+
+#asciiContainer {
+    order: 3;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+#asciiContainer pre {
+    flex-grow: 1;
+    margin: 0;
+    overflow: hidden;
+    font-size: 4px;
+    line-height: 4px;
+    color: var(--text-color);
+    white-space: pre;
+    transition: color 0.3s ease;
+}
+
+#audioControls input[type="file"] {
+    display: none;
+}
+
+#audioControls label, #audioControls button {
+    display: block;
+    margin: 10px 0;
+    padding: 8px 15px;
+    background-color: var(--text-color);
+    color: var(--bg-color);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.3s ease;
+    font-family: 'Roboto Mono', monospace;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+#audioControls label:hover, #audioControls button:hover {
+    background-color: var(--highlight-color);
+}
+
+#audioPlayer {
+    width: 100%;
+    margin-top: 15px;
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+/* Responsive styles for parameter UI */
+#parameterUI {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+}
+
+.parameter-group {
+    background-color: rgba(185, 103, 255, 0.1);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    padding: 10px;
+    transition: all 0.3s ease;
+}
+
+.dark-mode .parameter-group {
+    background-color: rgba(78, 0, 134, 0.1);
+}
+
+.parameter-group h3 {
+    margin-top: 0;
+    color: var(--highlight-color);
+    font-size: 14px;
+    text-transform: uppercase;
+}
+
+.parameter {
+    margin-bottom: 10px;
+}
+
+.parameter label {
+    display: block;
+    font-size: 12px;
+    margin-bottom: 5px;
+}
+
+.parameter input[type="range"] {
+    width: 100%;
+    -webkit-appearance: none;
+    background: linear-gradient(to right, var(--text-color), var(--highlight-color));
+    outline: none;
+    opacity: 0.7;
+    transition: opacity .2s;
+    border-radius: 5px;
+}
+
+.parameter input[type="range"]:hover {
+    opacity: 1;
+}
+
+.parameter input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 15px;
+    height: 15px;
+    background: var(--bg-color);
+    cursor: pointer;
+    border-radius: 50%;
+    border: 2px solid var(--highlight-color);
+}
+
+.parameter input[type="range"]::-moz-range-thumb {
+    width: 15px;
+    height: 15px;
+    background: var(--bg-color);
+    cursor: pointer;
+    border-radius: 50%;
+    border: 2px solid var(--highlight-color);
+}
+
+.parameter select {
+    width: 100%;
+    padding: 5px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+#resetButton {
+    grid-column: 1 / -1;
+    margin-top: 10px;
+    padding: 8px 15px;
+    background-color: var(--highlight-color);
+    color: var(--bg-color);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Roboto Mono', monospace;
+    font-weight: 700;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+}
+
+#resetButton:hover {
+    background-color: var(--text-color);
+}
+
+#darkModeToggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1001;
+    background-color: var(--text-color);
+    color: var(--bg-color);
+    border: none;
+    padding: 10px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 24px;
+    transition: all 0.3s ease;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#darkModeToggle:hover {
+    background-color: var(--highlight-color);
+}
+
+/* Media queries for responsive design */
+@media screen and (max-width: 768px) {
+    #sidebar {
+        width: 100%;
+        height: 50vh;
+        bottom: 0;
+        top: auto;
+        border-right: none;
+        border-top: 2px solid var(--border-color);
+        transform: translateY(100%);
+    }
+
+    #sidebar.hidden {
+        transform: translateY(0);
+    }
+
+    #sidebarToggle {
+        top: auto;
+        bottom: 10px;
+    }
+
+    #parameterUI {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    }
+
+    canvas {
+        height: 50vh;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    #sidebar {
+        padding: 10px;
+    }
+
+    .parameter-group {
+        padding: 5px;
+    }
+
+    .parameter-group h3 {
+        font-size: 12px;
+    }
+
+    .parameter label {
+        font-size: 10px;
+    }
+
+    #resetButton {
+        padding: 5px 10px;
+        font-size: 12px;
+    }
+
+    #darkModeToggle {
+        bottom: 10px;
+        right: 10px;
+        font-size: 20px;
+        width: 40px;
+        height: 40px;
+    }
+}
+</style>
+</head>
+<body>
+<div id="mainContent">
+    <!-- Three.js canvas will be inserted here -->
+</div>
+
+<div id="sidebar" class="hidden">
+    <div id="newWindow" style="margin-bottom: 20px; padding: 10px; background-color: rgba(185, 103, 255, 0.1); border: 1px solid var(--border-color); border-radius: 5px;">
+    <h3 style="color: var(--highlight-color); margin-top: 0; padding-top: 10px; font-size: 8px; line-height: 8px;">
+<div style="overflow: hidden; display: flex; justify-content: center; align-items: center; height: auto; min-height: 100px; max-height: 200px; width: 100%; max-width: 400px; margin: 0 auto;">
+<pre style="margin: 0; white-space: pre; font-family: monospace; font-size: clamp(3.456px, 1.3824vw, 6.912px); line-height: 1.2; text-align: center;"><style>
+@keyframes glitch-anim {
+  0% {
+    clip-path: inset(80% 0 0 0);
+    transform: translate(-2px, 2px);
+  }
+  10% {
+    clip-path: inset(10% 0 85% 0);
+    transform: translate(1px, -1px);
+  }
+  20% {
+    clip-path: inset(80% 0 0 0);
+    transform: translate(-1px, 1px);
+  }
+  30% {
+    clip-path: inset(10% 0 85% 0);
+    transform: translate(3px, -2px);
+  }
+  40% {
+    clip-path: inset(50% 0 30% 0);
+    transform: translate(-1px, 3px);
+  }
+  50% {
+    clip-path: inset(30% 0 60% 0);
+    transform: translate(2px, -1px);
+  }
+  60% {
+    clip-path: inset(70% 0 10% 0);
+    transform: translate(-2px, 1px);
+  }
+  70% {
+    clip-path: inset(10% 0 80% 0);
+    transform: translate(3px, -2px);
+  }
+  80% {
+    clip-path: inset(40% 0 50% 0);
+    transform: translate(-1px, 2px);
+  }
+  90% {
+    clip-path: inset(60% 0 30% 0);
+    transform: translate(1px, -1px);
+  }
+  100% {
+    clip-path: inset(80% 0 0 0);
+    transform: translate(2px, -2px);
+  }
+}
+
+.ascii-art {
+  position: relative;
+  display: inline-block;
+}
+
+.ascii-art::before,
+.ascii-art::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.ascii-art::before {
+  left: 2px;
+  text-shadow: -1px 0 #00ffff;
+  animation: glitch-anim 2s infinite linear alternate-reverse;
+}
+
+.ascii-art::after {
+  left: -2px;
+  text-shadow: 1px 0 #ff00ff;
+  animation: glitch-anim 3s infinite linear alternate-reverse;
+}
+</style>
+<span class="ascii-art" data-text="██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+███████████████████████████████▓▒▓████████████████████████████▒▓██████████████████████████
+██████████████▒▓▓█▓▓▓▓▒▒▒▒░░░░░▓█▓██████▒▒███████▓▓████████▓██▓░░░▓█████▓█████▓▒▓▓████████
+███████▓▓▒░░░░░░░░░░░░░░░░░░░▒██▒▒███▓░░░█████▒███▒░░▓█████▓░▓█▓░░░▓███▓░▒░░░▒▓███████████
+████████████▓▒░░░▓▓▓▓▓██▒░░░▓██░░▒████░░▒██▓░░▒░▒▓█▓░░░▒████░░▓█░░░██▒░░░░░▒▓█████████████
+████████████████▓█████▒░░░▒████░░▒████░░▓█░░▒▓▓▓░░▒█░░░░░▓██░░▓█░░░▒░░░▒▓█████████████████
+████████████████████▓░░░░░▒▓███░░░░░░░░░▓▒░░████▓░░▓░░▒▒░░░▓░░▓▓░░░░░▓████████████████████
+███████████████████▒░░░░▓█████▓░░▒▓▓▓▓░░▓▓░░▓███▒░░█░░███▒░░░░▓█░░░░░░▓███████████████████
+█████████████████▒░░░░▓███████▓░░▒████░░▓█▓░░░░░░░█▓░░▓████░░░█▓░░░▓▒░░░▓█████████████████
+████████████████▓░░░▓█████▓▓███▒▓▓████▒░▒████▒░▓███▒░▓██████▒░██░░▒█▓█▒░░░▒▓█▓████████████
+██████████████▒░░░░▓▓▒░░░░░░░▒▓▒██▓▓███▓▒█████▓████▓█▒████▒▒█▓▒█░█▓▒▒██▓░░░░▒█████████████
+█████████████▒░░░░░░░░▒▓▓▓▒█████▒░▒▓█▒░░░░░▒█▒▒▓█▓▒░░░░░▒█▓░░▒██▓▓░░▓█████▒░░░▓███████████
+███████████▓░░░░▒▓██████▓▒░░███▒░▒▓░▓░░▓██▓▓█▓░▒▓░░▓███▒░▒▓░░░░██▓░░▓██████▓▒░░▒██████████
+██████████▒░▒▓▒███████████▒░▒█▒░░█░░█▓▒░░░░░▓▓░▒░░▓█████░░▓░░▓░░▓▓░░██████████▓▒░▓████████
+█████████▓▓████████████████░░▒░░██░▒█▒████▓░░▓░▒▒░░▓███▒░░▓░░█▓░░░░░▓████████████▓▒▓██████
+███████▓▓███████████████████░░░███░░█▒░░▒░░▒▓█░▓█▓▒░░░░░▒█▓░▒███▒░░░██████████████████████
+████████████████████████████▓░▒███▒▒████▒█████░▓████▓▒████▓░██████░░██████████████████████
+█████████████████████████████▒█████▓██████████▒███████████▓▓███████▓▒█████████████████████
+██████████████████████████████████████████████▓███████████▓█████████▓▓████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████">██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+███████████████████████████████▓▒▓████████████████████████████▒▓██████████████████████████
+██████████████▒▓▓█▓▓▓▓▒▒▒▒░░░░░▓█▓██████▒▒███████▓▓████████▓██▓░░░▓█████▓█████▓▒▓▓████████
+███████▓▓▒░░░░░░░░░░░░░░░░░░░▒██▒▒███▓░░░█████▒███▒░░▓█████▓░▓█▓░░░▓███▓░▒░░░▒▓███████████
+████████████▓▒░░░▓▓▓▓▓██▒░░░▓██░░▒████░░▒██▓░░▒░▒▓█▓░░░▒████░░▓█░░░██▒░░░░░▒▓█████████████
+████████████████▓█████▒░░░▒████░░▒████░░▓█░░▒▓▓▓░░▒█░░░░░▓██░░▓█░░░▒░░░▒▓█████████████████
+████████████████████▓░░░░░▒▓███░░░░░░░░░▓▒░░████▓░░▓░░▒▒░░░▓░░▓▓░░░░░▓████████████████████
+███████████████████▒░░░░▓█████▓░░▒▓▓▓▓░░▓▓░░▓███▒░░█░░███▒░░░░▓█░░░░░░▓███████████████████
+█████████████████▒░░░░▓███████▓░░▒████░░▓█▓░░░░░░░█▓░░▓████░░░█▓░░░▓▒░░░▓█████████████████
+████████████████▓░░░▓█████▓▓███▒▓▓████▒░▒████▒░▓███▒░▓██████▒░██░░▒█▓█▒░░░▒▓█▓████████████
+██████████████▒░░░░▓▓▒░░░░░░░▒▓▒██▓▓███▓▒█████▓████▓█▒████▒▒█▓▒█░█▓▒▒██▓░░░░▒█████████████
+█████████████▒░░░░░░░░▒▓▓▓▒█████▒░▒▓█▒░░░░░▒█▒▒▓█▓▒░░░░░▒█▓░░▒██▓▓░░▓█████▒░░░▓███████████
+███████████▓░░░░▒▓██████▓▒░░███▒░▒▓░▓░░▓██▓▓█▓░▒▓░░▓███▒░▒▓░░░░██▓░░▓██████▓▒░░▒██████████
+██████████▒░▒▓▒███████████▒░▒█▒░░█░░█▓▒░░░░░▓▓░▒░░▓█████░░▓░░▓░░▓▓░░██████████▓▒░▓████████
+█████████▓▓████████████████░░▒░░██░▒█▒████▓░░▓░▒▒░░▓███▒░░▓░░█▓░░░░░▓████████████▓▒▓██████
+███████▓▓███████████████████░░░███░░█▒░░▒░░▒▓█░▓█▓▒░░░░░▒█▓░▒███▒░░░██████████████████████
+████████████████████████████▓░▒███▒▒████▒█████░▓████▓▒████▓░██████░░██████████████████████
+█████████████████████████████▒█████▓██████████▒███████████▓▓███████▓▒█████████████████████
+██████████████████████████████████████████████▓███████████▓█████████▓▓████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████</span>
+</pre>
+</div>
+</h3>
+    <p style="font-size: 14px;">ZhonkVision | Parameter: Dynamic 3D visualization that responds to audio amplitude using raymarching and color blending using mathematical formula. Interact for more ...</p>
+</div>
+    <div id="controls">
+        <div id="cli-prompt" style="margin-bottom: 10px;">
+    <div id="asciiContainer" style="display: none;">
+</div>
+</div>
+        <div id="parameterUI">
+    <div class="parameter-group">
+    <h3>Colors</h3>
+    <div class="parameter">
+        <label for="color1">Color 1 (Bass)</label>
+        <input type="color" id="color1" value="#551a8b">
+    </div>
+    <div class="parameter">
+        <label for="color2">Color 2 (Mid)</label>
+        <input type="color" id="color2" value="#ff69b4">
+    </div>
+    <div class="parameter">
+        <label for="color3">Color 3 (Treble)</label>
+        <input type="color" id="color3" value="#00ffff">
+    </div>
+</div>
+    <div class="parameter-group">
+        <h3>Shape</h3>
+        <div class="parameter">
+            <label for="iterationCount">Iteration Count</label>
+            <input type="range" id="iterationCount" min="1" max="20" step="1" value="5">
+        </div>
+        <div class="parameter">
+            <label for="shapeComplexity">Shape Complexity</label>
+            <input type="range" id="shapeComplexity" min="0.1" max="2" step="0.1" value="1.0">
+        </div>
+        <div class="parameter">
+            <label for="particleShape">Particle Shape</label>
+            <select id="particleShape">
+                <option value="0">Sphere</option>
+                <option value="1">Cube</option>
+                <option value="2">Torus</option>
+                <option value="3">Octahedron</option>
+                <option value="4">Tetrahedron</option>
+            </select>
+        </div>
+    </div>
+    <div class="parameter-group">
+        <h3>Animation</h3>
+        <div class="parameter">
+            <label for="rotationSpeed">Rotation Speed</label>
+            <input type="range" id="rotationSpeed" min="0.001" max="0.1" step="0.001" value="0.01">
+        </div>
+        <div class="parameter">
+            <label for="zoom">Zoom</label>
+            <input type="range" id="zoom" min="0.1" max="2" step="0.1" value="1.0">
+        </div>
+    </div>
+    <div class="parameter-group">
+        <h3>Audio Reactivity</h3>
+        <div class="parameter">
+            <label for="audioReactivity">Audio Reactivity</label>
+            <input type="range" id="audioReactivity" min="0" max="1" step="0.1" value="0.5">
+        </div>
+        <div class="parameter">
+            <label for="hueRotateSpeed">Hue Rotate Speed</label>
+            <input type="range" id="hueRotateSpeed" min="0" max="1" step="0.1" value="0.1">
+        </div>
+        <div class="parameter">
+            <label for="hueRotateAmplitude">Hue Rotate Amplitude</label>
+            <input type="range" id="hueRotateAmplitude" min="0" max="1" step="0.1" value="0.1">
+        </div>
+        <div class="parameter">
+            <label for="bassIntensity">Bass Intensity</label>
+            <input type="range" id="bassIntensity" min="0" max="1" step="0.1" value="0.5">
+        </div>
+        <div class="parameter">
+            <label for="midIntensity">Mid Intensity</label>
+            <input type="range" id="midIntensity" min="0" max="1" step="0.1" value="0.5">
+        </div>
+        <div class="parameter">
+            <label for="trebleIntensity">Treble Intensity</label>
+            <input type="range" id="trebleIntensity" min="0" max="1" step="0.1" value="0.5">
+        </div>
+    </div>
+    <div class="parameter-group">
+        <h3>Effects</h3>
+        <div class="parameter">
+            <label for="effectOption">Effect Type</label>
+            <select id="effectOption">
+                <option value="0">None</option>
+                <option value="1">Vignette</option>
+                <option value="2">Chromatic Aberration</option>
+                <option value="3">Pulse</option>
+                <option value="4">Radial Blur</option>
+                <option value="5">Glitch</option>
+            </select>
+        </div>
+        <div class="parameter">
+            <label for="effectIntensity">Effect Intensity</label>
+            <input type="range" id="effectIntensity" min="0" max="1" step="0.1" value="0.5">
+        </div>
+    </div>
+    <div class="parameter-group">
+    <h3>Formula</h3>
+    <div>
+    <div>
+        <pre style="font-size: 10px; line-height: 1.2; white-space: pre-wrap; overflow-x: auto; max-height: 500px; background-color: rgba(0, 0, 0, 0.1); padding: 10px; border-radius: 5px;"><span id="typed-text"></span><span class="cursor">|</span>
+<script>
+const text = `uniform float iTime;
+uniform vec2 iResolution;
+uniform float musicAmplitude;
+uniform float bassAmplitude;
+uniform float midAmplitude;
+uniform float trebleAmplitude;
+uniform vec3 color1;
+uniform vec3 color2;
+uniform vec3 color3;
+uniform float iterationCount;
+uniform float rotationSpeed;
+uniform float shapeComplexity;
+uniform float zoom;
+uniform float audioReactivity;
+uniform float hueRotateSpeed;
+uniform float hueRotateAmplitude;
+uniform int effectOption;
+uniform float effectIntensity;
+uniform int particleShape;
+uniform float bassIntensity;
+uniform float midIntensity;
+uniform float trebleIntensity;
+uniform bool isDarkMode;
+
+vec3 rgb2hsv(vec3 c) {
+    vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+    vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
+    vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));
+    float d = q.x - min(q.w, q.y);
+    float e = 1.0e-10;
+    return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+}
+
+vec3 hsv2rgb(vec3 c) {
+    vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
+
+vec3 hueRotate(vec3 color, float angle) {
+    vec3 hsv = rgb2hsv(color);
+    hsv.x = mod(hsv.x + angle, 1.0);
+    return hsv2rgb(hsv);
+}
+
+vec3 palette(float d) {
+    float hueShift = sin(iTime * hueRotateSpeed) * hueRotateAmplitude;
+    vec3 rotatedColor1 = hueRotate(color1, hueShift);
+    vec3 rotatedColor2 = hueRotate(color2, hueShift);
+    vec3 rotatedColor3 = hueRotate(color3, hueShift);
+    
+    float bassWeight = bassAmplitude * bassIntensity;
+    float midWeight = midAmplitude * midIntensity;
+    float trebleWeight = trebleAmplitude * trebleIntensity;
+    
+    vec3 color = mix(rotatedColor1, rotatedColor2, d * (midWeight + 0.5));
+    color = mix(color, rotatedColor3, d * (trebleWeight + 0.5));
+    color = mix(rotatedColor1, color, d * (bassWeight + 0.5));
+    
+    return color;
+}
+
+vec2 rotate(vec2 p, float a) {
+    float c = cos(a);
+    float s = sin(a);
+    return p * mat2(c, s, -s, c);
+}
+
+float sdSphere(vec3 p, float r) {
+    return length(p) - r;
+}
+
+float sdBox(vec3 p, vec3 b) {
+    vec3 q = abs(p) - b;
+    return length(max(q, 0.0)) + min(max(q.x, max(q.y, q.z)), 0.0);
+}
+
+float sdTorus(vec3 p, vec2 t) {
+    vec2 q = vec2(length(p.xz) - t.x, p.y);
+    return length(q) - t.y;
+}
+
+float sdOctahedron(vec3 p, float s) {
+    p = abs(p);
+    return (p.x + p.y + p.z - s) * 0.57735027;
+}
+
+float sdTetrahedron(vec3 p, float h) {
+    float m2 = h * h / 0.75;
+    vec3 q = abs(p);
+    float d = max(q.z - h, max((q.x * 0.866025 + q.y * 0.5), q.y) - h * 0.5);
+    return length(max(vec2(d, m2 - dot(q, q)), 0.0)) + min(max(d, 0.0), 0.0);
+}
+
+float map(vec3 p) {
+    float angle = iTime * rotationSpeed + sin(iTime * 0.1) * 0.0;
+    
+    // Add audio-reactive scaling
+    float scale = 1.0 + musicAmplitude * audioReactivity * 0.5;
+    p *= scale;
+    
+    // Add bass-reactive distortion
+    p.xz += sin(p.y * 10.0 + iTime * 5.0) * bassAmplitude * bassIntensity * 0.1;
+    
+    for (float i = 0.0; i < iterationCount; i++) {
+        float t = angle;
+        p.xz = rotate(p.xz, t * 5.333 * shapeComplexity);
+        p.xy = rotate(p.xy, t * 20.333 * shapeComplexity);
+        p.xz = rotate(p.xz, t * 5.333 * shapeComplexity);
+        p.xy = rotate(p.xy, t * 25.333 * shapeComplexity);
+        p.xz = abs(p.xz);
+        p.xz -= 0.5 * shapeComplexity;
+    }
+    
+    float particleSize = 0.5;
+    float shape;
+    
+    switch(particleShape) {
+        case 0: shape = sdSphere(p, particleSize); break;
+        case 1: shape = sdBox(p, vec3(particleSize)); break;
+        case 2: shape = sdTorus(p, vec2(particleSize, particleSize * 0.3)); break;
+        case 3: shape = sdOctahedron(p, particleSize); break;
+        case 4: shape = sdTetrahedron(p, particleSize); break;
+        default: shape = sdSphere(p, particleSize);
+    }
+    
+    return shape;
+}
+
+vec4 rm(vec3 ro, vec3 rd) {
+    float t = 0.0;
+    vec3 col = vec3(0.0);
+    float d;
+    for (float i = 0.0; i < 64.0; i++) {
+        vec3 p = ro + rd * t;
+        d = map(p) * 0.5;
+        if (d < 0.02) break;
+        if (d > 200.0) break;
+        col += palette(length(p) * 0.1) / (400.0 * d);
+        t += d;
+    }
+    return vec4(col, 1.0 / (d * 300.0));
+}
+
+void main() {
+    vec2 fragCoord = gl_FragCoord.xy;
+    vec2 uv = (fragCoord - (iResolution.xy / 2.0)) / iResolution.x;
+    float spiralTime = iTime * rotationSpeed;
+    vec3 ro = vec3(0.0, 0.0, -28.0 / zoom);
+    ro.xz = rotate(ro.xz, spiralTime);
+    
+    vec3 cf = normalize(-ro);
+    vec3 cs = normalize(cross(cf, vec3(0.0, 4.0, 0.0)));
+    vec3 cu = normalize(cross(cf, cs));
+    
+    vec3 uuv = ro + cf * 0.7 + uv.x * cs + uv.y * cu;
+    vec3 rd = normalize(uuv - ro);
+    
+    vec4 col = rm(ro, rd);
+    
+    // Apply effects based on effectOption
+    if (effectOption == 1) {
+        float vignette = length(uv);
+        col.rgb *= 1.0 - vignette * effectIntensity;
+    } else if (effectOption == 2) {
+        float ca = sin(iTime) * 0.01 * effectIntensity;
+        col.r = rm(ro, normalize(uuv + vec3(ca, 0.0, 0.0) - ro)).r;
+        col.b = rm(ro, normalize(uuv + vec3(-ca, 0.0, 0.0) - ro)).b;
+    } else if (effectOption == 3) {
+        float pulse = sin(iTime * 5.0) * 0.5 + 0.5;
+        col.rgb *= 1.0 + pulse * effectIntensity;
+    } else if (effectOption == 4) {
+        float blur = length(uv) * effectIntensity;
+        vec2 radialBlur = normalize(uv) * blur * 0.01;
+        col.rgb += rm(ro, normalize(uuv + vec3(radialBlur.x, radialBlur.y, 0.0) - ro)).rgb;
+        col.rgb *= 0.5;
+    } else if (effectOption == 5) {
+        float glitchIntensity = effectIntensity * 0.1;
+        vec2 glitchUV = uv + vec2(
+            sin(uv.y * 100.0 + iTime * 10.0) * glitchIntensity,
+            cos(uv.x * 100.0 + iTime * 10.0) * glitchIntensity
+        );
+        col.rgb = mix(col.rgb, rm(ro, normalize(vec3(glitchUV, 0.0) + cf * 0.7 - ro)).rgb, 0.5);
+    }
+    
+    // Apply audio reactivity
+    col.rgb *= 1.0 + musicAmplitude * audioReactivity;
+    
+    // Apply dark mode
+    if (isDarkMode) {
+        col.rgb = 1.0 - col.rgb;
+    }
+    
+    gl_FragColor = col;
+}`;
+
+let index = 0;
+const typingSpeed = 20; // Adjust this value to change typing speed (lower is faster)
+
+function typeText() {
+    if (index < text.length) {
+        document.getElementById('typed-text').textContent += text.charAt(index);
+        index++;
+        setTimeout(typeText, typingSpeed);
+    } else {
+        document.querySelector('.cursor').style.display = 'none';
+    }
+}
+
+typeText();
+</script>
+<style>
+@keyframes blink {
+    0% { opacity: 0; }
+    50% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+.cursor {
+    animation: blink 0.7s infinite;
+}
+</style>
+</pre>
+    </div>
+</div>
+</div>
+    <button id="resetButton">RESET</button>
+</div>
+    </div>
+    <div id="audioControls">
+    <label for="uploadMp3">Upload MP3</label>
+    <input type="file" id="uploadMp3" accept=".mp3">
+    <button id="toggleMic">Toggle Microphone</button>
+    <audio id="audioPlayer" controls="" style="width: 100%; height: 40px; background-color: var(--bg-color); border: 2px solid var(--border-color); border-radius: 10px; margin-top: 15px; outline: none; box-shadow: 0 0 10px var(--highlight-color);">
+        <source src="" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+</div>
+</div>
+
+<button id="sidebarToggle" style="width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; padding: 0;">◉</button>
+<button id="darkModeToggle">☀️</button>
+
+<script id="vertexShader" type="x-shader/x-vertex">
+varying vec2 vUv;
+void main() {
+    vUv = uv;
+    gl_Position = vec4(position, 1.0);
+}
+</script>
+
+<script id="fragmentShader" type="x-shader/x-fragment">
+uniform float iTime;
+uniform vec2 iResolution;
+uniform float musicAmplitude;
+uniform float bassAmplitude;
+uniform float midAmplitude;
+uniform float trebleAmplitude;
+uniform vec3 color1;
+uniform vec3 color2;
+uniform vec3 color3;
+uniform float iterationCount;
+uniform float rotationSpeed;
+uniform float shapeComplexity;
+uniform float zoom;
+uniform float audioReactivity;
+uniform float hueRotateSpeed;
+uniform float hueRotateAmplitude;
+uniform int effectOption;
+uniform float effectIntensity;
+uniform int particleShape;
+uniform float bassIntensity;
+uniform float midIntensity;
+uniform float trebleIntensity;
+uniform bool isDarkMode;
+
+vec3 rgb2hsv(vec3 c) {
+    vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+    vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
+    vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));
+    float d = q.x - min(q.w, q.y);
+    float e = 1.0e-10;
+    return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+}
+
+vec3 hsv2rgb(vec3 c) {
+    vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
+
+vec3 hueRotate(vec3 color, float angle) {
+    vec3 hsv = rgb2hsv(color);
+    hsv.x = mod(hsv.x + angle, 1.0);
+    return hsv2rgb(hsv);
+}
+
+vec3 palette(float d) {
+    float hueShift = sin(iTime * hueRotateSpeed) * hueRotateAmplitude;
+    vec3 rotatedColor1 = hueRotate(color1, hueShift);
+    vec3 rotatedColor2 = hueRotate(color2, hueShift);
+    vec3 rotatedColor3 = hueRotate(color3, hueShift);
+    
+    float bassWeight = bassAmplitude * bassIntensity;
+    float midWeight = midAmplitude * midIntensity;
+    float trebleWeight = trebleAmplitude * trebleIntensity;
+    
+    vec3 color = mix(rotatedColor1, rotatedColor2, d * (midWeight + 0.5));
+    color = mix(color, rotatedColor3, d * (trebleWeight + 0.5));
+    color = mix(rotatedColor1, color, d * (bassWeight + 0.5));
+    
+    return color;
+}
+
+vec2 rotate(vec2 p, float a) {
+    float c = cos(a);
+    float s = sin(a);
+    return p * mat2(c, s, -s, c);
+}
+
+float sdSphere(vec3 p, float r) {
+    return length(p) - r;
+}
+
+float sdBox(vec3 p, vec3 b) {
+    vec3 q = abs(p) - b;
+    return length(max(q, 0.0)) + min(max(q.x, max(q.y, q.z)), 0.0);
+}
+
+float sdTorus(vec3 p, vec2 t) {
+    vec2 q = vec2(length(p.xz) - t.x, p.y);
+    return length(q) - t.y;
+}
+
+float sdOctahedron(vec3 p, float s) {
+    p = abs(p);
+    return (p.x + p.y + p.z - s) * 0.57735027;
+}
+
+float sdTetrahedron(vec3 p, float h) {
+    float m2 = h * h / 0.75;
+    vec3 q = abs(p);
+    float d = max(q.z - h, max((q.x * 0.866025 + q.y * 0.5), q.y) - h * 0.5);
+    return length(max(vec2(d, m2 - dot(q, q)), 0.0)) + min(max(d, 0.0), 0.0);
+}
+
+float map(vec3 p) {
+    float angle = iTime * rotationSpeed + sin(iTime * 0.1) * 0.0;
+    
+    // Add audio-reactive scaling
+    float scale = 1.0 + musicAmplitude * audioReactivity * 0.5;
+    p *= scale;
+    
+    // Add bass-reactive distortion
+    p.xz += sin(p.y * 10.0 + iTime * 5.0) * bassAmplitude * bassIntensity * 0.1;
+    
+    for (float i = 0.0; i < iterationCount; i++) {
+        float t = angle;
+        p.xz = rotate(p.xz, t * 5.333 * shapeComplexity);
+        p.xy = rotate(p.xy, t * 20.333 * shapeComplexity);
+        p.xz = rotate(p.xz, t * 5.333 * shapeComplexity);
+        p.xy = rotate(p.xy, t * 25.333 * shapeComplexity);
+        p.xz = abs(p.xz);
+        p.xz -= 0.5 * shapeComplexity;
+    }
+    
+    float particleSize = 0.5;
+    float shape;
+    
+    switch(particleShape) {
+        case 0: shape = sdSphere(p, particleSize); break;
+        case 1: shape = sdBox(p, vec3(particleSize)); break;
+        case 2: shape = sdTorus(p, vec2(particleSize, particleSize * 0.3)); break;
+        case 3: shape = sdOctahedron(p, particleSize); break;
+        case 4: shape = sdTetrahedron(p, particleSize); break;
+        default: shape = sdSphere(p, particleSize);
+    }
+    
+    return shape;
+}
+
+vec4 rm(vec3 ro, vec3 rd) {
+    float t = 0.0;
+    vec3 col = vec3(0.0);
+    float d;
+    for (float i = 0.0; i < 64.0; i++) {
+        vec3 p = ro + rd * t;
+        d = map(p) * 0.5;
+        if (d < 0.02) break;
+        if (d > 200.0) break;
+        col += palette(length(p) * 0.1) / (400.0 * d);
+        t += d;
+    }
+    return vec4(col, 1.0 / (d * 300.0));
+}
+
+void main() {
+    vec2 fragCoord = gl_FragCoord.xy;
+    vec2 uv = (fragCoord - (iResolution.xy / 2.0)) / iResolution.x;
+    float spiralTime = iTime * rotationSpeed;
+    vec3 ro = vec3(0.0, 0.0, -28.0 / zoom);
+    ro.xz = rotate(ro.xz, spiralTime);
+    
+    vec3 cf = normalize(-ro);
+    vec3 cs = normalize(cross(cf, vec3(0.0, 4.0, 0.0)));
+    vec3 cu = normalize(cross(cf, cs));
+    
+    vec3 uuv = ro + cf * 0.7 + uv.x * cs + uv.y * cu;
+    vec3 rd = normalize(uuv - ro);
+    
+    vec4 col = rm(ro, rd);
+    
+    // Apply effects based on effectOption
+    if (effectOption == 1) {
+        float vignette = length(uv);
+        col.rgb *= 1.0 - vignette * effectIntensity;
+    } else if (effectOption == 2) {
+        float ca = sin(iTime) * 0.01 * effectIntensity;
+        col.r = rm(ro, normalize(uuv + vec3(ca, 0.0, 0.0) - ro)).r;
+        col.b = rm(ro, normalize(uuv + vec3(-ca, 0.0, 0.0) - ro)).b;
+    } else if (effectOption == 3) {
+        float pulse = sin(iTime * 5.0) * 0.5 + 0.5;
+        col.rgb *= 1.0 + pulse * effectIntensity;
+    } else if (effectOption == 4) {
+        float blur = length(uv) * effectIntensity;
+        vec2 radialBlur = normalize(uv) * blur * 0.01;
+        col.rgb += rm(ro, normalize(uuv + vec3(radialBlur.x, radialBlur.y, 0.0) - ro)).rgb;
+        col.rgb *= 0.5;
+    } else if (effectOption == 5) {
+        float glitchIntensity = effectIntensity * 0.1;
+        vec2 glitchUV = uv + vec2(
+            sin(uv.y * 100.0 + iTime * 10.0) * glitchIntensity,
+            cos(uv.x * 100.0 + iTime * 10.0) * glitchIntensity
+        );
+        col.rgb = mix(col.rgb, rm(ro, normalize(vec3(glitchUV, 0.0) + cf * 0.7 - ro)).rgb, 0.5);
+    }
+    
+    // Apply audio reactivity
+    col.rgb *= 1.0 + musicAmplitude * audioReactivity;
+    
+    // Apply dark mode
+    if (isDarkMode) {
+        col.rgb = 1.0 - col.rgb;
+    }
+    
+    gl_FragColor = col;
+}
+</script>
+
+<script>
+let scene, camera, renderer, material, analyser, dataArray;
+let microphoneStream = null;
+let isMicrophoneActive = false;
+const clock = new THREE.Clock();
+const darkModeToggle = document.getElementById('darkModeToggle');
+const sidebar = document.getElementById('sidebar');
+const sidebarToggle = document.getElementById('sidebarToggle');
+const uploadMp3 = document.getElementById('uploadMp3');
+const toggleMic = document.getElementById('toggleMic');
+const audioPlayer = document.getElementById('audioPlayer');
+const parameters = {};
+
+function init() {
+    scene = new THREE.Scene();
+    camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+    renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.getElementById('mainContent').appendChild(renderer.domElement);
+
+    const geometry = new THREE.PlaneGeometry(2, 2);
+    material = new THREE.ShaderMaterial({
+        uniforms: {
+            iTime: { value: 0 },
+            iResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+            musicAmplitude: { value: 0 },
+            bassAmplitude: { value: 0 },
+            midAmplitude: { value: 0 },
+            trebleAmplitude: { value: 0 },
+            color1: { value: new THREE.Color(0x551a8b) },
+            color2: { value: new THREE.Color(0xff69b4) },
+            color3: { value: new THREE.Color(0x00ffff) },
+            iterationCount: { value: 5 },
+            rotationSpeed: { value: 0.01 },
+            shapeComplexity: { value: 1.0 },
+            zoom: { value: 1.0 },
+            audioReactivity: { value: 0.5 },
+            hueRotateSpeed: { value: 0.1 },
+            hueRotateAmplitude: { value: 0.1 },
+            effectOption: { value: 0 },
+            effectIntensity: { value: 0.5 },
+            particleShape: { value: 0 },
+            bassIntensity: { value: 0.5 },
+            midIntensity: { value: 0.5 },
+            trebleIntensity: { value: 0.5 },
+            isDarkMode: { value: false }
+        },
+        vertexShader: document.getElementById('vertexShader').textContent,
+        fragmentShader: document.getElementById('fragmentShader').textContent
+    });
+
+    const mesh = new THREE.Mesh(geometry, material);
+    scene.add(mesh);
+
+    window.addEventListener('resize', onWindowResize, false);
+
+    // Set up audio context and analyser
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = audioContext.createAnalyser();
+    analyser.fftSize = 256;
+    dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+    // Connect audio player to analyser
+    const source = audioContext.createMediaElementSource(audioPlayer);
+    source.connect(analyser);
+    analyser.connect(audioContext.destination);
+
+    setupEventListeners();
+    animate();
+}
+
+function setupEventListeners() {
+    darkModeToggle.addEventListener('click', toggleDarkMode);
+    sidebarToggle.addEventListener('click', toggleSidebar);
+    uploadMp3.addEventListener('change', handleFileUpload);
+    toggleMic.addEventListener('click', toggleMicrophone);
+
+    // Set up parameter controls
+    setupParameterControl('color1', 'color');
+    setupParameterControl('color2', 'color');
+    setupParameterControl('color3', 'color');
+    setupParameterControl('iterationCount', 'range');
+    setupParameterControl('shapeComplexity', 'range');
+    setupParameterControl('particleShape', 'select');
+    setupParameterControl('rotationSpeed', 'range');
+    setupParameterControl('zoom', 'range');
+    setupParameterControl('audioReactivity', 'range');
+    setupParameterControl('hueRotateSpeed', 'range');
+    setupParameterControl('hueRotateAmplitude', 'range');
+    setupParameterControl('bassIntensity', 'range');
+    setupParameterControl('midIntensity', 'range');
+    setupParameterControl('trebleIntensity', 'range');
+    setupParameterControl('effectOption', 'select');
+    setupParameterControl('effectIntensity', 'range');
+
+    document.getElementById('resetButton').addEventListener('click', resetParameters);
+}
+
+function setupParameterControl(id, type) {
+    const element = document.getElementById(id);
+    parameters[id] = element.value;
+
+    element.addEventListener(type === 'range' ? 'input' : 'change', (event) => {
+        parameters[id] = event.target.value;
+        updateMaterialUniforms();
+    });
+}
+
+function updateMaterialUniforms() {
+    Object.keys(parameters).forEach(key => {
+        if (material.uniforms[key]) {
+            if (key.startsWith('color')) {
+                material.uniforms[key].value = new THREE.Color(parameters[key]);
+            } else {
+                material.uniforms[key].value = parseFloat(parameters[key]);
+            }
+        }
+    });
+}
+
+function resetParameters() {
+    Object.keys(parameters).forEach(key => {
+        const element = document.getElementById(key);
+        if (element) {
+            element.value = element.defaultValue;
+            parameters[key] = element.defaultValue;
+        }
+    });
+    updateMaterialUniforms();
+}
+
+function toggleDarkMode() {
+    document.body.classList.toggle('dark-mode');
+    darkModeToggle.textContent = document.body.classList.contains('dark-mode') ? '🌙' : '☀️';
+    material.uniforms.isDarkMode.value = document.body.classList.contains('dark-mode');
+}
+
+function toggleSidebar() {
+    sidebar.classList.toggle('hidden');
+}
+
+function handleFileUpload(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const url = URL.createObjectURL(file);
+        audioPlayer.src = url;
+        audioPlayer.play();
+    }
+}
+
+async function toggleMicrophone() {
+    if (isMicrophoneActive) {
+        if (microphoneStream) {
+            microphoneStream.getTracks().forEach(track => track.stop());
+        }
+        isMicrophoneActive = false;
+        toggleMic.textContent = 'Enable Microphone';
+    } else {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const source = new AudioContext().createMediaStreamSource(stream);
+            source.connect(analyser);
+            microphoneStream = stream;
+            isMicrophoneActive = true;
+            toggleMic.textContent = 'Disable Microphone';
+        } catch (error) {
+            console.error('Error accessing microphone:', error);
+        }
+    }
+}
+
+function onWindowResize() {
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    material.uniforms.iResolution.value.set(window.innerWidth, window.innerHeight);
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    render();
+}
+
+function render() {
+    const time = clock.getElapsedTime();
+    material.uniforms.iTime.value = time;
+
+    analyser.getByteFrequencyData(dataArray);
+    const bass = getAverageAmplitude(dataArray, 0, 3);
+    const mid = getAverageAmplitude(dataArray, 4, 20);
+    const treble = getAverageAmplitude(dataArray, 21, 63);
+
+    material.uniforms.musicAmplitude.value = (bass + mid + treble) / 3 / 255;
+    material.uniforms.bassAmplitude.value = bass / 255;
+    material.uniforms.midAmplitude.value = mid / 255;
+    material.uniforms.trebleAmplitude.value = treble / 255;
+
+    renderer.render(scene, camera);
+}
+
+function getAverageAmplitude(array, start, end) {
+    let sum = 0;
+    for (let i = start; i <= end; i++) {
+        sum += array[i];
+    }
+    return sum / (end - start + 1);
+}
+
+init();
+</script>
+
+</body></html>
