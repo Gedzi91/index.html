@@ -1,0 +1,578 @@
+<html><head><base href="https://ai-world-simulator.com/stickman-learning/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Humanoid Learning World - Realistic Morphology Edition</title>
+<style>
+    body, html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow: hidden;
+    }
+    #gameCanvas {
+        width: 100%;
+        height: 100%;
+    }
+    #controls {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: rgba(255,255,255,0.7);
+        padding: 10px;
+        border-radius: 5px;
+    }
+    #prompt {
+        width: 200px;
+    }
+    #neuronLayers {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(255,255,255,0.7);
+        padding: 10px;
+        border-radius: 5px;
+    }
+    .neuron {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: inline-block;
+        margin: 2px;
+        transition: background-color 0.3s;
+    }
+    .neuron.inactive {
+        background-color: gray;
+    }
+    .neuron.active {
+        background-color: red;
+    }
+</style>
+</head>
+<body>
+<canvas id="gameCanvas"></canvas>
+<div id="controls">
+    <input type="text" id="prompt" placeholder="Enter prompt">
+    <button id="submit">Submit</button>
+    <div id="score">Score: 0</div>
+    <div id="neurons">Neurons: 1</div>
+</div>
+<div id="neuronLayers"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.18.0/matter.min.js"></script>
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const { Engine, Render, World, Bodies, Body, Constraint, Vector, Composite } = Matter;
+
+let engine, world, humanoid, ground, score = 0, neurons = 1;
+let lastPosition = 0, fallStartTime = 0;
+let taskCompleted = false;
+let lastRespawnTime = 0;
+let joints = {};
+let bodyParts = {};
+let lastMoveTime = Date.now();
+let lastSignificantMoveTime = Date.now();
+
+const FRICTION = 0.1;
+const DENSITY = 0.001;
+const RESTITUTION = 0.2;
+
+function init() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    engine = Engine.create({
+        enableSleeping: false
+    });
+    world = engine.world;
+
+    ground = Bodies.rectangle(400, canvas.height - 50, canvas.width * 2, 100, { 
+        isStatic: true,
+        friction: FRICTION
+    });
+
+    createRealisticHumanoid();
+
+    World.add(world, [ground, ...Object.values(bodyParts), ...Object.values(joints)]);
+
+    Engine.run(engine);
+
+    requestAnimationFrame(gameLoop);
+    createNeuronLayers();
+}
+
+function createRealisticHumanoid() {
+    const commonOptions = {
+        friction: FRICTION,
+        frictionAir: 0.00001,
+        restitution: RESTITUTION,
+        density: DENSITY
+    };
+
+    // Create body parts with more realistic proportions
+    bodyParts = {
+        head: Bodies.circle(100, canvas.height - 180, 15, commonOptions),
+        neck: Bodies.rectangle(100, canvas.height - 160, 10, 10, commonOptions),
+        torso: Bodies.rectangle(100, canvas.height - 120, 40, 60, commonOptions),
+        leftUpperArm: Bodies.rectangle(70, canvas.height - 140, 30, 10, commonOptions),
+        leftLowerArm: Bodies.rectangle(45, canvas.height - 140, 30, 8, commonOptions),
+        rightUpperArm: Bodies.rectangle(130, canvas.height - 140, 30, 10, commonOptions),
+        rightLowerArm: Bodies.rectangle(155, canvas.height - 140, 30, 8, commonOptions),
+        leftUpperLeg: Bodies.rectangle(85, canvas.height - 70, 15, 40, commonOptions),
+        leftLowerLeg: Bodies.rectangle(85, canvas.height - 30, 12, 40, commonOptions),
+        rightUpperLeg: Bodies.rectangle(115, canvas.height - 70, 15, 40, commonOptions),
+        rightLowerLeg: Bodies.rectangle(115, canvas.height - 30, 12, 40, commonOptions),
+        leftFoot: Bodies.rectangle(85, canvas.height - 5, 20, 10, commonOptions),
+        rightFoot: Bodies.rectangle(115, canvas.height - 5, 20, 10, commonOptions)
+    };
+
+    // Connect body parts with joints
+    joints = {
+        neck: Constraint.create({
+            bodyA: bodyParts.head,
+            bodyB: bodyParts.neck,
+            pointA: { x: 0, y: 15 },
+            pointB: { x: 0, y: -5 },
+            stiffness: 0.8,
+            length: 0
+        }),
+        spine: Constraint.create({
+            bodyA: bodyParts.neck,
+            bodyB: bodyParts.torso,
+            pointA: { x: 0, y: 5 },
+            pointB: { x: 0, y: -30 },
+            stiffness: 0.8,
+            length: 0
+        }),
+        leftShoulder: Constraint.create({
+            bodyA: bodyParts.torso,
+            bodyB: bodyParts.leftUpperArm,
+            pointA: { x: -20, y: -25 },
+            pointB: { x: 15, y: 0 },
+            stiffness: 0.6,
+            length: 0
+        }),
+        rightShoulder: Constraint.create({
+            bodyA: bodyParts.torso,
+            bodyB: bodyParts.rightUpperArm,
+            pointA: { x: 20, y: -25 },
+            pointB: { x: -15, y: 0 },
+            stiffness: 0.6,
+            length: 0
+        }),
+        leftElbow: Constraint.create({
+            bodyA: bodyParts.leftUpperArm,
+            bodyB: bodyParts.leftLowerArm,
+            pointA: { x: -15, y: 0 },
+            pointB: { x: 15, y: 0 },
+            stiffness: 0.6,
+            length: 0
+        }),
+        rightElbow: Constraint.create({
+            bodyA: bodyParts.rightUpperArm,
+            bodyB: bodyParts.rightLowerArm,
+            pointA: { x: 15, y: 0 },
+            pointB: { x: -15, y: 0 },
+            stiffness: 0.6,
+            length: 0
+        }),
+        leftHip: Constraint.create({
+            bodyA: bodyParts.torso,
+            bodyB: bodyParts.leftUpperLeg,
+            pointA: { x: -15, y: 30 },
+            pointB: { x: 0, y: -20 },
+            stiffness: 0.6,
+            length: 0
+        }),
+        rightHip: Constraint.create({
+            bodyA: bodyParts.torso,
+            bodyB: bodyParts.rightUpperLeg,
+            pointA: { x: 15, y: 30 },
+            pointB: { x: 0, y: -20 },
+            stiffness: 0.6,
+            length: 0
+        }),
+        leftKnee: Constraint.create({
+            bodyA: bodyParts.leftUpperLeg,
+            bodyB: bodyParts.leftLowerLeg,
+            pointA: { x: 0, y: 20 },
+            pointB: { x: 0, y: -20 },
+            stiffness: 0.6,
+            length: 0
+        }),
+        rightKnee: Constraint.create({
+            bodyA: bodyParts.rightUpperLeg,
+            bodyB: bodyParts.rightLowerLeg,
+            pointA: { x: 0, y: 20 },
+            pointB: { x: 0, y: -20 },
+            stiffness: 0.6,
+            length: 0
+        }),
+        leftAnkle: Constraint.create({
+            bodyA: bodyParts.leftLowerLeg,
+            bodyB: bodyParts.leftFoot,
+            pointA: { x: 0, y: 20 },
+            pointB: { x: -5, y: 0 },
+            stiffness: 0.6,
+            length: 0
+        }),
+        rightAnkle: Constraint.create({
+            bodyA: bodyParts.rightLowerLeg,
+            bodyB: bodyParts.rightFoot,
+            pointA: { x: 0, y: 20 },
+            pointB: { x: -5, y: 0 },
+            stiffness: 0.6,
+            length: 0
+        })
+    };
+
+    humanoid = Composite.create({
+        bodies: Object.values(bodyParts),
+        constraints: Object.values(joints)
+    });
+
+    // Set initial standing pose
+    setStandingPose();
+}
+
+function setStandingPose() {
+    const centerX = canvas.width / 2;
+    const floorY = canvas.height - 50;
+
+    Body.setPosition(bodyParts.torso, { x: centerX, y: floorY - 100 });
+    Body.setPosition(bodyParts.head, { x: centerX, y: floorY - 170 });
+    Body.setPosition(bodyParts.neck, { x: centerX, y: floorY - 150 });
+    Body.setPosition(bodyParts.leftUpperArm, { x: centerX - 30, y: floorY - 130 });
+    Body.setPosition(bodyParts.leftLowerArm, { x: centerX - 55, y: floorY - 130 });
+    Body.setPosition(bodyParts.rightUpperArm, { x: centerX + 30, y: floorY - 130 });
+    Body.setPosition(bodyParts.rightLowerArm, { x: centerX + 55, y: floorY - 130 });
+    Body.setPosition(bodyParts.leftUpperLeg, { x: centerX - 15, y: floorY - 60 });
+    Body.setPosition(bodyParts.leftLowerLeg, { x: centerX - 15, y: floorY - 20 });
+    Body.setPosition(bodyParts.rightUpperLeg, { x: centerX + 15, y: floorY - 60 });
+    Body.setPosition(bodyParts.rightLowerLeg, { x: centerX + 15, y: floorY - 20 });
+    Body.setPosition(bodyParts.leftFoot, { x: centerX - 15, y: floorY - 5 });
+    Body.setPosition(bodyParts.rightFoot, { x: centerX + 15, y: floorY - 5 });
+
+    // Reset velocities and angles
+    for (let part in bodyParts) {
+        Body.setVelocity(bodyParts[part], { x: 0, y: 0 });
+        Body.setAngularVelocity(bodyParts[part], 0);
+        Body.setAngle(bodyParts[part], 0);
+    }
+
+    lastPosition = centerX;
+    lastMoveTime = Date.now();
+    lastSignificantMoveTime = Date.now();
+}
+
+function gameLoop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    ctx.save();
+    ctx.translate(-bodyParts.torso.position.x + canvas.width / 2, 0);
+    
+    // Draw ground
+    ctx.fillStyle = 'green';
+    ctx.fillRect(ground.position.x - ground.bounds.max.x, ground.position.y - 50, ground.bounds.max.x * 2, 100);
+    
+    // Draw humanoid
+    ctx.strokeStyle = 'black';
+    ctx.lineWidth = 3;
+    
+    for (let part in bodyParts) {
+        const body = bodyParts[part];
+        if (body.circleRadius) {
+            ctx.beginPath();
+            ctx.arc(body.position.x, body.position.y, body.circleRadius, 0, Math.PI * 2);
+            ctx.stroke();
+        } else {
+            const vertices = body.vertices;
+            ctx.beginPath();
+            ctx.moveTo(vertices[0].x, vertices[0].y);
+            for (let i = 1; i < vertices.length; i++) {
+                ctx.lineTo(vertices[i].x, vertices[i].y);
+            }
+            ctx.closePath();
+            ctx.stroke();
+        }
+    }
+    
+    // Draw joints
+    ctx.fillStyle = 'red';
+    for (let joint in joints) {
+        const j = joints[joint];
+        ctx.beginPath();
+        ctx.arc(j.bodyA.position.x + j.pointA.x, j.bodyA.position.y + j.pointA.y, 3, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    
+    ctx.restore();
+
+    updateScore();
+    checkFall();
+    checkMovement();
+
+    requestAnimationFrame(gameLoop);
+}
+
+function updateScore() {
+    const distance = (bodyParts.torso.position.x - lastPosition) / 100; // Convert to meters
+    score += distance;
+    document.getElementById('score').textContent = `Score: ${score.toFixed(2)}`;
+    lastPosition = bodyParts.torso.position.x;
+}
+
+function checkFall() {
+    const currentTime = Date.now();
+    if (currentTime - lastRespawnTime < 250) return; // Don't check for falls for 0.25 seconds after respawn
+
+    if (bodyParts.head.position.y > canvas.height - 100 || Math.abs(bodyParts.torso.angle) > Math.PI / 3) {
+        respawn();
+    }
+}
+
+function checkMovement() {
+    const currentTime = Date.now();
+    const timeSinceLastMove = (currentTime - lastSignificantMoveTime) / 1000; // Convert to seconds
+
+    const distanceMoved = Math.abs(bodyParts.torso.position.x - lastPosition) / 100; // Convert to meters
+
+    if (distanceMoved >= 0.2) {
+        lastSignificantMoveTime = currentTime;
+        lastPosition = bodyParts.torso.position.x;
+    } else if (timeSinceLastMove >= 10) { // If no significant movement for 10 seconds
+        score -= 10;
+        console.log("Humanoid didn't move enough in 10 seconds. -10 points and respawning.");
+        respawn();
+    }
+}
+
+function respawn() {
+    World.remove(world, humanoid);
+    createRealisticHumanoid();
+    World.add(world, [...Object.values(bodyParts), ...Object.values(joints)]);
+    
+    setStandingPose();
+    
+    fallStartTime = 0;
+    lastRespawnTime = Date.now();
+    lastSignificantMoveTime = Date.now();
+    console.log("Humanoid respawned");
+
+    // Set a timer to release the standing pose after 0.25 seconds
+    setTimeout(() => {
+        for (let constraint in joints) {
+            joints[constraint].stiffness = 0.6;
+        }
+    }, 250);
+}
+
+function getInputs() {
+    return [
+        bodyParts.head.position.x,
+        bodyParts.head.position.y,
+        bodyParts.head.velocity.x,
+        bodyParts.head.velocity.y,
+        bodyParts.leftUpperArm.position.x,
+        bodyParts.leftUpperArm.position.y,
+        bodyParts.leftUpperArm.velocity.x,
+        bodyParts.leftUpperArm.velocity.y,
+        bodyParts.rightUpperArm.position.x,
+        bodyParts.rightUpperArm.position.y,
+        bodyParts.rightUpperArm.velocity.x,
+        bodyParts.rightUpperArm.velocity.y,
+        bodyParts.torso.angle,
+        bodyParts.torso.position.x,
+        bodyParts.torso.position.y,
+        bodyParts.torso.velocity.x,
+        bodyParts.torso.velocity.y,
+        bodyParts.leftUpperLeg.position.x,
+        bodyParts.leftUpperLeg.position.y,
+        bodyParts.leftUpperLeg.velocity.x,
+        bodyParts.leftUpperLeg.velocity.y,
+        bodyParts.rightUpperLeg.position.x,
+        bodyParts.rightUpperLeg.position.y,
+        bodyParts.rightUpperLeg.velocity.x,
+        bodyParts.rightUpperLeg.velocity.y,
+        canvas.height - bodyParts.torso.position.y,
+        score
+    ];
+}
+
+function applyOutputs(outputs) {
+    Body.applyForce(bodyParts.head, bodyParts.head.position, { x: outputs[0], y: outputs[1] });
+    Body.applyForce(bodyParts.leftUpperArm, bodyParts.leftUpperArm.position, { x: outputs[2], y: outputs[3] });
+    Body.applyForce(bodyParts.rightUpperArm, bodyParts.rightUpperArm.position, { x: outputs[4], y: outputs[5] });
+    Body.applyForce(bodyParts.torso, bodyParts.torso.position, { x: outputs[6], y: outputs[7] });
+    Body.applyForce(bodyParts.leftUpperLeg, bodyParts.leftUpperLeg.position, { x: outputs[8], y: outputs[9] });
+    Body.applyForce(bodyParts.rightUpperLeg, bodyParts.rightUpperLeg.position, { x: outputs[10], y: outputs[11] });
+}
+
+function aiDecision() {
+    if (taskCompleted) return;
+
+    const inputs = getInputs();
+    
+    // Implement walking behavior
+    const outputs = walkingBehavior(inputs);
+    
+    applyOutputs(outputs);
+    
+    expandNeurons();
+    updateNeuronColors(inputs, outputs);
+    
+    if (Math.random() < 0.01) { // 1% chance to think it's achieved the task
+        taskCompleted = true;
+        console.log(`AI has completed the task! Final score: ${score.toFixed(2)}, Neurons: ${neurons}`);
+    }
+}
+
+function walkingBehavior(inputs) {
+    // Simple walking behavior with alternating leg positions
+    const outputs = Array(12).fill(0);
+    
+    // Move torso forward
+    outputs[6] = 0.0005;
+    
+    // Alternate leg movements
+    const time = Date.now();
+    const legForce = 0.0003;
+    const period = 1000; // 1 second for a full cycle
+    
+    if (Math.sin(2 * Math.PI * (time % period) / period) > 0) {
+        // Move left leg forward and right leg backward
+        outputs[8] = legForce;
+        outputs[10] = -legForce;
+    } else {
+        // Move right leg forward and left leg backward
+        outputs[8] = -legForce;
+        outputs[10] = legForce;
+    }
+    
+    // Slight arm movements
+    outputs[2] = -0.0001 * Math.sin(2 * Math.PI * (time % period) / period);
+    outputs[4] = 0.0001 * Math.sin(2 * Math.PI * (time % period) / period);
+    
+    return outputs;
+}
+
+function expandNeurons() {
+    if (Math.random() < 0.1) { // 10% chance to expand
+        neurons++;
+        document.getElementById('neurons').textContent = `Neurons: ${neurons}`;
+        createNeuronLayers();
+    }
+}
+
+function moveJoint(part, position, direction, pixels) {
+    const jointName = `${part}${position.charAt(0).toUpperCase() + position.slice(1)}`;
+    const joint = joints[jointName];
+    if (!joint) {
+        console.log(`Joint not found: ${jointName}`);
+        return;
+    }
+
+    const moveVector = { x: 0, y: 0 };
+    switch (direction) {
+        case 'left':
+            moveVector.x = -pixels;
+            break;
+        case 'right':
+            moveVector.x = pixels;
+            break;
+        case 'up':
+            moveVector.y = -pixels;
+            break;
+        case 'down':
+            moveVector.y = pixels;
+            break;
+    }
+
+    joint.pointA = Vector.add(joint.pointA, moveVector);
+    joint.pointB = Vector.add(joint.pointB, moveVector);
+}
+
+function createNeuronLayers() {
+    const neuronLayers = document.getElementById('neuronLayers');
+    neuronLayers.innerHTML = '';
+    
+    // Input layer
+    const inputLayer = document.createElement('div');
+    for (let i = 0; i < 27; i++) {
+        const neuron = document.createElement('div');
+        neuron.className = 'neuron inactive';
+        neuron.id = `input-${i}`;
+        inputLayer.appendChild(neuron);
+    }
+    neuronLayers.appendChild(inputLayer);
+    
+    // Hidden layer
+    const hiddenLayer = document.createElement('div');
+    for (let i = 0; i < neurons; i++) {
+        const neuron = document.createElement('div');
+        neuron.className = 'neuron inactive';
+        neuron.id = `hidden-${i}`;
+        hiddenLayer.appendChild(neuron);
+    }
+    neuronLayers.appendChild(hiddenLayer);
+    
+    // Output layer
+    const outputLayer = document.createElement('div');
+    for (let i = 0; i < 12; i++) {
+        const neuron = document.createElement('div');
+        neuron.className = 'neuron inactive';
+        neuron.id = `output-${i}`;
+        outputLayer.appendChild(neuron);
+    }
+    neuronLayers.appendChild(outputLayer);
+}
+
+function updateNeuronColors(inputs, outputs) {
+    // Update input neurons
+    inputs.forEach((input, index) => {
+        const neuron = document.getElementById(`input-${index}`);
+        if (neuron) {
+            neuron.className = input !== 0 ? 'neuron active' : 'neuron inactive';
+        }
+    });
+    
+    // Update hidden neurons (randomly for demonstration)
+    for (let i = 0; i < neurons; i++) {
+        const neuron = document.getElementById(`hidden-${i}`);
+        if (neuron) {
+            neuron.className = Math.random() > 0.5 ? 'neuron active' : 'neuron inactive';
+        }
+    }
+    
+    // Update output neurons
+    outputs.forEach((output, index) => {
+        const neuron = document.getElementById(`output-${index}`);
+        if (neuron) {
+            neuron.className = output !== 0 ? 'neuron active' : 'neuron inactive';
+        }
+    });
+}
+
+init();
+
+setInterval(aiDecision, 100); // AI makes decisions every 100ms
+
+document.getElementById('submit').addEventListener('click', () => {
+    const prompt = document.getElementById('prompt').value;
+    const moveNodeRegex = /Move node (\w+) (\w+) in the direction (left|right|up|down) (\d+)/;
+    const match = prompt.match(moveNodeRegex);
+    if (match) {
+        const [_, part, position, direction, pixels] = match;
+        moveJoint(part, position, direction, parseInt(pixels));
+    } else {
+        console.log('Invalid prompt format. Use: "Move node (part) (position) in the direction (left, right, up or down) (how many pixels to move it)"');
+    }
+});
+
+window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+});
+</script>
+</body>
+</html>
