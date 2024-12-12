@@ -1,0 +1,404 @@
+<html><head><base href="https://websim.ai/simulations/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Windows 11 Simulation with Battery Designer</title>
+<style>
+    body, html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: 'Segoe UI', sans-serif;
+        overflow: hidden;
+        background: url('https://4kwallpapers.com/images/wallpapers/windows-11-dark-mode-blue-stock-official-3840x2400-5630.jpg') no-repeat center center fixed;
+        background-size: cover;
+    }
+    #taskbar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 48px;
+        background-color: rgba(255, 255, 255, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+    .taskbar-icon {
+        width: 24px;
+        height: 24px;
+        margin: 0 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .taskbar-icon:hover {
+        transform: scale(1.2);
+    }
+    #start-menu {
+        position: fixed;
+        bottom: 48px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 600px;
+        height: 0;
+        background-color: rgba(255, 255, 255, 0.9);
+        border-radius: 10px 10px 0 0;
+        overflow: hidden;
+        transition: height 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        z-index: 999;
+    }
+    .start-menu-open {
+        height: 500px !important;
+    }
+    .start-menu-section {
+        padding: 20px;
+    }
+    .app-grid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 15px;
+    }
+    .app-icon {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .app-icon:hover {
+        transform: scale(1.1);
+    }
+    .app-icon img {
+        width: 48px;
+        height: 48px;
+    }
+    .app-icon span {
+        margin-top: 5px;
+        font-size: 12px;
+        text-align: center;
+    }
+    #notifications {
+        position: fixed;
+        bottom: 48px;
+        right: 10px;
+        width: 300px;
+        background-color: rgba(255, 255, 255, 0.9);
+        border-radius: 10px;
+        padding: 10px;
+        display: none;
+        z-index: 998;
+    }
+    .notification {
+        background-color: #f0f0f0;
+        border-radius: 5px;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+    #desktop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 48px;
+        display: flex;
+        flex-wrap: wrap;
+        align-content: flex-start;
+        padding: 20px;
+    }
+    .desktop-icon {
+        width: 80px;
+        margin: 10px;
+        text-align: center;
+        cursor: pointer;
+    }
+    .desktop-icon img {
+        width: 48px;
+        height: 48px;
+    }
+    .desktop-icon span {
+        display: block;
+        margin-top: 5px;
+        font-size: 12px;
+        color: white;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+    }
+    #battery-designer-window {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 80%;
+        height: 80%;
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.3);
+        display: none;
+        z-index: 1001;
+    }
+    #battery-designer-window .window-header {
+        background-color: #f0f0f0;
+        padding: 10px;
+        border-radius: 10px 10px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    #battery-designer-window .window-content {
+        height: calc(100% - 40px);
+    }
+    #battery-designer-window iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+    .close-button {
+        cursor: pointer;
+        font-size: 20px;
+    }
+</style>
+</head>
+<body>
+<div id="desktop">
+    <div class="desktop-icon" onclick="openBatteryDesigner()">
+        <img src="https://www.battery-designer.com/assets/images/battery-designer-favicon.png" alt="Battery Designer">
+        <span>Battery Designer</span>
+    </div>
+</div>
+
+<div id="taskbar">
+    <img src="https://cdn-icons-png.flaticon.com/512/1691/1691338.png" class="taskbar-icon" id="start-button" alt="Windows Start Button">
+    <img src="https://cdn-icons-png.flaticon.com/512/732/732221.png" class="taskbar-icon" alt="Microsoft Edge">
+    <img src="https://cdn-icons-png.flaticon.com/512/2965/2965300.png" class="taskbar-icon" alt="File Explorer">
+    <img src="https://cdn-icons-png.flaticon.com/512/888/888882.png" class="taskbar-icon" alt="Microsoft Store">
+    <img src="https://cdn-icons-png.flaticon.com/512/732/732070.png" class="taskbar-icon" alt="Microsoft Teams">
+    <img src="https://cdn-icons-png.flaticon.com/512/2111/2111615.png" class="taskbar-icon" alt="Spotify">
+    <img src="https://cdn-icons-png.flaticon.com/512/5968/5968705.png" class="taskbar-icon" alt="Figma">
+    <img src="https://cdn-icons-png.flaticon.com/512/5968/5968756.png" class="taskbar-icon" alt="Steam">
+    <img src="https://cdn-icons-png.flaticon.com/512/5969/5969346.png" class="taskbar-icon" alt="Unity">
+    <img src="https://cdn-icons-png.flaticon.com/512/5968/5968853.png" class="taskbar-icon" alt="Slack">
+    <img src="https://cdn-icons-png.flaticon.com/512/5968/5968306.png" class="taskbar-icon" alt="Whatsapp">
+    <img src="https://cdn-icons-png.flaticon.com/512/124/124010.png" class="taskbar-icon" alt="Facebook">
+    <img src="https://cdn-icons-png.flaticon.com/512/3670/3670151.png" class="taskbar-icon" alt="Brave Browser">
+    <img src="https://cdn-icons-png.flaticon.com/512/2111/2111631.png" class="taskbar-icon" id="notification-button" alt="Notifications">
+</div>
+
+<div id="start-menu">
+    <div class="start-menu-section">
+        <h2>Pinned</h2>
+        <div class="app-grid">
+            <div class="app-icon">
+                <img src="https://cdn-icons-png.flaticon.com/512/732/732221.png" alt="Microsoft Edge">
+                <span>Edge</span>
+            </div>
+            <div class="app-icon">
+                <img src="https://cdn-icons-png.flaticon.com/512/888/888882.png" alt="Microsoft Store">
+                <span>Store</span>
+            </div>
+            <div class="app-icon">
+                <img src="https://cdn-icons-png.flaticon.com/512/732/732070.png" alt="Microsoft Teams">
+                <span>Teams</span>
+            </div>
+            <div class="app-icon">
+                <img src="https://cdn-icons-png.flaticon.com/512/2111/2111615.png" alt="Spotify">
+                <span>Spotify</span>
+            </div>
+            <div class="app-icon">
+                <img src="https://cdn-icons-png.flaticon.com/512/5968/5968705.png" alt="Figma">
+                <span>Figma</span>
+            </div>
+            <div class="app-icon">
+                <img src="https://cdn-icons-png.flaticon.com/512/5968/5968756.png" alt="Steam">
+                <span>Steam</span>
+            </div>
+            <div class="app-icon">
+                <img src="https://cdn-icons-png.flaticon.com/512/5969/5969346.png" alt="Unity">
+                <span>Unity</span>
+            </div>
+            <div class="app-icon">
+                <img src="https://cdn-icons-png.flaticon.com/512/5968/5968853.png" alt="Slack">
+                <span>Slack</span>
+            </div>
+            <div class="app-icon">
+                <img src="https://cdn-icons-png.flaticon.com/512/5968/5968306.png" alt="Whatsapp">
+                <span>Whatsapp</span>
+            </div>
+            <div class="app-icon">
+                <img src="https://cdn-icons-png.flaticon.com/512/124/124010.png" alt="Facebook">
+                <span>Facebook</span>
+            </div>
+            <div class="app-icon">
+                <img src="https://cdn-icons-png.flaticon.com/512/3670/3670151.png" alt="Brave Browser">
+                <span>Brave</span>
+            </div>
+            <div class="app-icon">
+                <img src="https://www.battery-designer.com/assets/images/battery-designer-favicon.png" alt="Battery Designer">
+                <span>Battery Designer</span>
+            </div>
+        </div>
+    </div>
+    <div class="start-menu-section">
+        <h2>Recommended</h2>
+        <div class="app-grid">
+            <!-- Add more recommended apps here -->
+        </div>
+    </div>
+</div>
+
+<div id="notifications">
+    <div class="notification">
+        <h3>New message</h3>
+        <p>You have a new message from John Doe.</p>
+    </div>
+    <div class="notification">
+        <h3>System update</h3>
+        <p>A new system update is available. Click here to install.</p>
+    </div>
+</div>
+
+<div id="battery-designer-window">
+    <div class="window-header">
+        <span>Battery Designer</span>
+        <span class="close-button" onclick="closeBatteryDesigner()">&times;</span>
+    </div>
+    <div class="window-content">
+        <iframe src="https://websim.ai/@CesaroAndy/dise-a-tu-bater-a-li-ion-lifepo4"></iframe>
+    </div>
+</div>
+
+<script>
+const startButton = document.getElementById('start-button');
+const startMenu = document.getElementById('start-menu');
+const notificationButton = document.getElementById('notification-button');
+const notifications = document.getElementById('notifications');
+const batteryDesignerWindow = document.getElementById('battery-designer-window');
+
+startButton.addEventListener('click', () => {
+    startMenu.classList.toggle('start-menu-open');
+    notifications.style.display = 'none';
+});
+
+notificationButton.addEventListener('click', () => {
+    if (notifications.style.display === 'none' || notifications.style.display === '') {
+        notifications.style.display = 'block';
+        startMenu.classList.remove('start-menu-open');
+    } else {
+        notifications.style.display = 'none';
+    }
+});
+
+document.addEventListener('click', (event) => {
+    if (!startMenu.contains(event.target) && event.target !== startButton) {
+        startMenu.classList.remove('start-menu-open');
+    }
+    if (!notifications.contains(event.target) && event.target !== notificationButton) {
+        notifications.style.display = 'none';
+    }
+});
+
+// Add hover effect for taskbar icons
+const taskbarIcons = document.querySelectorAll('.taskbar-icon');
+taskbarIcons.forEach(icon => {
+    icon.addEventListener('mouseover', () => {
+        icon.style.transform = 'scale(1.2)';
+    });
+    icon.addEventListener('mouseout', () => {
+        icon.style.transform = 'scale(1)';
+    });
+});
+
+// Add click effect for app icons
+const appIcons = document.querySelectorAll('.app-icon');
+appIcons.forEach(icon => {
+    icon.addEventListener('click', () => {
+        icon.style.transform = 'scale(0.9)';
+        setTimeout(() => {
+            icon.style.transform = 'scale(1)';
+        }, 100);
+    });
+});
+
+// Function to show a notification
+function showNotification(title, message) {
+    const notification = document.createElement('div');
+    notification.className = 'notification';
+    notification.innerHTML = `
+        <h3>${title}</h3>
+        <p>${message}</p>
+    `;
+    notifications.prepend(notification);
+    notifications.style.display = 'block';
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => {
+            notification.remove();
+            if (notifications.children.length === 0) {
+                notifications.style.display = 'none';
+            }
+        }, 300);
+    }, 5000);
+}
+
+// Example: Show a notification after 3 seconds
+setTimeout(() => {
+    showNotification('Welcome', 'Welcome to the Windows 11 simulation!');
+}, 3000);
+
+function openBatteryDesigner() {
+    batteryDesignerWindow.style.display = 'block';
+}
+
+function closeBatteryDesigner() {
+    batteryDesignerWindow.style.display = 'none';
+}
+
+// Make the Battery Designer window draggable
+const batteryDesignerHeader = batteryDesignerWindow.querySelector('.window-header');
+let isDragging = false;
+let currentX;
+let currentY;
+let initialX;
+let initialY;
+let xOffset = 0;
+let yOffset = 0;
+
+batteryDesignerHeader.addEventListener('mousedown', dragStart);
+document.addEventListener('mousemove', drag);
+document.addEventListener('mouseup', dragEnd);
+
+function dragStart(e) {
+    initialX = e.clientX - xOffset;
+    initialY = e.clientY - yOffset;
+
+    if (e.target === batteryDesignerHeader) {
+        isDragging = true;
+    }
+}
+
+function drag(e) {
+    if (isDragging) {
+        e.preventDefault();
+        currentX = e.clientX - initialX;
+        currentY = e.clientY - initialY;
+
+        xOffset = currentX;
+        yOffset = currentY;
+
+        setTranslate(currentX, currentY, batteryDesignerWindow);
+    }
+}
+
+function dragEnd(e) {
+    initialX = currentX;
+    initialY = currentY;
+
+    isDragging = false;
+}
+
+function setTranslate(xPos, yPos, el) {
+    el.style.transform = `translate3d(${xPos}px, ${yPos}px, 0)`;
+}
+</script>
+</body>
+</html>
