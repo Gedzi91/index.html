@@ -1,0 +1,398 @@
+<html><head><base href="."><style>
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: #1a1a1a;
+    color: #fff;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.speedometer {
+    width: 400px;
+    height: 400px;
+    position: relative;
+    margin: 20px auto;
+}
+
+.needle {
+    width: 4px;
+    height: 160px;
+    background: #ff3333;
+    position: absolute;
+    left: 198px;
+    top: 40px;
+    transform-origin: bottom center;
+    transition: transform 0.2s ease-out;
+    box-shadow: 0 0 10px #ff3333;
+    border-radius: 2px;
+}
+
+.needle::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: -8px;
+    width: 20px;
+    height: 20px;
+    background: #ff3333;
+    border-radius: 50%;
+    box-shadow: 0 0 15px #ff3333;
+}
+
+.speed-display {
+    font-size: 48px;
+    text-align: center;
+    margin: 20px;
+    font-family: 'Digital', monospace;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.controls {
+    text-align: center;
+    margin: 20px;
+}
+
+button {
+    font-size: 18px;
+    padding: 10px 20px;
+    margin: 0 10px;
+    cursor: pointer;
+    background: #444;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+
+button:hover {
+    background: #666;
+}
+
+.dial {
+    stroke: #444;
+    fill: none;
+    stroke-width: 3;
+}
+
+.marking {
+    stroke: #666;
+    stroke-width: 2;
+}
+
+.number {
+    fill: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    text-anchor: middle;
+}
+
+.redline {
+    stroke: #ff3333;
+    stroke-width: 4;
+    filter: drop-shadow(0 0 5px #ff3333);
+}
+
+.sonic-indicator {
+    position: absolute;
+    top: 300px;
+    width: 100%;
+    text-align: center;
+    color: #ff3333;
+    font-weight: bold;
+    opacity: 0;
+    transition: opacity 0.3s;
+    text-shadow: 0 0 10px #ff3333;
+}
+
+.simulation-container {
+    width: 800px;
+    height: 200px;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(to bottom, #87CEEB, #4A90E2);
+    margin: 20px auto;
+    border-radius: 10px;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+}
+
+.forest {
+    display: flex;
+    position: absolute;
+    height: 100%;
+    animation: scrollForest linear infinite;
+    animation-play-state: paused;
+}
+
+.tree {
+    width: 40px;
+    height: 120px;
+    margin: 0 20px;
+    position: relative;
+    bottom: -80px;
+}
+
+.tree::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 12px;
+    height: 40px;
+    background: linear-gradient(to right, #3E2723, #5D4037, #3E2723);
+    border-radius: 2px;
+}
+
+.tree::after {
+    content: '';
+    position: absolute;
+    bottom: 35px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+    border-bottom: 80px solid #2d5a27;
+    filter: drop-shadow(0 -10px 0 #1a4a1a) drop-shadow(0 -20px 0 #2d5a27);
+}
+
+.tree.afterimage {
+    opacity: 0.3;
+    filter: blur(2px);
+    animation: fadeOut 0.5s forwards;
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 0.3;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+.pixel {
+    width: 0;
+    height: 0;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-left: 20px solid #4A90E2;
+    filter: drop-shadow(0 0 10px #4A90E2);
+    animation: pixelMove 0.5s infinite;
+    animation-play-state: paused;
+}
+
+@keyframes pixelMove {
+    0% {
+        transform: translate(-50%, -50%);
+    }
+    50% {
+        transform: translate(-48%, -50%);
+    }
+    100% {
+        transform: translate(-50%, -50%);
+    }
+}
+
+@keyframes scrollForest {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(-50%);
+    }
+}
+
+.simulation-container::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background: linear-gradient(to bottom, #2d5a27, #1a4a1a);
+    z-index: -1;
+}
+</style></head><body>
+<div class="container">
+    <h1>Speed Simulator</h1>
+    <div class="speedometer">
+        <svg width="400" height="400" viewBox="0 0 400 400">
+            <circle cx="200" cy="200" r="180" fill="#222" />
+            <circle cx="200" cy="200" r="170" fill="#1a1a1a" />
+            <path class="dial" d="M 50 200 A 150 150 0 0 1 350 200" />
+            <g id="markings"></g>
+            <g id="numbers"></g>
+            <circle cx="200" cy="200" r="15" fill="#4A90E2" />
+            <circle cx="200" cy="200" r="10" fill="#2171D1" />
+        </svg>
+        <div class="needle"></div>
+        <div class="sonic-indicator">Sonic Speeds achieved</div>
+    </div>
+    <div class="speed-display">0 MPH</div>
+    <div class="controls">
+        <button onclick="accelerate()">Accelerate</button>
+        <button onclick="brake()">Brake</button>
+        <button onclick="cruise()">Cruise</button>
+    </div>
+    <div class="simulation-container">
+        <div class="forest" id="forest"></div>
+        <div class="pixel"></div>
+    </div>
+</div>
+
+<script>
+let currentSpeed = 0;
+let maxSpeed = Infinity; // Removed speed cap
+let acceleration = 0;
+let cruising = false;
+let sonicBoomPlayed = false;
+let keysPressed = {};
+
+const sonicBoom = new Audio("eeington 5002.m4a");
+
+document.addEventListener('keydown', (event) => {
+    keysPressed[event.key.toLowerCase()] = true;
+    handleKeyboardInput();
+});
+
+document.addEventListener('keyup', (event) => {
+    keysPressed[event.key.toLowerCase()] = false;
+    handleKeyboardInput();
+});
+
+function handleKeyboardInput() {
+    if (keysPressed['a']) {
+        cruising = false;
+        acceleration += 5;
+        if (acceleration > 15) acceleration = 15;
+    } else if (keysPressed['b']) {
+        cruising = false;
+        acceleration -= 5;
+        if (acceleration < -15) acceleration = -15;
+    } else if (keysPressed['c']) {
+        cruising = !cruising;
+        acceleration = 0;
+    }
+}
+
+const forest = document.getElementById('forest');
+const treeCount = 20;
+for (let i = 0; i < treeCount * 2; i++) {
+    const tree = document.createElement('div');
+    tree.className = 'tree';
+    forest.appendChild(tree);
+}
+
+const markings = document.getElementById('markings');
+const numbers = document.getElementById('numbers');
+markings.innerHTML = '';
+numbers.innerHTML = '';
+
+for (let i = 0; i <= 2000; i += 100) { // Adjusted for higher speeds
+    const angle = -180 + (i / 2000 * 180);
+    const radians = angle * Math.PI / 180;
+    const x1 = 200 + 140 * Math.cos(radians);
+    const y1 = 200 + 140 * Math.sin(radians);
+    const x2 = 200 + 150 * Math.cos(radians);
+    const y2 = 200 + 150 * Math.sin(radians);
+    
+    markings.innerHTML += `<line class="marking" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" />`;
+    
+    const numX = 200 + 120 * Math.cos(radians);
+    const numY = 200 + 120 * Math.sin(radians);
+    numbers.innerHTML += `<text class="number" x="${numX}" y="${numY}">${i}</text>`;
+}
+
+function updateForestAnimation() {
+    const forest = document.querySelector('.forest');
+    const pixel = document.querySelector('.pixel');
+    
+    if (currentSpeed === 0) {
+        forest.style.animationPlayState = 'paused';
+        pixel.style.animationPlayState = 'paused';
+        pixel.style.transform = 'translate(-50%, -50%)';
+    } else {
+        forest.style.animationPlayState = 'running';
+        pixel.style.animationPlayState = 'running';
+        const duration = Math.max(10 * Math.exp(-currentSpeed / 200), 0.1);
+        forest.style.animationDuration = duration + 's';
+        
+        if (currentSpeed > 500) {
+            const trees = document.querySelectorAll('.tree:not(.afterimage)');
+            trees.forEach(tree => {
+                const clone = tree.cloneNode(true);
+                clone.classList.add('afterimage');
+                tree.parentNode.insertBefore(clone, tree);
+                
+                setTimeout(() => {
+                    if (clone && clone.parentNode) {
+                        clone.parentNode.removeChild(clone);
+                    }
+                }, 500);
+            });
+        }
+    }
+}
+
+function updateSpeedometer() {
+    const needle = document.querySelector('.needle');
+    const display = document.querySelector('.speed-display');
+    const sonicIndicator = document.querySelector('.sonic-indicator');
+    
+    const angle = -90 + (currentSpeed / 2000 * 180); // Adjusted scaling
+    needle.style.transform = `rotate(${angle}deg)`;
+    display.textContent = `${Math.round(currentSpeed)} MPH`;
+    
+    updateForestAnimation();
+    
+    if (currentSpeed >= 767 && !sonicBoomPlayed) {
+        sonicBoom.currentTime = 0;
+        sonicBoom.play();
+        sonicIndicator.style.opacity = '1';
+        sonicBoomPlayed = true;
+    } else if (currentSpeed < 767) {
+        sonicIndicator.style.opacity = '0';
+        sonicBoomPlayed = false;
+    }
+    
+    if (!cruising) {
+        currentSpeed += acceleration;
+        acceleration *= 0.98;
+    }
+    
+    if (currentSpeed < 0) currentSpeed = 0;
+    
+    requestAnimationFrame(updateSpeedometer);
+}
+
+function accelerate() {
+    cruising = false;
+    acceleration += 5;
+    if (acceleration > 15) acceleration = 15;
+}
+
+function brake() {
+    cruising = false;
+    acceleration -= 5;
+    if (acceleration < -15) acceleration = -15;
+}
+
+function cruise() {
+    cruising = !cruising;
+    acceleration = 0;
+}
+
+updateSpeedometer();
+</script>
+</body></html>
