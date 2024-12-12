@@ -1,0 +1,325 @@
+<html><head><base href="https://websim.ai/dimensional-rift/"><title>Interactive Multidimensional Rift Explorer - WebSim Quantum Optics Lab</title><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js"></script><link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet"><style>
+body, html {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  font-family: 'Orbitron', sans-serif;
+  background: #000;
+  color: #0f0;
+}
+#info-panel {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background: rgba(0,15,0,0.7);
+  padding: 15px;
+  border-radius: 10px;
+  border: 1px solid #0f0;
+  box-shadow: 0 0 10px #0f0;
+  z-index: 100;
+  transition: all 0.3s ease;
+}
+#info-panel:hover {
+  background: rgba(0,30,0,0.8);
+}
+#theme-selector {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+}
+.theme-button {
+  background: rgba(0,15,0,0.7);
+  color: #0f0;
+  border: 1px solid #0f0;
+  padding: 10px;
+  margin: 5px 0;
+  cursor: pointer;
+  transition: all 0.3s;
+  border-radius: 5px;
+  font-family: 'Orbitron', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.theme-button:hover {
+  background: rgba(0,255,0,0.3);
+  box-shadow: 0 0 10px #0f0;
+}
+#loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #0f0;
+  font-size: 24px;
+  z-index: 1000;
+}
+.dg.main {
+  margin-top: 20px !important;
+}
+.dg.main .close-button {
+  display: none !important;
+}
+.dg {
+  font-family: 'Orbitron', sans-serif !important;
+}
+.dg .c input[type=text] {
+  font-family: 'Orbitron', sans-serif !important;
+}
+.dg .property-name {
+  color: #0f0 !important;
+}
+.dg .c .slider {
+  background: #0f0 !important;
+}
+.dg .c .slider:hover {
+  background: #00ff00 !important;
+}
+.dg .c input[type=text]:hover {
+  background: #001500 !important;
+}
+.dg .closed .close-button {
+  background-color: #001500 !important;
+}
+.dg .cr.function:hover, .dg .cr.boolean:hover {
+  background: #001500 !important;
+}
+#fullscreen-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 100;
+  background: rgba(0,15,0,0.7);
+  color: #0f0;
+  border: 1px solid #0f0;
+  padding: 10px;
+  cursor: pointer;
+  transition: all 0.3s;
+  border-radius: 5px;
+  font-family: 'Orbitron', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+#fullscreen-btn:hover {
+  background: rgba(0,255,0,0.3);
+  box-shadow: 0 0 10px #0f0;
+}
+</style></head><body>
+<div id="loading">Initializing Multidimensional Rift Explorer...</div>
+<div id="info-panel">
+  <h3>Interactive Multidimensional Rift Explorer v4.0</h3>
+  <p>Current Theme: <span id="current-theme">Quantum Flux</span></p>
+  <p>Rift Stability: <span id="rift-stability">87%</span></p>
+  <p>Dimensional Overlap: <span id="dimensional-overlap">3.14159</span></p>
+  <p>Warning: Reality distortion imminent</p>
+</div>
+<div id="theme-selector">
+  <button class="theme-button" onclick="changeTheme('quantum')">Quantum Flux</button>
+  <button class="theme-button" onclick="changeTheme('cosmic')">Cosmic Vortex</button>
+  <button class="theme-button" onclick="changeTheme('biomorphic')">Biomorphic Nexus</button>
+  <button class="theme-button" onclick="changeTheme('techno')">Techno-Singularity</button>
+</div>
+<button id="fullscreen-btn" onclick="toggleFullscreen()">Fullscreen</button>
+<script>
+let scene, camera, renderer, rift, orbitGroup, particles;
+const themes = {
+  quantum: {
+    color: 0x00ffff,
+    emissive: 0x0000ff,
+    particles: 0xffff00,
+    background: 0x000033
+  },
+  cosmic: {
+    color: 0xff00ff,
+    emissive: 0xff0000,
+    particles: 0xffffff,
+    background: 0x110011
+  },
+  biomorphic: {
+    color: 0x00ff00,
+    emissive: 0x006600,
+    particles: 0xff6600,
+    background: 0x001100
+  },
+  techno: {
+    color: 0x0000ff,
+    emissive: 0x000066,
+    particles: 0x00ffff,
+    background: 0x000011
+  }
+};
+
+let currentTheme = 'quantum';
+
+const controls = {
+  rotationSpeed: 0.02,
+  particleCount: 5000,
+  particleSize: 0.02,
+  riftComplexity: 3,
+  cameraDistance: 5,
+  pulseSpeed: 0.5,
+  pulseIntensity: 0.2
+};
+
+function init() {
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
+
+  orbitGroup = new THREE.Group();
+  scene.add(orbitGroup);
+
+  createRift();
+  createParticles();
+  
+  camera.position.z = controls.cameraDistance;
+  orbitGroup.add(camera);
+
+  setupGUI();
+  animate();
+  
+  document.getElementById('loading').style.display = 'none';
+}
+
+function createRift() {
+  const geometry = new THREE.TorusKnotGeometry(1, 0.3, 100, 16, controls.riftComplexity);
+  const material = new THREE.MeshPhongMaterial({
+    color: themes[currentTheme].color,
+    emissive: themes[currentTheme].emissive,
+    shininess: 100,
+    specular: 0xffffff
+  });
+  rift = new THREE.Mesh(geometry, material);
+  scene.add(rift);
+
+  const light = new THREE.PointLight(0xffffff, 1, 100);
+  light.position.set(0, 0, 10);
+  scene.add(light);
+}
+
+function createParticles() {
+  const particlesGeometry = new THREE.BufferGeometry();
+  const particlesCount = controls.particleCount;
+
+  const positions = new Float32Array(particlesCount * 3);
+
+  for (let i = 0; i < particlesCount * 3; i++) {
+    positions[i] = (Math.random() - 0.5) * 10;
+  }
+
+  particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+  const particlesMaterial = new THREE.PointsMaterial({
+    color: themes[currentTheme].particles,
+    size: controls.particleSize,
+    transparent: true
+  });
+
+  particles = new THREE.Points(particlesGeometry, particlesMaterial);
+  scene.add(particles);
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+
+  rift.rotation.x += controls.rotationSpeed;
+  rift.rotation.y += controls.rotationSpeed * 1.5;
+
+  const time = Date.now() * 0.001;
+  orbitGroup.rotation.x = Math.sin(time * controls.pulseSpeed) * controls.pulseIntensity;
+  orbitGroup.rotation.y = Math.cos(time * controls.pulseSpeed * 0.6) * controls.pulseIntensity;
+
+  particles.rotation.x += controls.rotationSpeed * 0.1;
+  particles.rotation.y += controls.rotationSpeed * 0.15;
+
+  camera.position.z = controls.cameraDistance;
+
+  renderer.render(scene, camera);
+}
+
+function changeTheme(theme) {
+  currentTheme = theme;
+  document.getElementById('current-theme').textContent = theme.charAt(0).toUpperCase() + theme.slice(1);
+  
+  rift.material.color.setHex(themes[theme].color);
+  rift.material.emissive.setHex(themes[theme].emissive);
+  scene.background = new THREE.Color(themes[theme].background);
+  
+  particles.material.color.setHex(themes[theme].particles);
+
+  updateRiftStats();
+}
+
+function updateRiftStats() {
+  document.getElementById('rift-stability').textContent = `${Math.floor(Math.random() * 30 + 70)}%`;
+  document.getElementById('dimensional-overlap').textContent = (Math.random() * 5 + 1).toFixed(5);
+}
+
+function setupGUI() {
+  const gui = new dat.GUI({ autoPlace: false, width: 300 });
+  const customContainer = document.createElement('div');
+  customContainer.style.position = 'absolute';
+  customContainer.style.top = '20px';
+  customContainer.style.left = '20px';
+  document.body.appendChild(customContainer);
+  customContainer.appendChild(gui.domElement);
+
+  const riftFolder = gui.addFolder('Rift Controls');
+  riftFolder.add(controls, 'rotationSpeed', 0, 0.1).name('Rotation Speed');
+  riftFolder.add(controls, 'riftComplexity', 1, 10).step(1).onChange(updateRift).name('Complexity');
+  riftFolder.open();
+
+  const particleFolder = gui.addFolder('Particle Controls');
+  particleFolder.add(controls, 'particleCount', 1000, 10000).onChange(updateParticles).name('Count');
+  particleFolder.add(controls, 'particleSize', 0.01, 0.1).onChange(updateParticles).name('Size');
+  particleFolder.open();
+
+  const cameraFolder = gui.addFolder('Camera Controls');
+  cameraFolder.add(controls, 'cameraDistance', 1, 10).name('Distance');
+  cameraFolder.open();
+
+  const pulseFolder = gui.addFolder('Pulse Controls');
+  pulseFolder.add(controls, 'pulseSpeed', 0.1, 2).name('Speed');
+  pulseFolder.add(controls, 'pulseIntensity', 0, 1).name('Intensity');
+  pulseFolder.open();
+}
+
+function updateParticles() {
+  scene.remove(particles);
+  createParticles();
+}
+
+function updateRift() {
+  scene.remove(rift);
+  createRift();
+}
+
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen();
+  } else {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    }
+  }
+}
+
+window.onload = init;
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+setInterval(updateRiftStats, 5000);
+</script>
+</body></html>
