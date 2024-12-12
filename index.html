@@ -1,0 +1,284 @@
+<html><head><base href="https://party.websim.ai/"><title>Interactive 3D Neuron with Fast Impulses and Axon Impulses</title><style>
+    body {
+        margin: 0;
+        overflow: hidden;
+        background-color: #000;
+        font-family: Arial, sans-serif;
+    }
+    canvas {
+        display: block;
+    }
+    #impulseSlider {
+        position: absolute;
+        right: 20px;
+        bottom: 20px;
+        width: 200px;
+        -webkit-appearance: none;
+        appearance: none;
+        height: 15px;
+        background: #d3d3d3;
+        outline: none;
+        opacity: 0.7;
+        -webkit-transition: .2s;
+        transition: opacity .2s;
+    }
+    #impulseSlider:hover {
+        opacity: 1;
+    }
+    #impulseSlider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 25px;
+        height: 25px;
+        background: #0088ff;
+        cursor: pointer;
+        border-radius: 50%;
+    }
+    #impulseSlider::-moz-range-thumb {
+        width: 25px;
+        height: 25px;
+        background: #0088ff;
+        cursor: pointer;
+        border-radius: 50%;
+    }
+    #sliderLabel {
+        position: absolute;
+        right: 20px;
+        bottom: 50px;
+        color: white;
+    }
+    #title {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        color: white;
+        font-size: 18px;
+        font-weight: bold;
+        background-color: rgba(0, 0, 0, 0.7);
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style></head><body>
+<canvas id="neuronCanvas"></canvas>
+<input type="range" min="0" max="100" value="0" id="impulseSlider">
+<div id="sliderLabel">Impulse Frequency</div>
+<div id="title">Neuron Model</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+let scene, camera, renderer;
+let neuron = { soma: null, dendrites: [], axon: null };
+let impulses = [];
+let accumulatedImpulses = 0;
+
+function init() {
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('neuronCanvas'), antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    camera.position.z = 80;
+
+    createNeuron();
+
+    const ambientLight = new THREE.AmbientLight(0x404040);
+    scene.add(ambientLight);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+    directionalLight.position.set(1, 1, 1);
+    scene.add(directionalLight);
+
+    animate();
+}
+
+function createNeuron() {
+    // Cell body (soma) - matte material with same color as dendrites
+    const somaGeometry = new THREE.SphereGeometry(3, 32, 32);
+    const somaMaterial = new THREE.MeshLambertMaterial({ color: 0x0088ff });
+    neuron.soma = new THREE.Mesh(somaGeometry, somaMaterial);
+    scene.add(neuron.soma);
+
+    // Dendrites
+    createDenseDendrites(neuron.soma.position, 30, 5);
+
+    // Axon
+    createAxon(neuron.soma.position);
+}
+
+function createDenseDendrites(startPosition, length, depth) {
+    const dendriteCount = 50;
+
+    for (let i = 0; i < dendriteCount; i++) {
+        const direction = new THREE.Vector3(
+            Math.random() - 0.5,
+            Math.random() - 0.5,
+            Math.random() - 0.5
+        ).normalize();
+
+        createDendriteBranch(startPosition, direction, length, depth);
+    }
+}
+
+function createDendriteBranch(startPosition, direction, length, depth) {
+    if (depth <= 0) return;
+
+    const endPoint = new THREE.Vector3().addVectors(
+        startPosition,
+        direction.clone().multiplyScalar(length)
+    );
+
+    const midPoint = new THREE.Vector3().addVectors(
+        startPosition,
+        direction.clone().multiplyScalar(length * 0.5)
+    ).add(new THREE.Vector3(
+        (Math.random() - 0.5) * length * 0.5,
+        (Math.random() - 0.5) * length * 0.5,
+        (Math.random() - 0.5) * length * 0.5
+    ));
+
+    const curve = new THREE.QuadraticBezierCurve3(
+        endPoint,
+        midPoint,
+        startPosition
+    );
+
+    const geometry = new THREE.TubeGeometry(curve, 20, 0.3 * (depth / 5), 8, false);
+    const material = new THREE.MeshPhongMaterial({ color: 0x0088ff, shininess: 100 });
+    const dendrite = new THREE.Mesh(geometry, material);
+    scene.add(dendrite);
+    neuron.dendrites.push({ mesh: dendrite, curve: curve });
+
+    // Create branches
+    const branchCount = Math.floor(Math.random() * 3) + 1;
+    for (let i = 0; i < branchCount; i++) {
+        const newDirection = direction.clone()
+            .add(new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5))
+            .normalize();
+        createDendriteBranch(endPoint, newDirection, length * 0.7, depth - 1);
+    }
+}
+
+function createAxon(startPosition) {
+    const axonLength = 70;
+    const endPoint = new THREE.Vector3(
+        startPosition.x,
+        startPosition.y - axonLength,
+        startPosition.z
+    );
+
+    const curve = new THREE.CatmullRomCurve3([
+        startPosition,
+        new THREE.Vector3(startPosition.x + 4, startPosition.y - axonLength / 4, startPosition.z),
+        new THREE.Vector3(startPosition.x - 4, startPosition.y - axonLength * 2 / 4, startPosition.z),
+        new THREE.Vector3(startPosition.x + 4, startPosition.y - axonLength * 3 / 4, startPosition.z),
+        endPoint
+    ]);
+
+    const geometry = new THREE.TubeGeometry(curve, 200, 0.6, 12, false);
+    const material = new THREE.MeshPhongMaterial({ color: 0xff8800, shininess: 100 });
+    neuron.axon = { mesh: new THREE.Mesh(geometry, material), curve: curve };
+    scene.add(neuron.axon.mesh);
+
+    // Axon terminals
+    createAxonTerminals(endPoint);
+}
+
+function createAxonTerminals(startPosition) {
+    const terminalCount = 7;
+    const terminalLength = 5;
+
+    for (let i = 0; i < terminalCount; i++) {
+        const endPoint = new THREE.Vector3(
+            startPosition.x + (Math.random() - 0.5) * terminalLength,
+            startPosition.y - Math.random() * terminalLength,
+            startPosition.z + (Math.random() - 0.5) * terminalLength
+        );
+
+        const curve = new THREE.QuadraticBezierCurve3(
+            startPosition,
+            new THREE.Vector3(
+                (startPosition.x + endPoint.x) / 2,
+                (startPosition.y + endPoint.y) / 2 - 1,
+                (startPosition.z + endPoint.z) / 2
+            ),
+            endPoint
+        );
+
+        const geometry = new THREE.TubeGeometry(curve, 20, 0.15, 8, false);
+        const material = new THREE.MeshPhongMaterial({ color: 0xff8800, shininess: 100 });
+        const terminal = new THREE.Mesh(geometry, material);
+        scene.add(terminal);
+    }
+}
+
+function createImpulse(curve, isAxon = false) {
+    const geometry = new THREE.SphereGeometry(0.3, 32, 32);
+    const material = new THREE.MeshBasicMaterial({ color: isAxon ? 0xff8800 : 0xffff00 });
+    const impulse = new THREE.Mesh(geometry, material);
+    scene.add(impulse);
+
+    impulses.push({
+        mesh: impulse,
+        curve: curve,
+        progress: 0,
+        isAxon: isAxon
+    });
+}
+
+function updateImpulses() {
+    const speed = 0.04; // Increased speed
+
+    impulses.forEach((impulse, index) => {
+        impulse.progress += speed;
+        if (impulse.progress >= 1) {
+            scene.remove(impulse.mesh);
+            impulses.splice(index, 1);
+            if (!impulse.isAxon) {
+                accumulatedImpulses++;
+                
+                if (accumulatedImpulses >= 3) { // Reduced threshold
+                    createAxonImpulse();
+                    accumulatedImpulses = 0;
+                }
+            }
+        } else {
+            const position = impulse.curve.getPointAt(impulse.progress);
+            impulse.mesh.position.copy(position);
+        }
+    });
+}
+
+function createAxonImpulse() {
+    createImpulse(neuron.axon.curve, true);
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+
+    scene.rotation.y += 0.002;
+    updateImpulses();
+
+    renderer.render(scene, camera);
+}
+
+function onSliderChange() {
+    const value = document.getElementById('impulseSlider').value;
+    const frequency = value / 100;
+
+    if (Math.random() < frequency) {
+        const randomDendrite = neuron.dendrites[Math.floor(Math.random() * neuron.dendrites.length)];
+        createImpulse(randomDendrite.curve);
+    }
+}
+
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+document.getElementById('impulseSlider').addEventListener('input', onSliderChange);
+
+init();
+setInterval(onSliderChange, 50); // Increased frequency of impulse generation
+</script>
+</body></html>
