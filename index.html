@@ -1,0 +1,854 @@
+<html><head><base href="https://advanced-map-generator.com/"><title>Highly Detailed 2D Map Generator</title>
+<style>
+  body {
+    font-family: 'Roboto', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+    color: #333;
+  }
+  #container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  h1, h2 {
+    text-align: center;
+    color: #2c3e50;
+  }
+  #map-display {
+    width: 100%;
+    height: 700px;
+    background-color: #a2d2ff;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  }
+  #controls {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin: 5px;
+    font-size: 16px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  button:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+  }
+  #info-panel, #population-menu {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  .menu-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  .menu-item label {
+    margin-right: 10px;
+    font-weight: bold;
+  }
+  input[type="number"], input[type="range"] {
+    width: 100px;
+    background-color: #f0f0f0;
+    color: #333;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 5px;
+  }
+  #map-options {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+  .option-group {
+    flex-basis: 48%;
+  }
+  #legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    margin-top: 20px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    margin: 5px;
+  }
+  .legend-color {
+    width: 20px;
+    height: 20px;
+    margin-right: 5px;
+    border: 1px solid #333;
+  }
+</style>
+</head>
+<body>
+  <div id="container">
+    <h1>Highly Detailed 2D Map Generator</h1>
+    <canvas id="map-display"></canvas>
+    <div id="controls">
+      <button id="generate">Generate New Map</button>
+      <button id="modify">Modify Terrain</button>
+      <button id="populate">Populate Map</button>
+      <button id="save">Save Map</button>
+      <button id="draw-land">Draw Land</button>
+      <button id="draw-water">Draw Water</button>
+    </div>
+    <div id="map-options">
+      <div class="option-group">
+        <h2>Terrain Options</h2>
+        <div class="menu-item">
+          <label for="terrain-scale">Terrain Scale:</label>
+          <input type="range" id="terrain-scale" min="50" max="300" value="100">
+        </div>
+        <div class="menu-item">
+          <label for="water-level">Water Level:</label>
+          <input type="range" id="water-level" min="0" max="100" value="30">
+        </div>
+        <div class="menu-item">
+          <label for="mountain-level">Mountain Level:</label>
+          <input type="range" id="mountain-level" min="0" max="100" value="70">
+        </div>
+        <div class="menu-item">
+          <label for="continents">Number of Continents:</label>
+          <input type="number" id="continents" min="1" max="10" value="3">
+        </div>
+        <div class="menu-item">
+          <label for="islands">Number of Islands:</label>
+          <input type="number" id="islands" min="0" max="20" value="3">
+        </div>
+      </div>
+      <div class="option-group">
+        <h2>Population Options</h2>
+        <div class="menu-item">
+          <label for="cities">Cities:</label>
+          <input type="number" id="cities" min="0" max="20" value="5">
+        </div>
+        <div class="menu-item">
+          <label for="towns">Towns:</label>
+          <input type="number" id="towns" min="0" max="40" value="10">
+        </div>
+        <div class="menu-item">
+          <label for="forests">Forests:</label>
+          <input type="number" id="forests" min="0" max="30" value="8">
+        </div>
+        <div class="menu-item">
+          <label for="mountains">Mountain Ranges:</label>
+          <input type="number" id="mountains" min="0" max="10" value="3">
+        </div>
+        <div class="menu-item">
+          <label for="rivers">Rivers:</label>
+          <input type="number" id="rivers" min="0" max="5" value="2">
+        </div>
+      </div>
+      <div class="menu-item">
+        <label for="detail-level">Detail Level:</label>
+        <input type="range" id="detail-level" min="1" max="5" value="3">
+      </div>
+      <div class="menu-item">
+        <label for="brush-size">Brush Size:</label>
+        <input type="range" id="brush-size" min="5" max="50" value="20">
+      </div>
+      <div class="menu-item">
+        <label for="brush-strength">Brush Strength:</label>
+        <input type="range" id="brush-strength" min="1" max="10" value="5">
+      </div>
+    </div>
+    <div id="info-panel">
+      <h2>Map Information</h2>
+      <p id="map-info">Generate a map to see its details!</p>
+    </div>
+    <div id="legend">
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: #00008b;"></div>
+        <span>Deep Ocean</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: #0077be;"></div>
+        <span>Shallow Ocean</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: #c2b280;"></div>
+        <span>Coast</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: #228b22;"></div>
+        <span>Lowlands</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: #8b4513;"></div>
+        <span>Highlands</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: #a0522d;"></div>
+        <span>Mountains</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: #f0f8ff;"></div>
+        <span>Snow-capped peaks</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: #e0f0ff;"></div>
+        <span>Ice/Snow</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
+  <script>
+    const canvas = document.getElementById('map-display');
+    const ctx = canvas.getContext('2d');
+    const generateBtn = document.getElementById('generate');
+    const modifyBtn = document.getElementById('modify');
+    const populateBtn = document.getElementById('populate');
+    const saveBtn = document.getElementById('save');
+    const drawLandBtn = document.getElementById('draw-land');
+    const drawWaterBtn = document.getElementById('draw-water');
+    const brushSizeInput = document.getElementById('brush-size');
+    const brushStrengthInput = document.getElementById('brush-strength');
+    const mapInfo = document.getElementById('map-info');
+    const citiesInput = document.getElementById('cities');
+    const townsInput = document.getElementById('towns');
+    const forestsInput = document.getElementById('forests');
+    const mountainsInput = document.getElementById('mountains');
+    const riversInput = document.getElementById('rivers');
+    const terrainScaleInput = document.getElementById('terrain-scale');
+    const waterLevelInput = document.getElementById('water-level');
+    const mountainLevelInput = document.getElementById('mountain-level');
+    const continentsInput = document.getElementById('continents');
+    const islandsInput = document.getElementById('islands');
+    const detailLevelInput = document.getElementById('detail-level');
+
+    let terrain = [];
+    let cities = [];
+    let towns = [];
+    let forests = [];
+    let mountains = [];
+    let rivers = [];
+    let noise = new SimplexNoise();
+    let isDrawing = false;
+    let drawLandMode = false;
+    let drawWaterMode = false;
+
+    function resizeCanvas() {
+      canvas.width = canvas.clientWidth;
+      canvas.height = canvas.clientHeight;
+    }
+
+    function generateTerrain() {
+      terrain = [];
+      const terrainScale = terrainScaleInput.value / 100 * Math.pow(2, detailLevelInput.value - 3);
+      const numContinents = parseInt(continentsInput.value);
+      const numIslands = parseInt(islandsInput.value);
+      
+      const landmasses = [];
+      for (let i = 0; i < numContinents; i++) {
+        landmasses.push({
+          x: Math.random() * 0.6 + 0.2,
+          y: Math.random() * 0.6 + 0.2,
+          radius: Math.random() * 0.3 + 0.1,
+          type: 'continent'
+        });
+      }
+      for (let i = 0; i < numIslands; i++) {
+        landmasses.push({
+          x: Math.random() * 0.8 + 0.1,
+          y: Math.random() * 0.8 + 0.1,
+          radius: Math.random() * 0.1 + 0.02,
+          type: 'island'
+        });
+      }
+      
+      const borderSize = 0.1;
+
+      for (let y = 0; y < canvas.height; y++) {
+        for (let x = 0; x < canvas.width; x++) {
+          const nx = x / canvas.width;
+          const ny = y / canvas.height;
+          
+          if (nx < borderSize || nx > 1 - borderSize || ny < borderSize || ny > 1 - borderSize) {
+            terrain.push({ elevation: 0, temperature: 0 });
+            continue;
+          }
+
+          const baseNoise = (noise.noise2D(x * terrainScale / 100, y * terrainScale / 100) + 1) / 2;
+          const detailNoise = (noise.noise2D(x * terrainScale / 50, y * terrainScale / 50) + 1) / 2;
+          const microDetailNoise = (noise.noise2D(x * terrainScale / 25, y * terrainScale / 25) + 1) / 2;
+          const continentalNoise = (noise.noise2D(x * terrainScale / 200, y * terrainScale / 200) + 1) / 2;
+          
+          let landmassInfluence = 0;
+          for (const landmass of landmasses) {
+            const dx = nx - landmass.x;
+            const dy = ny - landmass.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const influence = Math.max(0, 1 - distance / landmass.radius);
+            landmassInfluence = Math.max(landmassInfluence, influence * (landmass.type === 'continent' ? 1 : 0.7));
+          }
+          
+          const erosionFactor = 0.05;
+          const erosionNoise = (noise.noise2D(x * terrainScale / 75, y * terrainScale / 75) + 1) / 2;
+          let value = (
+            baseNoise * 0.4 +
+            detailNoise * 0.3 +
+            microDetailNoise * 0.1 +
+            continentalNoise * 0.2
+          ) * (0.2 + landmassInfluence * 0.8);
+          value -= erosionFactor * erosionNoise * value;
+
+          const latitude = Math.abs(ny - 0.5) * 2;
+          const latitudeVariation = Math.sin(Math.PI * ny) * 0.1;
+          value += latitudeVariation;
+          
+          value = Math.max(0, Math.min(1, value));
+
+          const borderFade = Math.min(
+            (nx - borderSize) / borderSize,
+            (ny - borderSize) / borderSize,
+            (1 - borderSize - nx) / borderSize,
+            (1 - borderSize - ny) / borderSize
+          );
+          value *= Math.max(0, Math.min(1, borderFade * 2));
+
+          const temperatureFactor = 1 - Math.pow(latitude, 2);
+          
+          terrain.push({ elevation: value, temperature: temperatureFactor });
+        }
+      }
+      mapInfo.textContent = `A new detailed 2D map has been generated with ${numContinents} continents and ${numIslands} islands surrounded by water!`;
+      drawMap();
+    }
+
+    function modifyTerrain() {
+      for (let i = 0; i < terrain.length; i++) {
+        terrain[i].elevation += (Math.random() - 0.5) * 0.05;
+        terrain[i].elevation = Math.max(0, Math.min(1, terrain[i].elevation));
+      }
+      mapInfo.textContent = "The map terrain has been subtly modified!";
+      drawMap();
+    }
+
+    function populateMap() {
+      cities = [];
+      towns = [];
+      forests = [];
+      mountains = [];
+      rivers = [];
+
+      const waterLevel = waterLevelInput.value / 100;
+      const mountainLevel = mountainLevelInput.value / 100;
+
+      // Helper function to check if a position is on land
+      function isLand(x, y) {
+        return terrain[y * canvas.width + x].elevation > waterLevel;
+      }
+
+      // Place cities
+      for (let i = 0; i < citiesInput.value; i++) {
+        let attempts = 0;
+        while (attempts < 100) {
+          const x = Math.floor(Math.random() * canvas.width);
+          const y = Math.floor(Math.random() * canvas.height);
+          if (isLand(x, y) && terrain[y * canvas.width + x].elevation < mountainLevel - 0.1) {
+            cities.push({x, y, size: Math.random() * 5 + 10});
+            break;
+          }
+          attempts++;
+        }
+      }
+
+      // Place towns
+      for (let i = 0; i < townsInput.value; i++) {
+        let attempts = 0;
+        while (attempts < 100) {
+          const x = Math.floor(Math.random() * canvas.width);
+          const y = Math.floor(Math.random() * canvas.height);
+          if (isLand(x, y) && terrain[y * canvas.width + x].elevation < mountainLevel) {
+            towns.push({x, y, size: Math.random() * 3 + 5});
+            break;
+          }
+          attempts++;
+        }
+      }
+
+      // Place forests
+      for (let i = 0; i < forestsInput.value; i++) {
+        let attempts = 0;
+        while (attempts < 100) {
+          const x = Math.floor(Math.random() * canvas.width);
+          const y = Math.floor(Math.random() * canvas.height);
+          if (isLand(x, y) && terrain[y * canvas.width + x].elevation < mountainLevel - 0.1) {
+            forests.push({x, y, size: Math.random() * 40 + 30});
+            break;
+          }
+          attempts++;
+        }
+      }
+
+      // Place mountains
+      for (let i = 0; i < mountainsInput.value; i++) {
+        let attempts = 0;
+        while (attempts < 100) {
+          const x = Math.floor(Math.random() * canvas.width);
+          const y = Math.floor(Math.random() * canvas.height);
+          if (isLand(x, y) && terrain[y * canvas.width + x].elevation > mountainLevel) {
+            mountains.push({x, y, size: Math.random() * 30 + 20});
+            break;
+          }
+          attempts++;
+        }
+      }
+
+      // Generate rivers (no changes needed as rivers can start on land and end in water)
+      for (let i = 0; i < riversInput.value; i++) {
+        let x = Math.floor(Math.random() * canvas.width);
+        let y = Math.floor(Math.random() * canvas.height);
+        let river = [{x, y}];
+        for (let j = 0; j < 100; j++) {
+          const dx = Math.round(Math.random() * 2 - 1);
+          const dy = Math.round(Math.random() * 2 - 1);
+          x += dx;
+          y += dy;
+          if (x < 0 || x >= canvas.width || y < 0 || y >= canvas.height) break;
+          river.push({x, y});
+          if (terrain[y * canvas.width + x].elevation <= waterLevel) break;
+        }
+        rivers.push(river);
+      }
+
+      mapInfo.textContent = `The map has been populated with ${cities.length} cities, ${towns.length} towns, ${forests.length} forests, ${mountains.length} mountain ranges, and ${rivers.length} rivers!`;
+      drawMap();
+    }
+
+    function drawTerrainFeature(x, y, isWater) {
+      const brushSize = parseInt(brushSizeInput.value);
+      const brushStrength = parseInt(brushStrengthInput.value) / 100;
+      
+      for (let dy = -brushSize; dy <= brushSize; dy++) {
+        for (let dx = -brushSize; dx <= brushSize; dx++) {
+          const distance = Math.sqrt(dx*dx + dy*dy);
+          if (distance <= brushSize) {
+            const px = Math.floor(x + dx);
+            const py = Math.floor(y + dy);
+            if (px >= 0 && px < canvas.width && py >= 0 && py < canvas.height) {
+              const index = py * canvas.width + px;
+              const strength = (1 - distance / brushSize) * brushStrength;
+              if (isWater) {
+                terrain[index].elevation = Math.max(0, terrain[index].elevation - strength);
+              } else {
+                terrain[index].elevation = Math.min(1, terrain[index].elevation + strength);
+              }
+            }
+          }
+        }
+      }
+      drawMap();
+      mapInfo.textContent = isWater ? "Water has been added to the map!" : "Land has been added to the map!";
+    }
+
+    function drawCity(x, y, size) {
+      ctx.fillStyle = '#8B4513';
+      ctx.strokeStyle = '#4A2511';
+      ctx.lineWidth = 2;
+      
+      // Main keep
+      ctx.fillRect(x - size/3, y - size, size*2/3, size);
+      ctx.strokeRect(x - size/3, y - size, size*2/3, size);
+      
+      // Roofs
+      ctx.beginPath();
+      ctx.moveTo(x - size/3, y - size);
+      ctx.lineTo(x - size/2, y - size*1.2);
+      ctx.lineTo(x + size/2, y - size*1.2);
+      ctx.lineTo(x + size/3, y - size);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      
+      // Windows
+      ctx.fillStyle = '#000';
+      for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 2; j++) {
+          ctx.fillRect(x - size/4 + i*size/4, y - size*0.9 + j*size/3, size/10, size/10);
+        }
+      }
+      
+      // City walls
+      ctx.strokeStyle = '#8B4513';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(x, y, size*0.9, 0, Math.PI * 2);
+      ctx.stroke();
+      
+      // Towers
+      for (let i = 0; i < 8; i++) {
+        const angle = i * Math.PI / 4;
+        const towerX = x + Math.cos(angle) * size*0.9;
+        const towerY = y + Math.sin(angle) * size*0.9;
+        ctx.fillStyle = '#8B4513';
+        ctx.beginPath();
+        ctx.arc(towerX, towerY, size/8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        
+        // Tower tops
+        ctx.beginPath();
+        ctx.moveTo(towerX - size/8, towerY);
+        ctx.lineTo(towerX, towerY - size/4);
+        ctx.lineTo(towerX + size/8, towerY);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      }
+      
+      // Houses
+      const houseColors = ['#D2691E', '#CD853F', '#DEB887'];
+      for (let i = 0; i < 5; i++) {
+        const hx = x + (Math.random() - 0.5) * size * 1.2;
+        const hy = y + (Math.random() - 0.5) * size * 1.2;
+        const hsize = size * 0.2;
+        
+        ctx.fillStyle = houseColors[Math.floor(Math.random() * houseColors.length)];
+        ctx.fillRect(hx - hsize/2, hy - hsize/2, hsize, hsize);
+        
+        ctx.fillStyle = '#8B4513';
+        ctx.beginPath();
+        ctx.moveTo(hx - hsize/2, hy - hsize/2);
+        ctx.lineTo(hx, hy - hsize);
+        ctx.lineTo(hx + hsize/2, hy - hsize/2);
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+
+    function drawTown(x, y, size) {
+      // Town square
+      ctx.fillStyle = '#D2B48C';
+      ctx.fillRect(x - size/2, y - size/2, size, size);
+      
+      // Well
+      ctx.fillStyle = '#696969';
+      ctx.beginPath();
+      ctx.arc(x, y, size/8, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.strokeStyle = '#8B4513';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(x - size/10, y - size/6);
+      ctx.lineTo(x + size/10, y - size/6);
+      ctx.moveTo(x, y - size/6);
+      ctx.lineTo(x, y + size/8);
+      ctx.stroke();
+      
+      const houseColors = ['#8B4513', '#A0522D', '#CD853F', '#DEB887'];
+      for (let i = 0; i < 8; i++) {
+        const angle = i * Math.PI / 4;
+        const hx = x + Math.cos(angle) * size * 0.6;
+        const hy = y + Math.sin(angle) * size * 0.6;
+        const hsize = size * 0.25;
+        
+        ctx.fillStyle = houseColors[Math.floor(Math.random() * houseColors.length)];
+        ctx.fillRect(hx - hsize/2, hy - hsize/2, hsize, hsize);
+        
+        ctx.fillStyle = '#D2691E';
+        ctx.beginPath();
+        ctx.moveTo(hx - hsize/2, hy - hsize/2);
+        ctx.lineTo(hx, hy - hsize);
+        ctx.lineTo(hx + hsize/2, hy - hsize/2);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Windows
+        ctx.fillStyle = '#000';
+        ctx.fillRect(hx - hsize/4, hy - hsize/4, hsize/8, hsize/8);
+        ctx.fillRect(hx + hsize/8, hy - hsize/4, hsize/8, hsize/8);
+      }
+    }
+
+    function drawForest(x, y, size) {
+      // Watchtower
+      const towerX = x;
+      const towerY = y;
+      const towerSize = size * 0.4;
+      
+      ctx.fillStyle = '#8B4513';
+      ctx.fillRect(towerX - towerSize/6, towerY - towerSize, towerSize/3, towerSize);
+      
+      ctx.fillStyle = '#A0522D';
+      ctx.beginPath();
+      ctx.moveTo(towerX - towerSize/4, towerY - towerSize);
+      ctx.lineTo(towerX, towerY - towerSize*1.2);
+      ctx.lineTo(towerX + towerSize/4, towerY - towerSize);
+      ctx.closePath();
+      ctx.fill();
+      
+      // Windows
+      ctx.fillStyle = '#000';
+      ctx.fillRect(towerX - towerSize/12, towerY - towerSize*0.9, towerSize/12, towerSize/12);
+      ctx.fillRect(towerX - towerSize/12, towerY - towerSize*0.6, towerSize/12, towerSize/12);
+      
+      // Trees
+      const treeColors = ['#228B22', '#006400', '#008000', '#32CD32'];
+      for (let i = 0; i < 10; i++) {
+        const tx = x + (Math.random() - 0.5) * size;
+        const ty = y + (Math.random() - 0.5) * size;
+        const tsize = size * (0.2 + Math.random() * 0.2);
+        
+        ctx.fillStyle = '#8B4513';
+        ctx.fillRect(tx - tsize/10, ty, tsize/5, tsize/2);
+        
+        ctx.fillStyle = treeColors[Math.floor(Math.random() * treeColors.length)];
+        ctx.beginPath();
+        ctx.moveTo(tx - tsize/2, ty);
+        ctx.lineTo(tx, ty - tsize);
+        ctx.lineTo(tx + tsize/2, ty);
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+
+    function drawMountain(x, y, size) {
+      // Main mountain
+      ctx.fillStyle = '#808080'; // Medium grey
+      ctx.strokeStyle = '#696969'; // Darker grey for outlines
+      
+      ctx.beginPath();
+      ctx.moveTo(x, y - size);
+      ctx.lineTo(x - size/2, y + size/2);
+      ctx.lineTo(x + size/2, y + size/2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      
+      // Snow cap (keep as is)
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.moveTo(x, y - size);
+      ctx.lineTo(x - size/4, y - size/2);
+      ctx.lineTo(x + size/4, y - size/2);
+      ctx.closePath();
+      ctx.fill();
+      
+      // Rocky details
+      ctx.strokeStyle = '#696969'; // Darker grey for details
+      for (let i = 0; i < 5; i++) {
+        const rx = x + (Math.random() - 0.5) * size/2;
+        const ry = y + (Math.random() * size/2);
+        ctx.beginPath();
+        ctx.moveTo(rx, ry);
+        ctx.lineTo(rx + size/10, ry + size/10);
+        ctx.stroke();
+      }
+      
+      // Castle
+      const castleSize = size * 0.3;
+      const cx = x;
+      const cy = y - size * 0.4;
+      
+      ctx.fillStyle = '#8B4513';
+      ctx.fillRect(cx - castleSize/2, cy - castleSize/2, castleSize, castleSize/2);
+      
+      // Towers
+      ctx.fillRect(cx - castleSize/2, cy - castleSize/2, castleSize/6, castleSize);
+      ctx.fillRect(cx + castleSize/3, cy - castleSize/2, castleSize/6, castleSize);
+      
+      // Crenellations
+      for (let i = 0; i < 5; i++) {
+        ctx.fillRect(cx - castleSize/2 + i*castleSize/5, cy - castleSize/2 - castleSize/10, castleSize/10, castleSize/10);
+      }
+    }
+
+    function drawRiver(river) {
+      ctx.strokeStyle = '#4169e1';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(river[0].x, river[0].y);
+      for (let i = 1; i < river.length; i++) {
+        ctx.lineTo(river[i].x, river[i].y);
+      }
+      ctx.stroke();
+      
+      ctx.strokeStyle = '#87cefa';
+      ctx.lineWidth = 1;
+      for (let i = 0; i < river.length; i += 3) {
+        const x = river[i].x;
+        const y = river[i].y;
+        ctx.beginPath();
+        ctx.moveTo(x - 3, y - 3);
+        ctx.lineTo(x + 3, y + 3);
+        ctx.moveTo(x + 3, y - 3);
+        ctx.lineTo(x - 3, y + 3);
+        ctx.stroke();
+      }
+    }
+
+    function drawMap() {
+      const imageData = ctx.createImageData(canvas.width, canvas.height);
+      const waterLevel = waterLevelInput.value / 100;
+      const mountainLevel = mountainLevelInput.value / 100;
+
+      for (let i = 0; i < terrain.length; i++) {
+        const { elevation, temperature } = terrain[i];
+        const x = i % canvas.width;
+        const y = Math.floor(i / canvas.width);
+
+        let r, g, b;
+
+        if (elevation < waterLevel - 0.05) {
+          r = 0;
+          g = 0;
+          b = 139;
+        } else if (elevation < waterLevel) {
+          r = 0;
+          g = 119;
+          b = 190;
+        } else if (elevation < waterLevel + 0.05) {
+          r = 194;
+          g = 178;
+          b = 128;
+        } else if (elevation < mountainLevel - 0.1) {
+          const grassIntensity = Math.max(0, Math.min(1, temperature * 1.5));
+          const heightFactor = (elevation - waterLevel - 0.05) / (mountainLevel - 0.1 - waterLevel - 0.05);
+          r = 34 + (139 - 34) * heightFactor + (194 - 139) * (1 - grassIntensity) * (1 - heightFactor);
+          g = 139 + (69 - 139) * heightFactor + (178 - 69) * (1 - grassIntensity) * (1 - heightFactor);
+          b = 34 + (19 - 34) * heightFactor + (128 - 19) * (1 - grassIntensity) * (1 - heightFactor);
+        } else if (elevation < mountainLevel) {
+          // Change mountain color to grey
+          r = g = b = 128; // Medium grey
+        } else if (elevation < mountainLevel + 0.1) {
+          // Lighter grey for higher elevations
+          r = g = b = 160;
+        } else {
+          const snowIntensity = Math.max(0, Math.min(1, 1 - temperature * 2));
+          r = 160 + (240 - 160) * snowIntensity;
+          g = 82 + (248 - 82) * snowIntensity;
+          b = 45 + (255 - 45) * snowIntensity;
+        }
+
+        const detailFactor = 0.1;
+        const detailNoise = (noise.noise2D(x * 0.1, y * 0.1) + 1) / 2;
+        r += (detailNoise - 0.5) * detailFactor * r;
+        g += (detailNoise - 0.5) * detailFactor * g;
+        b += (detailNoise - 0.5) * detailFactor * b;
+
+        r = Math.max(0, Math.min(255, Math.round(r)));
+        g = Math.max(0, Math.min(255, Math.round(g)));
+        b = Math.max(0, Math.min(255, Math.round(b)));
+
+        const index = (y * canvas.width + x) * 4;
+        imageData.data[index] = r;
+        imageData.data[index + 1] = g;
+        imageData.data[index + 2] = b;
+        imageData.data[index + 3] = 255;
+      }
+
+      ctx.putImageData(imageData, 0, 0);
+
+      for (const forest of forests) {
+        drawForest(forest.x, forest.y, forest.size);
+      }
+
+      for (const river of rivers) {
+        drawRiver(river);
+      }
+
+      for (const city of cities) {
+        drawCity(city.x, city.y, city.size);
+      }
+
+      for (const town of towns) {
+        drawTown(town.x, town.y, town.size);
+      }
+
+      for (const mountain of mountains) {
+        drawMountain(mountain.x, mountain.y, mountain.size);
+      }
+    }
+
+    function saveMap() {
+      const link = document.createElement('a');
+      link.download = 'detailed_map.png';
+      link.href = canvas.toDataURL();
+      link.click();
+    }
+
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    generateBtn.addEventListener('click', generateTerrain);
+    modifyBtn.addEventListener('click', modifyTerrain);
+    populateBtn.addEventListener('click', populateMap);
+    saveBtn.addEventListener('click', saveMap);
+
+    drawLandBtn.addEventListener('click', () => {
+      drawLandMode = !drawLandMode;
+      drawWaterMode = false;
+      drawLandBtn.textContent = drawLandMode ? 'Exit Draw Mode' : 'Draw Land';
+      drawWaterBtn.textContent = 'Draw Water';
+      canvas.style.cursor = drawLandMode ? 'crosshair' : 'default';
+    });
+
+    drawWaterBtn.addEventListener('click', () => {
+      drawWaterMode = !drawWaterMode;
+      drawLandMode = false;
+      drawWaterBtn.textContent = drawWaterMode ? 'Exit Draw Mode' : 'Draw Water';
+      drawLandBtn.textContent = 'Draw Land';
+      canvas.style.cursor = drawWaterMode ? 'crosshair' : 'default';
+    });
+
+    canvas.addEventListener('mousedown', (e) => {
+      if (drawLandMode || drawWaterMode) {
+        isDrawing = true;
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        drawTerrainFeature(x, y, drawWaterMode);
+      }
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+      if (isDrawing && (drawLandMode || drawWaterMode)) {
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        drawTerrainFeature(x, y, drawWaterMode);
+      }
+    });
+
+    canvas.addEventListener('mouseup', () => {
+      isDrawing = false;
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+      isDrawing = false;
+    });
+
+    terrainScaleInput.addEventListener('input', generateTerrain);
+    waterLevelInput.addEventListener('input', drawMap);
+    mountainLevelInput.addEventListener('input', drawMap);
+    continentsInput.addEventListener('input', generateTerrain);
+    islandsInput.addEventListener('input', generateTerrain);
+    detailLevelInput.addEventListener('input', generateTerrain);
+
+    generateTerrain();
+  </script>
+</body></html>
