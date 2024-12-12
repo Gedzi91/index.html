@@ -1,0 +1,827 @@
+<html>
+<head>
+<base href="https://codepen.io/pen/">
+</head>
+<body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js"></script>
+
+<style>
+body {
+    margin: 0;
+    overflow: hidden;
+}
+
+#gui-container {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.dat-gui {
+    max-width: none !important;
+}
+
+.dg .folder .dg.a {
+    columns: 2;
+    -webkit-columns: 2;
+    -moz-columns: 2;
+}
+</style>
+
+<canvas id="starryPlanes" tabindex="0"></canvas>
+<div id="gui-container"></div>
+
+<script id="vertexShader" type="x-shader/x-vertex">
+varying vec2 vUv;
+void main() {
+    vUv = uv;
+    gl_Position = vec4(position, 1.0);
+}
+</script>
+
+<script id="fragmentShader" type="x-shader/x-fragment">
+uniform vec2 iResolution;
+uniform float iTime;
+uniform float speed;
+uniform float rotation;
+uniform float rotationSpeed;
+uniform float colorCycleSpeed;
+uniform float colorIntensity;
+uniform bool enableTeleidoscope;
+uniform float zoom;
+uniform int teleidoscopeSides;
+uniform float starPoints;
+uniform float starInnerRadius;
+uniform float starSmoothness;
+uniform float fluidity;
+
+#define TIME        iTime * speed
+#define RESOLUTION  iResolution
+
+#define ROT(a)      mat2(cos(a), sin(a), -sin(a), cos(a))
+
+const float
+  pi        = acos(-1.)
+, tau       = 2.*pi
+, planeDist = .5
+, furthest  = 16.
+, fadeFrom  = 8.
+;
+
+const vec2 
+  pathA = vec2(.31, .41)
+, pathB = vec2(1.0,sqrt(0.5))
+;
+
+const vec4 
+  U = vec4(0, 1, 2, 3)
+  ;
+
+// Simplex Noise function
+vec3 mod289(vec3 x) {
+  return x - floor(x * (1.0 / 289.0)) * 289.0;
+}
+vec2 mod289(vec2 x) {
+  return x - floor(x * (1.0 / 289.0)) * 289.0;
+}
+vec3 permute(vec3 x) {
+  return mod289(((x*34.0)+1.0)*x);
+}
+float snoise(vec2 v){
+  const vec4 C = vec4(0.211324865405187,  
+                      0.366025403784439,  
+                     -0.577350269189626,  
+                      0.024390243902439); 
+  vec2 i  = floor(v + dot(v, C.yy) );
+  vec2 x0 = v -   i + dot(i, C.xx);
+  vec2 i1;
+  i1 = (x0.x > x0.y) ? vec2(1.0, 0.0): vec2(0.0, 1.0);
+  vec4 x12 = x0.xyxy + C.xxzz;
+  x12.xy -= i1;
+  vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 ))
+              + i.x + vec3(0.0, i1.x, 1.0 ));
+  vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);
+  m = m*m ;
+  m = m*m ;
+  vec3 x = 2.0 * fract(p * C.www) - 1.0;
+  vec3 h = abs(x) - 0.5;
+  vec3 ox = floor(x + 0.5);
+  vec3 a0 = x - ox;
+  m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0+h*h );
+  vec3 g;
+  g.x  = a0.x  * x0.x  + h.x  * x0.y;
+  g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+  return 130.0 * dot(m, g);
+}
+
+// License: Unknown, author: Matt Taylor (https://github.com/64), found: https://64.github.io/tonemapping/
+vec3 aces_approx(vec3 v) {
+  v = max(v, 0.0);
+  v *= 0.6;
+  float a = 2.51;
+  float b = 0.03;
+  float c = 2.43;
+  float d = 0.59;
+  float e = 0.14;
+  return clamp((v*(a*v+b))/(v*(c*v+d)+e), 0.0, 1.0);
+}
+
+vec3 offset(float z) {
+  return vec3(pathB*sin(pathA*z), z);
+}
+
+vec3 doffset(float z) {
+  return vec3(pathA*pathB*cos(pathA*z), 1.0);
+}
+
+vec3 ddoffset(float z) {
+  return vec3(-pathA*pathA*pathB*sin(pathA*z), 0.0);
+}
+
+vec4 alphaBlend(vec4 back, vec4 front) {
+  float w = front.w + back.w*(1.0-front.w);
+  vec3 xyz = (front.xyz*front.w + back.xyz*back.w*(1.0-front.w))/w;
+  return w > 0.0 ? vec4(xyz, w) : vec4(0.0);
+}
+
+float pmin(float a, float b, float k) {
+  float h = clamp(0.5+0.5*(b-a)/k, 0.0, 1.0);
+  return mix(b, a, h) - k*h*(1.0-h);
+}
+
+float pmax(float a, float b, float k) {
+  return -pmin(-a, -b, k);
+}
+
+float pabs(float a, float k) {
+  return -pmin(a, -a, k);
+}
+
+float starN(vec2 p, float r, float rf, float sm, float n) {
+    p = -p;
+    float angle = pi / n;
+    vec2 k1 = vec2(cos(angle), -sin(angle));
+    vec2 k2 = vec2(-k1.x, k1.y);
+    p.x = abs(p.x);
+    p -= 2.0 * max(dot(k1, p), 0.0) * k1;
+    p -= 2.0 * max(dot(k2, p), 0.0) * k2;
+    p.x = pabs(p.x, sm);
+    p.y -= r;
+    vec2 ba = rf * vec2(-k1.y, k1.x) - vec2(0, 1);
+    float h = clamp(dot(p, ba) / dot(ba, ba), 0.0, r);
+    return length(p - ba * h) * sign(p.y * ba.x - p.x * ba.y);
+}
+
+vec3 palette(float n) {
+  return 0.5+0.5*sin(vec3(0.,1.,2.)+n*colorCycleSpeed)*colorIntensity;
+}
+
+vec4 plane(vec3 ro, vec3 rd, vec3 pp, vec3 npp, float pd, vec3 cp, vec3 off, float n) {
+  float aa = 3.*pd*distance(pp.xy, npp.xy);
+  vec4 col = vec4(0.);
+  vec2 p2 = pp.xy;
+  p2 -= offset(pp.z).xy;
+  vec2 doff   = ddoffset(pp.z).xz;
+  vec2 ddoff  = doffset(pp.z).xz;
+  float dd = dot(doff, ddoff);
+  p2 *= ROT(dd*pi*5.*rotation + rotationSpeed * iTime);
+
+  // Add noise for fluid dynamics effect
+  float noiseFactor = snoise(p2 * fluidity + TIME * fluidity);
+  p2 += noiseFactor * 0.1 * fluidity;
+
+  float d0 = starN(p2, 0.45, starInnerRadius, starSmoothness, starPoints) - 0.02;
+  float d1 = d0 - 0.01;
+  float d2 = length(p2);
+  const float colp = pi*100.;
+  float colaa = aa*200.;
+
+  col.xyz = palette(0.5*n+2.*d2)*mix(0.5/(d2*d2), 1., smoothstep(-0.5+colaa, 0.5+colaa, sin(d2*colp)))/max(3.*d2*d2, 1E-1);
+  col.xyz = mix(col.xyz, vec3(2.), smoothstep(aa, -aa, sin(d1))); 
+  col.w = smoothstep(aa, -aa, -d0);
+  return col;
+}
+
+vec3 color(vec3 ww, vec3 uu, vec3 vv, vec3 ro, vec2 p) {
+  float lp = length(p);
+  vec2 np = p + 1./RESOLUTION.xy;
+  float rdd = 2.0-0.25;
+
+  vec3 rd = normalize(p.x*uu + p.y*vv + rdd*ww);
+  vec3 nrd = normalize(np.x*uu + np.y*vv + rdd*ww);
+
+  float nz = floor(ro.z / planeDist);
+
+  vec4 acol = vec4(0.0);
+
+  vec3 aro = ro;
+  float apd = 0.0;
+
+  for (float i = 1.; i <= furthest; ++i) {
+    if (acol.w > 0.95) {
+      break;
+    }
+    float pz = planeDist*nz + planeDist*i;
+
+    float lpd = (pz - aro.z)/rd.z;
+    float npd = (pz - aro.z)/nrd.z;
+    float cpd = (pz - aro.z)/ww.z;
+
+    {
+      vec3 pp = aro + rd*lpd;
+      vec3 npp= aro + nrd*npd;
+      vec3 cp = aro+ww*cpd;
+
+      apd += lpd;
+
+      vec3 off = offset(pp.z);
+
+      float dz = pp.z-ro.z;
+      float fadeIn = smoothstep(planeDist*furthest, planeDist*fadeFrom, dz);
+      float fadeOut = smoothstep(0., planeDist*.1, dz);
+      float fadeOutRI = smoothstep(0., planeDist*1.0, dz);
+
+      float ri = mix(1.0, 0.9, fadeOutRI*fadeIn);
+
+      vec4 pcol = plane(ro, rd, pp, npp, apd, cp, off, nz+i);
+
+      pcol.w *= fadeOut*fadeIn;
+      acol = alphaBlend(pcol, acol);
+      aro = pp;
+    }
+  }
+
+  return acol.xyz*acol.w;
+}
+
+vec2 kale(vec2 uv, int sides, float rotationOffset) {
+    float a = atan(uv.y, uv.x) + rotationOffset;
+    float r = length(uv);
+    float pi = 3.14159;
+    float angle = 2.0*pi/float(sides);
+    a = mod(a, angle);
+    a = abs(a - angle/2.0);
+    return vec2(cos(a), sin(a)) * r;
+}
+
+void main() {
+    vec2 r = RESOLUTION.xy, q = gl_FragCoord.xy/r, pp = -1.0+2.0*q, p = pp;
+    p.x *= r.x/r.y;
+    
+    float rotationOffset = rotationSpeed * iTime;
+
+    if (enableTeleidoscope) {
+        p *= zoom;
+        p = kale(p, teleidoscopeSides, rotationOffset);
+    } else {
+        p *= ROT(rotationOffset);
+    }
+
+    float tm  = planeDist*TIME;
+
+    vec3 ro   = offset(tm);
+    vec3 dro  = doffset(tm);
+    vec3 ddro = ddoffset(tm);
+
+    vec3 ww = normalize(dro);
+    vec3 uu = normalize(cross(U.xyx+ddro, ww));
+    vec3 vv = cross(ww, uu);
+    
+    vec3 col = color(ww, uu, vv, ro, p);
+    col = aces_approx(col);
+    col = sqrt(col);
+    gl_FragColor = vec4(col, 1);
+}
+</script>
+
+<script>
+const scene = new THREE.Scene();
+const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+const renderer = new THREE.WebGLRenderer({canvas: document.getElementById('starryPlanes')});
+renderer.setSize(window.innerWidth, window.innerHeight);
+
+const geometry = new THREE.PlaneGeometry(2, 2);
+const uniforms = {
+    iTime: { value: 0 },
+    iResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+    speed: { value: 1.0 },
+    rotation: { value: 1.0 },
+    rotationSpeed: { value: 1.0 },
+    colorCycleSpeed: { value: 1.0 },
+    colorIntensity: { value: 1.0 },
+    enableTeleidoscope: { value: false },
+    zoom: { value: 1.5 },
+    teleidoscopeSides: { value: 6 },
+    starPoints: { value: 5.0 },
+    starInnerRadius: { value: 1.6 },
+    starSmoothness: { value: 0.2 },
+    fluidity: { value: 1.0 }
+};
+
+// New random mode settings
+const randomModeSettings = {
+    enabled: false,
+    interval: 5.0 // seconds between random changes
+};
+
+let lastRandomChange = 0;
+
+// Define presets
+const presets = {
+    "Galaxy": {
+        speed: 0.5,
+        rotation: 5.0,
+        rotationSpeed: 0.2,
+        colorCycleSpeed: 2.0,
+        colorIntensity: 1.2,
+        enableTeleidoscope: false,
+        zoom: 1.0,
+        teleidoscopeSides: 6,
+        starPoints: 7.0,
+        starInnerRadius: 1.0,
+        starSmoothness: 0.2,
+        fluidity: 0.8
+    },
+    "Kaleidoscope": {
+        speed: 1.0,
+        rotation: 0.0,
+        rotationSpeed: 2.0,
+        colorCycleSpeed: 3.0,
+        colorIntensity: 1.0,
+        enableTeleidoscope: true,
+        zoom: 1.5,
+        teleidoscopeSides: 8,
+        starPoints: 5.0,
+        starInnerRadius: 1.6,
+        starSmoothness: 0.4,
+        fluidity: 1.2
+    },
+    "Hyperspeed": {
+        speed: 3.0,
+        rotation: 0.0,
+        rotationSpeed: 0.0,
+        colorCycleSpeed: 1.0,
+        colorIntensity: 2.0,
+        enableTeleidoscope: false,
+        zoom: 0.5,
+        teleidoscopeSides: 6,
+        starPoints: 5.0,
+        starInnerRadius: 1.6,
+        starSmoothness: 0.1,
+        fluidity: 2.0
+    },
+    "Starfield": {
+        speed: 0.2,
+        rotation: 10.0,
+        rotationSpeed: 1.0,
+        colorCycleSpeed: 1.0,
+        colorIntensity: 1.0,
+        enableTeleidoscope: false,
+        zoom: 2.0,
+        teleidoscopeSides: 6,
+        starPoints: 5.0,
+        starInnerRadius: 1.6,
+        starSmoothness: 0.5,
+        fluidity: 0.5
+    },
+    "Mandala": {
+        speed: 1.0,
+        rotation: 0.0,
+        rotationSpeed: 0.5,
+        colorCycleSpeed: 1.0,
+        colorIntensity: 1.0,
+        enableTeleidoscope: true,
+        zoom: 1.0,
+        teleidoscopeSides: 12,
+        starPoints: 20.0,
+        starInnerRadius: 1.2,
+        starSmoothness: 0.3,
+        fluidity: 1.0
+    },
+    "Neon Dreams": {
+        speed: 0.8,
+        rotation: 2.0,
+        rotationSpeed: 1.5,
+        colorCycleSpeed: 4.0,
+        colorIntensity: 1.8,
+        enableTeleidoscope: true,
+        zoom: 1.2,
+        teleidoscopeSides: 5,
+        starPoints: 8.0,
+        starInnerRadius: 1.4,
+        starSmoothness: 0.3,
+        fluidity: 1.7
+    },
+    "Cosmic Dance": {
+        speed: 1.2,
+        rotation: 8.0,
+        rotationSpeed: -0.8,
+        colorCycleSpeed: 2.5,
+        colorIntensity: 1.5,
+        enableTeleidoscope: false,
+        zoom: 1.8,
+        teleidoscopeSides: 6,
+        starPoints: 12.0,
+        starInnerRadius: 1.8,
+        starSmoothness: 0.15,
+        fluidity: 1.3
+    },
+    "Crystal Cave": {
+        speed: 0.3,
+        rotation: 15.0,
+        rotationSpeed: 0.4,
+        colorCycleSpeed: 1.5,
+        colorIntensity: 1.3,
+        enableTeleidoscope: true,
+        zoom: 2.2,
+        teleidoscopeSides: 10,
+        starPoints: 15.0,
+        starInnerRadius: 2.0,
+        starSmoothness: 0.6,
+        fluidity: 0.6
+    },
+    "Quantum Flux": {
+        speed: 2.5,
+        rotation: 20.0,
+        rotationSpeed: 3.0,
+        colorCycleSpeed: 5.0,
+        colorIntensity: 1.6,
+        enableTeleidoscope: false,
+        zoom: 0.8,
+        teleidoscopeSides: 4,
+        starPoints: 6.0,
+        starInnerRadius: 1.1,
+        starSmoothness: 0.25,
+        fluidity: 2.5
+    },
+    "Sacred Geometry": {
+        speed: 0.6,
+        rotation: 12.0,
+        rotationSpeed: 0.7,
+        colorCycleSpeed: 1.8,
+        colorIntensity: 1.4,
+        enableTeleidoscope: true,
+        zoom: 1.6,
+        teleidoscopeSides: 7,
+        starPoints: 9.0,
+        starInnerRadius: 1.5,
+        starSmoothness: 0.35,
+        fluidity: 1.2
+    }
+};
+
+const material = new THREE.ShaderMaterial({
+    uniforms: uniforms,
+    vertexShader: document.getElementById('vertexShader').textContent,
+    fragmentShader: document.getElementById('fragmentShader').textContent
+});
+
+const mesh = new THREE.Mesh(geometry, material);
+scene.add(mesh);
+
+// Create the main GUI
+const gui = new dat.GUI({ autoPlace: false, width: 350 });
+document.getElementById('gui-container').appendChild(gui.domElement);
+
+// Create folders
+const presetsFolder = gui.addFolder('Presets');
+const controlsFolder = gui.addFolder('Controls');
+const randomFolder = controlsFolder.addFolder('Random Mode');
+const instructionsFolder = controlsFolder.addFolder('Instructions');
+
+// Preset Buttons
+function applyPreset(presetName) {
+    const preset = presets[presetName];
+    // Update uniforms
+    uniforms.speed.value = preset.speed;
+    uniforms.rotation.value = preset.rotation;
+    uniforms.rotationSpeed.value = preset.rotationSpeed;
+    uniforms.colorCycleSpeed.value = preset.colorCycleSpeed;
+    uniforms.colorIntensity.value = preset.colorIntensity;
+    uniforms.enableTeleidoscope.value = preset.enableTeleidoscope;
+    uniforms.zoom.value = preset.zoom;
+    uniforms.teleidoscopeSides.value = preset.teleidoscopeSides;
+    uniforms.starPoints.value = preset.starPoints;
+    uniforms.starInnerRadius.value = preset.starInnerRadius;
+    uniforms.starSmoothness.value = preset.starSmoothness;
+    uniforms.fluidity.value = preset.fluidity;
+
+    // Update GUI controls to reflect the preset values
+    speedControl.setValue(preset.speed);
+    rotationControl.setValue(preset.rotation);
+    spinControl.setValue(preset.rotationSpeed);
+    colorCycleControl.setValue(preset.colorCycleSpeed);
+    colorIntensityControl.setValue(preset.colorIntensity);
+    kaleidoscopeControl.setValue(preset.enableTeleidoscope);
+    zoomControl.setValue(preset.zoom);
+    sidesControl.setValue(preset.teleidoscopeSides);
+    starPointsControl.setValue(preset.starPoints);
+    starInnerRadiusControl.setValue(preset.starInnerRadius);
+    starSmoothnessControl.setValue(preset.starSmoothness);
+    fluidityControl.setValue(preset.fluidity);
+}
+
+const presetActions = {};
+Object.keys(presets).forEach(function(presetName) {
+    presetActions[presetName] = function() {
+        applyPreset(presetName);
+    };
+});
+
+Object.keys(presets).forEach(function(presetName) {
+    presetsFolder.add(presetActions, presetName);
+});
+
+// Controls
+const speedControl = controlsFolder.add(uniforms.speed, 'value', 0, 5).name('Speed');
+const rotationControl = controlsFolder.add(uniforms.rotation, 'value', 0, 40).name('Rotation');
+const spinControl = controlsFolder.add(uniforms.rotationSpeed, 'value', -5, 5).name('Spin');
+const colorCycleControl = controlsFolder.add(uniforms.colorCycleSpeed, 'value', 0, 10).name('Color Cycle Speed');
+const colorIntensityControl = controlsFolder.add(uniforms.colorIntensity, 'value', 0, 2).name('Color Intensity');
+const kaleidoscopeControl = controlsFolder.add(uniforms.enableTeleidoscope, 'value').name('Enable Kaleidoscope');
+const zoomControl = controlsFolder.add(uniforms.zoom, 'value', 0.1, 5).name('Zoom');
+const sidesControl = controlsFolder.add(uniforms.teleidoscopeSides, 'value', 3, 12).step(1).name('# of Sides');
+const starPointsControl = controlsFolder.add(uniforms.starPoints, 'value', 3, 50).step(1).name('Number of Star Points');
+const starInnerRadiusControl = controlsFolder.add(uniforms.starInnerRadius, 'value', 0.5, 2.5).name('Star Inner Radius');
+const starSmoothnessControl = controlsFolder.add(uniforms.starSmoothness, 'value', 0.0, 1.0).name('Star Smoothness');
+const fluidityControl = controlsFolder.add(uniforms.fluidity, 'value', 0.1, 3).name('Fluidity');
+
+// Random mode controls
+randomFolder.add(randomModeSettings, 'enabled').name('Enable Random Mode');
+randomFolder.add(randomModeSettings, 'interval', 1, 30).name('Change Interval (s)');
+
+// Randomize settings function
+function randomizeSettings() {
+    uniforms.speed.value = Math.random() * 5;
+    uniforms.rotation.value = Math.random() * 40;
+    uniforms.rotationSpeed.value = (Math.random() * 10) - 5;
+    uniforms.colorCycleSpeed.value = Math.random() * 10;
+    uniforms.colorIntensity.value = Math.random() * 2;
+    uniforms.enableTeleidoscope.value = Math.random() > 0.5;
+    uniforms.zoom.value = 0.1 + Math.random() * 4.9;
+    uniforms.teleidoscopeSides.value = Math.floor(3 + Math.random() * 9);
+    uniforms.starPoints.value = Math.floor(3 + Math.random() * 47);
+    uniforms.starInnerRadius.value = 0.5 + Math.random() * 2;
+    uniforms.starSmoothness.value = Math.random();
+    uniforms.fluidity.value = 0.1 + Math.random() * 2.9;
+
+    // Update GUI controls
+    speedControl.setValue(uniforms.speed.value);
+    rotationControl.setValue(uniforms.rotation.value);
+    spinControl.setValue(uniforms.rotationSpeed.value);
+    colorCycleControl.setValue(uniforms.colorCycleSpeed.value);
+    colorIntensityControl.setValue(uniforms.colorIntensity.value);
+    kaleidoscopeControl.setValue(uniforms.enableTeleidoscope.value);
+    zoomControl.setValue(uniforms.zoom.value);
+    sidesControl.setValue(uniforms.teleidoscopeSides.value);
+    starPointsControl.setValue(uniforms.starPoints.value);
+    starInnerRadiusControl.setValue(uniforms.starInnerRadius.value);
+    starSmoothnessControl.setValue(uniforms.starSmoothness.value);
+    fluidityControl.setValue(uniforms.fluidity.value);
+}
+
+// Instructions
+const instructionsContainer = document.createElement('div');
+instructionsContainer.innerHTML = '<div style="padding: 10px; font-size: 12px; color: #fff;">' +
+    '<p><strong>Controls:</strong></p>' +
+    '<ul>' +
+        '<li>↑/↓ Arrow Keys: Speed up/slow down</li>' +
+        '<li>→/← Arrow Keys: Increase/decrease rotation speed</li>' +
+        '<li>WASD: Move through space</li>' +
+        '<li>Mouse/Touch Drag: Move camera</li>' +
+        '<li>Scroll/Pinch: Zoom in/out</li>' +
+        '<li>N/M Keys: Increase/Decrease number of sides</li>' +
+        '<li>J/L Keys: Decrease/Increase Star Inner Radius</li>' +
+        '<li>U/I Keys: Decrease/Increase Star Smoothness</li>' +
+        '<li>K Key: Toggle Kaleidoscope</li>' +
+        '<li>Space: Reset position</li>' +
+    '</ul>' +
+    '</div>';
+
+instructionsFolder.domElement.appendChild(instructionsContainer);
+
+let isDragging = false;
+let previousMousePosition = { x: 0, y: 0 };
+let cameraOffset = { x: 0, y: 0 };
+let zoomLevel = 1;
+
+const sensitivity = 3;
+
+document.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    previousMousePosition = { x: e.clientX, y: e.clientY };
+});
+
+document.addEventListener('mousemove', (e) => {
+    if (isDragging) {
+        const deltaX = sensitivity * (e.clientX - previousMousePosition.x) / window.innerWidth;
+        const deltaY = sensitivity * (e.clientY - previousMousePosition.y) / window.innerHeight;
+        cameraOffset.x += deltaX;
+        cameraOffset.y -= deltaY;
+        previousMousePosition = { x: e.clientX, y: e.clientY };
+    }
+});
+
+document.addEventListener('mouseup', () => {
+    isDragging = false;
+});
+
+document.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    zoomLevel *= e.deltaY > 0 ? 1.1 : 0.9;
+    zoomLevel = Math.max(0.1, Math.min(5, zoomLevel));
+}, { passive: false });
+
+let touchStart = { x: 0, y: 0 };
+let isTouching = false;
+let initialPinchDistance = null;
+let initialZoomLevel = zoomLevel;
+
+document.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 1) {
+        isTouching = true;
+        touchStart.x = e.touches[0].clientX;
+        touchStart.y = e.touches[0].clientY;
+    } else if (e.touches.length === 2) {
+        initialPinchDistance = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+        );
+        initialZoomLevel = zoomLevel;
+    }
+});
+
+document.addEventListener('touchmove', (e) => {
+    if (e.touches.length === 1 && isTouching) {
+        const touch = e.touches[0];
+        const deltaX = sensitivity * (touch.clientX - touchStart.x) / window.innerWidth;
+        const deltaY = sensitivity * (touch.clientY - touchStart.y) / window.innerHeight;
+        cameraOffset.x += deltaX;
+        cameraOffset.y -= deltaY;
+        touchStart.x = touch.clientX;
+        touchStart.y = touch.clientY;
+    } else if (e.touches.length === 2 && initialPinchDistance !== null) {
+        const currentPinchDistance = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+        );
+        const pinchRatio = currentPinchDistance / initialPinchDistance;
+        zoomLevel = initialZoomLevel * (1 / pinchRatio);
+        zoomLevel = Math.max(0.1, Math.min(5, zoomLevel));
+    }
+});
+
+document.addEventListener('touchend', (e) => {
+    if (e.touches.length < 2) {
+        initialPinchDistance = null;
+        initialZoomLevel = zoomLevel;
+    }
+    if (e.touches.length === 0) {
+        isTouching = false;
+    }
+});
+
+document.addEventListener('touchcancel', (e) => {
+    initialPinchDistance = null;
+    initialZoomLevel = zoomLevel;
+    isTouching = false;
+});
+
+const keyState = {};
+document.addEventListener('keydown', (e) => {
+    const key = e.key.toLowerCase();
+    if (["arrowup", "arrowdown", "arrowleft", "arrowright", "w", "a", "s", "d", " ", "k", "n", "m", "j", "l", "u", "i"].includes(key)) {
+        e.preventDefault();
+    }
+    keyState[key] = true;
+
+    if (key === ' ') {
+        cameraOffset = { x: 0, y: 0 };
+        zoomLevel = 1;
+    }
+
+    if (key === 'k') {
+        uniforms.enableTeleidoscope.value = !uniforms.enableTeleidoscope.value;
+        kaleidoscopeControl.setValue(uniforms.enableTeleidoscope.value);
+    }
+
+    if (key === 'n') {
+        if (uniforms.enableTeleidoscope.value) {
+            uniforms.teleidoscopeSides.value = Math.max(3, uniforms.teleidoscopeSides.value - 1);
+            sidesControl.setValue(uniforms.teleidoscopeSides.value);
+        } else {
+            uniforms.starPoints.value = Math.max(3.0, uniforms.starPoints.value - 1.0);
+            starPointsControl.setValue(uniforms.starPoints.value);
+        }
+    }
+    if (key === 'm') {
+        if (uniforms.enableTeleidoscope.value) {
+            uniforms.teleidoscopeSides.value += 1;
+            sidesControl.setValue(uniforms.teleidoscopeSides.value);
+        } else {
+            uniforms.starPoints.value += 1.0;
+            starPointsControl.setValue(uniforms.starPoints.value);
+        }
+    }
+
+    if (key === 'j') {
+        uniforms.starInnerRadius.value -= 0.01;
+        uniforms.starInnerRadius.value = Math.max(0.5, uniforms.starInnerRadius.value);
+        starInnerRadiusControl.setValue(uniforms.starInnerRadius.value);
+    }
+    if (key === 'l') {
+        uniforms.starInnerRadius.value += 0.01;
+        uniforms.starInnerRadius.value = Math.min(2.5, uniforms.starInnerRadius.value);
+        starInnerRadiusControl.setValue(uniforms.starInnerRadius.value);
+    }
+
+    if (key === 'u') {
+        uniforms.starSmoothness.value -= 0.01;
+        uniforms.starSmoothness.value = Math.max(0.0, uniforms.starSmoothness.value);
+        starSmoothnessControl.setValue(uniforms.starSmoothness.value);
+    }
+    if (key === 'i') {
+        uniforms.starSmoothness.value += 0.01;
+        uniforms.starSmoothness.value = Math.min(1.0, uniforms.starSmoothness.value);
+        starSmoothnessControl.setValue(uniforms.starSmoothness.value);
+    }
+});
+
+document.addEventListener('keyup', (e) => {
+    const key = e.key.toLowerCase();
+    keyState[key] = false;
+});
+
+function updateCamera() {
+    if (keyState['w']) cameraOffset.y += 0.01;
+    if (keyState['s']) cameraOffset.y -= 0.01;
+    if (keyState['a']) cameraOffset.x -= 0.01;
+    if (keyState['d']) cameraOffset.x += 0.01;
+
+    camera.left = (-1 + cameraOffset.x) * zoomLevel;
+    camera.right = (1 + cameraOffset.x) * zoomLevel;
+    camera.top = (1 + cameraOffset.y) * zoomLevel;
+    camera.bottom = (-1 + cameraOffset.y) * zoomLevel;
+    camera.updateProjectionMatrix();
+}
+
+let prevTime = performance.now();
+
+function animate(time) {
+    const deltaTime = (time - prevTime) / 1000;
+    prevTime = time;
+
+    uniforms.iTime.value = time / 1000;
+
+    // Random mode timer
+    if (randomModeSettings.enabled) {
+        const currentTime = time / 1000;
+        if (currentTime - lastRandomChange > randomModeSettings.interval) {
+            randomizeSettings();
+            lastRandomChange = currentTime;
+        }
+    }
+
+    const speedChangeRate = 0.005;
+    const rotationSpeedChangeRate = 0.5;
+
+    if (keyState['arrowup']) {
+        uniforms.speed.value += speedChangeRate;
+        uniforms.speed.value = Math.min(5, uniforms.speed.value);
+        speedControl.setValue(uniforms.speed.value);
+    }
+    if (keyState['arrowdown']) {
+        uniforms.speed.value -= speedChangeRate;
+        uniforms.speed.value = Math.max(0, uniforms.speed.value);
+        speedControl.setValue(uniforms.speed.value);
+    }
+
+    if (keyState['arrowright']) {
+        uniforms.rotationSpeed.value += rotationSpeedChangeRate * deltaTime;
+        uniforms.rotationSpeed.value = Math.min(5, uniforms.rotationSpeed.value);
+        spinControl.setValue(uniforms.rotationSpeed.value);
+    }
+    if (keyState['arrowleft']) {
+        uniforms.rotationSpeed.value -= rotationSpeedChangeRate * deltaTime;
+        uniforms.rotationSpeed.value = Math.max(-5, uniforms.rotationSpeed.value);
+        spinControl.setValue(uniforms.rotationSpeed.value);
+    }
+
+    updateCamera();
+
+    renderer.render(scene, camera);
+    requestAnimationFrame(animate);
+}
+
+window.addEventListener('resize', function() {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    renderer.setSize(width, height);
+    uniforms.iResolution.value.set(width, height);
+});
+
+requestAnimationFrame(animate);
+</script>
+</body>
+</html>
