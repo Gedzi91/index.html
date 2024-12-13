@@ -1,0 +1,1214 @@
+<html><head><base href="." /><title>Gravity Well Sand Simulator</title><style>
+  body {
+    margin: 0;
+    overflow: hidden;
+    background: #000;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    height: 100vh;
+    padding-top: 20px;
+  }
+  canvas {
+    background: #111;
+    cursor: crosshair;
+  }
+  .material-menu {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 15px;
+    border-radius: 10px 10px 0 0;
+    border: 1px solid #444;
+    max-height: 30vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    flex-wrap: wrap;
+  }
+  .category {
+    flex: 1;
+    min-width: 120px;
+    margin: 0 10px;
+    padding: 0 10px;
+    border-right: 1px solid #444;
+    border-bottom: none;
+  }
+  .category:last-of-type {
+    border-bottom: none;
+  }
+  .category h3 {
+    color: #0a0;
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    text-transform: uppercase;
+  }
+  .material-btn {
+    display: block;
+    margin: 5px 0;
+    padding: 8px 15px;
+    background: #333;
+    border: none;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+    width: 100%;
+  }
+  .material-btn:hover {
+    background: #444;
+  }
+  .material-btn.active {
+    background: #0a0;
+    box-shadow: 0 0 10px #0f0;
+  }
+  .gravity-control {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #444;
+    color: white;
+  }
+  .settings-control {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #444;
+    color: white;
+  }
+  .settings-control label {
+    display: block;
+    margin-top: 10px;
+  }
+  .slider {
+    width: 100%;
+    margin-top: 8px;
+    -webkit-appearance: none;
+    height: 5px;
+    border-radius: 5px;
+    background: #333;
+    outline: none;
+  }
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: #0a0;
+    cursor: pointer;
+  }
+  .slider::-moz-range-thumb {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: #0a0;
+    cursor: pointer;
+  }
+  .material-menu::-webkit-scrollbar {
+    width: 8px;
+  }
+  .material-menu::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+  }
+  .material-menu::-webkit-scrollbar-thumb {
+    background: #0a0;
+    border-radius: 4px;
+  }
+</style></head><body>
+<div class="material-menu">
+  <div class="category">
+    <h3>Basic Materials</h3>
+    <button class="material-btn" data-material="sand">Sand</button>
+    <button class="material-btn" data-material="dirt">Dirt</button>
+    <button class="material-btn" data-material="rock">Rock</button>
+  </div>
+  
+  <div class="category">
+    <h3>Liquids</h3>
+    <button class="material-btn" data-material="water">Water</button>
+    <button class="material-btn" data-material="magma">Magma</button>
+  </div>
+  
+  <div class="category">
+    <h3>Special</h3>
+    <button class="material-btn" data-material="core">Core</button>
+    <button class="material-btn" data-material="plant">Plant</button>
+    <button class="material-btn" data-material="tnt">TNT</button>
+  </div>
+
+  <div class="category">
+    <h3>Tools</h3>
+    <button class="material-btn" data-tool="place">Place</button>
+    <button class="material-btn" data-tool="push">Push</button>
+    <button class="material-btn" data-tool="erase">Erase</button>
+    <button class="material-btn" data-tool="earthquake">Earthquake</button>
+    <button class="material-btn" data-tool="volcano">Volcano</button>
+    <button class="material-btn" data-material="preset">Planet Preset</button>
+    <button class="material-btn" data-material="gravity_well">Gravity Well</button>
+    <button class="material-btn" data-material="sun">Sun</button>
+  </div>
+
+  <div class="category">
+    <h3>Advanced Materials</h3>
+    <button class="material-btn" data-material="acid">Acid</button>
+    <button class="material-btn" data-material="crystal">Crystal</button>
+    <button class="material-btn" data-material="smoke">Smoke</button>
+    <button class="material-btn" data-material="oil">Oil</button>
+  </div>
+
+  <div class="category">
+    <h3>Special Tools</h3>
+    <button class="material-btn" data-tool="heat_ray">Heat Ray</button>
+    <button class="material-btn" data-tool="freeze_ray">Freeze Ray</button>
+    <button class="material-btn" data-tool="wind">Wind</button>
+  </div>
+
+  <div class="gravity-control">
+    <label for="gravity">Gravity: <span id="gravityValue">1.0</span>x</label>
+    <input type="range" id="gravity" min="0" max="200" value="100" class="slider">
+  </div>
+
+  <div class="settings-control">
+    <label for="particleSize">Particle Size: <span id="particleSizeValue">2</span>px</label>
+    <input type="range" id="particleSize" min="1" max="5" value="2" step="0.5" class="slider">
+    
+    <label for="maxParticles">Max Particles: <span id="maxParticlesValue">3000</span></label>
+    <input type="range" id="maxParticles" min="1000" max="5000" value="3000" step="100" class="slider">
+    
+      <label>
+        <input type="checkbox" id="coreGlow" checked>
+        Enable Particle Glow
+      </label>
+
+    
+    <button class="material-btn" id="clearParticles">Clear All</button>
+  </div>
+</div>
+<canvas id="sandCanvas"></canvas>
+<script>
+const MATERIALS = {
+  GRAVITY_WELL: 'gravity_well',
+  SUN: 'sun',
+  SAND: 'sand',
+  DIRT: 'dirt',
+  ROCK: 'rock',
+  WATER: 'water',
+  MAGMA: 'magma',
+  CORE: 'core',
+  PLANT: 'plant',
+  TNT: 'tnt',
+  PRESET: 'preset',
+  ICE: 'ice',
+  ACID: 'acid',
+  CRYSTAL: 'crystal',
+  SMOKE: 'smoke',
+  OIL: 'oil',
+  ATMOSPHERE: 'atmosphere',
+};
+
+function handleMouseInteraction(e) {
+    if (!isMouseDown) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    if (currentTool === 'place') {
+      addParticles(x, y);
+    } else if (currentTool === 'erase') {
+      const eraseRadius = particleSizeValue * 5;
+      particles.forEach((particle, index) => {
+        const dx = particle.x - x;
+        const dy = particle.y - y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < eraseRadius) {
+          particles.splice(index, 1);
+        }
+      });
+    } else if (currentTool === 'push') {
+      const pushRadius = particleSizeValue * 10;
+      const pushForce = 2;
+      const nearby = getNearbyParticles(x, y, pushRadius);
+      
+      for (const particle of nearby) {
+        const dx = particle.x - x;
+        const dy = particle.y - y;
+        const distance = Math.hypot(dx, dy);
+        
+        if (distance < pushRadius) {
+          const force = (1 - distance/pushRadius) * pushForce;
+          particle.vx += (dx/distance) * force;
+          particle.vy += (dy/distance) * force;
+        }
+      }
+    } else if (currentTool === 'heat_ray') {
+      const heatRadius = particleSizeValue * 8;
+      const nearbyHeat = getNearbyParticles(x, y, heatRadius);
+      for (const particle of nearbyHeat) {
+        if (particle.type === MATERIALS.ICE) {
+          particle.type = MATERIALS.WATER;
+          particle.isLiquid = true;
+        } else if (particle.type === MATERIALS.WATER) {
+          particle.vy -= 0.5;
+        }
+        particle.updateColor();
+      }
+    } else if (currentTool === 'freeze_ray') {
+      const freezeRadius = particleSizeValue * 8;
+      const nearbyFreeze = getNearbyParticles(x, y, freezeRadius);
+      for (const particle of nearbyFreeze) {
+        if (particle.type === MATERIALS.WATER) {
+          particle.type = MATERIALS.ICE;
+          particle.isLiquid = false;
+        }
+        particle.updateColor();
+      }
+    } else if (currentTool === 'wind') {
+      const windRadius = particleSizeValue * 15;
+      const nearbyWind = getNearbyParticles(x, y, windRadius);
+      
+      // Create smoke particles at wind point
+      if (Math.random() < 0.3 && particles.length < maxParticles) {
+        const smokeParticle = new Particle(x, y, MATERIALS.SMOKE);
+        smokeParticle.vx = (Math.random() - 0.5) * 2;
+        smokeParticle.vy = -Math.random() * 2;
+        particles.push(smokeParticle);
+      }
+
+      // Apply wind forces with fluid-like behavior
+      for (const particle of nearbyWind) {
+        const dx = particle.x - x;
+        const dy = particle.y - y;
+        const distance = Math.hypot(dx, dy);
+        const influence = 1 - (distance / windRadius);
+        
+        // Add vorticity
+        const vortexStrength = 0.5;
+        const vortexAngle = Math.atan2(dy, dx);
+        particle.vx += Math.cos(vortexAngle + Math.PI/2) * vortexStrength * influence;
+        particle.vy += Math.sin(vortexAngle + Math.PI/2) * vortexStrength * influence;
+        
+        // Add directional force
+        particle.vx += (Math.random() - 0.5) * 1.5 * influence;
+        particle.vy -= Math.random() * 1.5 * influence;
+        
+        // Add turbulence
+        if (Math.random() < 0.1) {
+          particle.vx += (Math.random() - 0.5) * influence;
+          particle.vy += (Math.random() - 0.5) * influence;
+        }
+      }
+    } else if (currentTool === 'earthquake') {
+      const quakeRadius = particleSizeValue * 30;
+      const quakeForce = 8;
+      const nearby = getNearbyParticles(x, y, quakeRadius);
+      
+      // Create shockwave effect
+      for (const particle of nearby) {
+        const dx = particle.x - x;
+        const dy = particle.y - y;
+        const distance = Math.hypot(dx, dy);
+        
+        if (distance < quakeRadius) {
+          // Break connections with probability based on distance
+          if (Math.random() < (1 - distance/quakeRadius)) {
+            particle.connections.clear();
+          }
+          
+          // Apply seismic forces
+          const force = (1 - distance/quakeRadius) * quakeForce;
+          particle.vx += (dx/distance) * force * (Math.random() - 0.5);
+          particle.vy += (dy/distance) * force * (Math.random() - 0.5);
+          
+          // Transform some rocks to magma
+          if (particle.type === MATERIALS.ROCK && Math.random() < 0.1) {
+            particle.type = MATERIALS.MAGMA;
+            particle.updateColor();
+          }
+        }
+      }
+      
+      // Add cracks/debris particles
+      if (Math.random() < 0.2 && particles.length < maxParticles) {
+        const debris = new Particle(x, y, MATERIALS.ROCK);
+        debris.vx = (Math.random() - 0.5) * 5;
+        debris.vy = (Math.random() - 0.5) * 5;
+        particles.push(debris);
+      }
+    } else if (currentTool === 'volcano') {
+      if (Math.random() < 0.2 && particles.length < maxParticles) {
+        // Create eruption
+        const angle = -Math.PI/2 + (Math.random() - 0.5);
+        const speed = 5 + Math.random() * 5;
+        const particle = new Particle(x, y, 
+            Math.random() < 0.7 ? MATERIALS.MAGMA : MATERIALS.SMOKE
+        );
+        particle.vx = Math.cos(angle) * speed;
+        particle.vy = Math.sin(angle) * speed;
+        particles.push(particle);
+        
+        // Create additional smoke
+        if (Math.random() < 0.3) {
+          const smoke = new Particle(x, y, MATERIALS.SMOKE);
+          smoke.vx = Math.cos(angle) * speed * 0.5;
+          smoke.vy = Math.sin(angle) * speed * 0.5;
+          particles.push(smoke);
+        }
+      }
+    }
+}
+
+const canvas = document.getElementById('sandCanvas');
+const ctx = canvas.getContext('2d', { alpha: false });
+
+canvas.width = window.innerWidth * 0.95;
+canvas.height = window.innerHeight * 0.65;
+
+const particles = [];
+let particleSizeValue = 2;
+const maxParticles = 3000;
+const gravitationalConstant = 9.81; // Change from 0.5 to 9.81
+const centerX = canvas.width / 2;
+const centerY = canvas.height / 2;
+const spatialHash = new Map();
+const CELL_SIZE = 10;
+
+let selectedMaterial = MATERIALS.SAND;
+let lastFrameTime = 0;
+const targetFPS = 60;
+const frameInterval = 1000 / targetFPS;
+let gravityMultiplier = 1.0;
+const gravitySlider = document.getElementById('gravity');
+const gravityValue = document.getElementById('gravityValue');
+const particleSizeSlider = document.getElementById('particleSize');
+const particleSizeDisplay = document.getElementById('particleSizeValue');
+const maxParticlesSlider = document.getElementById('maxParticles');
+const maxParticlesDisplay = document.getElementById('maxParticlesValue');
+const clearButton = document.getElementById('clearParticles');
+
+let currentTool = 'place';
+const coreGlowToggle = document.getElementById('coreGlow');
+
+gravitySlider.addEventListener('input', (e) => {
+  gravityMultiplier = e.target.value / 100;
+  gravityValue.textContent = gravityMultiplier.toFixed(1);
+});
+
+particleSizeSlider.addEventListener('input', (e) => {
+  particleSizeValue = parseFloat(e.target.value);
+  particleSizeDisplay.textContent = particleSizeValue;
+});
+
+maxParticlesSlider.addEventListener('input', (e) => {
+  const newMax = parseInt(e.target.value);
+  maxParticlesDisplay.textContent = newMax;
+  if (particles.length > newMax) {
+    particles.length = newMax;
+  }
+});
+
+clearButton.addEventListener('click', () => {
+  particles.length = 0;
+});
+
+function hashPos(x, y) {
+  const cellX = Math.floor(x / CELL_SIZE);
+  const cellY = Math.floor(y / CELL_SIZE);
+  return `${cellX},${cellY}`;
+}
+
+function updateSpatialHash() {
+  spatialHash.clear();
+  for (let i = 0; i < particles.length; i++) {
+    const p = particles[i];
+    const hash = hashPos(p.x, p.y);
+    if (!spatialHash.has(hash)) {
+      spatialHash.set(hash, []);
+    }
+    spatialHash.get(hash).push(p);
+  }
+}
+
+function getNearbyParticles(x, y, radius) {
+  const nearby = [];
+  const cellRadius = Math.ceil(radius / CELL_SIZE);
+  const centerCellX = Math.floor(x / CELL_SIZE);
+  const centerCellY = Math.floor(y / CELL_SIZE);
+
+  for (let dx = -cellRadius; dx <= cellRadius; dx++) {
+    for (let dy = -cellRadius; dy <= cellRadius; dy++) {
+      const hash = `${centerCellX + dx},${centerCellY + dy}`;
+      if (spatialHash.has(hash)) {
+        nearby.push(...spatialHash.get(hash));
+      }
+    }
+  }
+  return nearby;
+}
+
+class Particle {
+  constructor(x, y, type = selectedMaterial) {
+    this.isGravityWell = type === MATERIALS.GRAVITY_WELL || type === MATERIALS.SUN;
+    this.gravityStrength = type === MATERIALS.SUN ? 49.05 : // 5x Earth gravity 
+                           type === MATERIALS.GRAVITY_WELL ? 9.81 : 0; // Normal Earth gravity
+    this.x = x;
+    this.y = y;
+    this.vx = 0;
+    this.vy = 0;
+    this.type = type;
+    this.pressure = 0;
+    this.glow = 0;
+    this.updateColor();
+    this.radius = particleSizeValue;
+    this.isLiquid = type === MATERIALS.WATER;
+    this.mass = this.type === MATERIALS.CORE ? 2 : 1;
+    this.countdown = type === MATERIALS.TNT ? 3000 : null;
+    this.spawnTime = type === MATERIALS.TNT ? Date.now() : null;
+    this.connections = new Set();
+    this.jointStrength = 1.0;
+    this.isAtmosphere = type === MATERIALS.ATMOSPHERE;
+  }
+
+  updateColor() {
+    switch(this.type) {
+      case MATERIALS.SUN:
+        const sunPulse = (Math.sin(Date.now() * 0.005) + 1) * 0.5;
+        this.color = `rgba(255, ${150 + sunPulse * 100}, 0, 0.9)`;
+        this.glow = 30 + sunPulse * 20;
+        this.radius = particleSizeValue * 5;
+        break;
+      case MATERIALS.GRAVITY_WELL:
+        const pulseIntensity = (Math.sin(Date.now() * 0.005) + 1) * 0.5;
+        this.color = `rgba(0, ${150 + pulseIntensity * 100}, ${200 + pulseIntensity * 55}, 0.8)`;
+        this.glow = 15 + pulseIntensity * 10;
+        break;
+      case MATERIALS.WATER:
+        const waterBlue = 100 + Math.random() * 50;
+        this.color = `rgba(0, ${waterBlue}, 255, 0.6)`;
+        this.glow = 5;
+        break;
+      case MATERIALS.ICE:
+        const iceBlue = 200 + Math.random() * 55;
+        this.color = `rgb(${iceBlue}, ${iceBlue}, 255)`;
+        this.glow = 2;
+        break;
+      case MATERIALS.SAND:
+        this.color = `rgb(${194 + Math.random() * 20}, ${177 + Math.random() * 20}, ${145 + Math.random() * 20})`;
+        break;
+      case MATERIALS.DIRT:
+        this.color = `rgb(${65 + Math.random() * 20}, ${45 + Math.random() * 20}, ${25 + Math.random() * 20})`;
+        break;
+      case MATERIALS.ROCK:
+        this.color = `rgb(${50 + Math.random() * 20}, ${50 + Math.random() * 20}, ${50 + Math.random() * 20})`;
+        break;
+      case MATERIALS.MAGMA:
+        const magmaRed = 255;
+        const magmaGreen = 50 + Math.random() * 20;
+        const magmaBlue = 0;
+        this.color = `rgb(${magmaRed}, ${magmaGreen}, ${magmaBlue})`;
+        this.glow = 20;
+        break;
+      case MATERIALS.CORE:
+        const coreRed = 255;
+        const coreGreen = 150 + Math.random() * 50;
+        const coreBlue = 0;
+        this.color = `rgb(${coreRed}, ${coreGreen}, ${coreBlue})`;
+        this.glow = 30;
+        break;
+      case MATERIALS.PLANT:
+        const plantGreen = 50 + Math.random() * 50;
+        this.color = `rgb(${20 + Math.random() * 20}, ${plantGreen}, ${20 + Math.random() * 20})`;
+        break;
+      case MATERIALS.TNT:
+        const progress = this.countdown ? (Date.now() - this.spawnTime) / this.countdown : 0;
+        const flash = progress > 0.8 ? Math.random() > 0.5 : false;
+        this.color = flash ? '#fff' : '#ff0000';
+        this.glow = flash ? 10 : 0;
+        break;
+      case MATERIALS.ACID:
+        this.color = `rgba(${150 + Math.random() * 50}, 255, 0, 0.7)`;
+        this.glow = 10;
+        break;
+      case MATERIALS.CRYSTAL:
+        const hue = (Math.sin(Date.now() * 0.001) + 1) * 180;
+        this.color = `hsla(${hue}, 80%, 70%, 0.8)`;
+        this.glow = 15;
+        break;
+      case MATERIALS.SMOKE:
+        const smokeAlpha = 0.3 + Math.random() * 0.2;
+        this.color = `rgba(150, 150, 150, ${smokeAlpha})`;
+        this.radius = particleSizeValue * (1 + Math.random());
+        break;
+      case MATERIALS.OIL:
+        this.color = `rgba(40, 40, 40, 0.8)`;
+        break;
+      case MATERIALS.ATMOSPHERE:
+        const alpha = 0.2 + Math.sin(Date.now() * 0.001) * 0.05;
+        this.color = `rgba(120, 200, 255, ${alpha})`;
+        this.glow = 15;
+        this.radius = particleSizeValue * 3;
+        break;
+    }
+  }
+
+  generateAtmosphere() {
+    if (this.type === MATERIALS.PLANT && Math.random() < 0.001) {
+      const nearby = getNearbyParticles(this.x, this.y, this.radius * 20);
+      const plantCount = nearby.filter(p => p.type === MATERIALS.PLANT).length;
+      
+      if (plantCount > 5 && particles.length < maxParticles) {
+        const angle = Math.random() * Math.PI * 2;
+        const distance = this.radius * (10 + Math.random() * 10);
+        const atmosphere = new Particle(
+          this.x + Math.cos(angle) * distance,
+          this.y + Math.sin(angle) * distance,
+          MATERIALS.ATMOSPHERE
+        );
+        atmosphere.vx = (Math.random() - 0.5) * 0.5;
+        atmosphere.vy = (Math.random() - 0.5) * 0.5;
+        particles.push(atmosphere);
+      }
+    }
+  }
+
+  update() {
+    const dx = centerX - this.x;
+    const dy = centerY - this.y;
+    const distance = Math.hypot(dx, dy);
+    
+    if (!this.isGravityWell) {
+        const gravityWells = particles.filter(p => p.isGravityWell);
+        let totalForceX = 0;
+        let totalForceY = 0;
+        const dxCenter = centerX - this.x;
+        const dyCenter = centerY - this.y;
+        const distCenter = Math.hypot(dxCenter, dyCenter);
+        if (distCenter > 5) {
+            const forceCenter = (gravitationalConstant * gravityMultiplier) / Math.max(10, distCenter);
+            totalForceX += (dxCenter / distCenter) * forceCenter;
+            totalForceY += (dyCenter / distCenter) * forceCenter;
+        }
+        for (const well of gravityWells) {
+            const dxWell = well.x - this.x;
+            const dyWell = well.y - this.y;
+            const distWell = Math.hypot(dxWell, dyWell);
+            if (distWell > 5) {
+                const forceWell = (well.gravityStrength * gravityMultiplier) / Math.max(10, distWell);
+                totalForceX += (dxWell / distWell) * forceWell;
+                totalForceY += (dyWell / distWell) * forceWell;
+            }
+        }
+        let force = this.isLiquid ? 0.7 : 1.0;
+        this.vx += totalForceX * force;
+        this.vy += totalForceY * force;
+    }
+    if (this.isGravityWell) {
+        this.vx = 0;
+        this.vy = 0;
+        return true;
+    }
+    this.x += this.vx;
+    this.y += this.vy;
+    const frictionFactor = this.type === MATERIALS.WATER ? 0.98 :
+                          this.type === MATERIALS.MAGMA ? 0.95 : 0.99;
+    this.vx *= frictionFactor;
+    this.vy *= frictionFactor;
+    this.pressure = 0;
+    const nearby = getNearbyParticles(this.x, this.y, this.radius * 3);
+    
+    for (const other of nearby) {
+      if (other === this) continue;
+      
+      const dx = other.x - this.x;
+      const dy = other.y - this.y;
+      const distance = Math.hypot(dx, dy);
+      
+      if (distance < this.radius + other.radius) {
+        this.handleCollision(other, dx, dy, distance);
+      }
+    }
+
+    this.handleBoundaries();
+    this.checkConnections();
+
+    if (this.type === MATERIALS.WATER) {
+      let nearbyHeat = false;
+      const nearby = getNearbyParticles(this.x, this.y, this.radius * 8);
+      
+      for (const other of nearby) {
+        if (other.type === MATERIALS.MAGMA || other.type === MATERIALS.CORE) {
+          nearbyHeat = true;
+          break;
+        }
+      }
+      
+      if (!nearbyHeat && Math.random() < 0.001) {
+        this.type = MATERIALS.ICE;
+        this.isLiquid = false;
+        this.updateColor();
+      }
+    }
+    
+    if (this.type === MATERIALS.ICE) {
+      const nearby = getNearbyParticles(this.x, this.y, this.radius * 5);
+      for (const other of nearby) {
+        if (other.type === MATERIALS.MAGMA || other.type === MATERIALS.CORE) {
+          this.type = MATERIALS.WATER;
+          this.isLiquid = true;
+          this.updateColor();
+          break;
+        }
+      }
+    }
+
+    if (this.type === MATERIALS.CORE) {
+      if (Math.random() < 0.05) {
+        const nearby = getNearbyParticles(this.x, this.y, this.radius * 5);
+        let pressureCount = 0;
+        
+        for (const other of nearby) {
+          if (other === this) continue;
+          const dx = other.x - this.x;
+          const dy = other.y - this.y;
+          const distance = Math.hypot(dx, dy);
+          
+          if (distance < this.radius * 5) {
+            pressureCount++;
+            const force = 0.1 * (1 - distance/(this.radius * 5));
+            other.vx += (dx/distance) * force;
+            other.vy += (dy/distance) * force;
+            
+            if (Math.random() < 0.01) {
+              if (other.type === MATERIALS.ROCK) {
+                other.type = MATERIALS.MAGMA;
+                other.updateColor();
+              } else if (other.type === MATERIALS.DIRT || other.type === MATERIALS.SAND) {
+                other.type = MATERIALS.ROCK;
+                other.updateColor();
+              }
+            }
+          }
+        }
+
+        // Add core combustion check
+        if (pressureCount > 8 && Math.random() < 0.01) {
+          this.coreCombustion();
+        }
+      }
+    }
+
+    if (this.type === MATERIALS.PLANT) {
+      if (Math.random() < 0.001) {
+        const nearby = getNearbyParticles(this.x, this.y, this.radius * 4);
+        const dirt = nearby.find(p => p.type === MATERIALS.DIRT);
+        if (dirt && particles.length < maxParticles) {
+          const angle = Math.random() * Math.PI * 2;
+          const distance = this.radius * 2;
+          particles.push(new Particle(
+            this.x + Math.cos(angle) * distance,
+            this.y + Math.sin(angle) * distance,
+            MATERIALS.PLANT
+          ));
+        }
+      }
+      this.generateAtmosphere();
+    }
+
+    if (this.type === MATERIALS.TNT && this.countdown) {
+      const elapsed = Date.now() - this.spawnTime;
+      if (elapsed >= this.countdown) {
+        this.explode();
+        return false;
+      }
+    }
+
+    if (this.type === MATERIALS.SUN) {
+      const heatRadius = this.radius * 10;
+      const nearby = getNearbyParticles(this.x, this.y, heatRadius);
+      
+      for (const other of nearby) {
+        if (other === this) continue;
+        
+        const dx = other.x - this.x;
+        const dy = other.y - this.y;
+        const distance = Math.hypot(dx, dy);
+        
+        if (distance < heatRadius) {
+          if (other.type === MATERIALS.ICE) {
+            other.type = MATERIALS.WATER;
+            other.isLiquid = true;
+            other.updateColor();
+          } else if (other.type === MATERIALS.WATER) {
+            if (Math.random() < 0.1) {
+              particles.splice(particles.indexOf(other), 1);
+            }
+          } else if (other.type === MATERIALS.ROCK) {
+            if (Math.random() < 0.05) {
+              other.type = MATERIALS.MAGMA;
+              other.updateColor();
+            }
+          }
+          
+          const heatForce = 0.1 * (1 - distance/heatRadius);
+          other.vy -= heatForce;
+        }
+      }
+    }
+
+    if (this.type === MATERIALS.ACID) {
+      const nearby = getNearbyParticles(this.x, this.y, this.radius * 3);
+      for (const other of nearby) {
+        if (other !== this && Math.random() < 0.1) {
+          particles.splice(particles.indexOf(other), 1);
+        }
+      }
+    }
+
+    if (this.type === MATERIALS.CRYSTAL) {
+      if (Math.random() < 0.005 && particles.length < maxParticles) {
+        const angle = Math.random() * Math.PI * 2;
+        particles.push(new Particle(
+          this.x + Math.cos(angle) * this.radius * 2,
+          this.y + Math.sin(angle) * this.radius * 2,
+          MATERIALS.CRYSTAL
+        ));
+      }
+    }
+
+    if (this.type === MATERIALS.SMOKE) {
+        // Smoke dissipation
+        this.vy -= 0.1 + Math.random() * 0.1;
+        this.vx += (Math.random() - 0.5) * 0.1;
+  
+        // Smoke diffusion
+        if (Math.random() < 0.02) {
+          this.radius *= 1.02;
+          const alpha = parseFloat(this.color.match(/[\d.]+\)$/)[0]);
+          if (alpha > 0.1) {
+            this.color = `rgba(150, 150, 150, ${alpha * 0.95})`;
+          } else {
+            particles.splice(particles.indexOf(this), 1);
+          }
+        }
+        
+        // Smoke interaction with other particles
+        const nearby = getNearbyParticles(this.x, this.y, this.radius * 2);
+        for (const other of nearby) {
+          if (other !== this && other.type === MATERIALS.SMOKE) {
+            const dx = other.x - this.x;
+            const dy = other.y - this.y;
+            const distance = Math.hypot(dx, dy);
+            if (distance < this.radius + other.radius) {
+              // Merge smoke particles
+              if (Math.random() < 0.1) {
+                this.radius = Math.min(this.radius + 0.5, particleSizeValue * 3);
+                particles.splice(particles.indexOf(other), 1);
+              }
+            }
+          }
+        }
+
+        if (Math.random() < 0.02) {
+          particles.splice(particles.indexOf(this), 1);
+        }
+    }
+
+    if (this.type === MATERIALS.OIL) {
+      const nearby = getNearbyParticles(this.x, this.y, this.radius * 3);
+      for (const other of nearby) {
+        if (other.type === MATERIALS.WATER) {
+          if (this.y > other.y) {
+            this.vy -= 0.5;
+          }
+        }
+      }
+    }
+
+    if (this.type === MATERIALS.ATMOSPHERE) {
+      this.vx += (Math.random() - 0.5) * 0.1;
+      this.vy += (Math.random() - 0.5) * 0.1;
+      this.vx *= 0.99;
+      this.vy *= 0.99;
+      
+      const nearby = getNearbyParticles(this.x, this.y, this.radius * 10);
+      const plants = nearby.filter(p => p.type === MATERIALS.PLANT);
+      
+      if (plants.length < 3 || Math.random() < 0.001) {
+        return false; // Remove atmosphere particle if not enough plants nearby
+      }
+    }
+
+    return true;
+  }
+
+  coreCombustion() {
+    const explosionRadius = 20;
+    const explosionForce = 10;
+    const nearby = getNearbyParticles(this.x, this.y, explosionRadius);
+    
+    // Create mini explosion
+    for (const particle of nearby) {
+      if (particle === this) continue;
+      
+      const dx = particle.x - this.x;
+      const dy = particle.y - this.y;
+      const distance = Math.hypot(dx, dy);
+      
+      if (distance < explosionRadius) {
+        // Apply explosion force
+        const force = (1 - distance/explosionRadius) * explosionForce;
+        particle.vx += (dx/distance) * force;
+        particle.vy += (dy/distance) * force;
+        
+        // Transform nearby particles to magma
+        if (particle.type === MATERIALS.ROCK || particle.type === MATERIALS.DIRT) {
+          particle.type = MATERIALS.MAGMA;
+          particle.updateColor();
+        }
+      }
+    }
+    
+    // Create magma eruption
+    for (let i = 0; i < 5; i++) {
+      if (particles.length < maxParticles) {
+        const angle = -Math.PI/2 + (Math.random() - 0.5);
+        const speed = 3 + Math.random() * 3;
+        const particle = new Particle(this.x, this.y, MATERIALS.MAGMA);
+        particle.vx = Math.cos(angle) * speed;
+        particle.vy = Math.sin(angle) * speed;
+        particles.push(particle);
+        
+        // Add some smoke
+        if (Math.random() < 0.5) {
+          const smoke = new Particle(this.x, this.y, MATERIALS.SMOKE);
+          smoke.vx = Math.cos(angle) * speed * 0.5;
+          smoke.vy = Math.sin(angle) * speed * 0.5;
+          particles.push(smoke);
+        }
+      }
+    }
+  }
+
+  explode() {
+    const explosionRadius = 50;
+    const explosionForce = 20;
+    const nearby = getNearbyParticles(this.x, this.y, explosionRadius);
+    
+    for (const particle of nearby) {
+      if (particle === this) continue;
+      
+      const dx = particle.x - this.x;
+      const dy = particle.y - this.y;
+      const distance = Math.hypot(dx, dy);
+      
+      if (distance < explosionRadius) {
+        const force = (1 - distance / explosionRadius) * explosionForce;
+        particle.vx += (dx / distance) * force;
+        particle.vy += (dy / distance) * force;
+        
+        if (Math.random() < 0.3) {
+          particle.type = MATERIALS.MAGMA;
+          particle.updateColor();
+        }
+      }
+    }
+    
+    for (let i = 0; i < 20; i++) {
+      if (particles.length < maxParticles) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * explosionForce;
+        const particle = new Particle(this.x, this.y, MATERIALS.MAGMA);
+        particle.vx = Math.cos(angle) * speed;
+        particle.vy = Math.sin(angle) * speed;
+        particles.push(particle);
+      }
+    }
+  }
+
+  handleCollision(other, dx, dy, distance) {
+    if (this.pressure > 20) return;
+    
+    this.pressure += 1;
+    other.pressure += 1;
+
+    const targetRadius = particleSizeValue * (1 + (this.pressure * 0.05));
+    this.radius = this.radius * 0.9 + targetRadius * 0.1;
+
+    if (this.pressure > 15 && !this.isLiquid) {
+      this.transformUnderPressure();
+    }
+
+    const relativeSpeed = Math.hypot(this.vx - other.vx, this.vy - other.vy);
+    if (relativeSpeed > 0.1) {
+      const angle = Math.atan2(dy, dx);
+      const sin = Math.sin(angle);
+      const cos = Math.cos(angle);
+
+      const elasticity = this.isLiquid || other.isLiquid ? 0.3 :
+                        this.type === MATERIALS.MAGMA ? 0.5 : 0.8;
+
+      this.resolveCollision(other, sin, cos, elasticity);
+    }
+    
+    if (this.type === MATERIALS.CORE) {
+      if (other.type !== MATERIALS.CORE && Math.random() < 0.1) {
+        if (other.type === MATERIALS.ROCK) {
+          other.type = MATERIALS.MAGMA;
+          other.updateColor();
+        } else if (other.type === MATERIALS.DIRT || other.type === MATERIALS.SAND) {
+          other.type = MATERIALS.ROCK;
+          other.updateColor();
+        } else if (other.type === MATERIALS.WATER) {
+          return false;
+        }
+      }
+    }
+
+    this.resolveOverlap(other, dx, dy, distance);
+  }
+
+  handleBoundaries() {
+    if (this.x < this.radius) {
+      this.x = this.radius;
+      this.vx *= -0.8;
+    } else if (this.x > canvas.width - this.radius) {
+      this.x = canvas.width - this.radius;
+      this.vx *= -0.8;
+    }
+    
+    if (this.y < this.radius) {
+      this.y = this.radius;
+      this.vy *= -0.8;
+    } else if (this.y > canvas.height - this.radius) {
+      this.y = canvas.height - this.radius;
+      this.vy *= -0.8;
+    }
+  }
+
+  draw() {
+    if (this.glow > 0 && coreGlowToggle.checked) {
+      ctx.shadowBlur = this.glow;
+      ctx.shadowColor = this.color;
+    }
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    ctx.fillStyle = this.color;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    if (this.connections.size > 0) {
+      ctx.beginPath();
+      ctx.strokeStyle = `rgba(255,255,255,0.2)`;
+      ctx.lineWidth = 1;
+      for (const connected of this.connections) {
+        ctx.moveTo(this.x, this.y);
+        ctx.lineTo(connected.x, connected.y);
+      }
+      ctx.stroke();
+    }
+  }
+
+  resolveCollision(other, sin, cos, elasticity) {
+    const vx1 = this.vx * cos + this.vy * sin;
+    const vy1 = this.vy * cos - this.vx * sin;
+    const vx2 = other.vx * cos + other.vy * sin;
+    const vy2 = other.vy * cos - other.vx * sin;
+
+    this.vx = vx2 * cos - vy1 * sin * elasticity;
+    this.vy = vy1 * cos + vx2 * sin * elasticity;
+    other.vx = vx1 * cos - vy2 * sin * elasticity;
+    other.vy = vy2 * cos + vx1 * sin * elasticity;
+  }
+
+  resolveOverlap(other, dx, dy, distance) {
+    const overlap = (this.radius + other.radius) - distance;
+    const moveX = (overlap * dx) / distance / 2;
+    const moveY = (overlap * dy) / distance / 2;
+    
+    this.x -= moveX;
+    this.y -= moveY;
+    other.x += moveX;
+    other.y += moveY;
+  }
+
+  transformUnderPressure() {
+    if (this.type === MATERIALS.SAND) {
+      this.type = MATERIALS.ROCK;
+    } else if (this.type === MATERIALS.ROCK) {
+      this.type = MATERIALS.MAGMA;
+    } else if (this.type === MATERIALS.MAGMA) {
+      this.type = MATERIALS.CORE;
+    }
+    this.updateColor();
+  }
+
+  checkConnections() {
+    for (const connected of this.connections) {
+      const dx = connected.x - this.x;
+      const dy = connected.y - this.y;
+      const distance = Math.hypot(dx, dy);
+      
+      if (distance > particleSizeValue * 6) {
+        this.connections.delete(connected);
+        connected.connections.delete(this);
+        continue;
+      }
+      
+      const force = (distance - particleSizeValue * 3) * 0.1;
+      const angle = Math.atan2(dy, dx);
+      
+      this.vx += Math.cos(angle) * force;
+      this.vy += Math.sin(angle) * force;
+      connected.vx -= Math.cos(angle) * force;
+      connected.vy -= Math.sin(angle) * force;
+    }
+  }
+}
+
+function animate(currentTime) {
+  if (!lastFrameTime) lastFrameTime = currentTime;
+  
+  const elapsed = currentTime - lastFrameTime;
+  if (elapsed >= frameInterval) {
+    ctx.fillStyle = 'rgb(17, 17, 17)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    updateSpatialHash();
+    
+    const remainingParticles = [];
+    for (const particle of particles) {
+      if (particle.update()) {
+        remainingParticles.push(particle);
+      }
+    }
+    particles.length = 0;
+    particles.push(...remainingParticles);
+    
+    ctx.globalCompositeOperation = 'lighter';
+    for (const particle of particles) {
+      particle.draw();
+    }
+    ctx.globalCompositeOperation = 'source-over';
+    
+    lastFrameTime = currentTime - (elapsed % frameInterval);
+  }
+
+  requestAnimationFrame(animate);
+}
+
+function addParticles(x, y, count = 5) {
+  for (let i = 0; i < count; i++) {
+    if (particles.length < maxParticles) {
+      const spread = 8;
+      const newX = x + (Math.random() - 0.5) * spread;
+      const newY = y + (Math.random() - 0.5) * spread;
+      particles.push(new Particle(newX, newY, selectedMaterial));
+    }
+  }
+}
+
+function connectNearbyParticles() {
+  const connectionRadius = particleSizeValue * 4;
+
+  for (const particle of particles) {
+    const nearby = getNearbyParticles(particle.x, particle.y, connectionRadius);
+
+    for (const other of nearby) {
+      if (other === particle) continue;
+
+      const dx = other.x - particle.x;
+      const dy = other.y - particle.y;
+      const distance = Math.hypot(dx, dy);
+
+      if (distance < connectionRadius) {
+        particle.connections.add(other);
+        other.connections.add(particle);
+      }
+    }
+  }
+}
+
+let isMouseDown = false;
+canvas.addEventListener('mousedown', (e) => {
+  isMouseDown = true;
+  handleMouseInteraction(e);
+});
+
+canvas.addEventListener('mousemove', (e) => {
+  handleMouseInteraction(e);
+});
+
+canvas.addEventListener('mouseup', () => {
+  isMouseDown = false;
+});
+
+for (let i = 0; i < 200; i++) {
+  addParticles(Math.random() * canvas.width, Math.random() * canvas.height);
+}
+
+const materialButtons = document.querySelectorAll('.material-btn');
+materialButtons.forEach(button => {
+  button.addEventListener('click', () => {
+    materialButtons.forEach(b => b.classList.remove('active'));
+    button.classList.add('active');
+    
+    if (button.dataset.tool) {
+      currentTool = button.dataset.tool;
+    } else if (button.dataset.material === MATERIALS.PRESET) {
+      createPlanetPreset();
+    } else {
+      selectedMaterial = button.dataset.material;
+    }
+  });
+});
+
+function createPlanetPreset() {
+  particles.length = 0;
+  
+  const planetRadius = Math.min(canvas.width, canvas.height) * 0.3;
+  const coreRadius = planetRadius * 0.2;
+  const magmaRadius = planetRadius * 0.4;
+  const rockRadius = planetRadius * 0.7;
+  const grassRadius = planetRadius * 0.9;
+  
+  for (let i = 0; i < 1500; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const radius = Math.random() * planetRadius;
+    const x = centerX + Math.cos(angle) * radius;
+    const y = centerY + Math.sin(angle) * radius;
+    
+    let material = MATERIALS.DIRT;
+    if (radius < coreRadius) {
+      material = MATERIALS.CORE;
+    } else if (radius < magmaRadius) {
+      material = MATERIALS.MAGMA;
+    } else if (radius < rockRadius) {
+      material = MATERIALS.ROCK;
+    } else if (radius < grassRadius) {
+      material = MATERIALS.PLANT;
+    }
+    
+    particles.push(new Particle(x, y, material));
+  }
+  
+  // Add atmosphere around plant layer
+  for (let i = 0; i < 100; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const radius = grassRadius + (Math.random() * planetRadius * 0.2);
+    const x = centerX + Math.cos(angle) * radius;
+    const y = centerY + Math.sin(angle) * radius;
+    particles.push(new Particle(x, y, MATERIALS.ATMOSPHERE));
+  }
+  
+  connectNearbyParticles();
+}
+
+animate();
+window.addEventListener('resize', () => {
+  canvas.width = window.innerWidth * 0.95;
+  canvas.height = window.innerHeight * 0.65;
+});
+</script></body></html>
