@@ -1,0 +1,313 @@
+<html><head><base href="blob:https://party.websim.ai/c777e954-6ad3-4545-beed-41039b256590">
+    <title>Cosmic Crypto Constellation with Real-time Data</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #000; }
+        #info, #cryptoInfo, #newsReports { position: absolute; color: white; font-family: Arial; }
+        #info { top: 10px; left: 10px; }
+        #cryptoInfo { top: 10px; right: 10px; text-align: right; max-height: 95vh; overflow-y: auto; padding-right: 10px; }
+        #newsReports { bottom: 10px; left: 10px; max-width: 50%; }
+        #canvas-container { position: relative; width: 100%; height: 100vh; }
+        #backgroundCanvas { position: absolute; top: 0; left: 0; z-index: -1; }
+        #particleCanvas { z-index: 1; }
+    </style>
+</head>
+<body>
+    <div id="canvas-container">
+        <canvas id="backgroundCanvas"></canvas>
+        <canvas id="particleCanvas"></canvas>
+    </div>
+    <div id="info"></div>
+    <div id="cryptoInfo"></div>
+    <div id="newsReports"></div>
+
+    <script>
+        const COINGECKO_API_URL = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false';
+        const CRYPTO_PANIC_API_URL = 'https://cryptopanic.com/api/v1/posts/?auth_token=YOUR_CRYPTO_PANIC_API_KEY&kind=news';
+
+        const groups = {
+            'Layer 1 Protocols': ['Bitcoin', 'Ethereum', 'Cardano', 'Solana', 'Polkadot', 'Avalanche', 'Cosmos'],
+            'Layer 2 Solutions': ['Polygon', 'Optimism', 'Arbitrum'],
+            'DeFi': ['Uniswap', 'Aave', 'Maker', 'Compound', 'Curve DAO Token', 'PancakeSwap', 'SushiSwap'],
+            'Exchange Tokens': ['BNB', 'FTX Token', 'OKB', 'KuCoin Token', 'Huobi Token'],
+            'Stablecoins': ['Tether', 'USD Coin', 'Binance USD', 'Dai', 'TrueUSD'],
+            'Privacy Coins': ['Monero', 'Zcash', 'Dash'],
+            'Gaming & Metaverse': ['Axie Infinity', 'Decentraland', 'The Sandbox', 'Enjin Coin'],
+            'Oracle Networks': ['Chainlink', 'Band Protocol', 'API3'],
+            'Storage & Computing': ['Filecoin', 'Storj', 'Siacoin', 'Golem'],
+            'Others': []
+        };
+
+        async function fetchCoinData() {
+            try {
+                const response = await fetch(COINGECKO_API_URL);
+                const data = await response.json();
+                return data.map(coin => ({
+                    name: coin.name,
+                    symbol: coin.symbol,
+                    price: coin.current_price,
+                    market_cap: coin.market_cap,
+                    price_change_24h: coin.price_change_percentage_24h,
+                    image: coin.image
+                }));
+            } catch (error) {
+                console.error('Error fetching coin data:', error);
+                return [];
+            }
+        }
+
+        function groupCryptos(cryptos) {
+            return cryptos.map(crypto => {
+                for (const [group, members] of Object.entries(groups)) {
+                    if (members.includes(crypto.name)) {
+                        return { ...crypto, group };
+                    }
+                }
+                return { ...crypto, group: 'Others' };
+            });
+        }
+
+        async function fetchNewsReports() {
+            try {
+                const response = await fetch(CRYPTO_PANIC_API_URL);
+                const data = await response.json();
+                return data.results.slice(0, 5);
+            } catch (error) {
+                console.error('Error fetching news reports:', error);
+                return [];
+            }
+        }
+
+        async function updateNewsReports() {
+            const newsReports = await fetchNewsReports();
+            const newsHtml = newsReports.map(article => `
+                <h3>${article.title}</h3>
+                <p>${article.metadata?.description || 'No description available'}</p>
+                <a href="${article.url}" target="_blank">Read more</a>
+            `).join('<hr>');
+            document.getElementById('newsReports').innerHTML = `<h2>Latest Crypto News</h2>${newsHtml}`;
+        }
+
+        setInterval(updateNewsReports, 300000); // Update news every 5 minutes
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('particleCanvas') });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        camera.position.z = 50;
+
+        let cryptoSpheres = [];
+        let groupedCryptos = [];
+
+        async function initializeVisualization() {
+            const coinData = await fetchCoinData();
+            groupedCryptos = groupCryptos(coinData);
+
+            cryptoSpheres.forEach(sphere => scene.remove(sphere));
+            cryptoSpheres.length = 0;
+
+            const loader = new THREE.TextureLoader();
+
+            groupedCryptos.forEach((crypto, index) => {
+                const texture = loader.load(crypto.image);
+                const material = new THREE.SpriteMaterial({ map: texture });
+                const sprite = new THREE.Sprite(material);
+                sprite.scale.set(3, 3, 1);
+
+                const groupIndex = Object.keys(groups).indexOf(crypto.group);
+                const angleStep = (Math.PI * 2) / groupedCryptos.length;
+                const radius = 30 + (groupIndex * 5);
+
+                sprite.position.x = radius * Math.cos(index * angleStep);
+                sprite.position.y = radius * Math.sin(index * angleStep);
+                sprite.position.z = groupIndex * 5;
+
+                scene.add(sprite);
+                cryptoSpheres.push(sprite);
+            });
+
+            updateConnectionLines();
+            updateCryptoInfo();
+        }
+
+        function getColorForGroup(group) {
+            const colors = {
+                'Layer 1 Protocols': 0x00ff00,
+                'Layer 2 Solutions': 0x00ffff,
+                'DeFi': 0xff00ff,
+                'Exchange Tokens': 0xffff00,
+                'Stablecoins': 0x0000ff,
+                'Privacy Coins': 0xff0000,
+                'Gaming & Metaverse': 0xff8000,
+                'Oracle Networks': 0x8000ff,
+                'Storage & Computing': 0x00ff80,
+                'Others': 0xffffff
+            };
+            return colors[group] || 0xffffff;
+        }
+
+        function updateConnectionLines() {
+            scene.children.forEach(child => {
+                if (child instanceof THREE.Line) {
+                    scene.remove(child);
+                }
+            });
+
+            const groupedSpheres = {};
+            cryptoSpheres.forEach((sphere, index) => {
+                const group = groupedCryptos[index].group;
+                if (!groupedSpheres[group]) {
+                    groupedSpheres[group] = [];
+                }
+                groupedSpheres[group].push(sphere);
+            });
+
+            Object.entries(groupedSpheres).forEach(([group, spheres]) => {
+                const color = getColorForGroup(group);
+                for (let i = 0; i < spheres.length; i++) {
+                    for (let j = i + 1; j < spheres.length; j++) {
+                        const geometry = new THREE.BufferGeometry().setFromPoints([
+                            spheres[i].position,
+                            spheres[j].position
+                        ]);
+                        const line = new THREE.Line(geometry, new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.2 }));
+                        scene.add(line);
+                    }
+                }
+            });
+        }
+
+        function updateCryptoInfo() {
+            const cryptoInfoHtml = groupedCryptos.map(crypto => `
+                <div>
+                    <img src="${crypto.image}" alt="${crypto.name}" width="20" height="20" style="vertical-align: middle;">
+                    <strong>${crypto.name} (${crypto.symbol.toUpperCase()})</strong><br>
+                    Price: $${crypto.price.toFixed(2)}<br>
+                    24h Change: ${crypto.price_change_24h.toFixed(2)}%<br>
+                    Market Cap: $${(crypto.market_cap / 1e9).toFixed(2)}B
+                </div>
+            `).join('<hr>');
+            document.getElementById('cryptoInfo').innerHTML = cryptoInfoHtml;
+        }
+
+        initializeVisualization();
+        updateNewsReports();
+
+        const planetRadius = 100;
+        const planetSegments = 64;
+        const planetRings = 32;
+
+        function createPlanetBackground() {
+            const bgScene = new THREE.Scene();
+            const bgCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const bgRenderer = new THREE.WebGLRenderer({ canvas: document.getElementById('backgroundCanvas'), alpha: true });
+            bgRenderer.setSize(window.innerWidth, window.innerHeight);
+
+            bgCamera.position.z = 150;
+
+            const planetGeometry = new THREE.SphereGeometry(planetRadius, planetSegments, planetRings);
+            const planetMaterial = new THREE.ShaderMaterial({
+                uniforms: {
+                    time: { value: 0 }
+                },
+                vertexShader: `
+                    varying vec3 vNormal;
+                    void main() {
+                        vNormal = normal;
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    uniform float time;
+                    varying vec3 vNormal;
+                    void main() {
+                        vec3 color1 = vec3(0.1, 0.2, 0.3);
+                        vec3 color2 = vec3(0.5, 0.7, 0.9);
+                        float noise = sin(vNormal.x * 10.0 + time) * cos(vNormal.y * 10.0 + time) * sin(vNormal.z * 10.0 + time);
+                        vec3 color = mix(color1, color2, noise * 0.5 + 0.5);
+                        gl_FragColor = vec4(color, 1.0);
+                    }
+                `
+            });
+
+            const planet = new THREE.Mesh(planetGeometry, planetMaterial);
+            bgScene.add(planet);
+
+            function animatePlanet() {
+                requestAnimationFrame(animatePlanet);
+                planet.rotation.y += 0.001;
+                planetMaterial.uniforms.time.value += 0.01;
+                bgRenderer.render(bgScene, bgCamera);
+            }
+
+            animatePlanet();
+
+            window.addEventListener('resize', () => {
+                bgCamera.aspect = window.innerWidth / window.innerHeight;
+                bgCamera.updateProjectionMatrix();
+                bgRenderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+
+        createPlanetBackground();
+
+        function onMouseMove(event) {
+            const mouse = new THREE.Vector2();
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+
+            const raycaster = new THREE.Raycaster();
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(cryptoSpheres);
+
+            if (intersects.length > 0) {
+                const intersectedSprite = intersects[0].object;
+                const cryptoIndex = cryptoSpheres.indexOf(intersectedSprite);
+                const crypto = groupedCryptos[cryptoIndex];
+                document.getElementById('info').innerHTML = `
+                    <strong>${crypto.name} (${crypto.symbol.toUpperCase()})</strong><br>
+                    Price: $${crypto.price.toFixed(2)}<br>
+                    24h Change: ${crypto.price_change_24h.toFixed(2)}%<br>
+                    Group: ${crypto.group}
+                `;
+            } else {
+                document.getElementById('info').textContent = '';
+            }
+        }
+
+        window.addEventListener('mousemove', onMouseMove, false);
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const time = Date.now() * 0.0005;
+            camera.position.x = Math.cos(time) * 50;
+            camera.position.z = Math.sin(time) * 50;
+            camera.lookAt(scene.position);
+
+            cryptoSpheres.forEach((sprite, index) => {
+                const pulseFactor = Math.sin(time * 5 + index) * 0.1 + 1;
+                sprite.scale.set(3 * pulseFactor, 3 * pulseFactor, 1);
+            });
+
+            renderer.setClearColor(0x000000, 0); // Make the foreground transparent
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Periodically update data
+        setInterval(async () => {
+            await initializeVisualization();
+        }, 60000); // Update every minute
+    </script>
+</body>
+</html>
