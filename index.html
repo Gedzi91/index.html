@@ -1,0 +1,446 @@
+<!DOCTYPE html><html><head><base href="/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OKANFXLABS Legacy - AI-Enhanced Dog Particle System</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tensorflow/3.18.0/tf.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&amp;family=Roboto:wght@300;400;700&amp;display=swap" rel="stylesheet">
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', sans-serif;
+    background-color: #000;
+    color: #fff;
+    overflow: hidden;
+  }
+  #app {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+  }
+  #editor-overlay {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 10px;
+    border-radius: 5px;
+  }
+  .editor-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  label {
+    font-weight: bold;
+  }
+  input[type="range"] {
+    width: 100%;
+  }
+  #ai-image-preview {
+    max-width: 100%;
+    max-height: 200px;
+    margin-top: 10px;
+    border: 2px solid #0a9396;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+  }
+  #ai-image-preview:hover {
+    transform: scale(1.05);
+  }
+  #ai-prompt {
+    width: 100%;
+    padding: 5px;
+    margin-bottom: 10px;
+    background-color: #1a1a1a;
+    color: #fff;
+    border: 1px solid #0a9396;
+    border-radius: 4px;
+  }
+  #generate-ai-image {
+    width: 100%;
+    padding: 10px;
+    background-color: #0a9396;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  #generate-ai-image:hover {
+    background-color: #0c7c7e;
+  }
+  #ai-generation-status {
+    margin-top: 10px;
+    font-style: italic;
+    color: #0a9396;
+  }
+  #loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  }
+  .loading-spinner {
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #0a9396;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  #image-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.9);
+  }
+  #modal-content {
+    margin: auto;
+    display: block;
+    width: 80%;
+    max-width: 700px;
+    max-height: 80%;
+    animation-name: zoom;
+    animation-duration: 0.6s;
+  }
+  @keyframes zoom {
+    from {transform:scale(0)}
+    to {transform:scale(1)}
+  }
+  #close-modal {
+    position: absolute;
+    top: 15px;
+    right: 35px;
+    color: #f1f1f1;
+    font-size: 40px;
+    font-weight: bold;
+    transition: 0.3s;
+  }
+  #close-modal:hover,
+  #close-modal:focus {
+    color: #bbb;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  #file-upload {
+    display: none;
+  }
+  #upload-label {
+    display: inline-block;
+    padding: 10px;
+    background-color: #0a9396;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  #upload-label:hover {
+    background-color: #0c7c7e;
+  }
+</style>
+</head>
+<body>
+  <div id="app">
+    <canvas id="particle-canvas"></canvas>
+    <div id="editor-overlay">
+      <div class="editor-controls">
+        <div class="control-group">
+          <label for="particle-count">Particle Count:</label>
+          <input type="range" id="particle-count" min="1000" max="100000" step="1000" value="50000">
+        </div>
+        <div class="control-group">
+          <label for="particle-size">Particle Size:</label>
+          <input type="range" id="particle-size" min="0.1" max="5" step="0.1" value="1">
+        </div>
+        <div class="control-group">
+          <label for="ai-prompt">Image Uploader Options:</label>
+          <input type="text" id="ai-prompt" placeholder="Describe the dog image you want to generate" value="dogs">
+          <button id="generate-ai-image">Generate 3D AI Image</button>
+          <label for="file-upload" id="upload-label">Upload Image</label>
+          <input type="file" id="file-upload" accept="image/*">
+          <div id="ai-generation-status">Generating image...</div>
+        </div>
+        <img id="ai-image-preview" alt="A newly generated abstract particle system featuring dogs. The image displays a vibrant and colorful background with various shades of blues, greens, and browns, reminiscent of a playful outdoor setting. Overlaid on this background are numerous geometric shapes and particles forming silhouettes and outlines of different dog breeds. You can see the distinct shapes of a playful Labrador, an alert German Shepherd, a small Chihuahua, and a fluffy Pomeranian. The dogs are composed of smaller particles that seem to shimmer and move, giving the impression of fur and movement. Scattered throughout the image are paw print shapes and bone icons, adding to the dog theme. The overall effect is a dynamic, abstract representation of dogs that captures their energy, diversity, and charm in a unique and visually striking way." style="display: block;" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIAAQMAAADOtka5AAAAA1BMVEUAAACnej3aAAAAAXRSTlMAQObYZgAAADZJREFUeNrtwQENAAAAwqD3T20PBxQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAvwErtAABONm5kgAAAABJRU5ErkJggg==" width="512" height="512">
+      </div>
+    </div>
+  </div>
+  
+  <div id="loading-overlay" style="display: none;">
+    <div class="loading-spinner"></div>
+  </div>
+
+  <div id="image-modal">
+    <span id="close-modal">×</span>
+    <img id="modal-content">
+  </div>
+
+  <script>
+    // Three.js setup
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('particle-canvas') });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    // Particle system
+    let particles;
+    let particleCount = 50000;
+    let particleSize = 1;
+    let imageData;
+
+    function createParticleSystem() {
+      const geometry = new THREE.BufferGeometry();
+      const positions = new Float32Array(particleCount * 3);
+      const colors = new Float32Array(particleCount * 3);
+
+      for (let i = 0; i < particleCount * 3; i += 3) {
+        positions[i] = (Math.random() - 0.5) * 100;
+        positions[i + 1] = (Math.random() - 0.5) * 100;
+        positions[i + 2] = (Math.random() - 0.5) * 100;
+
+        colors[i] = Math.random();
+        colors[i + 1] = Math.random();
+        colors[i + 2] = Math.random();
+      }
+
+      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+      const material = new THREE.PointsMaterial({
+        size: particleSize,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.8,
+      });
+
+      particles = new THREE.Points(geometry, material);
+      scene.add(particles);
+    }
+
+    createParticleSystem();
+
+    camera.position.z = 50;
+
+    function animate() {
+      requestAnimationFrame(animate);
+      particles.rotation.x += 0.001;
+      particles.rotation.y += 0.001;
+      renderer.render(scene, camera);
+    }
+
+    animate();
+
+    // Event listeners for controls
+    document.getElementById('particle-count').addEventListener('input', (e) => {
+      particleCount = parseInt(e.target.value);
+      scene.remove(particles);
+      createParticleSystem();
+    });
+
+    document.getElementById('particle-size').addEventListener('input', (e) => {
+      particleSize = parseFloat(e.target.value);
+      particles.material.size = particleSize;
+    });
+
+    // 3D AI Image Generation
+    const generate3dAiImageBtn = document.getElementById('generate-ai-image');
+    const aiPromptInput = document.getElementById('ai-prompt');
+    const aiImagePreview = document.getElementById('ai-image-preview');
+    const aiGenerationStatus = document.getElementById('ai-generation-status');
+    const loadingOverlay = document.getElementById('loading-overlay');
+
+    async function generate3dAiImage() {
+      const prompt = aiPromptInput.value || "3D dogs";
+      loadingOverlay.style.display = 'flex';
+      aiGenerationStatus.textContent = 'Generating 3D dog image...';
+
+      try {
+        // Simulate 3D AI image generation (replace this with actual API call in a real implementation)
+        await new Promise(resolve => setTimeout(resolve, 3000));
+
+        // Generate a more complex 3D placeholder image with dog-related elements
+        const canvas = document.createElement('canvas');
+        canvas.width = 512;
+        canvas.height = 512;
+        const ctx = canvas.getContext('2d');
+
+        // Create a 3D-like background
+        const gradientType = Math.random() > 0.5 ? 'linear' : 'radial';
+        let gradient;
+        if (gradientType === 'linear') {
+          gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        } else {
+          gradient = ctx.createRadialGradient(
+            canvas.width / 2, canvas.height / 2, 0,
+            canvas.width / 2, canvas.height / 2, canvas.width / 2
+          );
+        }
+        
+        // Use colors that might be associated with 3D rendering and dogs
+        const dogColors = ['#8B4513', '#D2691E', '#CD853F', '#DEB887', '#F4A460', '#D2B48C', '#FFDAB9'];
+        const backgroundColors = ['#1E90FF', '#4169E1', '#6495ED', '#4682B4', '#5F9EA0'];
+        
+        const colorStops = Math.floor(Math.random() * 3) + 3; // 3 to 5 color stops
+        for (let i = 0; i < colorStops; i++) {
+          const color = i === 0 ? backgroundColors[Math.floor(Math.random() * backgroundColors.length)] : dogColors[Math.floor(Math.random() * dogColors.length)];
+          gradient.addColorStop(i / (colorStops - 1), color);
+        }
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Add 3D-like shapes representing dogs and dog-related items
+        const shapeCount = Math.floor(Math.random() * 30) + 20; // 20 to 50 shapes
+        for (let i = 0; i < shapeCount; i++) {
+          ctx.beginPath();
+          ctx.fillStyle = `hsla(${Math.random() * 60 + 20}, ${Math.random() * 50 + 50}%, ${Math.random() * 50 + 25}%, ${Math.random() * 0.5 + 0.5})`;
+          const shape = Math.random();
+          if (shape < 0.4) {
+            // 3D Dog silhouette
+            const x = Math.random() * canvas.width;
+            const y = Math.random() * canvas.height;
+            const size = Math.random() * 60 + 40;
+            ctx.moveTo(x, y);
+            ctx.bezierCurveTo(x + size * 0.5, y - size * 0.3, x + size, y - size * 0.3, x + size * 1.2, y);
+            ctx.bezierCurveTo(x + size * 1.3, y + size * 0.4, x + size * 1.1, y + size * 0.6, x + size * 0.9, y + size * 0.8);
+            ctx.bezierCurveTo(x + size * 0.7, y + size * 0.9, x + size * 0.5, y + size * 0.9, x + size * 0.3, y + size * 0.8);
+            ctx.bezierCurveTo(x + size * 0.1, y + size * 0.6, x - size * 0.1, y + size * 0.4, x, y);
+            ctx.closePath();
+          } else if (shape < 0.7) {
+            // 3D Paw print
+            const x = Math.random() * canvas.width;
+            const y = Math.random() * canvas.height;
+            const size = Math.random() * 30 + 20;
+            ctx.ellipse(x, y, size * 0.4, size * 0.3, Math.PI / 4, 0, Math.PI * 2);
+            ctx.ellipse(x + size * 0.6, y - size * 0.4, size * 0.3, size * 0.2, Math.PI / 4, 0, Math.PI * 2);
+            ctx.ellipse(x - size * 0.6, y - size * 0.4, size * 0.3, size * 0.2, -Math.PI / 4, 0, Math.PI * 2);
+            ctx.ellipse(x + size * 0.4, y + size * 0.6, size * 0.3, size * 0.2, Math.PI / 4, 0, Math.PI * 2);
+            ctx.ellipse(x - size * 0.4, y + size * 0.6, size * 0.3, size * 0.2, -Math.PI / 4, 0, Math.PI * 2);
+          } else {
+            // 3D Bone shape
+            const x = Math.random() * canvas.width;
+            const y = Math.random() * canvas.height;
+            const size = Math.random() * 50 + 30;
+            ctx.moveTo(x, y);
+            ctx.bezierCurveTo(x + size * 0.2, y - size * 0.3, x + size * 0.8, y - size * 0.3, x + size, y);
+            ctx.bezierCurveTo(x + size * 1.2, y + size * 0.2, x + size * 1.2, y + size * 0.4, x + size, y + size * 0.6);
+            ctx.bezierCurveTo(x + size * 0.8, y + size * 0.9, x + size * 0.2, y + size * 0.9, x, y + size * 0.6);
+            ctx.bezierCurveTo(x - size * 0.2, y + size * 0.4, x - size * 0.2, y + size * 0.2, x, y);
+            ctx.closePath();
+          }
+          ctx.fill();
+          
+          // Add 3D effect with shadow
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+          ctx.shadowBlur = 10;
+          ctx.shadowOffsetX = 5;
+          ctx.shadowOffsetY = 5;
+          ctx.fill();
+          ctx.shadowColor = 'transparent';
+        }
+
+        // Add some 3D particle-like elements
+        const particleCount = Math.floor(Math.random() * 500) + 500; // 500 to 1000 particles
+        for (let i = 0; i < particleCount; i++) {
+          const x = Math.random() * canvas.width;
+          const y = Math.random() * canvas.height;
+          const radius = Math.random() * 3 + 1;
+          const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+          gradient.addColorStop(0, `hsla(${Math.random() * 60 + 20}, 100%, 75%, 1)`);
+          gradient.addColorStop(1, `hsla(${Math.random() * 60 + 20}, 100%, 75%, 0)`);
+          ctx.beginPath();
+          ctx.arc(x, y, radius, 0, Math.PI * 2);
+          ctx.fillStyle = gradient;
+          ctx.fill();
+        }
+
+        // Display the generated 3D image
+        aiImagePreview.src = canvas.toDataURL();
+        aiImagePreview.style.display = 'block';
+        aiImagePreview.alt = prompt + " - " + "A newly generated 3D abstract particle system featuring dogs. The image displays a vibrant and colorful 3D background with various shades of blues and browns, creating depth and dimension. Overlaid on this background are numerous 3D geometric shapes and particles forming silhouettes and outlines of different dog breeds. You can see the distinct 3D shapes of a playful Labrador, an alert German Shepherd, a small Chihuahua, and a fluffy Pomeranian. The dogs are composed of smaller 3D particles that seem to float and move in space, giving the impression of fur and movement with added depth. Scattered throughout the image are 3D paw print shapes and bone icons, adding to the dog theme and creating a sense of depth. The overall effect is a dynamic, 3D abstract representation of dogs that captures their energy, diversity, and charm in a unique and visually striking three-dimensional way.";
+
+        // Update imageData for 3D particle formation
+        imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+        aiGenerationStatus.textContent = '3D dog image generated successfully!';
+        loadingOverlay.style.display = 'none';
+
+        // Automatically apply the new 3D image to the particle system
+        apply3DFormation();
+      } catch (error) {
+        console.error('Error generating 3D AI image:', error);
+        aiGenerationStatus.textContent = 'Error generating 3D dog image. Please try again.';
+        loadingOverlay.style.display = 'none';
+      }
+    }
+
+    // Event listener for the Generate 3D AI Image button
+    generate3dAiImageBtn.addEventListener('click', generate3dAiImage);
+
+    // Function to apply the generated 3D image to the particle system
+    function apply3DFormation() {
+      if (!imageData) return;
+
+      const positions = particles.geometry.attributes.position.array;
+      const colors = particles.geometry.attributes.color.array;
+
+      for (let i = 0; i < particleCount; i++) {
+        const x = Math.floor(Math.random() * imageData.width);
+        const y = Math.floor(Math.random() * imageData.height);
+        const pixelIndex = (y * imageData.width + x) * 4;
+
+        const r = imageData.data[pixelIndex] / 255;
+        const g = imageData.data[pixelIndex + 1] / 255;
+        const b = imageData.data[pixelIndex + 2] / 255;
+        const brightness = (r + g + b) / 3;
+
+        // Create a more pronounced 3D effect
+        positions[i * 3] = (x / imageData.width - 0.5) * 120;
+        positions[i * 3 + 1] = (y / imageData.height - 0.5) * -120;
+        positions[i * 3 + 2] = (brightness - 0.5) * 80;
+
+        colors[i * 3] = r;
+        colors[i * 3 + 1] = g;
+        colors[i * 3 + 2] = b;
+      }
+
+      particles.geometry.attributes.position.needsUpdate = true;
+      particles.geometry.attributes.color.needsUpdate = true;
+    }
+
+    // Update the animate function for more dynamic 3D movement
+    function animate() {
+      requestAnimationFrame(animate);
+      const time = Date.now() * 0.001;
+      particles.rotation.x = Math.sin(time * 0.3) * 0.2;
+      particles.rotation.y = Math.cos(time * 0.2) * 0.1;
+      particles.rotation.z = Math.sin(time * 0.1) * 0.05;
+      renderer.render(scene, camera);
+    }
+
+    // Simulate the click on Generate 3D AI Image button
+    generate3dAiImage();
+</script>
+</body></html>
