@@ -1,0 +1,179 @@
+<html><head><base href="https://.cuboidal-quantum.superposition//manifolds.projection/%20superhelix%20with%20146">
+<title>Arte Encadenado - Dynamic Flow</title>
+<style>
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #000;
+    font-family: 'Roboto', sans-serif;
+}
+
+.controls {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+    background: rgba(0,0,0,0.7);
+    padding: 15px;
+    border-radius: 10px;
+    color: #fff;
+}
+
+.title-overlay {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    color: #fff;
+    font-size: 24px;
+    text-shadow: 0 0 10px rgba(255,255,255,0.5);
+    animation: floatAnimation 3s ease-in-out infinite;
+}
+
+@keyframes floatAnimation {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    50% { transform: translate(5px, -5px) rotate(2deg); }
+    100% { transform: translate(0, 0) rotate(0deg); }
+}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
+</head>
+<body>
+<div class="controls">
+    <label>Flow Speed: <input type="range" id="flowSpeed" min="0" max="2" step="0.1" value="1"></label><br>
+    <label>Particle Size: <input type="range" id="particleSize" min="1" max="10" value="3"></label><br>
+    <label>Color Shift: <input type="range" id="colorShift" min="0" max="1" step="0.1" value="0.5"></label>
+</div>
+<div class="title-overlay">Arte Encadenado</div>
+<canvas id="canvas"></canvas>
+
+<script>
+let canvas, ctx, particles = [];
+const simplex = new SimplexNoise();
+let flowSpeed, particleSize, colorShift;
+
+class Particle {
+    constructor() {
+        this.reset();
+    }
+
+    reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * particleSize + 1;
+        this.vx = 0;
+        this.vy = 0;
+        this.life = Math.random() * 100 + 100;
+    }
+
+    update() {
+        const noiseX = simplex.noise3D(this.x * 0.001, this.y * 0.001, performance.now() * 0.0001);
+        const noiseY = simplex.noise3D(this.x * 0.001, this.y * 0.001, performance.now() * 0.0001 + 1000);
+        
+        this.vx += noiseX * flowSpeed;
+        this.vy += noiseY * flowSpeed;
+        
+        this.x += this.vx;
+        this.y += this.vy;
+        
+        this.vx *= 0.95;
+        this.vy *= 0.95;
+        
+        this.life--;
+        
+        if (this.life <= 0 || this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+            this.reset();
+        }
+    }
+
+    draw() {
+        const hue = (performance.now() * 0.05 * colorShift + this.x * 0.1) % 360;
+        ctx.fillStyle = `hsla(${hue}, 100%, 50%, 0.5)`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+function init() {
+    canvas = document.getElementById('canvas');
+    ctx = canvas.getContext('2d');
+    
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    
+    window.addEventListener('resize', resize);
+    resize();
+    
+    particles = Array(1000).fill().map(() => new Particle());
+    
+    // Control handlers
+    document.getElementById('flowSpeed').addEventListener('input', (e) => {
+        flowSpeed = parseFloat(e.target.value);
+    });
+    document.getElementById('particleSize').addEventListener('input', (e) => {
+        particleSize = parseFloat(e.target.value);
+    });
+    document.getElementById('colorShift').addEventListener('input', (e) => {
+        colorShift = parseFloat(e.target.value);
+    });
+    
+    // Initialize values
+    flowSpeed = 1;
+    particleSize = 3;
+    colorShift = 0.5;
+    
+    animate();
+}
+
+function animate() {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    particles.forEach(particle => {
+        particle.update();
+        particle.draw();
+    });
+    
+    // Mouse interaction
+    canvas.addEventListener('mousemove', (e) => {
+        const mouseX = e.clientX;
+        const mouseY = e.clientY;
+        
+        particles.forEach(particle => {
+            const dx = mouseX - particle.x;
+            const dy = mouseY - particle.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            
+            if (dist < 100) {
+                particle.vx += dx * 0.01;
+                particle.vy += dy * 0.01;
+            }
+        });
+    });
+    
+    requestAnimationFrame(animate);
+}
+
+window.addEventListener('load', init);
+
+// Touch events support
+canvas.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    const mouseEvent = new MouseEvent('mousemove', {
+        clientX: touch.clientX,
+        clientY: touch.clientY
+    });
+    canvas.dispatchEvent(mouseEvent);
+}, false);
+
+// Double click to reset particles
+canvas.addEventListener('dblclick', () => {
+    particles.forEach(particle => particle.reset());
+});
+</script>
+</body></html>
