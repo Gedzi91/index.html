@@ -1,0 +1,439 @@
+<html><head><base href="https://infinite.music.art">
+<title>AI-Powered Infinite Music Art Experience</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.4.2/chroma.min.js"></script>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #000;
+    font-family: Arial, sans-serif;
+  }
+  #controls {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 10;
+  }
+  button, select, input {
+    margin: 5px;
+    padding: 5px 10px;
+    font-size: 16px;
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  button:hover, select:hover, input:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+  #moodInput {
+    width: 300px;
+  }
+  #infoPanel {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    color: white;
+    font-size: 14px;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 10px;
+    border-radius: 5px;
+  }
+</style>
+</head>
+<body>
+  <div id="controls">
+    <button id="playBtn">Play</button>
+    <button id="stopBtn">Stop</button>
+    <input type="text" id="moodInput" placeholder="Describe your mood...">
+    <button id="generateBtn">Generate Music</button>
+  </div>
+  <div id="infoPanel"></div>
+
+  <script>
+    const baseUrl = "https://gleitz.github.io/midi-js-soundfonts/MusyngKite/";
+    let samplers = {};
+    let isPlaying = false;
+    let sequence;
+    let particles = [];
+    let instrumentColors = {};
+    let visualEffects = [];
+    let currentMood = "";
+    let currentNotes = [];
+    let currentInstruments = [];
+    let moodDescription = "";
+
+    async function loadInstrument(instrumentName) {
+      if (samplers[instrumentName]) {
+        return;
+      }
+
+      const urls = {};
+      for (let octave = 0; octave <= 8; octave++) {
+        for (let note of ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']) {
+          const noteKey = `${note}${octave}`;
+          urls[noteKey] = `${noteKey}.mp3`;
+        }
+      }
+
+      samplers[instrumentName] = new Tone.Sampler({
+        urls: urls,
+        baseUrl: `${baseUrl}${instrumentName}-mp3/`,
+        onload: () => {
+          console.log(`${instrumentName} loaded!`);
+        }
+      }).toDestination();
+    }
+
+    async function loadInstruments(instrumentList) {
+      for (const instrument of instrumentList) {
+        await loadInstrument(instrument);
+        instrumentColors[instrument] = chroma.random().hex();
+      }
+    }
+
+    function generateSequence() {
+      return new Tone.Sequence((time, note) => {
+        const randomInstrument = currentInstruments[Math.floor(Math.random() * currentInstruments.length)];
+        playNote(randomInstrument, note, time);
+        addParticle(note, randomInstrument);
+        addVisualEffect(note, randomInstrument);
+      }, currentNotes, '8n');
+    }
+
+    function playNote(instrument, note, time) {
+      const sampler = samplers[instrument];
+      if (sampler) {
+        sampler.triggerAttackRelease(note, '8n', time);
+      }
+    }
+
+    document.getElementById('playBtn').addEventListener('click', async () => {
+      if (!isPlaying && currentNotes.length > 0 && currentInstruments.length > 0) {
+        await Tone.start();
+        sequence = generateSequence();
+        sequence.start(0);
+        Tone.Transport.start();
+        isPlaying = true;
+      }
+    });
+
+    document.getElementById('stopBtn').addEventListener('click', () => {
+      if (isPlaying) {
+        Tone.Transport.stop();
+        if (sequence) {
+          sequence.stop();
+        }
+        isPlaying = false;
+      }
+    });
+
+    document.getElementById('generateBtn').addEventListener('click', async () => {
+      const moodInput = document.getElementById('moodInput');
+      moodDescription = moodInput.value;
+      
+      if (moodDescription) {
+        try {
+          const response = await fetch('/api/ai-mood-picker', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ description: moodDescription }),
+          });
+
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+
+          const data = await response.json();
+          currentNotes = data.notes;
+          currentInstruments = data.instruments;
+          moodDescription = data.whyIChoseTheseInstrumentsAndNotes;
+
+          // Stop current playback
+          if (isPlaying) {
+            Tone.Transport.stop();
+            if (sequence) {
+              sequence.stop();
+            }
+            isPlaying = false;
+          }
+
+          // Load new instruments
+          await loadInstruments(currentInstruments);
+
+          // Update info panel
+          updateInfoPanel();
+
+          console.log("Generated music based on mood:", data);
+        } catch (error) {
+          console.error('Error fetching mood-based music:', error);
+        }
+      }
+    });
+
+    class Particle {
+      constructor(x, y, note, instrument) {
+        this.pos = createVector(x, y);
+        this.vel = p5.Vector.random2D().mult(random(2, 5));
+        this.acc = createVector(0, 0);
+        this.note = note;
+        this.instrument = instrument;
+        this.lifespan = 255;
+        this.size = random(20, 50);
+        this.color = color(instrumentColors[instrument] || chroma.random().hex());
+        this.rotation = 0;
+        this.rotationSpeed = random(-0.1, 0.1);
+        this.shape = random(['circle', 'square', 'triangle', 'star']);
+      }
+
+      update() {
+        this.vel.add(this.acc);
+        this.pos.add(this.vel);
+        this.acc.mult(0);
+        this.lifespan -= 2;
+        this.rotation += this.rotationSpeed;
+      }
+
+      display() {
+        push();
+        translate(this.pos.x, this.pos.y);
+        rotate(this.rotation);
+        
+        noStroke();
+        fill(this.color.levels[0], this.color.levels[1], this.color.levels[2], this.lifespan);
+        
+        switch (this.shape) {
+          case 'circle':
+            ellipse(0, 0, this.size);
+            break;
+          case 'square':
+            rectMode(CENTER);
+            rect(0, 0, this.size, this.size);
+            break;
+          case 'triangle':
+            triangle(0, -this.size/2, -this.size/2, this.size/2, this.size/2, this.size/2);
+            break;
+          case 'star':
+            this.drawStar(0, 0, this.size/2, this.size/4, 5);
+            break;
+        }
+
+        fill(255, this.lifespan);
+        textAlign(CENTER, CENTER);
+        textSize(this.size * 0.4);
+        text(this.note, 0, 0);
+
+        textSize(this.size * 0.2);
+        text(this.instrument.replace(/_/g, ' '), 0, this.size * 0.6);
+
+        pop();
+      }
+
+      drawStar(x, y, radius1, radius2, npoints) {
+        let angle = TWO_PI / npoints;
+        let halfAngle = angle / 2.0;
+        beginShape();
+        for (let a = 0; a < TWO_PI; a += angle) {
+          let sx = x + cos(a) * radius2;
+          let sy = y + sin(a) * radius2;
+          vertex(sx, sy);
+          sx = x + cos(a + halfAngle) * radius1;
+          sy = y + sin(a + halfAngle) * radius1;
+          vertex(sx, sy);
+        }
+        endShape(CLOSE);
+      }
+
+      isDead() {
+        return this.lifespan <= 0;
+      }
+    }
+
+    function addParticle(note, instrument) {
+      particles.push(new Particle(random(width), random(height), note, instrument));
+    }
+
+    class VisualEffect {
+      constructor(x, y, note, instrument) {
+        this.pos = createVector(x, y);
+        this.note = note;
+        this.instrument = instrument;
+        this.lifespan = 255;
+        this.size = random(100, 200);
+        this.color = color(instrumentColors[instrument] || chroma.random().hex());
+        this.shape = random(['ripple', 'burst', 'spiral']);
+        this.angle = 0;
+      }
+
+      update() {
+        this.lifespan -= 5;
+        this.size *= 1.02;
+        this.angle += 0.1;
+      }
+
+      display() {
+        push();
+        translate(this.pos.x, this.pos.y);
+        noFill();
+        stroke(this.color.levels[0], this.color.levels[1], this.color.levels[2], this.lifespan);
+        strokeWeight(2);
+
+        switch (this.shape) {
+          case 'ripple':
+            for (let i = 0; i < 3; i++) {
+              ellipse(0, 0, this.size * (1 - i * 0.2));
+            }
+            break;
+          case 'burst':
+            for (let i = 0; i < 8; i++) {
+              let angle = TWO_PI / 8 * i + this.angle;
+              line(0, 0, cos(angle) * this.size/2, sin(angle) * this.size/2);
+            }
+            break;
+          case 'spiral':
+            beginShape();
+            for (let i = 0; i < 100; i++) {
+              let angle = 0.1 * i + this.angle;
+              let x = cos(angle) * (2 + i) * this.size/100;
+              let y = sin(angle) * (2 + i) * this.size/100;
+              vertex(x, y);
+            }
+            endShape();
+            break;
+        }
+
+        pop();
+      }
+
+      isDead() {
+        return this.lifespan <= 0;
+      }
+    }
+
+    function addVisualEffect(note, instrument) {
+      visualEffects.push(new VisualEffect(random(width), random(height), note, instrument));
+    }
+
+    let visualizer;
+
+    function setup() {
+      createCanvas(windowWidth, windowHeight);
+      background(0);
+      visualizer = new Visualizer();
+    }
+
+    function draw() {
+      background(0, 20);
+
+      visualizer.update();
+      visualizer.display();
+
+      for (let i = particles.length - 1; i >= 0; i--) {
+        particles[i].update();
+        particles[i].display();
+        if (particles[i].isDead()) {
+          particles.splice(i, 1);
+        }
+      }
+
+      for (let i = visualEffects.length - 1; i >= 0; i--) {
+        visualEffects[i].update();
+        visualEffects[i].display();
+        if (visualEffects[i].isDead()) {
+          visualEffects.splice(i, 1);
+        }
+      }
+
+      updateInfoPanel();
+    }
+
+    function windowResized() {
+      resizeCanvas(windowWidth, windowHeight);
+      visualizer.resize();
+    }
+
+    class Visualizer {
+      constructor() {
+        this.resize();
+        this.numPoints = 128;
+        this.analyzer = new Tone.Analyser('waveform', this.numPoints);
+        Tone.Destination.connect(this.analyzer);
+        this.waveform = new Array(this.numPoints).fill(0);
+      }
+
+      resize() {
+        this.circleRadius = min(width, height) * 0.4;
+        this.centerX = width / 2;
+        this.centerY = height / 2;
+      }
+
+      update() {
+        this.waveform = this.analyzer.getValue();
+      }
+
+      display() {
+        push();
+        translate(this.centerX, this.centerY);
+        noFill();
+        strokeWeight(3);
+
+        // Draw waveform
+        beginShape();
+        for (let i = 0; i < this.numPoints; i++) {
+          const angle = map(i, 0, this.numPoints, 0, TWO_PI);
+          const r = this.circleRadius + this.waveform[i] * 200;
+          const x = r * cos(angle);
+          const y = r * sin(angle);
+
+          stroke(lerpColor(color(0, 255, 255), color(255, 0, 255), i / this.numPoints));
+          curveVertex(x, y);
+        }
+        endShape(CLOSE);
+
+        // Draw mood-inspired elements
+        this.drawMoodElements();
+
+        pop();
+      }
+
+      drawMoodElements() {
+        // This function can be expanded to create different visual elements based on the current mood
+        // For now, we'll just draw some generic elements
+        for (let i = 0; i < 10; i++) {
+          const angle = random(TWO_PI);
+          const r = random(this.circleRadius * 0.8, this.circleRadius * 1.2);
+          const x = r * cos(angle);
+          const y = r * sin(angle);
+          
+          stroke(255, 100);
+          line(0, 0, x, y);
+          
+          fill(255, 50);
+          noStroke();
+          ellipse(x, y, 10, 10);
+        }
+      }
+    }
+
+    function updateInfoPanel() {
+      const infoPanel = document.getElementById('infoPanel');
+      const instrumentList = currentInstruments.join(', ');
+      const noteList = currentNotes.join(', ');
+      const particleCount = particles.length;
+      const visualEffectCount = visualEffects.length;
+
+      infoPanel.innerHTML = `
+        <strong>Current Mood:</strong> ${moodDescription}<br>
+        <strong>Instruments:</strong> ${instrumentList}<br>
+        <strong>Notes:</strong> ${noteList}<br>
+        <strong>Particles:</strong> ${particleCount} | <strong>Visual Effects:</strong> ${visualEffectCount}
+      `;
+    }
+  </script>
+</body></html>
