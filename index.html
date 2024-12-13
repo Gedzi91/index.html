@@ -1,0 +1,166 @@
+<html><head><base href="." /><style>
+    body {
+        margin: 0;
+        overflow: hidden;
+        background: #000;
+    }
+    #info {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        color: #fff;
+        font-family: monospace;
+        text-shadow: 2px 2px 2px rgba(0,0,0,0.5);
+    }
+</style></head><body>
+<div id="info">Ancient Vision: Tower of Babel<br>Under Blue Lotus Influence</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+    let scene, camera, renderer;
+    let tower, particles, beacon;
+    const startTime = Date.now();
+
+    function init() {
+        scene = new THREE.Scene();
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Create stepped tower levels
+        const levels = 7;
+        const towerGroup = new THREE.Group();
+        
+        for(let i = 0; i < levels; i++) {
+            const size = 5 - (i * 0.6);
+            const height = 2;
+            const geometry = new THREE.BoxGeometry(size, height, size);
+            const material = new THREE.MeshPhongMaterial({
+                color: 0xc4a484,
+                emissive: 0x222244,
+                specular: 0xffffff,
+                shininess: 20,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.8
+            });
+            const level = new THREE.Mesh(geometry, material);
+            level.position.y = i * height;
+            towerGroup.add(level);
+        }
+        
+        // Add beacon
+        const beaconGeometry = new THREE.CylinderGeometry(0.2, 0.2, 20, 32);
+        const beaconMaterial = new THREE.MeshBasicMaterial({
+            color: 0xffff00,
+            transparent: true,
+            opacity: 0
+        });
+        beacon = new THREE.Mesh(beaconGeometry, beaconMaterial);
+        beacon.position.y = levels * 2;
+        towerGroup.add(beacon);
+        
+        // Add spiraling staircase/ramp effect
+        const rampPoints = [];
+        for(let i = 0; i <= levels * 20; i++) {
+            const angle = i * 0.3;
+            const radius = 3 - (i * 0.05);
+            const height = i * 0.1;
+            rampPoints.push(new THREE.Vector3(
+                radius * Math.cos(angle),
+                height,
+                radius * Math.sin(angle)
+            ));
+        }
+        
+        const rampGeometry = new THREE.BufferGeometry().setFromPoints(rampPoints);
+        const rampMaterial = new THREE.LineBasicMaterial({ 
+            color: 0xd4b494,
+            transparent: true,
+            opacity: 0.6
+        });
+        const ramp = new THREE.Line(rampGeometry, rampMaterial);
+        towerGroup.add(ramp);
+        
+        scene.add(towerGroup);
+        tower = towerGroup;
+
+        // Particle system for psychedelic effect
+        const particlesGeometry = new THREE.BufferGeometry();
+        const particlesCnt = 5000;
+        const posArray = new Float32Array(particlesCnt * 3);
+        
+        for(let i = 0; i < particlesCnt * 3; i++) {
+            posArray[i] = (Math.random() - 0.5) * 30;
+        }
+        
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        const particlesMaterial = new THREE.PointsMaterial({
+            size: 0.05,
+            color: 0x88ffff,
+            transparent: true,
+            opacity: 0.5
+        });
+        
+        particles = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particles);
+
+        // Lights
+        const light1 = new THREE.PointLight(0xff8800, 1, 100);
+        light1.position.set(10, 10, 10);
+        scene.add(light1);
+
+        const light2 = new THREE.PointLight(0x0088ff, 1, 100);
+        light2.position.set(-10, -10, -10);
+        scene.add(light2);
+
+        const ambientLight = new THREE.AmbientLight(0x444444);
+        scene.add(ambientLight);
+
+        camera.position.z = 20;
+        camera.position.y = 10;
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+
+        const currentTime = (Date.now() - startTime) / 1000;
+
+        // Gentle tower rotation
+        tower.rotation.y = currentTime * 0.2;
+        tower.rotation.x = Math.sin(currentTime * 0.1) * 0.1;
+
+        // Subtle breathing effect
+        tower.scale.y = 1 + Math.sin(currentTime * 0.5) * 0.05;
+        
+        // Move particles
+        particles.rotation.y = currentTime * 0.1;
+        particles.rotation.x = currentTime * 0.05;
+        
+        // Dreamy camera movement
+        camera.position.y = 10 + Math.sin(currentTime * 0.3) * 2;
+        camera.position.x = Math.sin(currentTime * 0.2) * 5;
+        camera.lookAt(0, tower.scale.y * 7, 0);
+
+        // Beacon pulse
+        const beaconPulse = Math.sin(currentTime * 2) * 0.5 + 0.5;
+        const beaconActive = (currentTime % 10) < 1; // Activate beacon every 10 seconds for 1 second
+        beacon.material.opacity = beaconActive ? beaconPulse : 0;
+
+        renderer.render(scene, camera);
+    }
+
+    function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    window.addEventListener('resize', onWindowResize, false);
+
+    init();
+    animate();
+</script>
+
+</body></html>
