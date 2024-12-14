@@ -1,0 +1,178 @@
+<html><head><base href="https://eyes.net/">
+<title>Eyes</title>
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    background: black;
+    height: 100%;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+  }
+
+  .eye {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    cursor: pointer;
+    animation: spin 5s linear infinite;
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .dialogue {
+    position: absolute;
+    color: white;
+    font-size: 14px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: opacity 1s ease-in-out;
+  }
+
+  .trigger-warning {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    color: white;
+    background: red;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+
+  .red-tint {
+    filter: hue-rotate(300deg) saturate(3);
+  }
+
+  .tiny-fact {
+    position: absolute;
+    font-size: 10px;
+    color: gray;
+    opacity: 0.5;
+  }
+
+  .smiley {
+    position: absolute;
+    font-size: 20px;
+    color: yellow;
+    text-shadow: 1px 1px 5px yellow;
+  }
+
+  .sign-in {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    color: white;
+  }
+
+  .sign-in form {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sign-in input[type="text"],
+  .sign-in input[type="password"] {
+    margin-bottom: 10px;
+    padding: 5px;
+    background: black;
+    color: white;
+    border: 1px solid gray;
+  }
+
+  .sign-in input[type="submit"] {
+    padding: 5px 10px;
+    background: darkred;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+
+  .additional-img {
+    position: absolute;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="trigger-warning">TW: High Anxiety</div>
+
+<div class="eye" style="top: 20%; left: 35%;"><img src="https://i.imgflip.com/7e384q.png" alt="Spinning eye meme" width="100" height="100"></div>
+<div class="eye" style="top: 40%; left: 25%;"><img src="https://i.imgflip.com/7e384q.png" alt="Spinning eye meme" width="100" height="100"></div>
+<div class="eye" style="top: 60%; left: 45%;"><img src="https://i.imgflip.com/7e384q.png" alt="Spinning eye meme" width="100" height="100"></div>
+<div class="eye" style="top: 80%; left: 15%;"><img src="https://i.imgflip.com/7e384q.png" alt="Spinning eye meme" width="100" height="100"></div>
+<div class="eye" style="top: 10%; left: 55%;"><img src="https://i.imgflip.com/7e384q.png" alt="Spinning eye meme" width="100" height="100"></div>
+<div class="eye" style="top: 30%; left: 75%;"><img src="https://i.imgflip.com/7e384q.png" alt="Spinning eye meme" width="100" height="100"></div>
+<div class="eye" style="top: 50%; left: 65%;"><img src="https://i.imgflip.com/7e384q.png" alt="Spinning eye meme" width="100" height="100"></div>
+<div class="eye" style="top: 70%; left: 85%;"><img src="https://i.imgflip.com/7e384q.png" alt="Spinning eye meme" width="100" height="100"></div>
+<div class="eye" style="top: 90%; left: 35%;"><img src="https://i.imgflip.com/7e384q.png" alt="Spinning eye meme" width="100" height="100"></div>
+<div class="eye" style="top: 15%; left: 95%;"><img src="https://i.imgflip.com/7e384q.png" alt="Spinning eye meme" width="100" height="100"></div>
+
+<div class="red-tint eye" style="top: 35%; left: 50%;"><img src="https://i.imgflip.com/7e384q.png" alt="Red tinted spinning eye meme" width="100" height="100"><div class="dialogue" style="top: 35px; left: 110px;">...</div></div>
+
+<div class="tiny-fact" style="top: 5%; left: 90%;">Tiny fact: There are more stars in the universe than grains of sand on all Earth's beaches.</div>
+
+<div class="smiley" style="top: 85%; left: 10%;">:)</div>
+
+<div class="sign-in">
+  <form method="GET" action="/signIn">
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username" required>
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" required>
+    <input type="submit" value="Sign In">
+  </form>
+</div>
+
+<div class="additional-img" style="top: 2%; left: 40%;">
+  <img src="https://img1.picmix.com/output/stamp/normal/8/5/7/0/2420758_965dc.png" alt="Grinning cartoon face" width="300" height="300">
+</div>
+
+<script>
+  let phrases = [
+    "The void whispers back.",
+    "All eyes are watching.",
+    "Don't look behind you.",
+    "The truth is not here.",
+    "Souls are tied to light.",
+    "It hears your thoughts.",
+    "A shadow moves silently.",
+    "Seek the unseen.",
+    "Patterns within patterns.",
+    "Reality is fragile.",
+    "Whispers in the dark.",
+    "I see you seeing me.",
+    "Dreams in the abyss.",
+    "Time is an illusion.",
+    "Echoes in the shadows.",
+    "Eyes never sleep.",
+    "Silent screams linger.",
+    "Mirrors tell lies.",
+    "Illusions are real.",
+    "Unseen but present."
+  ];
+
+  document.querySelectorAll('.eye:not(.red-tint)').forEach(eye => {
+    eye.addEventListener('click', function(e) {
+      const dialogue = document.createElement('div');
+      dialogue.classList.add('dialogue');
+      dialogue.innerText = phrases[Math.floor(Math.random() * phrases.length)];
+      dialogue.style.top = (e.clientY - 20) + 'px';
+      dialogue.style.left = (e.clientX + 20) + 'px';
+      document.body.appendChild(dialogue);
+      setTimeout(() => {
+        dialogue.style.opacity = '0';
+      }, 2000);
+      setTimeout(() => {
+        dialogue.remove();
+      }, 3000);
+    });
+  });
+</script>
+
+</body>
+</html>
