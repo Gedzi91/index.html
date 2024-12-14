@@ -1,0 +1,144 @@
+<html><head><base href="https://websim.world/palace-of-mana/cerulean-well">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Cerulean Well - Palace of Mana</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Arial', sans-serif;
+            background: #000;
+            color: #fff;
+            overflow-x: hidden;
+        }
+        .container {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+        .well-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 30px 0;
+        }
+        .well {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, #0ff, #00f);
+            border-radius: 50%;
+            box-shadow: 0 0 50px #0ff;
+            animation: pulse 4s infinite alternate;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 50px #0ff; }
+            100% { transform: scale(1.1); box-shadow: 0 0 100px #0ff; }
+        }
+        .ripple {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 2px solid rgba(0, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: ripple 4s linear infinite;
+        }
+        @keyframes ripple {
+            0% { width: 0; height: 0; opacity: 1; }
+            100% { width: 500px; height: 500px; opacity: 0; }
+        }
+        .energy-swirl {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 400px;
+            height: 400px;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+        .swirl {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid #9370DB;
+            opacity: 0.7;
+            animation: swirl 10s linear infinite, fade 10s ease-out infinite;
+        }
+        @keyframes swirl {
+            0% { transform: rotate(0deg) scale(0.8); }
+            100% { transform: rotate(360deg) scale(1.2); }
+        }
+        @keyframes fade {
+            0% { opacity: 0.7; }
+            100% { opacity: 0; }
+        }
+        h1 {
+            font-size: 2.5em;
+            text-shadow: 0 0 10px #0ff;
+            margin-bottom: 0;
+        }
+        p {
+            max-width: 600px;
+            margin: 20px auto;
+            line-height: 1.6;
+        }
+        .back-link {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #0ff;
+            text-decoration: none;
+            font-size: 1.2em;
+        }
+        .back-link:hover {
+            text-shadow: 0 0 5px #0ff;
+        }
+        .warning {
+            color: #ff3333;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../" class="back-link">← Back to Palace of Mana</a>
+        <h1>The Cerulean Well</h1>
+        <div class="well-container">
+            <div class="well"></div>
+            <div class="ripple"></div>
+            <div class="ripple" style="animation-delay: 1s;"></div>
+            <div class="ripple" style="animation-delay: 2s;"></div>
+            <div class="energy-swirl">
+                <div class="swirl" style="animation-delay: 0s, 0s;"></div>
+                <div class="swirl" style="animation-delay: -2s, -2s; transform: scale(0.9) rotate(45deg);"></div>
+                <div class="swirl" style="animation-delay: -4s, -4s; transform: scale(1.1) rotate(-45deg);"></div>
+                <div class="swirl" style="animation-delay: -6s, -6s; transform: scale(1.2) rotate(90deg);"></div>
+            </div>
+        </div>
+        <p>
+            The Cerulean Well is a mystical artifact of unparalleled power, crafted by Arisu, the Goddess of Mana herself. It is not truly a "well" in the conventional sense, but rather a void of raw mana—a singular point in space so densely packed with energy that it continually draws more mana into itself.
+        </p>
+        <p>
+            This cosmic anomaly serves as Arisu's primary tool for shaping the very fabric of the universe. The goddess harnesses the Well to amplify her divine powers, using its boundless store of mana to mold and maintain the entire cosmos.
+        </p>
+        <p>
+            Always in close proximity to the goddess, the Cerulean Well hovers silently between Arisu's three tails or rests in specially designed fonts throughout her celestial palace. Its mesmerizing cerulean glow is a result of powerful enchantments that protect both the goddess and others from its overwhelming mana concentration.
+        </p>
+        <p class="warning">
+            WARNING: The protective enchantments on the Cerulean Well are absolute. Any attempt to breach these safeguards would result in near-instantaneous obliteration.
+        </p>
+    </div>
+    <script>
+        document.querySelector('.well').addEventListener('click', function() {
+            alert('As you reach out towards the Cerulean Well, you feel an overwhelming surge of energy. The air crackles with power, and you quickly withdraw your hand, realizing the danger of your actions.');
+        });
+    </script>
+</body>
+</html>
