@@ -1,0 +1,205 @@
+<html><head><base href="https://websim.ai/exolife/explore/cosmic-web/anomalous-structure"><title>ExoLife 2.0 - Cosmic Web Anomalous Structure</title>
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Roboto', sans-serif;
+    background-color: #000;
+    color: #fff;
+    overflow: hidden;
+  }
+  .container {
+    display: flex;
+    height: 100%;
+  }
+  .anomaly-viewer {
+    flex: 2;
+    position: relative;
+    overflow: hidden;
+    background: radial-gradient(circle at center, #1a237e, #000000);
+  }
+  .data-panel {
+    flex: 1;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.8);
+    overflow-y: auto;
+  }
+  h1, h2 {
+    color: #7e57c2;
+  }
+  p {
+    line-height: 1.6;
+  }
+  .highlight {
+    color: #b39ddb;
+    font-weight: bold;
+  }
+  #anomalyCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+  #controlPanel {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    display: flex;
+    gap: 10px;
+  }
+  .control-btn {
+    background-color: rgba(126, 87, 194, 0.2);
+    border: 1px solid #7e57c2;
+    color: #7e57c2;
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  .control-btn:hover {
+    background-color: rgba(126, 87, 194, 0.4);
+  }
+  #readouts {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 10px;
+    border-radius: 5px;
+  }
+  .readout {
+    margin-bottom: 5px;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="anomaly-viewer">
+      <canvas id="anomalyCanvas"></canvas>
+      <div id="controlPanel">
+        <button class="control-btn" id="analyzeStructureBtn">Analyze Structure</button>
+        <button class="control-btn" id="simulateEvolutionBtn">Simulate Evolution</button>
+        <button class="control-btn" id="probeInteriorBtn">Probe Interior</button>
+      </div>
+      <div id="readouts">
+        <div class="readout">Energy Density: <span id="energyDensityReadout">0.00 J/m³</span></div>
+        <div class="readout">Spacetime Curvature: <span id="curvatureReadout">0.00 m⁻²</span></div>
+        <div class="readout">Dark Matter Ratio: <span id="darkMatterReadout">0.00%</span></div>
+      </div>
+    </div>
+    <div class="data-panel">
+      <h1>Cosmic Web Anomalous Structure</h1>
+      <p>A highly unusual structure has been detected within the cosmic web, potentially related to the probe's location.</p>
+      <div id="analysisResults">
+        <h2>Initial Observations</h2>
+        <p>The structure appears to be a <span class="highlight">massive void</span> with unexpected properties, seemingly defying known cosmological principles.</p>
+        <p>Preliminary data suggests the void may be <span class="highlight">artificially created or modified</span>, raising questions about potential advanced civilizations or natural phenomena beyond our current understanding.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('anomalyCanvas');
+    const ctx = canvas.getContext('2d');
+    const analysisResults = document.getElementById('analysisResults');
+    const energyDensityReadout = document.getElementById('energyDensityReadout');
+    const curvatureReadout = document.getElementById('curvatureReadout');
+    const darkMatterReadout = document.getElementById('darkMatterReadout');
+
+    let energyDensity = 0.1;
+    let spacetimeCurvature = 0.01;
+    let darkMatterRatio = 20;
+
+    function resizeCanvas() {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function drawAnomalyStructure() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw cosmic web background
+      for (let i = 0; i < 1000; i++) {
+        ctx.strokeStyle = `rgba(126, 87, 194, ${Math.random() * 0.5})`;
+        ctx.beginPath();
+        ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height);
+        ctx.lineTo(Math.random() * canvas.width, Math.random() * canvas.height);
+        ctx.stroke();
+      }
+
+      // Draw anomalous void
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const radius = Math.min(canvas.width, canvas.height) * 0.4;
+
+      const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
+      gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
+      gradient.addColorStop(0.7, 'rgba(179, 157, 219, 0.1)');
+      gradient.addColorStop(1, 'rgba(179, 157, 219, 0.3)');
+
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Draw energy fluctuations
+      for (let i = 0; i < 50; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const distance = Math.random() * radius;
+        const x = centerX + Math.cos(angle) * distance;
+        const y = centerY + Math.sin(angle) * distance;
+
+        ctx.fillStyle = 'rgba(179, 157, 219, 0.8)';
+        ctx.beginPath();
+        ctx.arc(x, y, Math.random() * 3 + 1, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      requestAnimationFrame(drawAnomalyStructure);
+    }
+
+    drawAnomalyStructure();
+
+    function updateReadouts() {
+      energyDensityReadout.textContent = energyDensity.toFixed(2) + ' J/m³';
+      curvatureReadout.textContent = spacetimeCurvature.toFixed(4) + ' m⁻²';
+      darkMatterReadout.textContent = darkMatterRatio.toFixed(2) + '%';
+    }
+
+    setInterval(updateReadouts, 1000);
+
+    document.getElementById('analyzeStructureBtn').addEventListener('click', () => {
+      energyDensity += Math.random() * 0.2 - 0.1;
+      spacetimeCurvature += Math.random() * 0.005 - 0.0025;
+      analysisResults.innerHTML += `
+        <h2>Structure Analysis Results</h2>
+        <p>The void exhibits <span class="highlight">negative energy density</span> of ${energyDensity.toFixed(2)} J/m³, contradicting the weak energy condition.</p>
+        <p>Detected <span class="highlight">unusual spacetime curvature patterns</span>, suggesting the presence of exotic matter or modified gravity effects.</p>
+        <p>The structure's boundaries show signs of <span class="highlight">quantum entanglement</span> on a macroscopic scale, hinting at possible artificial origin.</p>
+      `;
+    });
+
+    document.getElementById('simulateEvolutionBtn').addEventListener('click', () => {
+      darkMatterRatio += Math.random() * 10 - 5;
+      analysisResults.innerHTML += `
+        <h2>Evolution Simulation Results</h2>
+        <p>The void appears to be <span class="highlight">expanding at an accelerated rate</span>, defying the surrounding cosmic web's gravitational influence.</p>
+        <p>Simulations predict the formation of <span class="highlight">causality-violating closed timelike curves</span> within the void's core in approximately ${Math.floor(Math.random() * 1000 + 1000)} million years.</p>
+        <p>The dark matter ratio in the surrounding region fluctuates anomalously, currently at ${darkMatterRatio.toFixed(2)}%, suggesting unknown interactions with dark energy.</p>
+      `;
+    });
+
+    document.getElementById('probeInteriorBtn').addEventListener('click', () => {
+      analysisResults.innerHTML += `
+        <h2>Interior Probe Results</h2>
+        <p>The probe detected <span class="highlight">pockets of altered physical constants</span> within the void, including regions where the speed of light appears to be variable.</p>
+        <p>At the core, there are indications of a <span class="highlight">stable Einstein-Rosen bridge</span>, potentially connecting to distant parts of the universe or even other universes.</p>
+        <p>Warning: The probe's sensors detected signs of <span class="highlight">intelligent activity</span> within the void, including complex energy patterns that could be interpreted as communication attempts.</p>
+      `;
+    });
+  </script>
+</body></html>
