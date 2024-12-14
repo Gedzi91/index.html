@@ -1,0 +1,189 @@
+<html>
+<head>
+  <title>3D Spiral Galaxies Visualization with Glow Effect</title>
+  <style>
+    body { margin: 0; overflow: hidden; background-color: #000000; }
+  </style>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.134.0/build/three.module.js"
+    }
+  }
+  </script>
+</head>
+<body>
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'https://unpkg.com/three@0.134.0/examples/jsm/controls/OrbitControls.js';
+
+    // Set up scene, camera, and renderer
+    const scene = new THREE.Scene();
+
+    const camera = new THREE.PerspectiveCamera(
+      75, window.innerWidth / window.innerHeight, 0.1, 5000
+    );
+    camera.position.z = 500;
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    document.body.appendChild(renderer.domElement);
+
+    // Add OrbitControls
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true; // Enable smoothing
+    controls.dampingFactor = 0.05;
+    controls.rotateSpeed = 0.5;
+
+    // Ambient light
+    const ambientLight = new THREE.AmbientLight(0xffffff);
+    scene.add(ambientLight);
+
+    // Parameters
+    const galaxyCount = 100; // Number of galaxies
+    const galaxySpread = 2000; // Spread of galaxies in space
+    const starCount = 50000; // Stars per galaxy
+
+    // Colors for galaxies
+    const galaxyColors = [
+      0xf5deb3, // wheat (beige)
+      0xfff8dc, // cornsilk (light beige)
+      0xffefd5, // papaya whip (light yellow)
+      0xffe4b5, // moccasin (muted yellow)
+      0xadd8e6, // light blue
+      0x87cefa, // light sky blue
+      0xb0c4de, // light steel blue
+      0xd3d3d3, // light gray
+    ];
+
+    // Star texture
+    const generateStarTexture = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 64;
+      canvas.height = 64;
+      const ctx = canvas.getContext('2d');
+
+      // Draw gradient circle
+      const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+      gradient.addColorStop(0, 'rgba(255,255,255,1)');
+      gradient.addColorStop(0.2, 'rgba(255,255,255,0.8)');
+      gradient.addColorStop(0.4, 'rgba(255,255,255,0.6)');
+      gradient.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, 64, 64);
+
+      const texture = new THREE.CanvasTexture(canvas);
+      return texture;
+    };
+
+    const starTexture = generateStarTexture();
+
+    // Animation loop and callbacks
+    const animateCallbacks = [];
+
+    // Create galaxies
+    for (let g = 0; g < galaxyCount; g++) {
+      createGalaxy();
+    }
+
+    function createGalaxy() {
+      const spiralArms = 2 + Math.floor(Math.random() * 3); // 2 to 4 arms
+      const armSeparation = Math.PI * 2 / spiralArms;
+      const maxRadius = 50 + Math.random() * 150; // Radius between 50 and 200
+
+      const positions = new Float32Array(starCount * 3);
+      const colors = new Float32Array(starCount * 3);
+      const sizes = new Float32Array(starCount);
+
+      const galaxyColor = new THREE.Color(galaxyColors[Math.floor(Math.random() * galaxyColors.length)]);
+
+      for (let i = 0; i < starCount; i++) {
+        const radius = Math.random() * maxRadius;
+        const armAngle = (i % spiralArms) * armSeparation;
+        const angleOffset = Math.random() * armSeparation * 0.2; // Slight randomness to star positions
+        const angle = armAngle + radius * 0.1 + angleOffset;
+
+        const x = radius * Math.cos(angle);
+        const y = (Math.random() - 0.5) * 5; // Slight thickness to the galaxy
+        const z = radius * Math.sin(angle);
+
+        positions[i * 3] = x + (Math.random() - 0.5) * 5;
+        positions[i * 3 + 1] = y + (Math.random() - 0.5) * 5;
+        positions[i * 3 + 2] = z + (Math.random() - 0.5) * 5;
+
+        // Vary the color slightly for each star
+        const colorVariation = galaxyColor.clone().offsetHSL(
+          (Math.random() - 0.5) * 0.05,
+          (Math.random() - 0.5) * 0.05,
+          (Math.random() - 0.5) * 0.05
+        );
+        colors[i * 3] = colorVariation.r;
+        colors[i * 3 + 1] = colorVariation.g;
+        colors[i * 3 + 2] = colorVariation.b;
+
+        sizes[i] = 1 + Math.random() * 2; // Randomize star sizes
+      }
+
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+      geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+      const material = new THREE.PointsMaterial({
+        size: 3,
+        map: starTexture,
+        blending: THREE.AdditiveBlending,
+        transparent: true,
+        depthWrite: false,
+        vertexColors: true,
+        sizeAttenuation: true,
+      });
+
+      const stars = new THREE.Points(geometry, material);
+
+      // Position the galaxy randomly in space
+      stars.position.x = (Math.random() - 0.5) * galaxySpread;
+      stars.position.y = (Math.random() - 0.5) * galaxySpread;
+      stars.position.z = (Math.random() - 0.5) * galaxySpread;
+
+      // Random rotation
+      stars.rotation.x = Math.random() * Math.PI;
+      stars.rotation.y = Math.random() * Math.PI;
+      stars.rotation.z = Math.random() * Math.PI;
+
+      // Random rotation speed
+      const rotationSpeedX = (Math.random() - 0.5) * 0.0001;
+      const rotationSpeedY = (Math.random() - 0.5) * 0.0001;
+      const rotationSpeedZ = (Math.random() - 0.5) * 0.0001;
+
+      scene.add(stars);
+
+      // Rotate each galaxy over time
+      function rotateGalaxy() {
+        stars.rotation.y += rotationSpeedY;
+        stars.rotation.x += rotationSpeedX;
+        stars.rotation.z += rotationSpeedZ;
+      }
+      animateCallbacks.push(rotateGalaxy);
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      animateCallbacks.forEach(callback => callback());
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // Handle window resize
+    window.addEventListener('resize', function() {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      renderer.setSize(width, height);
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+    });
+  </script>
+</body>
+</html>
