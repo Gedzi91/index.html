@@ -1,0 +1,348 @@
+<html><head><base href="https://websim.ai/"/><title>Advanced Particle Simulator with Time Control - WebSim.ai</title><style>
+body {
+  margin: 0;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+  background-color: #111;
+  color: #fff;
+}
+#canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+#controls {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(0,0,0,0.7);
+  padding: 10px;
+  border-radius: 5px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+input[type="range"] {
+  width: 150px;
+}
+</style></head>
+<body>
+<canvas id="canvas"></canvas>
+<div id="controls">
+  <h3>Advanced Particle Simulator</h3>
+  <label>Simulation Speed: <input type="range" id="simSpeed" min="0.1" max="2" step="0.1" value="1"></label><br>
+  <label>Temperature: <input type="range" id="temperature" min="0" max="1" step="0.01" value="0.5"></label><br>
+  <label>Interaction Strength: <input type="range" id="interactionStrength" min="0" max="2" step="0.01" value="1"></label><br>
+  <label>Particles: <input type="range" id="particleCount" min="100" max="1000" step="50" value="500"></label><br>
+  <label>Gravity: <input type="range" id="gravity" min="-0.1" max="0.1" step="0.01" value="0"></label><br>
+  <label>Friction: <input type="range" id="friction" min="0" max="0.1" step="0.001" value="0.005"></label><br>
+  <label>Particle Lifespan: <input type="range" id="lifespan" min="100" max="2000" step="100" value="1000"></label><br>
+  <label>Void Strength: <input type="range" id="voidStrength" min="0" max="1" step="0.01" value="0.5"></label><br>
+  <button id="reset">Reset</button>
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+let simulationSpeed = 1;
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+class Particle {
+  constructor() {
+    this.x = Math.random() * canvas.width;
+    this.y = Math.random() * canvas.height;
+    this.vx = (Math.random() - 0.5) * 0.5;
+    this.vy = (Math.random() - 0.5) * 0.5;
+    this.radius = Math.random() * 3 + 2;
+    this.type = this.getRandomType();
+    this.color = this.getColor();
+    this.pulsePhase = Math.random() * Math.PI * 2;
+    this.lifespan = Math.random() * parseInt(lifespanSlider.value) + 100;
+    this.age = 0;
+    this.state = 'normal';
+    this.mass = this.radius * 0.1;
+  }
+
+  getRandomType() {
+    const types = ['normal', 'repeller', 'pulsar', 'hunter', 'oscillator', 'attractor', 'shapeshifter', 'catalyst', 'void', 'quantum'];
+    return types[Math.floor(Math.random() * types.length)];
+  }
+
+  getColor() {
+    const colors = {
+      normal: '#ffffff',
+      repeller: '#ff0000',
+      pulsar: '#00ff00',
+      hunter: '#ffff00',
+      oscillator: '#ff00ff',
+      attractor: '#00ffff',
+      shapeshifter: '#ffa500',
+      catalyst: '#8a2be2',
+      void: '#000000',
+      quantum: '#1e90ff'
+    };
+    return colors[this.type];
+  }
+
+  draw() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    ctx.fillStyle = this.color;
+    ctx.fill();
+
+    if (this.type === 'shapeshifter' || this.type === 'void' || this.type === 'quantum') {
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+  }
+
+  update(particles, params) {
+    this.age += simulationSpeed;
+    if (this.age > this.lifespan) {
+      this.respawn();
+    }
+
+    this.x += this.vx * simulationSpeed;
+    this.y += this.vy * simulationSpeed;
+
+    if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+    if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+
+    // Apply gravity
+    this.vy += params.gravity * this.mass * simulationSpeed;
+
+    // Apply friction
+    this.vx *= (1 - params.friction * simulationSpeed);
+    this.vy *= (1 - params.friction * simulationSpeed);
+
+    const damping = 1 - (1 - params.temperature) * 0.01;
+    this.vx *= damping;
+    this.vy *= damping;
+
+    this.specialBehavior(particles, params);
+  }
+
+  respawn() {
+    this.x = Math.random() * canvas.width;
+    this.y = Math.random() * canvas.height;
+    this.vx = (Math.random() - 0.5) * 0.5;
+    this.vy = (Math.random() - 0.5) * 0.5;
+    this.age = 0;
+    this.lifespan = Math.random() * parseInt(lifespanSlider.value) + 100;
+    if (Math.random() < 0.1) {
+      this.type = this.getRandomType();
+      this.color = this.getColor();
+    }
+  }
+
+  specialBehavior(particles, params) {
+    switch(this.type) {
+      case 'repeller':
+        this.repel(particles, params.interactionStrength);
+        break;
+      case 'pulsar':
+        this.pulse(particles, params.interactionStrength);
+        break;
+      case 'hunter':
+        this.hunt(particles, params.interactionStrength);
+        break;
+      case 'oscillator':
+        this.oscillate(params.interactionStrength);
+        break;
+      case 'attractor':
+        this.attract(particles, params.interactionStrength);
+        break;
+      case 'shapeshifter':
+        this.shapeshift(particles, params.interactionStrength);
+        break;
+      case 'catalyst':
+        this.catalyze(particles, params.interactionStrength);
+        break;
+      case 'void':
+        this.createVoid(particles, params.voidStrength);
+        break;
+      case 'quantum':
+        this.quantumBehavior(particles, params.interactionStrength);
+        break;
+    }
+  }
+
+  repel(particles, strength) {
+    particles.forEach(p => {
+      if (p !== this) {
+        const dx = p.x - this.x;
+        const dy = p.y - this.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < 100) {
+          const force = -strength * (100 - distance) / distance;
+          p.vx += force * dx * 0.005 * simulationSpeed;
+          p.vy += force * dy * 0.005 * simulationSpeed;
+        }
+      }
+    });
+  }
+
+  pulse(particles, strength) {
+    this.pulsePhase += 0.05 * simulationSpeed;
+    const pulseStrength = Math.sin(this.pulsePhase) * strength;
+    particles.forEach(p => {
+      if (p !== this) {
+        const dx = p.x - this.x;
+        const dy = p.y - this.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < 100) {
+          const force = pulseStrength * (100 - distance) / distance;
+          p.vx += force * dx * 0.005 * simulationSpeed;
+          p.vy += force * dy * 0.005 * simulationSpeed;
+        }
+      }
+    });
+  }
+
+  hunt(particles, strength) {
+    let closestParticle = null;
+    let minDistance = Infinity;
+    particles.forEach(p => {
+      if (p !== this && p.type !== 'hunter' && p.type !== 'void') {
+        const dx = p.x - this.x;
+        const dy = p.y - this.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestParticle = p;
+        }
+      }
+    });
+    if (closestParticle) {
+      const dx = closestParticle.x - this.x;
+      const dy = closestParticle.y - this.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      const force = strength * 0.3;
+      this.vx += force * dx / distance * simulationSpeed;
+      this.vy += force * dy / distance * simulationSpeed;
+    }
+  }
+
+  oscillate(strength) {
+    this.vx += Math.sin(this.age * 0.05) * strength * 0.05 * simulationSpeed;
+    this.vy += Math.cos(this.age * 0.05) * strength * 0.05 * simulationSpeed;
+  }
+
+  attract(particles, strength) {
+    particles.forEach(p => {
+      if (p !== this) {
+        const dx = p.x - this.x;
+        const dy = p.y - this.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < 150 && distance > 20) {
+          const force = strength * (distance - 20) / distance;
+          p.vx -= force * dx * 0.005 * simulationSpeed;
+          p.vy -= force * dy * 0.005 * simulationSpeed;
+        }
+      }
+    });
+  }
+
+  shapeshift(particles, strength) {
+    if (this.age % 100 === 0) {
+      this.radius = Math.random() * 3 + 2;
+      this.color = `hsl(${Math.random() * 360}, 70%, 50%)`;
+    }
+    this.attract(particles, strength * 0.5);
+    this.repel(particles, strength * 0.5);
+  }
+
+  catalyze(particles, strength) {
+    particles.forEach(p => {
+      if (p !== this && p.type !== 'catalyst' && p.type !== 'void') {
+        const dx = p.x - this.x;
+        const dy = p.y - this.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < 50) {
+          p.vx *= 1.01;
+          p.vy *= 1.01;
+        }
+      }
+    });
+  }
+
+  createVoid(particles, strength) {
+    particles.forEach(p => {
+      if (p !== this && p.type !== 'void') {
+        const dx = p.x - this.x;
+        const dy = p.y - this.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < 100) {
+          p.vx *= (1 - strength * 0.01 * simulationSpeed);
+          p.vy *= (1 - strength * 0.01 * simulationSpeed);
+        }
+      }
+    });
+  }
+
+  quantumBehavior(particles, strength) {
+    if (Math.random() < 0.01 * simulationSpeed) {
+      this.x = Math.random() * canvas.width;
+      this.y = Math.random() * canvas.height;
+    }
+    this.attract(particles, strength * 0.3);
+    this.repel(particles, strength * 0.3);
+  }
+}
+
+function createParticles() {
+  particles = [];
+  const count = parseInt(particleCountSlider.value);
+  for (let i = 0; i < count; i++) {
+    particles.push(new Particle());
+  }
+}
+
+function animate() {
+  ctx.fillStyle = 'rgba(17, 17, 17, 0.1)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+  const params = {
+    temperature: parseFloat(temperatureSlider.value),
+    interactionStrength: parseFloat(interactionStrengthSlider.value),
+    gravity: parseFloat(gravitySlider.value),
+    friction: parseFloat(frictionSlider.value),
+    voidStrength: parseFloat(voidStrengthSlider.value)
+  };
+
+  particles.forEach(p => {
+    p.update(particles, params);
+    p.draw();
+  });
+
+  requestAnimationFrame(animate);
+}
+
+const simSpeedSlider = document.getElementById('simSpeed');
+const temperatureSlider = document.getElementById('temperature');
+const interactionStrengthSlider = document.getElementById('interactionStrength');
+const particleCountSlider = document.getElementById('particleCount');
+const gravitySlider = document.getElementById('gravity');
+const frictionSlider = document.getElementById('friction');
+const lifespanSlider = document.getElementById('lifespan');
+const voidStrengthSlider = document.getElementById('voidStrength');
+const resetButton = document.getElementById('reset');
+
+simSpeedSlider.addEventListener('input', () => {
+  simulationSpeed = parseFloat(simSpeedSlider.value);
+});
+
+resetButton.addEventListener('click', createParticles);
+particleCountSlider.addEventListener('change', createParticles);
+
+createParticles();
+animate();
+</script>
+</body></html>
