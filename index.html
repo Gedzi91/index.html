@@ -1,0 +1,216 @@
+<html><head><base href="https://digital-sculpture.art/research/holographic-technology/ai-reconstruction/holographic-ai-assistants/demo/scene/interaction/dialogue/explore/techniques/volumetric/working/static-volume/optimization/hologram-preview/">
+<title>Interactive Hologram Preview</title>
+<style>
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: #000;
+    color: #1dec5c;
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+#hologram-container {
+    width: 600px;
+    height: 600px;
+    position: relative;
+    perspective: 1000px;
+}
+
+#hologram {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    transform-style: preserve-3d;
+    animation: rotate 20s infinite linear;
+}
+
+.voxel {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: rgba(29, 236, 92, 0.7);
+    border: 1px solid #1dec5c;
+    box-shadow: 0 0 5px #1dec5c;
+    transform-style: preserve-3d;
+}
+
+@keyframes rotate {
+    from { transform: rotateY(0deg) rotateX(0deg); }
+    to { transform: rotateY(360deg) rotateX(360deg); }
+}
+
+#controls {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 20px;
+}
+
+button {
+    padding: 10px 20px;
+    background: rgba(29, 236, 92, 0.2);
+    border: 1px solid #1dec5c;
+    color: #1dec5c;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    background: rgba(29, 236, 92, 0.4);
+}
+
+#info-panel {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #1dec5c;
+}
+</style>
+</head>
+<body>
+<div id="hologram-container">
+    <div id="hologram"></div>
+</div>
+
+<div id="controls">
+    <button id="change-shape">Change Shape</button>
+    <button id="toggle-rotation">Toggle Rotation</button>
+</div>
+
+<div id="info-panel">
+    <h2>Hologram Information</h2>
+    <p>Voxels: <span id="voxel-count">0</span></p>
+    <p>Rotation Speed: <span id="rotation-speed">20s</span></p>
+    <p>Current Shape: <span id="current-shape">Sphere</span></p>
+</div>
+
+<script>
+const hologram = document.getElementById('hologram');
+const changeShapeBtn = document.getElementById('change-shape');
+const toggleRotationBtn = document.getElementById('toggle-rotation');
+const voxelCountSpan = document.getElementById('voxel-count');
+const currentShapeSpan = document.getElementById('current-shape');
+
+let isRotating = true;
+let currentShape = 'sphere';
+const shapes = ['sphere', 'cube', 'pyramid', 'torus'];
+
+function createVoxel(x, y, z) {
+    const voxel = document.createElement('div');
+    voxel.className = 'voxel';
+    voxel.style.transform = `translate3d(${x}px, ${y}px, ${z}px)`;
+    return voxel;
+}
+
+function clearHologram() {
+    hologram.innerHTML = '';
+}
+
+function createSphere() {
+    clearHologram();
+    const radius = 200;
+    let voxelCount = 0;
+    for (let phi = 0; phi < Math.PI; phi += Math.PI / 15) {
+        for (let theta = 0; theta < 2 * Math.PI; theta += Math.PI / 15) {
+            const x = radius * Math.sin(phi) * Math.cos(theta) + 300;
+            const y = radius * Math.sin(phi) * Math.sin(theta) + 300;
+            const z = radius * Math.cos(phi);
+            hologram.appendChild(createVoxel(x, y, z));
+            voxelCount++;
+        }
+    }
+    voxelCountSpan.textContent = voxelCount;
+    currentShapeSpan.textContent = 'Sphere';
+}
+
+function createCube() {
+    clearHologram();
+    const size = 300;
+    let voxelCount = 0;
+    for (let x = 0; x <= size; x += 20) {
+        for (let y = 0; y <= size; y += 20) {
+            for (let z = 0; z <= size; z += 20) {
+                if (x === 0 || x === size || y === 0 || y === size || z === 0 || z === size) {
+                    hologram.appendChild(createVoxel(x + 150, y + 150, z - 150));
+                    voxelCount++;
+                }
+            }
+        }
+    }
+    voxelCountSpan.textContent = voxelCount;
+    currentShapeSpan.textContent = 'Cube';
+}
+
+function createPyramid() {
+    clearHologram();
+    const baseSize = 400;
+    const height = 400;
+    let voxelCount = 0;
+    for (let y = 0; y <= height; y += 20) {
+        const sizeAtHeight = baseSize * (1 - y / height);
+        for (let x = -sizeAtHeight / 2; x <= sizeAtHeight / 2; x += 20) {
+            for (let z = -sizeAtHeight / 2; z <= sizeAtHeight / 2; z += 20) {
+                if (Math.abs(x) >= sizeAtHeight / 2 - 20 || Math.abs(z) >= sizeAtHeight / 2 - 20 || y >= height - 20) {
+                    hologram.appendChild(createVoxel(x + 300, height - y + 100, z));
+                    voxelCount++;
+                }
+            }
+        }
+    }
+    voxelCountSpan.textContent = voxelCount;
+    currentShapeSpan.textContent = 'Pyramid';
+}
+
+function createTorus() {
+    clearHologram();
+    const R = 200; // distance from the center of the tube to the center of the torus
+    const r = 80;  // radius of the tube
+    let voxelCount = 0;
+    for (let theta = 0; theta < 2 * Math.PI; theta += Math.PI / 30) {
+        for (let phi = 0; phi < 2 * Math.PI; phi += Math.PI / 30) {
+            const x = (R + r * Math.cos(phi)) * Math.cos(theta) + 300;
+            const y = (R + r * Math.cos(phi)) * Math.sin(theta) + 300;
+            const z = r * Math.sin(phi);
+            hologram.appendChild(createVoxel(x, y, z));
+            voxelCount++;
+        }
+    }
+    voxelCountSpan.textContent = voxelCount;
+    currentShapeSpan.textContent = 'Torus';
+}
+
+function changeShape() {
+    const nextShapeIndex = (shapes.indexOf(currentShape) + 1) % shapes.length;
+    currentShape = shapes[nextShapeIndex];
+    switch (currentShape) {
+        case 'sphere': createSphere(); break;
+        case 'cube': createCube(); break;
+        case 'pyramid': createPyramid(); break;
+        case 'torus': createTorus(); break;
+    }
+}
+
+function toggleRotation() {
+    isRotating = !isRotating;
+    hologram.style.animationPlayState = isRotating ? 'running' : 'paused';
+    toggleRotationBtn.textContent = isRotating ? 'Pause Rotation' : 'Resume Rotation';
+}
+
+changeShapeBtn.addEventListener('click', changeShape);
+toggleRotationBtn.addEventListener('click', toggleRotation);
+
+// Initialize with a sphere
+createSphere();
+</script>
+</body>
+</html>
