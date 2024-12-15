@@ -1,0 +1,404 @@
+<html><head><base href="." /><title>DEMONIC Minecraft-Style World</title>
+<style>
+body { margin: 0; overflow: hidden; background: #000; }
+
+.world {
+    perspective: 1000px;
+    height: 100vh;
+    background: linear-gradient(#300, #000);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: pulse 2s infinite, shake 0.5s infinite, demonicPulse 3s infinite;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px) rotate(-1deg); }
+    75% { transform: translateX(5px) rotate(1deg); }
+}
+
+@keyframes pulse {
+    0%, 100% { background: linear-gradient(#400, #000); }
+    50% { background: linear-gradient(#900, #200); }
+}
+
+@keyframes demonicPulse {
+    0%, 100% { filter: saturate(100%) hue-rotate(0deg); }
+    50% { filter: saturate(200%) hue-rotate(60deg); }
+}
+
+.cube {
+    width: 100px;
+    height: 100px;
+    position: relative;
+    transform-style: preserve-3d;
+    animation: rotate 15s infinite linear;
+    filter: drop-shadow(0 0 25px #f00);
+}
+
+.face {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    opacity: 0.9;
+    border: 2px solid rgba(255,0,0,0.5);
+}
+
+.front { transform: translateZ(50px); background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%23400"/><path d="M50,20 L20,80 L80,80 Z" fill="%23900"/></svg>'); }
+.back { transform: translateZ(-50px) rotateY(180deg); background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%23400"/><circle cx="50" cy="50" r="30" fill="%23900"/></svg>'); }
+.right { transform: translateX(50px) rotateY(90deg); background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%23400"/><path d="M20,20 L80,20 L50,80 Z" fill="%23900"/></svg>'); }
+.left { transform: translateX(-50px) rotateY(-90deg); background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%23400"/><path d="M20,80 L80,80 L50,20 Z" fill="%23900"/></svg>'); }
+.top { transform: translateY(-50px) rotateX(90deg); background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%23700"/><path d="M10,10 L90,10 L50,90 Z" fill="%23c00"/></svg>'); }
+.bottom { transform: translateY(50px) rotateX(-90deg); background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%23400"/><circle cx="50" cy="50" r="40" fill="%23900"/></svg>'); }
+
+@keyframes rotate {
+    0% { transform: rotateX(0) rotateY(0) rotateZ(0); }
+    100% { transform: rotateX(360deg) rotateY(720deg) rotateZ(360deg); }
+}
+
+.grass {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 200px;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%23300"/><path d="M0,0 L50,50 L100,0 Z" fill="%23700"/></svg>');
+    transform: rotateX(60deg);
+    transform-origin: bottom;
+    animation: grassPulse 3s infinite;
+}
+
+@keyframes grassPulse {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.5); }
+}
+
+.clouds {
+    position: absolute;
+    top: 50px;
+    left: 0;
+    width: 100%;
+    height: 100px;
+    animation: moveClouds 15s linear infinite;
+    filter: contrast(300%) brightness(50%) sepia(100%) hue-rotate(320deg);
+}
+
+.lava {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 80px;
+    background: linear-gradient(90deg, #f00, #900);
+    opacity: 0.8;
+    animation: lavaFlow 1s infinite;
+}
+
+@keyframes lavaFlow {
+    0%, 100% { transform: scaleY(1); filter: brightness(1); }
+    50% { transform: scaleY(1.4); filter: brightness(1.5); }
+}
+
+.pentagram {
+    position: absolute;
+    width: 400px;
+    height: 400px;
+    animation: rotatePentagram 5s linear infinite, glow 2s infinite;
+    opacity: 0.8;
+    filter: drop-shadow(0 0 20px #f00);
+}
+
+@keyframes rotatePentagram {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes glow {
+    0%, 100% { filter: drop-shadow(0 0 20px #f00); }
+    50% { filter: drop-shadow(0 0 40px #f00); }
+}
+
+.blood-drip {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.drip {
+    position: absolute;
+    width: 3px;
+    height: 20px;
+    background: #900;
+    animation: drip 3s linear infinite;
+    filter: drop-shadow(0 0 5px #f00);
+}
+
+@keyframes drip {
+    0% { transform: translateY(-20px); opacity: 0; }
+    50% { opacity: 1; }
+    100% { transform: translateY(100vh); opacity: 0; }
+}
+
+.skull {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(10deg); }
+}
+
+.flames {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 150px;
+    z-index: 2;
+}
+
+.demonic-symbols {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1001;
+}
+
+.symbol {
+    position: absolute;
+    font-family: serif;
+    color: #f00;
+    font-size: 30px;
+    animation: floatSymbol 5s infinite, glowSymbol 2s infinite;
+    text-shadow: 0 0 10px #f00;
+}
+
+@keyframes floatSymbol {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    50% { transform: translate(20px, -20px) rotate(180deg); }
+}
+
+@keyframes glowSymbol {
+    0%, 100% { text-shadow: 0 0 10px #f00; }
+    50% { text-shadow: 0 0 30px #f00, 0 0 50px #f00; }
+}
+
+.tortured-souls {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 999;
+}
+
+.soul {
+    position: absolute;
+    width: 50px;
+    height: 80px;
+    animation: floatSoul 8s infinite;
+    opacity: 0.3;
+}
+
+@keyframes floatSoul {
+    0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+    50% { opacity: 0.3; }
+    100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+}
+</style>
+</head>
+<body>
+<div class="world">
+    <div class="blood-drip"></div>
+    <div class="pentagram">
+        <svg width="100%" height="100%" viewBox="0 0 100 100">
+            <path d="M50,0 L61,35 L97,35 L68,57 L79,91 L50,70 L21,91 L32,57 L3,35 L39,35 Z" 
+                  fill="none" stroke="#f00" stroke-width="3"/>
+            <circle cx="50" cy="50" r="30" fill="none" stroke="#f00" stroke-width="2"/>
+            <text x="50" y="55" text-anchor="middle" fill="#f00" font-size="10">666</text>
+        </svg>
+    </div>
+    <div class="skull">
+        <svg width="100%" height="100%" viewBox="0 0 100 100">
+            <path d="M20,30 Q50,0 80,30 Q100,60 80,80 Q50,100 20,80 Q0,60 20,30" fill="#600" stroke="#f00"/>
+            <circle cx="35" cy="40" r="10" fill="#f00"/>
+            <circle cx="65" cy="40" r="10" fill="#f00"/>
+            <path d="M40,60 Q50,70 60,60" stroke="#f00" fill="none" stroke-width="3"/>
+        </svg>
+    </div>
+    <div class="flames">
+        <svg width="100%" height="100%" viewBox="0 0 100 100">
+            <path d="M0,100 Q25,50 50,100 Q75,50 100,100" fill="#f00" opacity="0.6">
+                <animate attributeName="d" dur="1s" repeatCount="indefinite"
+                    values="M0,100 Q25,50 50,100 Q75,50 100,100;
+                            M0,100 Q25,40 50,100 Q75,40 100,100;
+                            M0,100 Q25,50 50,100 Q75,50 100,100"/>
+            </path>
+        </svg>
+    </div>
+    <div class="clouds">
+        <svg width="100%" height="100%" viewBox="0 0 200 100">
+            <path d="M20,50 Q30,20 40,50 Q50,20 60,50 Q70,20 80,50 T100,50 T120,50 T140,50" 
+                  fill="#f00" opacity="0.5"/>
+            <path d="M40,70 Q50,40 60,70 Q70,40 80,70 T100,70 T120,70" 
+                  fill="#900" opacity="0.3"/>
+        </svg>
+    </div>
+    <div class="cube">
+        <div class="face front"></div>
+        <div class="face back"></div>
+        <div class="face right"></div>
+        <div class="face left"></div>
+        <div class="face top"></div>
+        <div class="face bottom"></div>
+    </div>
+    <div class="grass"></div>
+    <div class="lava"></div>
+    <div class="tortured-souls"></div>
+    <div class="demonic-symbols"></div>
+</div>
+
+<script>
+document.addEventListener('mousemove', (e) => {
+    const cube = document.querySelector('.cube');
+    const x = (e.clientX / window.innerWidth - 0.5) * 20;
+    const y = (e.clientY / window.innerHeight - 0.5) * 20;
+    cube.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
+});
+
+document.querySelector('.cube').addEventListener('click', function() {
+    this.style.animation = 'none';
+    this.offsetHeight;
+    this.style.animation = 'rotate 15s infinite linear';
+    
+    for(let i = 0; i < 5; i++) {
+        const particle = document.createElement('div');
+        particle.style.position = 'absolute';
+        particle.style.width = '10px';
+        particle.style.height = '10px';
+        particle.style.backgroundColor = '#f00';
+        particle.style.boxShadow = '0 0 10px #f00';
+        particle.style.animation = 'particle 1s ease-out';
+        particle.style.setProperty('--x', (Math.random() * 200 - 100) + 'px');
+        particle.style.setProperty('--y', (Math.random() * 200 - 100) + 'px');
+        this.appendChild(particle);
+    }
+});
+
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes particle {
+        0% { transform: translate(0, 0) scale(1); opacity: 1; }
+        100% { transform: translate(var(--x, 100px), var(--y, -100px)) scale(0); opacity: 0; }
+    }
+`;
+document.head.appendChild(style);
+
+// Add blood drips
+function createDrip() {
+    const drip = document.createElement('div');
+    drip.className = 'drip';
+    drip.style.left = Math.random() * 100 + '%';
+    document.querySelector('.blood-drip').appendChild(drip);
+    drip.addEventListener('animationend', () => drip.remove());
+}
+
+setInterval(createDrip, 200);
+
+// Add demonic whispers
+const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+function playDemonicSound() {
+    const oscillator = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    oscillator.connect(gain);
+    gain.connect(audioContext.destination);
+    
+    oscillator.type = 'sawtooth';
+    oscillator.frequency.setValueAtTime(Math.random() * 200 + 100, audioContext.currentTime);
+    gain.gain.setValueAtTime(0.1, audioContext.currentTime);
+    
+    oscillator.start();
+    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+    oscillator.stop(audioContext.currentTime + 0.5);
+}
+
+setInterval(playDemonicSound, 3000);
+
+document.addEventListener('click', () => {
+    const rumble = new Audio();
+    rumble.src = 'data:audio/wav;base64,UklGRjIAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAZGF0YRAAAAAA//////////8=';
+    rumble.play();
+    playDemonicSound();
+});
+
+// Add floating demonic symbols
+const symbols = ['☠', '⛧', '⛥', '⛦', '666', '✝̸', 'XIII', '☰', '⛧'];
+function createSymbol() {
+    const symbol = document.createElement('div');
+    symbol.className = 'symbol';
+    symbol.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+    symbol.style.left = Math.random() * 100 + '%';
+    symbol.style.top = Math.random() * 100 + '%';
+    document.querySelector('.demonic-symbols').appendChild(symbol);
+    setTimeout(() => symbol.remove(), 5000);
+}
+setInterval(createSymbol, 1000);
+
+// Add tortured souls
+function createSoul() {
+    const soul = document.createElement('div');
+    soul.className = 'soul';
+    soul.style.left = Math.random() * 100 + '%';
+    
+    const soulSvg = `
+    <svg viewBox="0 0 50 80" width="100%" height="100%">
+        <path d="M25,0 Q40,20 25,40 Q10,20 25,0" fill="#600" opacity="0.5">
+            <animate attributeName="d" dur="1s" repeatCount="indefinite"
+                values="M25,0 Q40,20 25,40 Q10,20 25,0;
+                        M25,0 Q45,25 25,40 Q5,25 25,0;
+                        M25,0 Q40,20 25,40 Q10,20 25,0"/>
+        </path>
+    </svg>`;
+    
+    soul.innerHTML = soulSvg;
+    document.querySelector('.tortured-souls').appendChild(soul);
+    soul.addEventListener('animationend', () => soul.remove());
+}
+setInterval(createSoul, 500);
+
+// Enhanced demonic sound effects
+function playEnhancedDemonicSound() {
+    const oscillator1 = audioContext.createOscillator();
+    const oscillator2 = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    
+    oscillator1.connect(gain);
+    oscillator2.connect(gain);
+    gain.connect(audioContext.destination);
+    
+    oscillator1.type = 'sawtooth';
+    oscillator2.type = 'square';
+    
+    oscillator1.frequency.setValueAtTime(Math.random() * 200 + 100, audioContext.currentTime);
+    oscillator2.frequency.setValueAtTime(Math.random() * 100 + 50, audioContext.currentTime);
+    
+    gain.gain.setValueAtTime(0.1, audioContext.currentTime);
+    
+    oscillator1.start();
+    oscillator2.start();
+    
+    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1);
+    
+    oscillator1.stop(audioContext.currentTime + 1);
+    oscillator2.stop(audioContext.currentTime + 1);
+}
+
+setInterval(playEnhancedDemonicSound, 2000);
+</script>
+</body></html>
