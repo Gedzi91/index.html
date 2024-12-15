@@ -1,0 +1,324 @@
+<html><head><base href="https://interdimensional-cable.tv"><title>Interdimensional Cable TV</title>
+<style>
+  body {
+    font-family: 'Courier New', monospace;
+    color: #0F0;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-image: url('https://static1.srcdn.com/wordpress/wp-content/uploads/2020/07/Rick-and-Morty-Interdimensional-Cable.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    height: 100vh;
+  }
+  .container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    position: relative;
+  }
+  .tv-screen {
+    position: absolute;
+    top: 36%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40%;
+    height: 52%;
+    overflow: hidden;
+    border-radius: 10px;
+  }
+  .static {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+      repeating-radial-gradient(#000 0 0.0001%, #fff 0 0.0002%) 50% 0/2500px 2500px,
+      repeating-conic-gradient(#000 0 0.0001%, #fff 0 0.0002%) 50% 50%/2500px 2500px;
+    background-blend-mode: difference;
+    opacity: 0.05;
+    pointer-events: none;
+  }
+  .video-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+  iframe {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 56.25vw; /* 16:9 aspect ratio */
+    transform: translate(-50%, -50%);
+    min-height: 100%;
+    min-width: 177.78vh; /* 16:9 aspect ratio */
+  }
+  .controls {
+    display: flex;
+    justify-content: space-around;
+    padding: 20px;
+    background-color: rgba(17, 17, 17, 0.8);
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+  button {
+    background-color: #0F0;
+    color: #000;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  button:hover {
+    background-color: #0F0;
+    box-shadow: 0 0 10px #0F0;
+  }
+  .channel-display {
+    font-size: 2em;
+    text-align: center;
+    padding: 10px;
+    background-color: rgba(17, 17, 17, 0.8);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+  }
+  @keyframes glitch {
+    0% {
+      text-shadow: 0.05em 0 0 #00fffc, -0.03em -0.04em 0 #fc00ff,
+        0.025em 0.04em 0 #fffc00;
+    }
+    15% {
+      text-shadow: 0.05em 0 0 #00fffc, -0.03em -0.04em 0 #fc00ff,
+        0.025em 0.04em 0 #fffc00;
+    }
+    16% {
+      text-shadow: -0.05em -0.025em 0 #00fffc, 0.025em 0.035em 0 #fc00ff,
+        -0.05em -0.05em 0 #fffc00;
+    }
+    49% {
+      text-shadow: -0.05em -0.025em 0 #00fffc, 0.025em 0.035em 0 #fc00ff,
+        -0.05em -0.05em 0 #fffc00;
+    }
+    50% {
+      text-shadow: 0.05em 0.035em 0 #00fffc, 0.03em 0 0 #fc00ff,
+        0 -0.04em 0 #fffc00;
+    }
+    99% {
+      text-shadow: 0.05em 0.035em 0 #00fffc, 0.03em 0 0 #fc00ff,
+        0 -0.04em 0 #fffc00;
+    }
+    100% {
+      text-shadow: -0.05em 0 0 #00fffc, -0.025em -0.04em 0 #fc00ff,
+        -0.04em -0.025em 0 #fffc00;
+    }
+  }
+  .glitch {
+    animation: glitch 1s linear infinite;
+  }
+  .loader {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    display: none;
+    overflow: hidden;
+  }
+  .loader::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+      linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.3) 50%,
+        rgba(255, 255, 255, 0) 100%
+      );
+    background-size: 100% 3px;
+    animation: static-animation 50ms steps(100) infinite;
+  }
+  @keyframes static-animation {
+    0% {
+      background-position: 0 0;
+    }
+    100% {
+      background-position: 0 100%;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="channel-display">
+    <span id="channel-number" class="glitch">Channel 137</span>
+  </div>
+  
+  <div class="tv-screen">
+    <div class="static"></div>
+    <div class="video-container">
+      <iframe id="video-frame" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+      <div id="loader" class="loader"></div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button onclick="changeChannel('prev')">Previous Channel</button>
+    <button onclick="changeChannel('random')">Random Channel</button>
+    <button onclick="changeChannel('next')">Next Channel</button>
+  </div>
+</div>
+
+<script>
+  const weirdVideoIds = {
+    100: 'ygI-2F8ApUM',  // Cows & Cows & Cows
+    101: 'WQO-aOdJLiw',  // Cyriak - Welcome to Kitty City
+    102: 'FavUpD_IjVY',  // Cyriak - Cows Cows Cows
+    103: 'dZfmPREbTd8',  // Cyriak - Baaa
+    104: 'V6SfEIoEHY0',  // Rick and Morty - Interdimensional Cable
+    105: 'vZ3Pi1QBAlQ',  // The Delicious Taste of Ice Cream (Surreal Animation)
+    106: '9C_HReR_McQ',  // Don't Hug Me I'm Scared
+    107: 'erh2ngRZxs0',  // The Chickening
+    108: 'FHviwdECNjU',  // Pickle Surprise
+    109: 'D-UmfqFjpl0',  // Dog of Wisdom
+    110: 'ETfiUYij5UE',  // Goat Simulator Launch Trailer
+    111: 'eRvfxWRi6qQ',  // The Gentlemen's Guide To Knife Fighting - Rude Waiter
+    112: 'jX3iLfcMDCw',  // Salad Fingers 1: Spoons
+    113: 'YbYWhdLO43Q',  // Unedited Footage of a Bear
+    114: 'j5a0jTc9S10',  // Puppy Monkey Baby
+    115: '8ZDNkp0Xbeo',  // Rubber Johnny by Chris Cunningham
+    116: 'Wst94KxjpMo',  // Sextina Aquafina's Get Dat Fetus, Kill Dat Fetus
+    117: 'oeb5LdAyLC8',  // Too Many Cooks
+    118: 'sdSJ1--kBZ4',  // Lasagna Cat - 07/27/1978
+    119: 'k_d5jWvBirU',  // Celery Man
+    120: 'q1dpQKntj_w',  // Going to the Store
+    121: 'iRZ2Sh5-XuM',  // Obey the Walrus
+    122: 'dQw4w9WgXcQ',  // Rick Roll
+    123: 'ZZ5LpwO-An4',  // HEYYEYAAEYAAAEYAEYAA
+    124: 'rLy-AwdCOmI',  // Llamas with Hats 1
+    125: 'sPzJjNQaYEA',  // Charlie the Unicorn
+    126: 'FWtO0cfgewY',  // Potter Puppet Pals: The Mysterious Ticking Noise
+    127: 'zt2uIhAvQZ8',  // Banana Phone
+    128: 'vtkGtXtDlQA',  // Don't Hug Me I'm Scared 2 - TIME
+    129: 'zUqQt8mD99c',  // Skifcha - Sad Cat Diary
+    130: 'ZqzESY7SIqU',  // Nyan Cat [original]
+    131: 'NL6CDFn2i3I',  // The Ultimate Showdown of Ultimate Destiny
+    132: 'ub82Xb1C8os',  // Rick Roll 2: Electric Boogaloo
+    133: 'dgha9S39Y6M',  // Animation vs. Animator
+    134: 'MuOvqeABHvQ',  // Rejected
+    135: 'jX6kn9_U8qk',  // Banana Splits Intro (Tra La La Song)
+    136: 'wBqM2ytqHY4',  // Crab Rave
+    137: 'tVj0ZTS4WF4',  // Badgers
+    138: 'rEcOzjg7vBU',  // Dumb Ways to Die
+    139: 'y6120QOlsfU',  // Darude - Sandstorm
+    140: 'hGlyFc79BUE',  // Ultimate Dog Tease
+  };
+
+  const fallbackVideoId = 'h8JZCqaJ068'; // Fallback video: Adult Swim Off The Air - Technology
+
+  let currentChannel = 137;
+  let staticNoiseAudio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-static-tv-noise-2874.mp3');
+  staticNoiseAudio.loop = true;
+
+  function changeChannel(direction) {
+    if (direction === 'next') {
+      currentChannel++;
+    } else if (direction === 'prev') {
+      currentChannel--;
+    } else if (direction === 'random') {
+      currentChannel = Math.floor(Math.random() * 999999999999) + 1;
+    }
+
+    if (currentChannel > 999999999999) currentChannel = 1;
+    if (currentChannel < 1) currentChannel = 999999999999;
+
+    document.getElementById('channel-number').textContent = `Channel ${currentChannel}`;
+    
+    loadVideo(currentChannel);
+  }
+
+  function loadVideo(channel) {
+    const videoId = weirdVideoIds[channel] || generateVideoId(channel);
+    
+    // Show loader and play static noise
+    document.getElementById('loader').style.display = 'block';
+    staticNoiseAudio.play();
+    
+    // Hide current video
+    document.getElementById('video-frame').style.opacity = '0';
+    
+    // Check if video is available
+    checkVideoAvailability(videoId)
+      .then(isAvailable => {
+        if (isAvailable) {
+          playVideo(videoId);
+        } else {
+          console.log(`Video ${videoId} is not available. Playing fallback...`);
+          playVideo(fallbackVideoId);
+        }
+      });
+  }
+
+  function generateVideoId(channel) {
+    // Use channel number to generate a seemingly random but consistent video ID
+    let hash = 0;
+    const channelString = channel.toString();
+    for (let i = 0; i < channelString.length; i++) {
+      const char = channelString.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+    // Use the hash to select a video from weirdVideoIds
+    const videoKeys = Object.keys(weirdVideoIds);
+    const index = Math.abs(hash) % videoKeys.length;
+    return weirdVideoIds[videoKeys[index]];
+  }
+
+  function checkVideoAvailability(videoId) {
+    return fetch(`https://www.youtube.com/oembed?url=http://www.youtube.com/watch?v=${videoId}&format=json`)
+      .then(response => response.ok)
+      .catch(() => false);
+  }
+
+  function playVideo(videoId) {
+    // Change video source
+    document.getElementById('video-frame').src = `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=0&showinfo=0&rel=0`;
+    
+    // Hide loader, stop static noise, and show video when loaded
+    document.getElementById('video-frame').onload = function() {
+      setTimeout(() => {
+        document.getElementById('loader').style.display = 'none';
+        staticNoiseAudio.pause();
+        staticNoiseAudio.currentTime = 0;
+        document.getElementById('video-frame').style.opacity = '1';
+      }, 1000); // Delay to show the loader effect
+    };
+    
+    applyGlitchEffect();
+  }
+
+  function applyGlitchEffect() {
+    const channelDisplay = document.getElementById('channel-number');
+    channelDisplay.classList.add('glitch');
+    setTimeout(() => {
+      channelDisplay.classList.remove('glitch');
+    }, 1000);
+  }
+
+  // Initial video load
+  changeChannel('random');
+</script>
+
+</body></html>
