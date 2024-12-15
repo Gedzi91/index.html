@@ -1,0 +1,488 @@
+<html><head><base href="https://3d-surreal-room-explorer.com">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D Surreal Room Explorer</title>
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+  }
+  #gameCanvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  #info {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    color: white;
+    font-size: 18px;
+    background-color: rgba(0,0,0,0.5);
+    padding: 10px;
+    border-radius: 5px;
+  }
+  #crosshair {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+  <canvas id="gameCanvas"></canvas>
+  <div id="info">
+    WASD: Move | Mouse: Look | E: Enter Portal | R: Restart
+  </div>
+  <svg id="crosshair" viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="48" stroke="white" stroke-width="2" fill="none" />
+    <line x1="50" y1="0" x2="50" y2="100" stroke="white" stroke-width="2" />
+    <line x1="0" y1="50" x2="100" y2="50" stroke="white" stroke-width="2" />
+  </svg>
+
+  <audio id="backgroundMusic" loop>
+    <source src="https://example.com/calming-music.mp3" type="audio/mpeg">
+  </audio>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ canvas });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    // Background music
+    const backgroundMusic = document.getElementById('backgroundMusic');
+    backgroundMusic.volume = 0.3;
+    canvas.addEventListener('click', () => {
+      backgroundMusic.play();
+    });
+
+    // Player
+    const playerHeight = 1.8;
+    const moveSpeed = 10;
+    let playerVelocity = new THREE.Vector3();
+
+    camera.position.set(0, playerHeight, 0);
+
+    // Room
+    const roomSize = 20;
+    const wallGeometry = new THREE.BoxGeometry(roomSize, roomSize, 0.1);
+    const ceilingFloorGeometry = new THREE.BoxGeometry(roomSize, 0.1, roomSize);
+
+    function createWall(position, rotation) {
+      const wallMaterial = new THREE.MeshPhongMaterial({
+        color: Math.random() * 0xffffff,
+        map: createWeirdTexture(),
+      });
+      const wallMesh = new THREE.Mesh(wallGeometry, wallMaterial);
+      wallMesh.position.copy(position);
+      wallMesh.rotation.setFromVector3(rotation);
+      scene.add(wallMesh);
+    }
+
+    function createRoom() {
+      createWall(new THREE.Vector3(0, roomSize / 2, -roomSize / 2), new THREE.Vector3(0, 0, 0));
+      createWall(new THREE.Vector3(0, roomSize / 2, roomSize / 2), new THREE.Vector3(0, Math.PI, 0));
+      createWall(new THREE.Vector3(-roomSize / 2, roomSize / 2, 0), new THREE.Vector3(0, Math.PI / 2, 0));
+      createWall(new THREE.Vector3(roomSize / 2, roomSize / 2, 0), new THREE.Vector3(0, -Math.PI / 2, 0));
+
+      const floorMaterial = new THREE.MeshPhongMaterial({
+        color: 0x808080,
+        map: createWeirdTexture(),
+      });
+      const floorMesh = new THREE.Mesh(ceilingFloorGeometry, floorMaterial);
+      floorMesh.position.set(0, 0, 0);
+      scene.add(floorMesh);
+
+      const ceilingMaterial = new THREE.MeshPhongMaterial({
+        color: 0x808080,
+        map: createWeirdTexture(),
+      });
+      const ceilingMesh = new THREE.Mesh(ceilingFloorGeometry, ceilingMaterial);
+      ceilingMesh.position.set(0, roomSize, 0);
+      scene.add(ceilingMesh);
+    }
+
+    // Lights
+    const ambientLight = new THREE.AmbientLight(0x404040);
+    scene.add(ambientLight);
+
+    const pointLight = new THREE.PointLight(0xffffff, 1, 100);
+    pointLight.position.set(0, roomSize / 2, 0);
+    scene.add(pointLight);
+
+    // Floating shapes
+    const shapeGeometries = [
+      new THREE.TetrahedronGeometry(1),
+      new THREE.OctahedronGeometry(1),
+      new THREE.DodecahedronGeometry(1),
+      new THREE.TorusKnotGeometry(0.5, 0.2, 100, 16),
+    ];
+
+    let floatingShapes = [];
+
+    function createFloatingShapes() {
+      floatingShapes = [];
+      for (let i = 0; i < 10; i++) {
+        const geometry = shapeGeometries[Math.floor(Math.random() * shapeGeometries.length)];
+        const material = new THREE.MeshPhongMaterial({ color: Math.random() * 0xffffff });
+        const shape = new THREE.Mesh(geometry, material);
+        shape.position.set(
+          Math.random() * roomSize - roomSize / 2,
+          Math.random() * roomSize,
+          Math.random() * roomSize - roomSize / 2
+        );
+        shape.userData.velocity = new THREE.Vector3(
+          (Math.random() - 0.5) * 0.05,
+          (Math.random() - 0.5) * 0.05,
+          (Math.random() - 0.5) * 0.05
+        );
+        scene.add(shape);
+        floatingShapes.push(shape);
+      }
+    }
+
+    // 3D Words
+    const fontLoader = new THREE.FontLoader();
+    const fonts = [
+      'https://threejs.org/examples/fonts/helvetiker_regular.typeface.json',
+      'https://threejs.org/examples/fonts/helvetiker_bold.typeface.json',
+      'https://threejs.org/examples/fonts/optimer_regular.typeface.json',
+      'https://threejs.org/examples/fonts/optimer_bold.typeface.json',
+      'https://threejs.org/examples/fonts/gentilis_regular.typeface.json',
+      'https://threejs.org/examples/fonts/gentilis_bold.typeface.json',
+      'https://threejs.org/examples/fonts/droid/droid_sans_regular.typeface.json',
+      'https://threejs.org/examples/fonts/droid/droid_sans_bold.typeface.json',
+      'https://threejs.org/examples/fonts/droid/droid_serif_regular.typeface.json',
+      'https://threejs.org/examples/fonts/droid/droid_serif_bold.typeface.json'
+    ];
+
+    // Function to get random words
+    async function getRandomWords(count) {
+      const response = await fetch(`https://random-word-api.herokuapp.com/word?number=${count}`);
+      return response.json();
+    }
+
+    async function create3DWords() {
+      const words = await getRandomWords(5);
+      words.forEach(word => {
+        const randomFont = fonts[Math.floor(Math.random() * fonts.length)];
+        fontLoader.load(randomFont, function(font) {
+          const textGeometry = new THREE.TextGeometry(word, {
+            font: font,
+            size: 1,
+            height: 0.2,
+          });
+          const textMaterial = new THREE.MeshPhongMaterial({ color: Math.random() * 0xffffff });
+          const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+          textMesh.position.set(
+            Math.random() * roomSize - roomSize / 2,
+            Math.random() * roomSize,
+            Math.random() * roomSize - roomSize / 2
+          );
+          textMesh.rotation.set(
+            Math.random() * Math.PI,
+            Math.random() * Math.PI,
+            Math.random() * Math.PI
+          );
+          textMesh.scale.set(
+            1 + Math.random() * 0.5,
+            1 + Math.random() * 0.5,
+            1 + Math.random() * 0.5
+          );
+          textMesh.userData.rotationSpeed = new THREE.Vector3(
+            (Math.random() - 0.5) * 0.02,
+            (Math.random() - 0.5) * 0.02,
+            (Math.random() - 0.5) * 0.02
+          );
+          textMesh.userData.scaleSpeed = new THREE.Vector3(
+            (Math.random() - 0.5) * 0.005,
+            (Math.random() - 0.5) * 0.005,
+            (Math.random() - 0.5) * 0.005
+          );
+          scene.add(textMesh);
+        });
+      });
+    }
+
+    // Portal
+    let portalMesh;
+
+    function createWeirdPortal() {
+      if (portalMesh) {
+        scene.remove(portalMesh);
+      }
+
+      const randomGeometry = [
+        new THREE.TorusGeometry(2, 0.5, 16, 100),
+        new THREE.SphereGeometry(2, 32, 32),
+        new THREE.IcosahedronGeometry(2),
+        new THREE.TorusKnotGeometry(1.5, 0.5, 100, 16),
+      ][Math.floor(Math.random() * 4)];
+
+      const portalMaterial = new THREE.MeshPhongMaterial({
+        color: Math.random() * 0xffffff,
+        emissive: Math.random() * 0xffffff,
+        wireframe: Math.random() > 0.5,
+      });
+
+      portalMesh = new THREE.Mesh(randomGeometry, portalMaterial);
+      portalMesh.position.set(
+        Math.random() * (roomSize - 4) - (roomSize / 2 - 2),
+        3,
+        Math.random() * (roomSize - 4) - (roomSize / 2 - 2)
+      );
+      scene.add(portalMesh);
+    }
+
+    // Background
+    function createBackground() {
+      const loader = new THREE.TextureLoader();
+      const randomImage = `https://picsum.photos/id/${Math.floor(Math.random() * 1000)}/1024/1024`;
+      loader.load(randomImage, function(texture) {
+        scene.background = texture;
+      });
+    }
+
+    // Controls
+    const keys = { w: false, a: false, s: false, d: false };
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key.toLowerCase() in keys) keys[e.key.toLowerCase()] = true;
+      if (e.key.toLowerCase() === 'r') restartGame();
+    });
+
+    document.addEventListener('keyup', (e) => {
+      if (e.key.toLowerCase() in keys) keys[e.key.toLowerCase()] = false;
+      if (e.key.toLowerCase() === 'e') checkPortalEntry();
+    });
+
+    let pitch = 0;
+    let yaw = 0;
+
+    document.addEventListener('mousemove', (e) => {
+      if (document.pointerLockElement === canvas) {
+        const sensitivity = 0.002;
+        yaw -= e.movementX * sensitivity;
+        pitch -= e.movementY * sensitivity;
+        pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, pitch));
+      }
+    });
+
+    canvas.addEventListener('click', () => {
+      canvas.requestPointerLock();
+    });
+
+    function createWeirdTexture() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 256;
+      canvas.height = 256;
+      const ctx = canvas.getContext('2d');
+
+      ctx.fillStyle = `hsl(${Math.random() * 360}, 100%, 50%)`;
+      ctx.fillRect(0, 0, 256, 256);
+
+      for (let i = 0; i < 50; i++) {
+        ctx.beginPath();
+        ctx.fillStyle = `hsla(${Math.random() * 360}, 100%, 50%, 0.5)`;
+        ctx.arc(Math.random() * 256, Math.random() * 256, Math.random() * 50, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.wrapT = THREE.RepeatWrapping;
+      texture.repeat.set(4, 4);
+
+      return texture;
+    }
+
+    function checkPortalEntry() {
+      const distanceToPortal = camera.position.distanceTo(portalMesh.position);
+      if (distanceToPortal < 3) {
+        teleportPlayer();
+      }
+    }
+
+    function teleportPlayer() {
+      const newX = Math.random() * (roomSize - 4) - (roomSize / 2 - 2);
+      const newZ = Math.random() * (roomSize - 4) - (roomSize / 2 - 2);
+      camera.position.set(newX, playerHeight, newZ);
+      playerVelocity.set(0, 0, 0);
+
+      // Remove all existing shapes and text
+      scene.children = scene.children.filter(child => 
+        child instanceof THREE.Light || 
+        child instanceof THREE.Mesh && (child.geometry === wallGeometry || child.geometry === ceilingFloorGeometry)
+      );
+
+      // Create new shapes and text
+      createFloatingShapes();
+      create3DWords();
+      createBackground();
+      createWeirdPortal();
+    }
+
+    function generateNewRoom() {
+      // Remove existing room elements
+      scene.children = scene.children.filter(child => child instanceof THREE.Light);
+
+      // Regenerate room
+      createRoom();
+      createFloatingShapes();
+      create3DWords();
+      createBackground();
+      createWeirdPortal();
+
+      // Reposition player
+      camera.position.set(0, playerHeight, 0);
+      playerVelocity.set(0, 0, 0);
+    }
+
+    function restartGame() {
+      generateNewRoom();
+      pitch = 0;
+      yaw = 0;
+    }
+
+    function updatePlayer(deltaTime) {
+      const speedDelta = deltaTime * moveSpeed;
+
+      if (keys.w) {
+        playerVelocity.add(getForwardVector().multiplyScalar(speedDelta));
+      }
+      if (keys.s) {
+        playerVelocity.add(getForwardVector().multiplyScalar(-speedDelta));
+      }
+      if (keys.a) {
+        playerVelocity.add(getSideVector().multiplyScalar(-speedDelta));
+      }
+      if (keys.d) {
+        playerVelocity.add(getSideVector().multiplyScalar(speedDelta));
+      }
+
+      let damping = Math.exp(-4 * deltaTime) - 1;
+      playerVelocity.addScaledVector(playerVelocity, damping);
+
+      const deltaPosition = playerVelocity.clone().multiplyScalar(deltaTime);
+      camera.position.add(deltaPosition);
+
+      // Constrain the player to the room
+      camera.position.x = Math.max(-roomSize / 2 + 1, Math.min(roomSize / 2 - 1, camera.position.x));
+      camera.position.y = playerHeight;
+      camera.position.z = Math.max(-roomSize / 2 + 1, Math.min(roomSize / 2 - 1, camera.position.z));
+    }
+
+    function getForwardVector() {
+      camera.getWorldDirection(playerDirection);
+      playerDirection.y = 0;
+      playerDirection.normalize();
+      return playerDirection;
+    }
+
+    function getSideVector() {
+      camera.getWorldDirection(playerDirection);
+      playerDirection.y = 0;
+      playerDirection.normalize();
+      playerDirection.cross(camera.up);
+      return playerDirection;
+    }
+
+    const playerDirection = new THREE.Vector3();
+
+    function updateFloatingShapes(deltaTime) {
+      floatingShapes.forEach(shape => {
+        shape.position.add(shape.userData.velocity);
+
+        // Bounce off walls
+        if (Math.abs(shape.position.x) > roomSize / 2 - 1) {
+          shape.userData.velocity.x *= -1;
+        }
+        if (Math.abs(shape.position.y) > roomSize - 1) {
+          shape.userData.velocity.y *= -1;
+        }
+        if (Math.abs(shape.position.z) > roomSize / 2 - 1) {
+          shape.userData.velocity.z *= -1;
+        }
+
+        // Rotate the shape
+        shape.rotation.x += 0.01;
+        shape.rotation.y += 0.01;
+      });
+    }
+
+    function updateWeirdText(deltaTime) {
+      scene.children.forEach(child => {
+        if (child instanceof THREE.Mesh && child.geometry instanceof THREE.TextGeometry) {
+          child.rotation.x += child.userData.rotationSpeed.x;
+          child.rotation.y += child.userData.rotationSpeed.y;
+          child.rotation.z += child.userData.rotationSpeed.z;
+
+          child.scale.x += child.userData.scaleSpeed.x;
+          child.scale.y += child.userData.scaleSpeed.y;
+          child.scale.z += child.userData.scaleSpeed.z;
+
+          // Limit scaling
+          child.scale.x = THREE.MathUtils.clamp(child.scale.x, 0.5, 2);
+          child.scale.y = THREE.MathUtils.clamp(child.scale.y, 0.5, 2);
+          child.scale.z = THREE.MathUtils.clamp(child.scale.z, 0.5, 2);
+
+          // Reverse scale direction if limits are reached
+          if (child.scale.x <= 0.5 || child.scale.x >= 2) child.userData.scaleSpeed.x *= -1;
+          if (child.scale.y <= 0.5 || child.scale.y >= 2) child.userData.scaleSpeed.y *= -1;
+          if (child.scale.z <= 0.5 || child.scale.z >= 2) child.userData.scaleSpeed.z *= -1;
+        }
+      });
+    }
+
+    let prevTime = performance.now();
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      const time = performance.now();
+      const deltaTime = (time - prevTime) / 1000;
+      prevTime = time;
+
+      updatePlayer(deltaTime);
+      updateFloatingShapes(deltaTime);
+      updateWeirdText(deltaTime);
+
+      // Update camera rotation
+      camera.rotation.order = 'YXZ';
+      camera.rotation.x = pitch;
+      camera.rotation.y = yaw;
+
+      // Rotate portal
+      if (portalMesh) {
+        portalMesh.rotation.y += 0.01;
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    // Initial room generation
+    createRoom();
+    createFloatingShapes();
+    create3DWords();
+    createBackground();
+    createWeirdPortal();
+
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body></html>
