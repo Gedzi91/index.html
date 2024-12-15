@@ -1,0 +1,75 @@
+<html><head><base href="https://dharma.enlightenment.org/">
+<title>Falling Dharma Symbols</title>
+<style>
+body, html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: #000;
+  font-family: 'Arial', sans-serif;
+}
+
+.symbol {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  opacity: 0.8;
+  animation: fall linear infinite;
+}
+
+@keyframes fall {
+  0% {
+    transform: translateY(-50px) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(360deg);
+    opacity: 0.2;
+  }
+}
+</style>
+</head>
+<body>
+<svg style="display: none;">
+  <symbol id="swastik" viewBox="0 0 100 100">
+    <path d="M30,30 H70 V40 H50 V60 H70 V70 H30 V60 H50 V40 H30 Z" />
+  </symbol>
+  <symbol id="dharmachakra" viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="45" fill="none" stroke-width="10" />
+    <circle cx="50" cy="50" r="5" />
+    <path d="M50,5 V95 M5,50 H95 M15,15 L85,85 M15,85 L85,15" stroke-width="10" />
+  </symbol>
+</svg>
+
+<script>
+const colors = ['#FF5733', '#33FF57', '#3357FF', '#FF33F1', '#33FFF1', '#FFF133'];
+const symbols = ['swastik', 'dharmachakra'];
+
+function createSymbol() {
+  const symbol = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  symbol.classList.add('symbol');
+  
+  const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+  use.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', `#${symbols[Math.floor(Math.random() * symbols.length)]}`);
+  
+  symbol.appendChild(use);
+  
+  const color = colors[Math.floor(Math.random() * colors.length)];
+  symbol.style.fill = color;
+  symbol.style.stroke = color;
+  
+  symbol.style.left = `${Math.random() * 100}vw`;
+  symbol.style.animationDuration = `${Math.random() * 5 + 5}s`;
+  
+  document.body.appendChild(symbol);
+  
+  symbol.addEventListener('animationend', () => {
+    symbol.remove();
+  });
+}
+
+setInterval(createSymbol, 200);
+</script>
+</body></html>
