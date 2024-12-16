@@ -1,0 +1,636 @@
+<html><head><base href="." /><title>Ultimate Rizz Simulator</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --primary: #ff69b4;
+  --secondary: #4a90e2;
+  --background: #1a1a2e;
+  --glow: 0 0 30px var(--primary); /* Increased glow intensity */
+}
+
+body {
+  background: var(--background);
+  color: white;
+  font-family: 'Quicksand', sans-serif;
+  font-size: 1.2em;
+  margin: 0;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 20%, rgba(255, 105, 180, 0.3), transparent 45%),
+    radial-gradient(circle at 80% 80%, rgba(74, 144, 226, 0.3), transparent 45%),
+    radial-gradient(circle at 50% 50%, rgba(147, 112, 219, 0.2), transparent 55%),
+    radial-gradient(circle at 10% 90%, rgba(255, 105, 180, 0.2), transparent 45%);
+  z-index: -1;
+  animation: ambientShift 15s ease-in-out infinite alternate;
+  filter: blur(30px);
+}
+
+@keyframes ambientShift {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.1); }
+}
+
+h1 {
+  text-shadow: 0 0 30px var(--primary);
+  animation: titlePulse 3s infinite;
+  margin-bottom: 2rem;
+}
+
+@keyframes titlePulse {
+  0% { transform: scale(1); text-shadow: 0 0 30px var(--primary); }
+  50% { transform: scale(1.05); text-shadow: 0 0 50px var(--primary), 0 0 100px var(--primary); }
+  100% { transform: scale(1); text-shadow: 0 0 30px var(--primary); }
+}
+
+.character {
+  width: 200px;
+  height: 200px;
+  background: var(--primary);
+  border-radius: 50%;
+  position: relative;
+  margin: 20px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 40px var(--primary);
+}
+
+.character:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 50px var(--primary);
+}
+
+.stats-container {
+  background: rgba(0,0,0,0.7);
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 0 25px rgba(255,105,180,0.2);
+  padding: 20px;
+  border-radius: 10px;
+  margin: 20px;
+  width: 300px;
+  backdrop-filter: blur(10px);
+  transform: translateZ(0);
+  transition: all 0.3s ease;
+}
+
+.stats-container:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 20px rgba(0,0,0,0.7);
+}
+
+.progress {
+  width: 100%;
+  height: 12px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: inset 0 0 15px rgba(0,0,0,0.4);
+  margin: 8px 0;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, 
+    #ff69b4, 
+    #ff8cc6 50%, 
+    #ffb4dc
+  );
+  width: 0%;
+  transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 0 15px var(--primary);
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  margin: 20px;
+  width: 300px;
+}
+
+button {
+  background: linear-gradient(135deg, var(--secondary), #5a9ff2);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 15px 25px;
+  color: white;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-shadow: 0 0 5px rgba(0,0,0,0.5);
+  box-shadow: 0 0 20px rgba(74, 144, 226, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+button::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+  transform: rotate(45deg);
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  transform: scale(1.05) translateY(-2px);
+  background: linear-gradient(135deg, var(--primary), #ff8cc6);
+  box-shadow: 0 0 30px var(--primary);
+  text-shadow: 0 0 10px rgba(255,255,255,0.8);
+}
+
+button:hover::before {
+  animation: shine 1.5s;
+}
+
+@keyframes shine {
+  0% { transform: translateX(-100%) rotate(45deg); }
+  100% { transform: translateX(100%) rotate(45deg); }
+}
+
+button:active {
+  transform: scale(0.95);
+}
+
+.boss-stats {
+  background: rgba(0,0,0,0.7);
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 0 25px rgba(255,105,180,0.2);
+  padding: 20px;
+  border-radius: 10px;
+  margin: 20px;
+  width: 300px;
+  color: white;
+  backdrop-filter: blur(10px);
+}
+
+.boss-backstory {
+  font-size: 0.9em;
+  color: #ccc;
+  margin-top: 10px;
+  line-height: 1.4;
+}
+
+.minigame-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0,0,0,0.85);
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 0 40px rgba(0,0,0,0.6);
+  backdrop-filter: blur(15px);
+  padding: 20px;
+  border-radius: 15px;
+  width: 80%;
+  max-width: 600px;
+  height: 400px;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.game-canvas {
+  border: 2px solid var(--primary);
+  border-radius: 5px;
+  margin: 10px;
+}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<h1>Ultimate Rizz Simulator</h1>
+
+<div class="character" id="player">
+  <svg width="100" height="100" viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="45" fill="white"/>
+    <circle cx="35" cy="40" r="5" fill="black"/>
+    <circle cx="65" cy="40" r="5" fill="black"/>
+    <path d="M 30 60 Q 50 70 70 60" stroke="black" fill="none" stroke-width="3"/>
+  </svg>
+</div>
+
+<div class="stats-container">
+  <div class="stat">
+    <label style="font-size: 1.4em;">Rizz Level: <span id="rizzLevel">1</span></label>
+  </div>
+  <div class="stat">
+    <label>Looks: <span id="looks">1</span></label>
+    <div class="progress">
+      <div class="progress-bar" id="looksBar"></div>
+    </div>
+  </div>
+  <div class="stat">
+    <label>Jaw Power: <span id="jawPower">1</span></label>
+    <div class="progress">
+      <div class="progress-bar" id="jawBar"></div>
+    </div>
+  </div>
+  <div class="stat" style="margin-top: 15px;">
+    <label>Bosses Rizzed: <span id="bossesDefeated">0</span>/50</label>
+  </div>
+</div>
+
+<div class="actions">
+  <button onclick="looksmax()">Looksmax 💅</button>
+  <button onclick="mew()">Mew 😤</button>
+  <button onclick="challengeBoss()" style="grid-column: span 2;">Challenge Boss 🔥</button>
+</div>
+
+<div class="boss-container" id="bossContainer">
+  <div class="boss-stats" id="bossStats">
+    <h3 id="bossName">???</h3>
+    <div id="bossRizz">Rizz Level: ???</div>
+    <div id="bossLooks">Looks: ???</div>
+    <div id="bossCharm">Charm: ???</div>
+    <div class="boss-backstory" id="bossBackstory"></div>
+  </div>
+  <button onclick="tryRizz()" id="rizzButton">Attempt to Rizz Up</button>
+  <button onclick="closeBoss()">Retreat</button>
+</div>
+
+<div class="minigame-container" id="minigameContainer">
+  <canvas id="gameCanvas" class="game-canvas" width="400" height="300"></canvas>
+  <button onclick="closeMinigame()">Close</button>
+</div>
+
+<script>
+const state = {
+  rizzLevel: 1,
+  looks: 1,
+  jawPower: 1,
+  currentBoss: 0,
+  bossesDefeated: 0,
+  defeatedBosses: new Set(),
+  bosses: [
+    { name: "Sigma Sarah", threshold: 10, rizz: 8, looks: 7, charm: 9, backstory: "A corporate executive who turned down 100 proposals. Her standards are higher than her heels, and those are already breaking the Geneva Convention." },
+    { name: "Gigachad Gary", threshold: 20, rizz: 15, looks: 18, charm: 12, backstory: "Legend says he was born with a jawline that could cut diamonds. Never skipped leg day - actually, never skipped any day. Some say he doesn't even sleep, he just waits." },
+    { name: "E-girl Emma", threshold: 25, rizz: 20, looks: 16, charm: 22, backstory: "Queen of 3 million followers. Her DMs are harder to get into than Fort Knox. Has rejected so many simps she's single-handedly keeping the tissue industry in business." },
+    { name: "Fitness Freak Fred", threshold: 30, rizz: 25, looks: 28, charm: 20, backstory: "Lives in the gym. His protein shake has protein shakes." },
+    { name: "Crypto Chad", threshold: 35, rizz: 30, looks: 25, charm: 28, backstory: "Made millions in crypto. His wallet is as thick as his confidence." },
+    { name: "Model Maya", threshold: 40, rizz: 32, looks: 35, charm: 30, backstory: "International runway model. Has turned down billionaires without blinking." },
+    { name: "Tech Titan Tom", threshold: 45, rizz: 35, looks: 30, charm: 38, backstory: "Silicon Valley CEO. His coding skills are only matched by his smooth talk." },
+    { name: "Influencer Iris", threshold: 50, rizz: 38, looks: 40, charm: 35, backstory: "10M followers across platforms. Her content game is as strong as her boundaries." },
+    { name: "DJ Derek", threshold: 55, rizz: 40, looks: 38, charm: 42, backstory: "Headliner at major festivals. His beats drop as hard as his pickup lines." },
+    { name: "Yoga Yara", threshold: 60, rizz: 45, looks: 42, charm: 40, backstory: "Spiritual guru with perfect balance. As flexible with her schedule as her poses." },
+    { name: "Basketball Brad", threshold: 65, rizz: 48, looks: 45, charm: 44, backstory: "Pro athlete with a signature shoe line. Scores on and off the court." },
+    { name: "Doctor Diana", threshold: 70, rizz: 50, looks: 48, charm: 47, backstory: "Neurosurgeon with a heart of gold. Her standards are as precise as her operations." },
+    { name: "Actor Alex", threshold: 75, rizz: 52, looks: 55, charm: 50, backstory: "Hollywood A-lister. Method acts even in their dating life." },
+    { name: "Chef Charlotte", threshold: 80, rizz: 55, looks: 52, charm: 54, backstory: "Michelin-starred chef. Can smell weak game from a mile away." },
+    { name: "Ultimate Ultra Chad", threshold: 300, rizz: 100, looks: 100, charm: 100, backstory: "The final boss of rizz. Legend says no one has ever succeeded in rizzing them up." },
+  ]
+};
+
+function updateStats() {
+  document.getElementById('rizzLevel').textContent = Math.floor(state.rizzLevel);
+  document.getElementById('looks').textContent = Math.floor(state.looks);
+  document.getElementById('jawPower').textContent = Math.floor(state.jawPower);
+  document.getElementById('bossesDefeated').textContent = state.bossesDefeated;
+  
+  document.getElementById('looksBar').style.width = `${(Math.floor(state.looks)/80)*100}%`;
+  document.getElementById('jawBar').style.width = `${(Math.floor(state.jawPower)/80)*100}%`;
+}
+
+function updateBossStats() {
+  const currentBoss = state.bosses[state.currentBoss];
+  document.getElementById('bossName').textContent = currentBoss.name;
+  document.getElementById('bossRizz').textContent = `Rizz Level: ${currentBoss.rizz}`;
+  document.getElementById('bossLooks').textContent = `Looks: ${currentBoss.looks}`;
+  document.getElementById('bossCharm').textContent = `Charm: ${currentBoss.charm}`;
+  document.getElementById('bossBackstory').textContent = currentBoss.backstory;
+}
+
+function looksmax() {
+  const game = new LooksmaxGame();
+  game.start();
+}
+
+function mew() {
+  const game = new MewingGame();
+  game.start();
+}
+
+function challengeBoss() {
+  document.getElementById('bossContainer').style.display = 'flex';
+  updateBossStats();
+}
+
+function closeBoss() {
+  document.getElementById('bossContainer').style.display = 'none';
+}
+
+function closeMinigame() {
+  document.getElementById('minigameContainer').style.display = 'none';
+}
+
+async function tryRizz() {
+  const currentBoss = state.bosses[state.currentBoss];
+  const totalPlayerPower = state.rizzLevel + state.looks + state.jawPower;
+  const totalBossPower = currentBoss.rizz + currentBoss.looks + currentBoss.charm;
+
+  const game = new RizzGame(totalPlayerPower, totalBossPower);
+  game.start();
+
+  const checkInterval = setInterval(() => {
+    if (!game.active) {
+      clearInterval(checkInterval);
+      const success = game.score >= game.targetScore;
+
+      if (success) {
+        alert(`Congratulations! You successfully rizzed up ${currentBoss.name}!`);
+        if (!state.defeatedBosses.has(state.currentBoss)) {
+          state.bossesDefeated++;
+          state.defeatedBosses.add(state.currentBoss);
+          state.rizzLevel += currentBoss.rizz;
+          document.getElementById('bossesDefeated').textContent = state.bossesDefeated;
+        }
+        state.currentBoss++;
+        if (state.currentBoss >= state.bosses.length) {
+          alert("YOU ARE THE ULTIMATE RIZZ MASTER!");
+          state.currentBoss = 0;
+        }
+      } else {
+        alert(`Your rizz is too weak! Keep training to defeat ${currentBoss.name}!`);
+      }
+      closeBoss();
+      closeMinigame();
+    }
+  }, 100);
+}
+
+class RizzGame {
+  constructor(playerPower, bossPower) {
+    this.canvas = document.getElementById('gameCanvas');
+    this.ctx = this.canvas.getContext('2d');
+    this.active = false;
+    this.timeLeft = this.calculateTimeLimit(playerPower, bossPower);
+    this.score = 0;
+    this.playerPower = playerPower;
+    this.bossPower = bossPower;
+    this.targetScore = Math.ceil(bossPower / 3);
+    this.hearts = [];
+  }
+
+  calculateTimeLimit(playerPower, bossPower) {
+    const baseTime = 15;
+    const powerRatio = playerPower / bossPower;
+    
+    if (powerRatio >= 1) {
+      return Math.min(25, baseTime + (powerRatio - 1) * 10);
+    } else {
+      return Math.max(8, baseTime - ((1 - powerRatio) * 5));
+    }
+  }
+
+  start() {
+    document.getElementById('minigameContainer').style.display = 'flex';
+    this.active = true;
+    this.score = 0;
+    this.hearts = [];
+    
+    this.spawnHeart();
+    this.timer = setInterval(() => {
+      this.timeLeft--;
+      if (this.timeLeft <= 0) this.endGame(false);
+    }, 1000);
+
+    this.canvas.addEventListener('click', (e) => this.handleClick(e));
+    this.render();
+  }
+
+  spawnHeart() {
+    if (!this.active) return;
+    
+    this.hearts.push({
+      x: Math.random() * (this.canvas.width - 30),
+      y: Math.random() * (this.canvas.height - 30),
+      size: 30
+    });
+    
+    const delay = Math.max(300, 1000 - (this.playerPower/this.bossPower * 500));
+    setTimeout(() => this.spawnHeart(), delay);
+  }
+
+  handleClick(e) {
+    if (!this.active) return;
+
+    const rect = this.canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    for (let i = this.hearts.length - 1; i >= 0; i--) {
+      const heart = this.hearts[i];
+      if (x > heart.x && x < heart.x + heart.size &&
+          y > heart.y && y < heart.y + heart.size) {
+        this.hearts.splice(i, 1);
+        this.score++;
+        if (this.score >= this.targetScore) {
+          this.endGame(true);
+        }
+      }
+    }
+  }
+
+  endGame(success) {
+    this.active = false;
+    clearInterval(this.timer);
+    return success;
+  }
+
+  render() {
+    if (!this.active) return;
+
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    this.ctx.fillStyle = '#ff69b4';
+    for (const heart of this.hearts) {
+      this.ctx.fillText('❤️', heart.x, heart.y + heart.size);
+    }
+
+    this.ctx.fillStyle = 'white';
+    this.ctx.font = '20px Quicksand';
+    this.ctx.fillText(`Score: ${this.score}/${this.targetScore}`, 10, 30);
+    this.ctx.fillText(`Time: ${this.timeLeft}s`, 10, 60);
+
+    requestAnimationFrame(() => this.render());
+  }
+}
+
+class LooksmaxGame {
+  constructor() {
+    this.canvas = document.getElementById('gameCanvas');
+    this.ctx = this.canvas.getContext('2d');
+    this.targets = [];
+    this.active = false;
+    this.score = 0;
+  }
+
+  start() {
+    document.getElementById('minigameContainer').style.display = 'flex';
+    this.active = true;
+    this.score = 0;
+    this.targets = [];
+    this.spawnTarget();
+
+    this.canvas.addEventListener('click', (e) => this.handleClick(e));
+    this.render();
+    
+    setTimeout(() => this.endGame(), 10000);
+  }
+
+  spawnTarget() {
+    if (!this.active) return;
+
+    const target = {
+      x: Math.random() * (this.canvas.width - 40),
+      y: Math.random() * (this.canvas.height - 40),
+      size: 40
+    };
+    this.targets.push(target);
+
+    setTimeout(() => this.spawnTarget(), 1000);
+  }
+
+  handleClick(e) {
+    if (!this.active) return;
+
+    const rect = this.canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    for (let i = this.targets.length - 1; i >= 0; i--) {
+      const target = this.targets[i];
+      if (x > target.x && x < target.x + target.size &&
+          y > target.y && y < target.y + target.size) {
+        this.targets.splice(i, 1);
+        this.score++;
+      }
+    }
+  }
+
+  endGame() {
+    this.active = false;
+    state.looks += this.score;
+    alert(`Looksmax complete! +${this.score} Looks`);
+    updateStats();
+    closeMinigame();
+  }
+
+  render() {
+    if (!this.active) return;
+
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    this.ctx.fillStyle = '#ff69b4';
+    for (const target of this.targets) {
+      this.ctx.fillRect(target.x, target.y, target.size, target.size);
+    }
+
+    this.ctx.fillStyle = 'white';
+    this.ctx.font = '20px Quicksand';
+    this.ctx.fillText(`Score: ${this.score}`, 10, 30);
+
+    requestAnimationFrame(() => this.render());
+  }
+}
+
+class MewingGame {
+  constructor() {
+    this.canvas = document.getElementById('gameCanvas');
+    this.ctx = this.canvas.getContext('2d');
+    this.targetY = this.canvas.height / 2;
+    this.currentY = this.canvas.height / 2;
+    this.score = 0;
+    this.active = false;
+    this.targetDirection = 1;
+    this.targetSpeed = 2;
+  }
+
+  start() {
+    document.getElementById('minigameContainer').style.display = 'flex';
+    this.active = true;
+    this.score = 0;
+
+    this.canvas.addEventListener('mousemove', (e) => this.handleMove(e));
+    this.startTime = Date.now();
+    this.render();
+
+    setTimeout(() => this.endGame(), 10000);
+  }
+
+  handleMove(e) {
+    if (!this.active) return;
+
+    const rect = this.canvas.getBoundingClientRect();
+    this.currentY = e.clientY - rect.top;
+  }
+
+  endGame() {
+    this.active = false;
+    state.jawPower += Math.floor(this.score / 10);
+    alert(`Mewing complete! +${Math.floor(this.score / 10)} Jaw Power`);
+    updateStats();
+    closeMinigame();
+  }
+
+  render() {
+    if (!this.active) return;
+
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    this.targetY += this.targetSpeed * this.targetDirection;
+    if (this.targetY > this.canvas.height - 50 || this.targetY < 50) {
+      this.targetDirection *= -1;
+    }
+
+    this.ctx.strokeStyle = '#4a90e2';
+    this.ctx.lineWidth = 2;
+    this.ctx.beginPath();
+    this.ctx.moveTo(0, this.targetY);
+    this.ctx.lineTo(this.canvas.width, this.targetY);
+    this.ctx.stroke();
+
+    this.ctx.strokeStyle = '#ff69b4';
+    this.ctx.beginPath();
+    this.ctx.moveTo(0, this.currentY);
+    this.ctx.lineTo(this.canvas.width, this.currentY);
+    this.ctx.stroke();
+
+    if (Math.abs(this.currentY - this.targetY) < 10) {
+      this.score++;
+    }
+
+    this.ctx.fillStyle = 'white';
+    this.ctx.font = '20px Quicksand';
+    this.ctx.fillText(`Score: ${this.score}`, 10, 30);
+
+    requestAnimationFrame(() => this.render());
+  }
+}
+
+updateStats();
+</script>
+</body></html>
