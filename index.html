@@ -1,0 +1,313 @@
+<html><head><base href="https://hotdogdance.websim.ai/Macarena-start=true"><title>Hot Dog Macarena Dance Challenge - Let's Dance!</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<style>
+  body { margin: 0; overflow: hidden; font-family: Arial, sans-serif; background-color: #FFD700; }
+  #game-container { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+  #ui-overlay { position: absolute; top: 10px; left: 10px; color: #FF4500; text-shadow: 1px 1px 2px #FFA500; }
+  #score { font-size: 24px; font-weight: bold; }
+  #instructions { position: absolute; bottom: 20px; left: 0; width: 100%; text-align: center; color: #FF4500; text-shadow: 1px 1px 2px #FFA500; font-size: 18px; }
+  #dance-moves { position: absolute; top: 50px; right: 10px; color: #FF4500; text-shadow: 1px 1px 2px #FFA500; background-color: rgba(255, 255, 255, 0.7); padding: 10px; border-radius: 10px; }
+  #combo-meter { position: absolute; top: 40px; left: 10px; width: 200px; height: 20px; background-color: #FFA500; border-radius: 10px; overflow: hidden; }
+  #combo-fill { width: 0%; height: 100%; background-color: #FF4500; transition: width 0.3s ease-out; }
+  #current-move { position: absolute; top: 70px; left: 10px; font-size: 20px; font-weight: bold; color: #FF4500; text-shadow: 1px 1px 2px #FFA500; }
+  #music-control { position: absolute; top: 10px; right: 10px; }
+</style>
+</head>
+<body>
+<div id="game-container">
+  <canvas width="390" height="588" style="display: block; width: 390px; height: 588px;"></canvas>
+</div>
+<div id="ui-overlay">
+  <div id="score">Score: 0</div>
+  <div id="combo-meter"><div id="combo-fill"></div></div>
+  <div id="current-move">Current Move: Arms out</div>
+</div>
+<div id="dance-moves">
+  <h3>Macarena Dance Moves:</h3>
+  <ol>
+    <li>Arms out</li>
+    <li>Arms crossed</li>
+    <li>Hands on head</li>
+    <li>Hands on hips</li>
+    <li>Hip shake</li>
+    <li>Jump and turn</li>
+  </ol>
+</div>
+<div id="instructions">Follow the Macarena dance moves with your hot dog!</div>
+<div id="music-control">
+  <button id="toggle-music" style="background-color: #FF4500; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer;">Pause Music</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, 390 / 588, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({ canvas: document.querySelector('canvas'), antialias: true });
+
+// Lighting
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+scene.add(ambientLight);
+const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+directionalLight.position.set(0, 10, 5);
+scene.add(directionalLight);
+
+// Hot Dog Geometry
+const hotdogGeometry = new THREE.CylinderGeometry(0.5, 0.5, 3, 32);
+const bunMaterial = new THREE.MeshPhongMaterial({ color: 0xf4a460 });
+const sausageMaterial = new THREE.MeshPhongMaterial({ color: 0x8b4513 });
+
+const bun = new THREE.Mesh(hotdogGeometry, bunMaterial);
+scene.add(bun);
+
+const sausage = new THREE.Mesh(
+  new THREE.CylinderGeometry(0.3, 0.3, 3.2, 32),
+  sausageMaterial
+);
+scene.add(sausage);
+
+// Arms and Legs
+const limbGeometry = new THREE.CylinderGeometry(0.1, 0.1, 1, 16);
+const limbMaterial = new THREE.MeshPhongMaterial({ color: 0x8b4513 });
+
+const leftArm = new THREE.Mesh(limbGeometry, limbMaterial);
+leftArm.position.set(-0.7, 0, 0);
+leftArm.rotation.z = Math.PI / 4;
+bun.add(leftArm);
+
+const rightArm = new THREE.Mesh(limbGeometry, limbMaterial);
+rightArm.position.set(0.7, 0, 0);
+rightArm.rotation.z = -Math.PI / 4;
+bun.add(rightArm);
+
+const leftLeg = new THREE.Mesh(limbGeometry, limbMaterial);
+leftLeg.position.set(-0.3, -1.8, 0);
+bun.add(leftLeg);
+
+const rightLeg = new THREE.Mesh(limbGeometry, limbMaterial);
+rightLeg.position.set(0.3, -1.8, 0);
+bun.add(rightLeg);
+
+// Eyes
+const eyeGeometry = new THREE.SphereGeometry(0.1, 32, 32);
+const eyeMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
+const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+leftEye.position.set(-0.2, 1.2, 0.45);
+bun.add(leftEye);
+
+const rightEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+rightEye.position.set(0.2, 1.2, 0.45);
+bun.add(rightEye);
+
+// Smile
+const smileGeometry = new THREE.TorusGeometry(0.2, 0.05, 16, 32, Math.PI);
+const smileMaterial = new THREE.MeshPhongMaterial({ color: 0x000000 });
+const smile = new THREE.Mesh(smileGeometry, smileMaterial);
+smile.position.set(0, 0.8, 0.45);
+smile.rotation.x = Math.PI / 2;
+bun.add(smile);
+
+camera.position.z = 8;
+
+let score = 0;
+let combo = 0;
+const scoreElement = document.getElementById('score');
+const comboFill = document.getElementById('combo-fill');
+const currentMoveElement = document.getElementById('current-move');
+
+function updateScore(points) {
+  score += points * (combo + 1);
+  combo = Math.min(combo + 1, 5);
+  scoreElement.textContent = `Score: ${score}`;
+  comboFill.style.width = `${combo * 20}%`;
+}
+
+function resetCombo() {
+  combo = 0;
+  comboFill.style.width = '0%';
+}
+
+// Macarena dance moves
+const macarenaMoves = [
+  {
+    name: "Arms out",
+    action: () => {
+      leftArm.rotation.z = 0;
+      rightArm.rotation.z = 0;
+      leftArm.position.y = 0;
+      rightArm.position.y = 0;
+      updateScore(10);
+    }
+  },
+  {
+    name: "Arms crossed",
+    action: () => {
+      leftArm.rotation.z = Math.PI / 2;
+      rightArm.rotation.z = -Math.PI / 2;
+      leftArm.position.y = 0;
+      rightArm.position.y = 0;
+      updateScore(10);
+    }
+  },
+  {
+    name: "Hands on head",
+    action: () => {
+      leftArm.rotation.z = Math.PI / 2;
+      rightArm.rotation.z = -Math.PI / 2;
+      leftArm.position.y = 1.5;
+      rightArm.position.y = 1.5;
+      updateScore(15);
+    }
+  },
+  {
+    name: "Hands on hips",
+    action: () => {
+      leftArm.rotation.z = -Math.PI / 4;
+      rightArm.rotation.z = Math.PI / 4;
+      leftArm.position.y = -0.5;
+      rightArm.position.y = -0.5;
+      updateScore(15);
+    }
+  },
+  {
+    name: "Hip shake",
+    action: () => {
+      const shakeDuration = 500;
+      const shakeStart = Date.now();
+      
+      function shake() {
+        const elapsed = Date.now() - shakeStart;
+        if (elapsed < shakeDuration) {
+          bun.position.x = Math.sin(elapsed / 50) * 0.2;
+          requestAnimationFrame(shake);
+        } else {
+          bun.position.x = 0;
+        }
+      }
+      
+      shake();
+      updateScore(20);
+    }
+  },
+  {
+    name: "Jump and turn",
+    action: () => {
+      const jumpHeight = 1;
+      const jumpDuration = 500;
+      const startY = bun.position.y;
+      const jumpStart = Date.now();
+      
+      function jumpAndTurn() {
+        const elapsed = Date.now() - jumpStart;
+        if (elapsed < jumpDuration) {
+          const jumpProgress = elapsed / jumpDuration;
+          bun.position.y = startY + Math.sin(jumpProgress * Math.PI) * jumpHeight;
+          bun.rotation.y += Math.PI / 50;
+          requestAnimationFrame(jumpAndTurn);
+        } else {
+          bun.position.y = startY;
+          bun.rotation.y = 0;
+        }
+      }
+      
+      jumpAndTurn();
+      updateScore(25);
+    }
+  }
+];
+
+let currentMove = 0;
+let isPlaying = true;
+
+function playNextMove() {
+  if (!isPlaying) return;
+  const move = macarenaMoves[currentMove];
+  currentMoveElement.textContent = `Current Move: ${move.name}`;
+  move.action();
+  currentMove = (currentMove + 1) % macarenaMoves.length;
+  setTimeout(playNextMove, 2000); // Change move every 2 seconds
+}
+
+// Start the dance immediately
+playNextMove();
+
+// Particle system for visual effects
+const particleCount = 100;
+const particles = new THREE.BufferGeometry();
+const particleMaterial = new THREE.PointsMaterial({
+  color: 0xFFFF00,
+  size: 0.1,
+  blending: THREE.AdditiveBlending,
+  transparent: true,
+  opacity: 0.7
+});
+
+const particlePositions = new Float32Array(particleCount * 3);
+for (let i = 0; i < particleCount * 3; i++) {
+  particlePositions[i] = (Math.random() - 0.5) * 10;
+}
+particles.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+const particleSystem = new THREE.Points(particles, particleMaterial);
+scene.add(particleSystem);
+
+function updateParticles() {
+  const positions = particles.attributes.position.array;
+  for (let i = 0; i < positions.length; i += 3) {
+    positions[i] += (Math.random() - 0.5) * 0.1;
+    positions[i + 1] += (Math.random() - 0.5) * 0.1;
+    positions[i + 2] += (Math.random() - 0.5) * 0.1;
+    
+    if (positions[i] < -5 || positions[i] > 5) positions[i] *= -1;
+    if (positions[i + 1] < -5 || positions[i + 1] > 5) positions[i + 1] *= -1;
+    if (positions[i + 2] < -5 || positions[i + 2] > 5) positions[i + 2] *= -1;
+  }
+  particles.attributes.position.needsUpdate = true;
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  
+  bun.rotation.y += Math.sin(Date.now() * 0.001) * 0.01;
+  sausage.position.copy(bun.position);
+  sausage.rotation.copy(bun.rotation);
+  
+  updateParticles();
+  
+  renderer.render(scene, camera);
+}
+
+animate();
+
+// Combo timer
+setInterval(() => {
+  if (combo > 0) {
+    resetCombo();
+  }
+}, 3000);
+
+// Audio
+const audio = new Audio('https://example.com/macarena.mp3');
+audio.loop = true;
+audio.play();
+
+const toggleMusicButton = document.getElementById('toggle-music');
+toggleMusicButton.addEventListener('click', () => {
+  if (audio.paused) {
+    audio.play();
+    toggleMusicButton.textContent = 'Pause Music';
+  } else {
+    audio.pause();
+    toggleMusicButton.textContent = 'Play Music';
+  }
+});
+
+// Mobile responsiveness
+window.addEventListener('resize', () => {
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  camera.aspect = width / height;
+  camera.updateProjectionMatrix();
+  renderer.setSize(width, height);
+});
+
+</script>
+</body></html>
