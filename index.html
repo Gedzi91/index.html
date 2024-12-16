@@ -1,0 +1,371 @@
+<html><head><base href="." /></head><body>
+<style>
+    body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: #1a1a2e;
+        font-family: Arial, sans-serif;
+        color: white;
+    }
+
+    #game-board {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        padding: 10px;
+        background: #162447;
+        border-radius: 10px;
+        margin: 20px;
+    }
+
+    .tile {
+        width: 80px;
+        height: 80px;
+        background: #1f4068;
+        border-radius: 8px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 24px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .tile img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        border-radius: 8px;
+    }
+
+    .tile:hover {
+        transform: scale(1.05);
+    }
+
+    .tile.selected {
+        background: #e43f5a;
+    }
+
+    #score {
+        font-size: 24px;
+        margin: 20px;
+    }
+
+    .tile.merge-animation {
+        animation: merge 0.3s ease;
+    }
+
+    .game-button {
+        padding: 10px 20px;
+        background: #e43f5a;
+        border: none;
+        border-radius: 5px;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+        margin: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .game-button:hover:not(:disabled) {
+        transform: scale(1.05);
+    }
+
+    .game-button:disabled {
+        background: #666;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .victory-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        background: #162447;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        max-width: 400px;
+        width: 90%;
+    }
+
+    .copy-btn {
+        padding: 10px 20px;
+        background: #e43f5a;
+        border: none;
+        border-radius: 5px;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+        margin: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .copy-btn:hover {
+        transform: scale(1.05);
+    }
+
+    @keyframes merge {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); }
+    }
+</style>
+
+<h1>Number Merge Game</h1>
+<div id="score">Score: 0</div>
+<button id="add-number-btn" class="game-button" disabled>Add Number (Cost: 100 points)</button>
+<button id="auto-merger-btn" class="game-button" disabled>Buy Auto Merger (Cost: 500 points)</button>
+<div id="game-board"></div>
+
+<div class="victory-modal" id="victoryModal">
+    <div class="modal-content">
+        <h2>Congratulations!</h2>
+        <p>You've reached 2048! Here's your special code:</p>
+        <h3>UWX9833YWC</h3>
+        <p>Use this code in the main game at: <a href="https://websim.ai/p/m838blgi1w6lugnxttmv" style="color: #e43f5a;">Main Game</a></p>
+        <button class="copy-btn" onclick="copyCode()">Copy Code</button>
+    </div>
+</div>
+
+<script>
+    class MergeGame {
+        constructor() {
+            this.board = Array(16).fill(null);
+            this.score = 0;
+            this.selectedTile = null;
+            this.gameBoard = document.getElementById('game-board');
+            this.scoreElement = document.getElementById('score');
+            this.addNumberBtn = document.getElementById('add-number-btn');
+            this.autoMergerBtn = document.getElementById('auto-merger-btn');
+            this.victoryModal = document.getElementById('victoryModal');
+            this.has2048 = false;
+            this.hasAutoMerger = false;
+            this.autoMergerInterval = null;
+            this.imageMap = {
+                2: 'Cat.webp',
+                4: 'Hot pink cat.png',
+                8: 'Fluffy cat.webp',
+                16: 'Badly drawn cat.png',
+                32: 'Calico cat.webp',
+                64: 'Dino cat.webp',
+                128: 'Tie-Dye cat.jpeg',
+                256: 'Enchanted cat.webp',
+                512: 'Knight cat.webp',
+                1024: 'Blu Razberi.png',
+                2048: 'Unicorn cat.webp'
+            };
+            this.initializeBoard();
+            this.setupButtons();
+        }
+
+        setupButtons() {
+            this.addNumberBtn.addEventListener('click', () => {
+                if (this.score >= 100) {
+                    this.score -= 100;
+                    this.addNewNumber();
+                    this.renderBoard();
+                    this.updateButtons();
+                }
+            });
+
+            this.autoMergerBtn.addEventListener('click', () => {
+                if (this.score >= 500 && !this.hasAutoMerger) {
+                    this.score -= 500;
+                    this.hasAutoMerger = true;
+                    this.startAutoMerger();
+                    this.updateButtons();
+                }
+            });
+        }
+
+        startAutoMerger() {
+            this.autoMergerInterval = setInterval(() => {
+                this.performAutoMerge();
+            }, 5000);
+        }
+
+        performAutoMerge() {
+            // Create a map of values to their positions
+            const valueMap = new Map();
+            this.board.forEach((value, index) => {
+                if (value !== null) {
+                    if (!valueMap.has(value)) {
+                        valueMap.set(value, []);
+                    }
+                    valueMap.get(value).push(index);
+                }
+            });
+
+            // Find first pair that can be merged
+            for (let [value, positions] of valueMap) {
+                if (positions.length >= 2) {
+                    // Merge the first two positions
+                    const newValue = value * 2;
+                    this.score += newValue;
+                    this.board[positions[0]] = newValue;
+                    this.board[positions[1]] = null;
+                    this.addNewNumber();
+                    this.renderBoard();
+                    return;
+                }
+            }
+        }
+
+        updateButtons() {
+            this.addNumberBtn.disabled = this.score < 100 || !this.board.includes(null);
+            this.autoMergerBtn.disabled = this.score < 500 || this.hasAutoMerger;
+        }
+
+        initializeBoard() {
+            // Add initial numbers
+            for (let i = 0; i < 6; i++) {
+                this.addNewNumber();
+            }
+            this.renderBoard();
+        }
+
+        addNewNumber() {
+            const emptySpots = this.board.reduce((acc, val, idx) => {
+                if (val === null) acc.push(idx);
+                return acc;
+            }, []);
+
+            if (emptySpots.length > 0) {
+                const randomSpot = emptySpots[Math.floor(Math.random() * emptySpots.length)];
+                this.board[randomSpot] = Math.random() < 0.5 ? 2 : 4;
+            }
+        }
+
+        check2048Achievement() {
+            if (!this.has2048 && this.board.includes(2048)) {
+                this.has2048 = true;
+                this.victoryModal.style.display = 'flex';
+            }
+        }
+
+        renderBoard() {
+            this.gameBoard.innerHTML = '';
+            this.board.forEach((value, index) => {
+                const tile = document.createElement('div');
+                tile.className = 'tile';
+                if (value !== null) {
+                    if (this.imageMap[value]) {
+                        const img = document.createElement('img');
+                        img.src = this.imageMap[value];
+                        img.alt = `${value}`;
+                        tile.appendChild(img);
+                    } else {
+                        tile.textContent = value;
+                    }
+                    tile.addEventListener('click', () => this.handleTileClick(index));
+                }
+                this.gameBoard.appendChild(tile);
+            });
+            this.scoreElement.textContent = `Score: ${this.score}`;
+            this.updateButtons();
+            this.check2048Achievement();
+        }
+
+        handleTileClick(index) {
+            if (this.board[index] === null) return;
+
+            const tiles = document.querySelectorAll('.tile');
+
+            if (this.selectedTile === null) {
+                this.selectedTile = index;
+                tiles[index].classList.add('selected');
+            } else {
+                if (this.selectedTile === index) {
+                    tiles[index].classList.remove('selected');
+                    this.selectedTile = null;
+                } else if (this.board[this.selectedTile] === this.board[index]) {
+                    // Merge tiles
+                    const newValue = this.board[this.selectedTile] * 2;
+                    this.score += newValue;
+                    
+                    // Animation
+                    tiles[index].classList.add('merge-animation');
+                    
+                    this.board[index] = newValue;
+                    this.board[this.selectedTile] = null;
+                    
+                    // Reset selection
+                    tiles[this.selectedTile].classList.remove('selected');
+                    this.selectedTile = null;
+                    
+                    // Add new number and render
+                    this.addNewNumber();
+                    setTimeout(() => this.renderBoard(), 300);
+                } else {
+                    tiles[this.selectedTile].classList.remove('selected');
+                    this.selectedTile = index;
+                    tiles[index].classList.add('selected');
+                }
+            }
+
+            // Check for game over
+            if (this.isGameOver()) {
+                setTimeout(() => {
+                    alert(`Game Over! Final Score: ${this.score}`);
+                    this.resetGame();
+                }, 300);
+            }
+        }
+
+        isGameOver() {
+            // Check if board is full
+            if (this.board.includes(null)) return false;
+
+            // Check for possible merges
+            for (let i = 0; i < 16; i++) {
+                const currentValue = this.board[i];
+                // Check right
+                if (i % 4 < 3 && this.board[i + 1] === currentValue) return false;
+                // Check down
+                if (i < 12 && this.board[i + 4] === currentValue) return false;
+            }
+            return true;
+        }
+
+        resetGame() {
+            this.board = Array(16).fill(null);
+            this.score = 0;
+            this.selectedTile = null;
+            this.has2048 = false;
+            if (this.autoMergerInterval) {
+                clearInterval(this.autoMergerInterval);
+                this.autoMergerInterval = null;
+            }
+            this.hasAutoMerger = false;
+            this.victoryModal.style.display = 'none';
+            this.initializeBoard();
+        }
+    }
+
+    function copyCode() {
+        navigator.clipboard.writeText('UWX9833YWC').then(() => {
+            alert('Code copied to clipboard!');
+        }).catch(err => {
+            console.error('Failed to copy code:', err);
+            alert('Failed to copy code. Please copy it manually.');
+        });
+    }
+
+    // Start the game
+    const game = new MergeGame();
+</script>
+</body></html>
