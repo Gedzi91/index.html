@@ -1,0 +1,250 @@
+<html><head><base href="https://websim.ai/@DumpTrump"><title>DumpTrump's WebSim Profile</title><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>
+    body, html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: Arial, sans-serif;
+        background-color: transparent;
+    }
+    #cube-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+    }
+    #profile-content {
+        position: relative;
+        z-index: 1;
+        padding: 20px;
+        color: #f0f0f0;
+        text-shadow: 
+            -1px -1px 0 #000,
+            1px -1px 0 #000,
+            -1px 1px 0 #000,
+            1px 1px 0 #000;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    h1 {
+        font-size: 3em;
+        margin-bottom: 0.5em;
+        text-shadow: 
+            -2px -2px 0 #000,
+            2px -2px 0 #000,
+            -2px 2px 0 #000,
+            2px 2px 0 #000;
+    }
+    .project-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+    .project-item {
+        background: rgba(255,255,255,0.1);
+        backdrop-filter: blur(5px);
+        border-radius: 10px;
+        padding: 15px;
+        transition: transform 0.3s ease;
+        box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+    .project-item:hover {
+        transform: scale(1.05);
+    }
+    .project-title {
+        font-weight: bold;
+        margin-bottom: 10px;
+        text-shadow: 
+            -1px -1px 0 #000,
+            1px -1px 0 #000,
+            -1px 1px 0 #000,
+            1px 1px 0 #000;
+    }
+    .project-stats {
+        font-size: 0.9em;
+        color: #ddd;
+        text-shadow: 
+            -1px -1px 0 #000,
+            1px -1px 0 #000,
+            -1px 1px 0 #000,
+            1px 1px 0 #000;
+    }
+</style></head><body>
+<div id="cube-container"></div>
+<div id="profile-content">
+    <h1>DumpTrump's WebSim Profile</h1>
+    <p>Welcome to my mesmerizing WebSim world! Explore my projects below:</p>
+    <div class="project-list" id="project-list">
+        <!-- Projects will be dynamically inserted here -->
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.155.0/examples/js/controls/OrbitControls.js"></script>
+
+<script id="vertexShader" type="x-shader/x-vertex">
+uniform float time;
+varying vec3 vNormal;
+varying vec3 vPosition;
+void main() {
+    vNormal = normal;
+    vPosition = position;
+    
+    float displacement = sin(time * 5.0 + position.x * 10.0) * 0.1;
+    vec3 newPosition = position + normal * displacement;
+ 
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
+}
+</script>
+
+<script id="fragmentShader" type="x-shader/x-fragment">
+uniform float time;
+varying vec3 vNormal;
+varying vec3 vPosition;
+
+vec3 getGradientColor(vec3 colors[5], float t) {
+    float scaledT = t * 4.0;
+    int idx = int(floor(scaledT));
+    idx = clamp(idx, 0, 3);
+    float alpha = fract(scaledT);
+    return mix(colors[idx], colors[idx+1], alpha);
+}
+
+void main() {
+    vec3 colors[5];
+    colors[0] = vec3(1.0, 0.0, 0.0);
+    colors[1] = vec3(1.0, 1.0, 0.0);
+    colors[2] = vec3(0.0, 1.0, 0.0);
+    colors[3] = vec3(0.0, 1.0, 1.0);
+    colors[4] = vec3(0.0, 0.0, 1.0);
+
+    float t = abs(sin(time + length(vPosition)));
+
+    vec3 baseColor = getGradientColor(colors, t);
+    
+    float intensity = abs(sin(time * 2.0 + length(vPosition)));
+    vec3 color = baseColor * intensity;
+    
+    float shock = step(0.95, fract(time * 0.2)) * (1.0 - smoothstep(0.0, 0.5, length(vPosition)));
+    color += vec3(1.0, 0.5, 0.0) * shock;
+    
+    gl_FragColor = vec4(color, 1.0);
+}
+</script>
+
+<script>
+const scene = new THREE.Scene();
+
+const camera = new THREE.PerspectiveCamera(
+  45,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  1000
+);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setClearColor(0x000000, 0); // Set clear color to transparent
+document.getElementById('cube-container').appendChild(renderer.domElement);
+
+camera.position.z = 5;
+
+const uniforms = {
+  time: { value: 0.0 }
+};
+
+const geometry = new THREE.BoxGeometry(1, 1, 1, 50, 50, 50);
+const material = new THREE.ShaderMaterial({
+  uniforms: uniforms,
+  vertexShader: document.getElementById('vertexShader').textContent,
+  fragmentShader: document.getElementById('fragmentShader').textContent,
+  wireframe: true,
+  transparent: true
+});
+
+const cube = new THREE.Mesh(geometry, material);
+scene.add(cube);
+
+const cornerCubes = [];
+const positions = [
+  [-5, 5, -5],
+  [5, 5, -5],
+  [-5, -5, -5],
+  [5, -5, -5],
+];
+
+positions.forEach((pos) => {
+  const bigGeometry = new THREE.BoxGeometry(3, 3, 3, 50, 50, 50);
+  const bigCube = new THREE.Mesh(bigGeometry, material);
+  bigCube.position.set(pos[0], pos[1], pos[2]);
+  scene.add(bigCube);
+  cornerCubes.push(bigCube);
+});
+
+// Add gigantic background cube
+const backgroundGeometry = new THREE.BoxGeometry(50, 50, 50, 100, 100, 100);
+const backgroundCube = new THREE.Mesh(backgroundGeometry, material);
+scene.add(backgroundCube);
+
+window.addEventListener("resize", onWindowResize, false);
+
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+
+  uniforms.time.value += 0.01;
+
+  cube.rotation.x += 0.005;
+  cube.rotation.y += 0.01;
+  cube.rotation.z += 0.005;
+
+  cornerCubes.forEach((bigCube, index) => {
+    bigCube.rotation.x += 0.001 * (index + 1);
+    bigCube.rotation.y += 0.001 * (index + 1);
+    bigCube.rotation.z += 0.001 * (index + 1);
+  });
+
+  backgroundCube.rotation.x += 0.0005;
+  backgroundCube.rotation.y += 0.0005;
+  backgroundCube.rotation.z += 0.0005;
+
+  renderer.render(scene, camera);
+}
+
+animate();
+
+// Fetch and display projects
+async function fetchProjects() {
+    try {
+        const response = await fetch('/api/v1/users/DumpTrump/projects');
+        const data = await response.json();
+        const projectList = document.getElementById('project-list');
+        
+        data.projects.data.forEach(project => {
+            const projectElement = document.createElement('div');
+            projectElement.className = 'project-item';
+            projectElement.innerHTML = `
+                <div class="project-title">${project.project.title || 'Untitled Project'}</div>
+                <div class="project-stats">
+                    Views: ${project.project.stats.views}<br>
+                    Likes: ${project.project.stats.likes}
+                </div>
+            `;
+            projectList.appendChild(projectElement);
+        });
+    } catch (error) {
+        console.error('Error fetching projects:', error);
+    }
+}
+
+fetchProjects();
+</script>
+</body></html>
