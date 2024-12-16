@@ -1,0 +1,755 @@
+<html><head><base href="." /><title>Advanced Procedural Slime Mold Evolution Simulation</title><style>
+body {
+    background: #000;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #0f6;
+    font-family: monospace;
+}
+
+canvas {
+    border: 1px solid #0f6;
+    margin: 20px;
+}
+
+.controls {
+    display: flex;
+    gap: 20px;
+    margin: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+button {
+    background: #0f6;
+    color: black;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-family: monospace;
+}
+
+button:hover {
+    background: #0f8;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin: 20px;
+    padding: 20px;
+    border: 1px solid #0f6;
+}
+
+.stats-section {
+    padding: 10px;
+}
+
+#spawnModeIndicator {
+    color: #0f6;
+    padding: 10px;
+    border: 1px solid #0f6;
+}
+
+.slider-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+    border: 1px solid #0f6;
+}
+
+.slider {
+    width: 200px;
+    background: #0f6;
+}
+</style></head><body>
+<h1>Advanced Slime Mold Evolution Simulator</h1>
+<canvas id="simCanvas" width="800" height="600"></canvas>
+<div class="controls">
+    <button onclick="resetSimulation()">Reset</button>
+    <button onclick="togglePause()">Pause/Play</button>
+    <button onclick="mutatePopulation()">Mutate</button>
+    <button onclick="addFood()">Add Food</button>
+    <button onclick="toggleSpawnMode()">Toggle Spawn Mode</button>
+    <button onclick="toggleSpawnType()">Toggle Spawn Type</button>
+    <div id="spawnModeIndicator">Mode: Random</div>
+    <div id="spawnTypeIndicator">Spawn Type: Balanced</div>
+    <div class="slider-container">
+        <label>Min Population: <span id="minPopValue">500</span></label>
+        <input type="range" min="100" max="1000" value="500" class="slider" id="minPopSlider">
+        <label>Max Population: <span id="maxPopValue">1500</span></label>
+        <input type="range" min="500" max="2000" value="1500" class="slider" id="maxPopSlider">
+    </div>
+</div>
+<div id="stats" class="stats"></div>
+
+<script>
+const canvas = document.getElementById('simCanvas');
+const ctx = canvas.getContext('2d');
+const width = canvas.width;
+const height = canvas.height;
+
+let paused = false;
+let agents = [];
+let populationSize = 1000;
+let sensorAngle = Math.PI / 4;
+let sensorDistance = 20;
+let depositAmount = 1;
+let evaporationRate = 0.99;
+let diffusionRate = 0.1;
+
+// Environment variables
+let temperature = 20; // Celsius
+let humidity = 0.5;
+let environmentCycle = 0;
+let environmentalStress = 0;
+let foodSources = [];
+
+// Food zone variables
+let foodZones = [];
+let spawnMode = 'random'; // 'random' or 'zone'
+let spawnType = 'balanced'; // 'balanced' or 'random'
+let minPopulation = 500;
+let maxPopulation = 1500;
+
+// Trail map for pheromone deposits
+let trailMap = new Float32Array(width * height);
+let nextTrailMap = new Float32Array(width * height);
+
+let environmentActive = true; // Add this variable to control environment updates
+
+class Species {
+    constructor(name, color) {
+        this.name = name;
+        this.color = color;
+        this.population = 0;
+        this.predators = 0;
+        this.avgFitness = 0;
+        this.avgAdaptation = 0;
+        this.chemicalProfile = Math.random(); // Species-specific chemical signature
+    }
+}
+
+const species = [
+    new Species("Hunter", "#ff0000"),    // Red - Aggressive
+    new Species("Gatherer", "#00ff00"),  // Green - Food focused
+    new Species("Social", "#0000ff"),    // Blue - Symbiotic
+    new Species("Adapter", "#ffff00")     // Yellow - Environmental specialist
+];
+
+class Food {
+    constructor(x, y, energy = 100) {
+        this.x = x;
+        this.y = y;
+        this.energy = energy;
+        this.radius = 5;
+        // Add chemical properties
+        this.chemicalSignature = {
+            strength: energy * 0.1,
+            decay: 0.05,
+            type: Math.random()
+        };
+    }
+
+    emitChemical() {
+        const radius = this.energy * 0.5;
+        for(let ox = -radius; ox <= radius; ox++) {
+            for(let oy = -radius; oy <= radius; oy++) {
+                const px = Math.floor(this.x + ox);
+                const py = Math.floor(this.y + oy);
+                if(px >= 0 && px < width && py >= 0 && py < height) {
+                    const dist = Math.sqrt(ox*ox + oy*oy);
+                    if(dist <= radius) {
+                        const idx = px + py * width;
+                        const intensity = (1 - dist/radius) * this.chemicalSignature.strength;
+                        trailMap[idx] += intensity;
+                    }
+                }
+            }
+        }
+    }
+}
+
+class FoodZone {
+    constructor(x, y, radius = 50, minFood = 5, maxFood = 15) {
+        this.x = x;
+        this.y = y;
+        this.radius = radius;
+        this.minFood = minFood;
+        this.maxFood = maxFood;
+        this.currentFood = 0;
+    }
+
+    update() {
+        this.currentFood = foodSources.filter(food => {
+            const dx = food.x - this.x;
+            const dy = food.y - this.y;
+            return Math.sqrt(dx * dx + dy * dy) <= this.radius;
+        }).length;
+
+        if (this.currentFood < this.minFood) {
+            const angle = Math.random() * Math.PI * 2;
+            const r = Math.random() * this.radius;
+            const newX = this.x + Math.cos(angle) * r;
+            const newY = this.y + Math.sin(angle) * r;
+            foodSources.push(new Food(newX, newY));
+        }
+    }
+
+    draw(ctx) {
+        ctx.strokeStyle = '#0f6';
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+}
+
+class Agent {
+    constructor(x, y, angle, genes, speciesIdx = 0) {
+        this.x = x;
+        this.y = y;
+        this.angle = angle;
+        this.speciesIdx = speciesIdx;
+        this.energy = 100;
+        this.age = 0;
+        this.predator = Math.random() > 0.8; // 20% chance to be predator
+        this.size = this.predator ? 4 : 2; // Predators are larger
+        this.maxEnergy = this.predator ? 300 : 200; // Predators need more energy
+        this.oscillationPhase = Math.random() * Math.PI * 2;
+        this.lastChemicalGradient = 0;
+        this.adaptationLevel = 1;
+        this.plasmodiumConnections = [];
+        
+        // Chemical signature properties
+        this.chemicalSignature = {
+            type: Math.random(),  // Unique chemical identifier
+            strength: Math.random(),
+            decay: 0.1 + Math.random() * 0.2
+        };
+
+        // Enhanced genes object
+        this.genes = genes || {
+            moveSpeed: 1 + Math.random(),
+            sensorSize: 5 + Math.random() * 10,
+            turnSpeed: 0.1 + Math.random() * 0.4,
+            trailStrength: 0.5 + Math.random() * 0.5,
+            metabolismRate: 0.5 + Math.random() * 0.5,
+            temperatureTolerance: 15 + Math.random() * 20,
+            humidityTolerance: 0.3 + Math.random() * 0.4,
+            foodSense: 30 + Math.random() * 30,
+            chemicalSensitivity: 0.5 + Math.random() * 0.5,
+            oscillationFrequency: 0.1 + Math.random() * 0.2,
+            plasmodiumStrength: 0.5 + Math.random() * 0.5,
+            adaptationRate: 0.1 + Math.random() * 0.2,
+            repulsionStrength: 0.3 + Math.random() * 0.4,
+            aggregationTendency: 0.4 + Math.random() * 0.6,
+            chemicalProfile: Math.random(),
+            trailColor: {
+                r: Math.random(),
+                g: Math.random(),
+                b: Math.random()
+            },
+            predatorSense: 0.3 + Math.random() * 0.7,
+            preyAttraction: 0.2 + Math.random() * 0.8,
+            predatorRepulsion: 0.4 + Math.random() * 0.6,
+            chemicalDecayRate: 0.05 + Math.random() * 0.15,
+            speciesRecognition: 0.3 + Math.random() * 0.7
+        };
+    }
+
+    sense(sensorAngleOffset, type = 'trail') {
+        const sensorAngle = this.angle + sensorAngleOffset;
+        const sensorX = this.x + Math.cos(sensorAngle) * sensorDistance;
+        const sensorY = this.y + Math.sin(sensorAngle) * sensorDistance;
+        
+        if (type === 'chemical') {
+            let chemicalValue = 0;
+            const idx = Math.floor(sensorX) + Math.floor(sensorY) * width;
+            if (idx >= 0 && idx < trailMap.length) {
+                chemicalValue = trailMap[idx] * this.genes.chemicalSensitivity;
+            }
+            return chemicalValue;
+        }
+
+        if (type === 'food') {
+            let foodValue = 0;
+            foodSources.forEach(food => {
+                const dx = food.x - sensorX;
+                const dy = food.y - sensorY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < this.genes.foodSense) {
+                    foodValue += (1 - dist/this.genes.foodSense) * food.energy;
+                }
+            });
+            return foodValue;
+        }
+
+        let sum = 0;
+        const radius = this.genes.sensorSize;
+        
+        for(let ox = -radius; ox <= radius; ox++) {
+            for(let oy = -radius; oy <= radius; oy++) {
+                const px = Math.floor(sensorX + ox);
+                const py = Math.floor(sensorY + oy);
+                if(px >= 0 && px < width && py >= 0 && py < height) {
+                    sum += trailMap[px + py * width];
+                }
+            }
+        }
+        return sum;
+    }
+
+    senseChemicalGradient() {
+        const ahead = this.sense(0, 'chemical');
+        const behind = this.sense(Math.PI, 'chemical');
+        return ahead - behind;
+    }
+
+    checkFood() {
+        for (let i = foodSources.length - 1; i >= 0; i--) {
+            const food = foodSources[i];
+            const dx = this.x - food.x;
+            const dy = this.y - food.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            
+            if (dist < food.radius + 2) {
+                this.energy += food.energy * 0.5;
+                food.energy *= 0.5;
+                if (food.energy < 1) {
+                    foodSources.splice(i, 1);
+                }
+            }
+        }
+    }
+
+    checkAgentInteractions() {
+        for (let other of agents) {
+            if (other === this) continue;
+            
+            const dx = this.x - other.x;
+            const dy = this.y - other.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            
+            if (dist < 10) {
+                const chemicalAffinity = 1 - Math.abs(this.chemicalSignature.type - other.chemicalSignature.type);
+                
+                if (this.predator && !other.predator) {
+                    const huntSuccess = this.genes.predatorSense * (1 - other.genes.predatorRepulsion);
+                    if (Math.random() < huntSuccess) {
+                        this.energy += other.energy * 0.5;
+                        other.energy = 0;
+                    }
+                }
+                
+                if (this.speciesIdx === other.speciesIdx && chemicalAffinity > 0.7) {
+                    const cooperation = this.genes.speciesRecognition * chemicalAffinity;
+                    const energyShare = (this.energy + other.energy) * 0.1 * cooperation;
+                    this.energy += energyShare;
+                    other.energy += energyShare;
+                }
+            }
+        }
+    }
+
+    update() {
+        this.age++;
+        this.oscillationPhase += this.genes.oscillationFrequency;
+        const oscillationFactor = Math.sin(this.oscillationPhase);
+        
+        this.energy -= this.genes.metabolismRate;
+
+        const chemicalGradient = this.senseChemicalGradient();
+        const gradientChange = chemicalGradient - this.lastChemicalGradient;
+        this.lastChemicalGradient = chemicalGradient;
+
+        const environmentalFitness = 1 - (Math.abs(temperature - this.genes.temperatureTolerance) / 30 +
+                                        Math.abs(humidity - this.genes.humidityTolerance));
+        this.adaptationLevel += (environmentalFitness - this.adaptationLevel) * this.genes.adaptationRate;
+
+        const leftTrail = this.sense(-sensorAngle);
+        const centerTrail = this.sense(0);
+        const rightTrail = this.sense(sensorAngle);
+        const leftFood = this.sense(-sensorAngle, 'food');
+        const centerFood = this.sense(0, 'food');
+        const rightFood = this.sense(sensorAngle, 'food');
+
+        const chemicalFactor = this.genes.chemicalSensitivity * gradientChange;
+        const oscillationInfluence = oscillationFactor * this.genes.plasmodiumStrength;
+        const totalLeft = leftTrail + leftFood + chemicalFactor;
+        const totalCenter = centerTrail + centerFood;
+        const totalRight = rightTrail + rightFood - chemicalFactor;
+
+        if(Math.abs(totalCenter - totalLeft) < 0.1 && Math.abs(totalCenter - totalRight) < 0.1) {
+            this.angle += oscillationInfluence;
+        } else if(totalLeft > totalRight) {
+            this.angle -= this.genes.turnSpeed * (1 + oscillationInfluence);
+        } else if(totalRight > totalLeft) {
+            this.angle += this.genes.turnSpeed * (1 + oscillationInfluence);
+        }
+
+        const adaptedSpeed = this.genes.moveSpeed * this.adaptationLevel;
+        this.x += Math.cos(this.angle) * adaptedSpeed;
+        this.y += Math.sin(this.angle) * adaptedSpeed;
+
+        this.x = (this.x + width) % width;
+        this.y = (this.y + height) % height;
+
+        const idx = Math.floor(this.x) + Math.floor(this.y) * width;
+        const chemicalStrength = this.genes.trailStrength * 
+                             this.chemicalSignature.strength * 
+                             (1 + this.adaptationLevel);
+        trailMap[idx] += depositAmount * chemicalStrength;
+
+        if (this.predator) {
+            trailMap[idx] += depositAmount * this.genes.predatorSense * 0.5;
+        }
+
+        // Chemical decay based on genes
+        trailMap[idx] *= (1 - this.genes.chemicalDecayRate);
+
+        this.checkFood();
+        this.checkAgentInteractions();
+        this.updateEnergy();
+        this.checkReproduction();
+    }
+    
+    checkReproduction() {
+        if (this.energy > this.maxEnergy * 0.8) {
+            this.reproduce();
+        }
+        
+        if (this.energy <= 0) {
+            const index = agents.indexOf(this);
+            if (index > -1) {
+                agents.splice(index, 1);
+            }
+        }
+    }
+
+    updateEnergy() {
+        const baseCost = this.genes.metabolismRate * (1 + this.genes.chemicalSensitivity);
+        const tempStress = Math.abs(temperature - this.genes.temperatureTolerance);
+        const humidityStress = Math.abs(humidity - this.genes.humidityTolerance);
+        const environmentalCost = (tempStress + humidityStress) * 0.1;
+        const movementCost = this.genes.moveSpeed * 0.05;
+        const sensoryCost = this.genes.sensorSize * 0.02;
+        const populationStress = (agents.length / populationSize) * 0.1;
+        const totalCost = baseCost + environmentalCost + movementCost + sensoryCost + populationStress;
+        this.energy -= totalCost * (1 - this.adaptationLevel * 0.2);
+        this.energy = Math.min(this.energy, this.maxEnergy);
+    }
+
+    reproduce() {
+        if (agents.length >= populationSize * 1.5) return;
+
+        const childGenes = {};
+        for (let gene in this.genes) {
+            childGenes[gene] = this.genes[gene] * (0.9 + Math.random() * 0.2);
+            if (Math.random() < 0.1) {
+                childGenes[gene] *= 0.8 + Math.random() * 0.4;
+            }
+        }
+
+        let childSpecies = this.speciesIdx;
+        if (Math.random() < 0.05) {
+            childSpecies = Math.floor(Math.random() * species.length);
+        }
+
+        const child = new Agent(this.x, this.y, this.angle + Math.random() * Math.PI, childGenes, childSpecies);
+        agents.push(child);
+        this.energy *= 0.5;
+    }
+}
+
+function updateEnvironment() {
+    if (!environmentActive) return; 
+    
+    environmentCycle += 0.01;
+    temperature = 20 + Math.sin(environmentCycle) * 10;
+    humidity = 0.5 + Math.cos(environmentCycle) * 0.3;
+    environmentalStress = Math.abs(Math.sin(environmentCycle));
+}
+
+function addFood(x, y) {
+    if (spawnMode === 'random') {
+        for(let i = 0; i < 10; i++) {
+            foodSources.push(new Food(
+                Math.random() * width,
+                Math.random() * height
+            ));
+        }
+    } else if (spawnMode === 'zone') {
+        const minFood = 5;
+        const maxFood = 15;
+        foodZones.push(new FoodZone(x, y, 50, minFood, maxFood));
+    }
+}
+
+function initializePopulation() {
+    agents = [];
+    for(let i = 0; i < minPopulation; i++) {
+        const genes = spawnType === 'random' ? generateRandomGenes() : null;
+        const agent = new Agent(
+            Math.random() * width,
+            Math.random() * height,
+            Math.random() * Math.PI * 2,
+            genes,
+            Math.floor(Math.random() * species.length)
+        );
+        agents.push(agent);
+    }
+}
+
+function mutatePopulation() {
+    agents.forEach(agent => {
+        if(Math.random() < 0.1) {
+            const geneToMutate = Object.keys(agent.genes)[Math.floor(Math.random() * 4)];
+            agent.genes[geneToMutate] *= 0.8 + Math.random() * 0.4;
+        }
+    });
+}
+
+function diffuseTrails() {
+    for(let x = 0; x < width; x++) {
+        for(let y = 0; y < height; y++) {
+            let sum = 0;
+            let count = 0;
+            const idx = x + y * width;
+            
+            for(let ox = -1; ox <= 1; ox++) {
+                for(let oy = -1; oy <= 1; oy++) {
+                    const nx = x + ox;
+                    const ny = y + oy;
+                    if(nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                        sum += trailMap[nx + ny * width];
+                        count++;
+                    }
+                }
+            }
+            
+            nextTrailMap[idx] = trailMap[idx] * (1 - diffusionRate) +
+                               (sum / count) * diffusionRate;
+            nextTrailMap[idx] *= evaporationRate;
+        }
+    }
+    
+    [trailMap, nextTrailMap] = [nextTrailMap, trailMap];
+}
+
+function drawTrails() {
+    const imageData = ctx.createImageData(width, height);
+    const data = imageData.data;
+    
+    for(let i = 0; i < trailMap.length; i++) {
+        const value = Math.min(255, trailMap[i] * 500);
+        const idx = i * 4;
+        
+        const chemical = Math.sin(value * 0.1) * 50;
+        const species = Math.cos(value * 0.2) * 50;
+        const predator = Math.sin(value * 0.3) * 50;
+        
+        data[idx] = value * 0.5 + chemical; 
+        data[idx + 1] = value * 0.7 + species; 
+        data[idx + 2] = value * 0.3 + predator; 
+        data[idx + 3] = 255;
+    }
+    
+    ctx.putImageData(imageData, 0, 0);
+}
+
+function drawAgents() {
+    agents.forEach(agent => {
+        ctx.fillStyle = species[agent.speciesIdx].color;
+        ctx.beginPath();
+        ctx.arc(agent.x, agent.y, agent.size, 0, Math.PI * 2);
+        ctx.fill();
+        if (agent.predator) {
+            ctx.strokeStyle = '#ff0000';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
+    });
+}
+
+function drawFood() {
+    ctx.fillStyle = '#0f0';
+    foodSources.forEach(food => {
+        ctx.beginPath();
+        ctx.arc(food.x, food.y, food.radius, 0, Math.PI * 2);
+        ctx.fill();
+    });
+}
+
+function updateStats() {
+    const stats = document.getElementById('stats');
+    
+    species.forEach(s => {
+        s.population = agents.filter(a => a.speciesIdx === species.indexOf(s)).length;
+        s.predators = agents.filter(a => a.speciesIdx === species.indexOf(s) && a.predator).length;
+        s.avgFitness = agents
+            .filter(a => a.speciesIdx === species.indexOf(s))
+            .reduce((acc, a) => acc + a.energy, 0) / (s.population || 1);
+        s.avgAdaptation = agents
+            .filter(a => a.speciesIdx === species.indexOf(s))
+            .reduce((acc, a) => acc + a.adaptationLevel, 0) / (s.population || 1);
+    });
+
+    stats.innerHTML = `
+        <div class="stats-section">
+            <h3>Environment</h3>
+            Temperature: ${temperature.toFixed(1)}°C<br>
+            Humidity: ${(humidity * 100).toFixed(1)}%<br>
+            Stress Level: ${(environmentalStress * 100).toFixed(1)}%<br>
+            Food Sources: ${foodSources.length}<br>
+            Food Zones: ${foodZones.length}<br>
+            Total Population: ${agents.length}/${populationSize * 1.5}
+        </div>
+        <div class="stats-section">
+            <h3>Species Data</h3>
+            ${species.map(s => `
+                ${s.name}: ${s.population} (Predators: ${s.predators})<br>
+                Avg Fitness: ${s.avgFitness.toFixed(1)}<br>
+                Avg Adaptation: ${s.avgAdaptation.toFixed(2)}<br>
+            `).join('')}
+        </div>
+        <div class="stats-section">
+            <h3>Chemical Analysis</h3>
+            Average Adaptation: ${agents.reduce((acc, a) => acc + a.adaptationLevel, 0) / agents.length || 0}<br>
+            Chemical Activity: ${agents.reduce((acc, a) => acc + a.lastChemicalGradient, 0) / agents.length || 0}<br>
+            Network Complexity: ${agents.reduce((acc, a) => acc + a.plasmodiumConnections.length, 0) / agents.length || 0}
+        </div>
+    `;
+}
+
+function resetSimulation() {
+    trailMap.fill(0);
+    nextTrailMap.fill(0);
+    foodSources = [];
+    foodZones = [];
+    initializePopulation();
+}
+
+function togglePause() {
+    paused = !paused;
+}
+
+function toggleSpawnMode() {
+    spawnMode = spawnMode === 'random' ? 'zone' : 'random';
+    document.getElementById('spawnModeIndicator').textContent = `Mode: ${spawnMode.charAt(0).toUpperCase() + spawnMode.slice(1)}`;
+}
+
+function toggleSpawnType() {
+    spawnType = spawnType === 'balanced' ? 'random' : 'balanced';
+    document.getElementById('spawnTypeIndicator').textContent = 
+        `Spawn Type: ${spawnType.charAt(0).toUpperCase() + spawnType.slice(1)}`;
+}
+
+function generateRandomGenes() {
+    return {
+        moveSpeed: 0.5 + Math.random() * 2,
+        sensorSize: 2 + Math.random() * 15,
+        turnSpeed: 0.05 + Math.random() * 0.5,
+        trailStrength: 0.2 + Math.random(),
+        metabolismRate: 0.3 + Math.random(),
+        temperatureTolerance: 10 + Math.random() * 30,
+        humidityTolerance: 0.2 + Math.random() * 0.6,
+        foodSense: 20 + Math.random() * 50,
+        chemicalSensitivity: 0.2 + Math.random(),
+        oscillationFrequency: 0.05 + Math.random() * 0.3,
+        plasmodiumStrength: 0.3 + Math.random(),
+        adaptationRate: 0.05 + Math.random() * 0.25,
+        repulsionStrength: 0.2 + Math.random() * 0.6,
+        aggregationTendency: 0.3 + Math.random() * 0.7,
+        chemicalProfile: Math.random(),
+        trailColor: {
+            r: Math.random(),
+            g: Math.random(),
+            b: Math.random()
+        },
+        predatorSense: 0.2 + Math.random(),
+        preyAttraction: 0.1 + Math.random(),
+        predatorRepulsion: 0.3 + Math.random(),
+        chemicalDecayRate: 0.03 + Math.random() * 0.2,
+        speciesRecognition: 0.2 + Math.random()
+    };
+}
+
+// Add to animate function
+function animate() {
+    if(!paused) {
+        updateEnvironment();
+        foodSources.forEach(food => food.emitChemical());
+        agents.forEach(agent => agent.update());
+        foodZones.forEach(zone => zone.update());
+        diffuseTrails();
+        updateStats();
+        
+        // Population control
+        while (agents.length < minPopulation) {
+            const genes = spawnType === 'random' ? generateRandomGenes() : null;
+            agents.push(new Agent(
+                Math.random() * width,
+                Math.random() * height,
+                Math.random() * Math.PI * 2,
+                genes
+            ));
+        }
+        
+        if (agents.length > maxPopulation) {
+            agents.length = maxPopulation;
+        }
+    }
+    
+    ctx.clearRect(0, 0, width, height);
+    drawTrails();
+    drawFood();
+    foodZones.forEach(zone => zone.draw(ctx));
+    drawAgents();
+    requestAnimationFrame(animate);
+}
+
+// Initialize and start
+initializePopulation();
+addFood();
+animate();
+
+document.addEventListener('DOMContentLoaded', () => {
+    const minSlider = document.getElementById('minPopSlider');
+    const maxSlider = document.getElementById('maxPopSlider');
+    const minValue = document.getElementById('minPopValue');
+    const maxValue = document.getElementById('maxPopValue');
+
+    minSlider.addEventListener('input', (e) => {
+        minPopulation = parseInt(e.target.value);
+        minValue.textContent = minPopulation;
+        if (minPopulation > maxPopulation) {
+            maxPopulation = minPopulation;
+            maxSlider.value = minPopulation;
+            maxValue.textContent = maxPopulation;
+        }
+    });
+
+    maxSlider.addEventListener('input', (e) => {
+        maxPopulation = parseInt(e.target.value);
+        maxValue.textContent = maxPopulation;
+        if (maxPopulation < minPopulation) {
+            minPopulation = maxPopulation;
+            minSlider.value = maxPopulation;
+            minValue.textContent = minPopulation;
+        }
+    });
+});
+
+canvas.addEventListener('click', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    addFood(x, y);
+});
+</script></body></html>
