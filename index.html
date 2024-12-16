@@ -1,0 +1,180 @@
+<html><head><base href="https://websim.com/fnaf-game/"></head>
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+  }
+  #game-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background-image: url('https://avatars.dzeninfra.ru/get-zen_doc/271828/pub_654aa08ec6ff143647e90abe_654ac35ef65b8b26593f8d1b/scale_1200');
+    background-size: cover;
+    background-position: center;
+  }
+  #camera-interface {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    height: 150px;
+    background-image: url('https://steamuserimages-a.akamaihd.net/ugc/43117112893151424/16F0A77AE2B7D3713B250C993873FEDA407E4FDC/');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+  .camera-btn {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background-color: rgba(255, 255, 255, 0.2);
+    border: 2px solid #fff;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+  #power-meter {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 200px;
+    height: 30px;
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 2px solid #fff;
+  }
+  #power-bar {
+    width: 100%;
+    height: 100%;
+    background-color: #0f0;
+    transition: width 0.5s;
+  }
+  #time-display {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 24px;
+    color: #fff;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 5px 10px;
+  }
+  .animatronic {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    transition: all 0.5s;
+  }
+</style>
+<body>
+  <div id="game-container">
+    <div id="power-meter"><div id="power-bar"></div></div>
+    <div id="time-display">12:00 AM</div>
+    <div id="camera-interface">
+      <div class="camera-btn" style="top: 30px; left: 100px;" onclick="switchCamera(1)"></div>
+      <div class="camera-btn" style="top: 30px; left: 170px;" onclick="switchCamera(2)"></div>
+      <div class="camera-btn" style="top: 30px; left: 240px;" onclick="switchCamera(3)"></div>
+      <div class="camera-btn" style="top: 90px; left: 100px;" onclick="switchCamera(4)"></div>
+      <div class="camera-btn" style="top: 90px; left: 170px;" onclick="switchCamera(5)"></div>
+    </div>
+    <div id="freddy" class="animatronic" style="background-image: url('https://i.ytimg.com/vi/_YN3BFzTtZM/maxresdefault.jpg');"></div>
+    <div id="bonnie" class="animatronic" style="background-image: url('https://i.pinimg.com/originals/9a/0c/01/9a0c01fe7c50acb2ad55914ed8577a46.png');"></div>
+    <div id="chica" class="animatronic" style="background-image: url('https://i.ytimg.com/vi/5fze7NzGjN4/hqdefault.jpg');"></div>
+    <div id="foxy" class="animatronic" style="background-image: url('https://i.pinimg.com/originals/ee/f8/34/eef834732e7322c1e36443a43e3ad7bd.png');"></div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
+  <script>
+    let power = 100;
+    let time = 0;
+    const animatronics = ['freddy', 'bonnie', 'chica', 'foxy'];
+    const positions = [
+      {x: -100, y: -100},
+      {x: window.innerWidth, y: -100},
+      {x: -100, y: window.innerHeight},
+      {x: window.innerWidth, y: window.innerHeight},
+      {x: window.innerWidth / 2, y: window.innerHeight / 2}
+    ];
+
+    const ambientSound = new Howl({
+      src: ['https://example.com/ambient.mp3'],
+      loop: true,
+      volume: 0.5
+    });
+
+    const jumpscareSound = new Howl({
+      src: ['https://example.com/jumpscare.mp3'],
+      volume: 1
+    });
+
+    ambientSound.play();
+
+    function updatePower() {
+      power -= 0.1;
+      document.getElementById('power-bar').style.width = `${power}%`;
+      if (power <= 0) {
+        gameOver();
+      }
+    }
+
+    function updateTime() {
+      time += 1;
+      const hours = Math.floor(time / 60) + 12;
+      const minutes = time % 60;
+      document.getElementById('time-display').innerText = `${hours}:${minutes.toString().padStart(2, '0')} AM`;
+      if (time >= 360) {
+        gameWin();
+      }
+    }
+
+    function moveAnimatronics() {
+      animatronics.forEach(animatronic => {
+        if (Math.random() < 0.1) {
+          const newPos = positions[Math.floor(Math.random() * positions.length)];
+          document.getElementById(animatronic).style.left = `${newPos.x}px`;
+          document.getElementById(animatronic).style.top = `${newPos.y}px`;
+        }
+      });
+    }
+
+    function switchCamera(cameraNumber) {
+      power -= 1;
+      const backgrounds = [
+        'https://kalix.club/uploads/posts/2022-12/1671720758_kalix-club-p-detskii-sad-fnaf-fon-vkontakte-51.jpg',
+        'https://steamuserimages-a.akamaihd.net/ugc/1834658961493545721/5C007DB9DF35A5BF5CA6314D5875071B3429BCE8/',
+        'https://avatars.mds.yandex.net/i?id=6ec2b37abf9cd48cd24906b3f45085c0_l-9583697-images-thumbs&n=33&w=1280&h=720',
+        'https://i.ytimg.com/vi/_YN3BFzTtZM/maxresdefault.jpg',
+        'https://avatars.dzeninfra.ru/get-zen_doc/271828/pub_654aa08ec6ff143647e90abe_654ac35ef65b8b26593f8d1b/scale_1200'
+      ];
+      document.getElementById('game-container').style.backgroundImage = `url('${backgrounds[cameraNumber - 1]}')`;
+    }
+
+    function gameOver() {
+      alert('Game Over! The animatronics got you!');
+      jumpscareSound.play();
+      location.reload();
+    }
+
+    function gameWin() {
+      alert('Congratulations! You survived the night!');
+      location.reload();
+    }
+
+    setInterval(updatePower, 1000);
+    setInterval(updateTime, 1000);
+    setInterval(moveAnimatronics, 5000);
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowLeft') {
+        document.getElementById('game-container').style.backgroundPosition = 'left center';
+      } else if (event.key === 'ArrowRight') {
+        document.getElementById('game-container').style.backgroundPosition = 'right center';
+      }
+    });
+  </script>
+</body>
+</html>
