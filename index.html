@@ -1,0 +1,525 @@
+<html><head><base href="." /><title>Five Nights at Freddy's Clone</title><style>
+body {
+    margin: 0;
+    padding: 0;
+    background: #000;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+}
+
+#title-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+#mickey-svg {
+    width: 200px;
+    height: 200px;
+    margin-bottom: 30px;
+    filter: drop-shadow(0 0 10px #ff0000);
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+}
+
+#title-screen h1 {
+    color: #ff0000;
+    font-size: 48px;
+    font-family: "Courier New", monospace;
+    text-shadow: 0 0 10px #ff0000;
+    margin-bottom: 40px;
+    animation: pulse 2s infinite;
+}
+
+#play-btn {
+    padding: 15px 40px;
+    font-size: 24px;
+    background: #333;
+    color: white;
+    border: 2px solid #ff0000;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+#play-btn:hover {
+    background: #ff0000;
+    transform: scale(1.1);
+}
+
+@keyframes pulse {
+    0% { text-shadow: 0 0 10px #ff0000; }
+    50% { text-shadow: 0 0 20px #ff0000, 0 0 30px #ff0000; }
+}
+
+#office {
+    width: 100vw;
+    height: 100vh;
+    background: url('/a/691b71ff-cb60-454d-9704-74a24ce4befa') center/cover;
+    position: relative;
+}
+
+#camera-btn {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 20px;
+    background: #ff0000;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.door-btn {
+    position: absolute;
+    top: 50%;
+    padding: 10px;
+    background: #444;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+#left-door {
+    left: 10px;
+}
+
+#right-door {
+    right: 10px;
+}
+
+#power-status {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    color: white;
+}
+
+#time {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    color: white;
+}
+
+#camera-view {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+    z-index: 100;
+}
+
+.camera-static {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.1));
+    opacity: 0.1;
+    animation: static 0.1s infinite;
+}
+
+@keyframes static {
+    0% { opacity: 0.1; }
+    50% { opacity: 0.15; }
+    100% { opacity: 0.1; }
+}
+
+.camera-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: rgba(255, 255, 255, 0.3);
+    font-family: "Courier New", monospace;
+    font-size: 24px;
+}
+
+.camera-btn-grid {
+    position: absolute;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+}
+
+.cam-btn {
+    padding: 10px 20px;
+    background: #333;
+    color: #fff;
+    border: 2px solid #666;
+    cursor: pointer;
+    font-family: "Courier New", monospace;
+    transition: background 0.3s;
+}
+
+.cam-btn:hover {
+    background: #444;
+}
+
+.cam-btn.active {
+    background: #ff0000;
+    border-color: #ff4444;
+}
+
+#jump-scare {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: url('https://static.wikia.nocookie.net/freddy-fazbears-pizza/images/4/4c/FreddyJumpscare.gif') center/cover;
+    z-index: 1000;
+}
+
+#death-screen {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: url('/a/cf05f2f4-9975-456d-a913-c5de9421870e') center/cover;
+    z-index: 1000;
+}
+
+.cam-1a {
+    background: url('/a/b34c663a-1bd9-4357-9e77-3dececaf5088') center/cover !important;
+}
+
+#back-to-office {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 20px;
+    background: #444;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-family: "Courier New", monospace;
+    z-index: 101;
+}
+
+#back-to-office:hover {
+    background: #555;
+}
+</style></head><body>
+<div id="title-screen">
+    <svg id="mickey-svg" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="30" fill="#000"/>
+        <circle cx="25" cy="25" r="20" fill="#000"/>
+        <circle cx="75" cy="25" r="20" fill="#000"/>
+        <ellipse cx="40" cy="45" rx="5" ry="8" fill="#fff"/>
+        <ellipse cx="60" cy="45" rx="5" ry="8" fill="#fff"/>
+        <path d="M 45 60 Q 50 65 55 60" stroke="#fff" stroke-width="2" fill="none"/>
+    </svg>
+    <h1>Five Nights at Treasure Island</h1>
+    <button id="play-btn">PLAY</button>
+</div>
+<div id="office" style="display: none;">
+    <div id="power-status">Power: <span id="power-level">100</span>%</div>
+    <div id="time">12 AM</div>
+    <button id="left-door" class="door-btn">Left Door</button>
+    <button id="right-door" class="door-btn">Right Door</button>
+    <button id="camera-btn">Toggle Camera</button>
+</div>
+
+<div id="camera-view">
+    <button id="back-to-office">Back to Office</button>
+    <div class="camera-static"></div>
+    <div class="camera-overlay">CAM 1A</div>
+    <div class="camera-btn-grid">
+        <button class="cam-btn active" data-cam="1A">CAM 1A</button>
+        <button class="cam-btn" data-cam="1B">CAM 1B</button>
+        <button class="cam-btn" data-cam="1C">CAM 1C</button>
+        <button class="cam-btn" data-cam="2A">CAM 2A</button>
+        <button class="cam-btn" data-cam="2B">CAM 2B</button>
+        <button class="cam-btn" data-cam="3A">CAM 3A</button>
+        <button class="cam-btn" data-cam="4A">CAM 4A</button>
+        <button class="cam-btn" data-cam="4B">CAM 4B</button>
+        <button class="cam-btn" data-cam="5">CAM 5</button>
+    </div>
+</div>
+
+<div id="jump-scare"></div>
+<div id="death-screen"></div>
+<audio id="jumpscare-sound">
+    <source src="https://example.com/path/to/royalty-free-sound.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+let power = 100;
+let time = 0;
+let leftDoorClosed = false;
+let rightDoorClosed = false;
+let cameraActive = false;
+let gameOver = false;
+let currentHour = 12;
+
+// Hide all game elements initially
+document.getElementById('office').style.display = 'none';
+
+// Play button handler
+document.getElementById('play-btn').addEventListener('click', () => {
+    document.getElementById('title-screen').style.display = 'none';
+    document.getElementById('office').style.display = 'block';
+    startGame();
+});
+
+// Wrap existing initialization code in startGame function
+function startGame() {
+    power = 100;
+    time = 0;
+    leftDoorClosed = false;
+    rightDoorClosed = false;
+    cameraActive = false;
+    gameOver = false;
+    currentHour = 12;
+}
+
+const animatronics = {
+    freddy: { position: 'stage', active: false },
+    bonnie: { position: 'stage', active: false },
+    chica: { position: 'stage', active: false },
+    foxy: { position: 'pirateCove', active: false }
+};
+
+// Check for jump scare
+function checkForJumpScare(animatronic) {
+    const atLeftDoor = animatronics[animatronic].position === 'leftDoor';
+    const atRightDoor = animatronics[animatronic].position === 'rightDoor';
+    
+    if (atLeftDoor || atRightDoor) {
+        if ((atLeftDoor && !leftDoorClosed) || (atRightDoor && !rightDoorClosed)) {
+            gameOver = true;
+            endGame('jumpscare');
+        }
+    }
+}
+
+function moveAnimatronic(animatronic) {
+    const positions = ['stage', 'diningArea', 'hallway', 'leftDoor', 'rightDoor'];
+    const current = animatronics[animatronic].position;
+    const currentIndex = positions.indexOf(current);
+    
+    if (currentIndex < positions.length - 1) {
+        // Randomly choose between left and right door if moving from hallway
+        if (current === 'hallway') {
+            animatronics[animatronic].position = Math.random() < 0.5 ? 'leftDoor' : 'rightDoor';
+        } else {
+            animatronics[animatronic].position = positions[currentIndex + 1];
+        }
+
+        // Handle door arrival
+        if (animatronics[animatronic].position === 'leftDoor' || animatronics[animatronic].position === 'rightDoor') {
+            // Update office background when animatronic arrives
+            if (animatronic === 'bonnie' && animatronics[animatronic].position === 'leftDoor') {
+                document.getElementById('office').style.background = `url('/a/d55da2b6-185f-414c-bfda-d9d374dcd52c') center/cover`;
+            } else if (animatronic === 'chica' && animatronics[animatronic].position === 'rightDoor') {
+                document.getElementById('office').style.background = `url('/a/32f844fc-137b-471b-b66c-fd38f5921e21') center/cover`;
+            }
+
+            // Give player 5 seconds to react before checking for jumpscare
+            setTimeout(() => {
+                const atLeftDoor = animatronics[animatronic].position === 'leftDoor';
+                const atRightDoor = animatronics[animatronic].position === 'rightDoor';
+                
+                // Only trigger jumpscare if door is still open after grace period
+                if ((atLeftDoor && !leftDoorClosed) || (atRightDoor && !rightDoorClosed)) {
+                    gameOver = true;
+                    endGame('jumpscare');
+                }
+            }, 5000);
+
+            // After 8 seconds total, if the appropriate door is closed, the animatronic leaves
+            setTimeout(() => {
+                const atLeftDoor = animatronics[animatronic].position === 'leftDoor';
+                const atRightDoor = animatronics[animatronic].position === 'rightDoor';
+                
+                if ((atLeftDoor && leftDoorClosed) || (atRightDoor && rightDoorClosed)) {
+                    animatronics[animatronic].position = 'stage';
+                    document.getElementById('office').style.background = `url('/a/691b71ff-cb60-454d-9704-74a24ce4befa') center/cover`;
+                }
+            }, 8000);
+        }
+    }
+}
+
+// Power consumption
+setInterval(() => {
+    if (!gameOver) {
+        let consumption = 1;
+        // Dramatically increase door power consumption
+        if (leftDoorClosed) consumption += 5;  // Changed from 1 to 5
+        if (rightDoorClosed) consumption += 5; // Changed from 1 to 5
+        if (cameraActive) consumption += 1;
+        
+        // Increase the rate of power drain (from 0.1 to 0.3)
+        power -= consumption * 0.3;
+        document.getElementById('power-level').textContent = Math.floor(power);
+        
+        if (power <= 0) {
+            gameOver = true;
+            endGame('power');
+        }
+    }
+}, 1000);
+
+// Time progression - updating the timing logic
+setInterval(() => {
+    if (!gameOver) {
+        time += 1; // Changed from 2 to 1 to slow down time progression
+        if (time % 60 === 0) { // Changed from 30 to 60 seconds = 1 hour in game
+            currentHour += 1;
+            if (currentHour > 6) {
+                winGame();
+            }
+            document.getElementById('time').textContent = currentHour + ' AM';
+        }
+    }
+}, 1000);
+
+// Animatronic movement
+setInterval(() => {
+    if (!gameOver) {
+        for (let animatronic in animatronics) {
+            if (Math.random() < 0.2) {
+                moveAnimatronic(animatronic);
+            }
+        }
+    }
+}, 3000);
+
+// Door controls
+document.getElementById('left-door').addEventListener('click', () => {
+    leftDoorClosed = !leftDoorClosed;
+    document.getElementById('left-door').style.background = leftDoorClosed ? '#ff0000' : '#444';
+});
+
+document.getElementById('right-door').addEventListener('click', () => {
+    rightDoorClosed = !rightDoorClosed;
+    document.getElementById('right-door').style.background = rightDoorClosed ? '#ff0000' : '#444';
+});
+
+// Camera controls
+document.getElementById('camera-btn').addEventListener('click', () => {
+    cameraActive = !cameraActive;
+    document.getElementById('camera-view').style.display = cameraActive ? 'block' : 'none';
+});
+
+// Back to office button
+document.getElementById('back-to-office').addEventListener('click', () => {
+    cameraActive = false;
+    document.getElementById('camera-view').style.display = 'none';
+});
+
+// Camera switching
+document.querySelectorAll('.cam-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.cam-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelector('.camera-overlay').textContent = 'CAM ' + btn.dataset.cam;
+        
+        // Remove all camera-specific classes
+        document.getElementById('camera-view').classList.remove('cam-1a');
+        
+        // Add specific camera class based on camera selection
+        if (btn.dataset.cam === '1A') {
+            const randomChance = Math.floor(Math.random() * 10) + 1;
+            if (randomChance === 1) {
+                document.getElementById('camera-view').style.background = `url('/a/395d155b-5415-4b4a-acee-06de35bb4504') center/cover`;
+            } else {
+                document.getElementById('camera-view').style.background = `url('/a/b34c663a-1bd9-4357-9e77-3dececaf5088') center/cover`;
+            }
+        } else if (btn.dataset.cam === '1B') {
+            const randomChance = Math.random();
+            if (randomChance < 0.2) {
+                document.getElementById('camera-view').style.background = `url('/a/a3b1bcc0-35db-49fb-bb97-125178a1c6ff') center/cover`;
+            } else {
+                document.getElementById('camera-view').style.background = `url('/a/ded9d810-8b4b-4991-a9cf-5b8c59fdf9da') center/cover`;
+            }
+        } else if (btn.dataset.cam === '1C') {
+            const randomChance = Math.random() * 15;
+            if (randomChance < 1) {
+                document.getElementById('camera-view').style.background = `url('/a/1bcfdc87-3fe9-4688-96a7-cadcd6812430') center/cover`;
+            } else {
+                document.getElementById('camera-view').style.background = `url('/a/a801b5e5-c781-4b40-859a-c0b2ee86a446') center/cover`;
+            }
+        } else if (btn.dataset.cam === '2A') {
+            const randomChance = Math.floor(Math.random() * 20) + 1; 
+            if (randomChance <= 2) {
+                document.getElementById('camera-view').style.background = `url('/a/5abcf9ab-1b3c-46e4-a260-c71d18f0dd2b') center/cover`;
+            } else {
+                document.getElementById('camera-view').style.background = `url('/a/0eb865bf-3afd-4874-95b5-a5107da7b99d') center/cover`;
+            }
+        } else {
+            // Default black background for other cameras
+            document.getElementById('camera-view').style.background = '#000';
+        }
+    });
+});
+
+// Initialize CAM 1A view
+document.getElementById('camera-view').classList.add('cam-1a');
+
+function endGame(reason) {
+    if (reason === 'jumpscare') {
+        const sound = document.getElementById('jumpscare-sound');
+        sound.play();
+        document.getElementById('jump-scare').style.display = 'block';
+        setTimeout(() => {
+            document.getElementById('jump-scare').style.display = 'none';
+            document.getElementById('death-screen').style.display = 'block';
+            setTimeout(() => {
+                alert('Game Over - You were caught!');
+                location.reload();
+            }, 2000);
+        }, 1000);
+    } else {
+        document.getElementById('death-screen').style.display = 'block';
+        setTimeout(() => {
+            alert('Game Over - You ran out of power!');
+            location.reload();
+        }, 2000);
+    }
+}
+
+function winGame() {
+    alert('Congratulations! You survived until 6 AM!');
+    location.reload();
+}
+
+// Teclas para controlar las puertas
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'a' || event.key === 'A') {
+        document.getElementById('left-door').click();
+    }
+    if (event.key === 'd' || event.key === 'D') {
+        document.getElementById('right-door').click();
+    }
+    if (event.key === 'c' || event.key === 'C') {
+        document.getElementById('camera-btn').click();
+    }
+});
+
+</script></body></html>
