@@ -1,0 +1,277 @@
+<html><head><base href="https://interdimensional-cable.tv/make-it-so-most-of-the-videos-are-music-themed-please/make-it-so-it-still-plays-endless-youtube-videos-just-exclusive-to-music">
+<title>Interdimensional Music TV - Infinite Tunes, Infinite Realities</title>
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Courier New', monospace;
+    background-color: #000;
+    color: #0F0;
+    overflow: hidden;
+  }
+  .container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  .header {
+    text-align: center;
+    padding: 20px;
+    background-color: rgba(0, 255, 0, 0.1);
+  }
+  h1 {
+    margin: 0;
+    font-size: 2.5em;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    animation: musicwave 4s ease-in-out infinite;
+  }
+  @keyframes musicwave {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    25% { transform: translateY(-5px) rotate(-2deg); }
+    75% { transform: translateY(5px) rotate(2deg); }
+  }
+  .tv-screen {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+  #currentChannel {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 1.2em;
+    z-index: 10;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 5px;
+    border-radius: 5px;
+  }
+  iframe {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100vw;
+    height: 56.25vw;
+    transform: translate(-50%, -50%);
+    min-height: 100vh;
+    min-width: 177.77vh;
+  }
+  .controls {
+    display: flex;
+    justify-content: space-around;
+    padding: 20px;
+    background-color: rgba(0, 255, 0, 0.1);
+  }
+  button {
+    background-color: #0F0;
+    color: #000;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 5px;
+  }
+  button:hover {
+    background-color: #000;
+    color: #0F0;
+    box-shadow: 0 0 10px #0F0;
+  }
+  .static {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+      repeating-radial-gradient(#000 0 0.0001%, #fff 0 0.0002%) 50% 0/2500px 2500px,
+      repeating-conic-gradient(#000 0 0.0001%, #fff 0 0.0002%) 50% 50%/2500px 2500px;
+    background-blend-mode: difference;
+    opacity: 0.05;
+    pointer-events: none;
+  }
+  #songInfo {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    font-size: 1.2em;
+    z-index: 10;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 5px;
+    border-radius: 5px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>Interdimensional Music TV</h1>
+  </div>
+  
+  <div class="tv-screen">
+    <div id="currentChannel">Channel: 1</div>
+    <div id="songInfo">Now Playing: ...</div>
+    <iframe id="videoFrame" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    <div class="static"></div>
+  </div>
+  
+  <div class="controls">
+    <button onclick="changeChannel('prev')">Previous Channel</button>
+    <button onclick="changeChannel('random')">Random Channel</button>
+    <button onclick="changeChannel('next')">Next Channel</button>
+  </div>
+</div>
+
+<script>
+  const musicVideoIds = [
+    'dQw4w9WgXcQ', // Rick Astley - Never Gonna Give You Up
+    'Gs069dndIYk', // Earth, Wind & Fire - September
+    'ZZ5LpwO-An4', // HEYYEYAAEYAAAEYAEYAA (He-Man)
+    'y6120QOlsfU', // Darude - Sandstorm
+    'djV11Xbc914', // a-ha - Take On Me
+    'ZyhrYis509A', // Aqua - Barbie Girl
+    'YgGzAKP_HuM', // Eiffel 65 - Blue (Da Ba Dee)
+    '9bZkp7q19f0', // PSY - GANGNAM STYLE
+    'L_jWHffIx5E', // Smash Mouth - All Star
+    'FTQbiNvZqaY', // Toto - Africa
+    'btPJPFnesV4', // Survivor - Eye Of The Tiger
+    'uE-1RPDqJAY', // Badgers
+    'EwTZ2xpQwpA', // Chocolate Rain
+    'astISOttCQ0', // The Gummy Bear Song
+    'CsGYh8AacgY', // Caramelldansen
+    'J---aiyznGQ', // Keyboard Cat
+    '2Z4m4lnjxkY', // Trololo Song
+    'YaG5SAw1n0c', // John Cena Theme
+    'KmtzQCSh6xk', // Numa Numa
+    'eBShN8qT4lk', // "Why You Always Lying" Meme Song
+    'rY-FJvRqK0E', // Shooting Stars
+    'wWUC2-ypnDQ', // Guile's Theme
+    'o0u4M6vppCI', // Actual Cannibal Shia LaBeouf
+    'feA64wXhbjo', // Bag Raiders - Shooting Stars
+    'Ct6BUPvE2sM', // Smash Mouth - All Star but every word is somebody
+    'mj-v6zCnEaw', // Daft Punk - Around the World
+    'PfYnvDL0Qcw', // Noisestorm - Crab Rave
+    'hGlyFc79BUE', // Nyan Cat
+    'cUYSGojUuAU', // Doja Cat - MOOO!
+    'vTIIMJ9tUc8', // Benny Lava (Buffalax - Kalluri Vaanil)
+    'k85mRPqvMbE', // Crazy Frog - Axel F
+    'TKfS5zVfGBc', // Darude - Sandstorm (Remix)
+    'l_MyUGq7pgs', // Malhari - Bajirao Mastani
+    'qRC4Vk6kisY', // Peanut Butter Jelly Time
+    '9bZkp7q19f0', // PSY - GANGNAM STYLE
+    'qaC0vNLdLvY', // Daler Mehndi - Tunak Tunak Tun
+    'kJQP7kiw5Fk', // Luis Fonsi - Despacito ft. Daddy Yankee
+    'dv13gl0a-FA', // Initial D - Deja Vu
+    '1wnE4vF9CQ4', // Ievan Polkka (Loituma)
+    'xwtdhWltSIg'  // Scatman John - Scatman (Ski-Ba-Bop-Ba-Dop-Bop)
+  ];
+
+  const songTitles = [
+    "Rick Astley - Never Gonna Give You Up",
+    "Earth, Wind & Fire - September",
+    "He-Man - HEYYEYAAEYAAAEYAEYAA",
+    "Darude - Sandstorm",
+    "a-ha - Take On Me",
+    "Aqua - Barbie Girl",
+    "Eiffel 65 - Blue (Da Ba Dee)",
+    "PSY - GANGNAM STYLE",
+    "Smash Mouth - All Star",
+    "Toto - Africa",
+    "Survivor - Eye Of The Tiger",
+    "Mr. Weebl - Badgers",
+    "Tay Zonday - Chocolate Rain",
+    "Gummibär - The Gummy Bear Song",
+    "Caramella Girls - Caramelldansen",
+    "Keyboard Cat",
+    "Eduard Khil - Trololo Song",
+    "John Cena Theme",
+    "Gary Brolsma - Numa Numa",
+    "Nicholas Fraser - Why You Always Lying",
+    "Bag Raiders - Shooting Stars",
+    "Street Fighter II - Guile's Theme",
+    "Rob Cantor - Actual Cannibal Shia LaBeouf",
+    "Bag Raiders - Shooting Stars",
+    "Smash Mouth - All Star (Word Replacement)",
+    "Daft Punk - Around the World",
+    "Noisestorm - Crab Rave",
+    "Nyan Cat",
+    "Doja Cat - MOOO!",
+    "Prabhu Deva - Kalluri Vaanil (Benny Lava)",
+    "Crazy Frog - Axel F",
+    "Darude - Sandstorm (Remix)",
+    "Ranveer Singh - Malhari",
+    "Buckwheat Boyz - Peanut Butter Jelly Time",
+    "PSY - GANGNAM STYLE",
+    "Daler Mehndi - Tunak Tunak Tun",
+    "Luis Fonsi ft. Daddy Yankee - Despacito",
+    "Initial D - Deja Vu",
+    "Loituma - Ievan Polkka",
+    "Scatman John - Scatman (Ski-Ba-Bop-Ba-Dop-Bop)"
+  ];
+
+  let currentChannel = 1;
+
+  function changeChannel(direction) {
+    const channelDisplay = document.getElementById('currentChannel');
+    const videoFrame = document.getElementById('videoFrame');
+    const songInfoDisplay = document.getElementById('songInfo');
+
+    if (direction === 'next') {
+      currentChannel++;
+    } else if (direction === 'prev') {
+      currentChannel--;
+    } else if (direction === 'random') {
+      currentChannel = Math.floor(Math.random() * 999999999999) + 1;
+    }
+
+    if (currentChannel > 999999999999) currentChannel = 1;
+    if (currentChannel < 1) currentChannel = 999999999999;
+
+    channelDisplay.textContent = `Channel: ${currentChannel}`;
+    
+    // Show static effect
+    videoFrame.style.opacity = 0;
+    setTimeout(() => {
+      const videoIndex = (currentChannel - 1) % musicVideoIds.length;
+      videoFrame.src = `https://www.youtube.com/embed/${musicVideoIds[videoIndex]}?autoplay=1&controls=0&showinfo=0&rel=0`;
+      songInfoDisplay.textContent = `Now Playing: ${songTitles[videoIndex]}`;
+      videoFrame.style.opacity = 1;
+    }, 500);
+  }
+
+  // Initial channel load
+  changeChannel('random');
+
+  // Easter egg: Konami Code
+  let konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+  let konamiIndex = 0;
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === konamiCode[konamiIndex]) {
+      konamiIndex++;
+      if (konamiIndex === konamiCode.length) {
+        alert('Konami Code activated! Unlocking secret interdimensional music channel...');
+        document.body.style.animation = 'rainbow 5s linear infinite';
+        konamiIndex = 0;
+      }
+    } else {
+      konamiIndex = 0;
+    }
+  });
+</script>
+
+<style>
+@keyframes rainbow {
+  0% { background-color: red; }
+  14% { background-color: orange; }
+  28% { background-color: yellow; }
+  42% { background-color: green; }
+  56% { background-color: blue; }
+  70% { background-color: indigo; }
+  84% { background-color: violet; }
+  100% { background-color: red; }
+}
+</style>
+
+</body></html>
