@@ -1,0 +1,485 @@
+<html><head><base href="https://www.LSDDreamEmulator3dPSX.com/NewDream/?day=1">
+<title>LSD: Dream Emulator 3D PSX - New Dream (Day 1) - Surreal Interaction</title>
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Arial', sans-serif;
+    background-color: #000;
+  }
+  #dream-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+  }
+  #hud {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    color: #fff;
+    font-size: 18px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  }
+  #dream-canvas {
+    width: 100%;
+    height: 100%;
+    cursor: none;
+  }
+  #interaction-text {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #fff;
+    font-size: 24px;
+    text-align: center;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    opacity: 0;
+    transition: opacity 0.5s;
+  }
+  #custom-cursor {
+    position: fixed;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.5);
+    pointer-events: none;
+    z-index: 9999;
+    mix-blend-mode: difference;
+    transition: transform 0.3s ease;
+  }
+  #psychedelic-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0.3;
+    mix-blend-mode: screen;
+  }
+  #thought-bubble {
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 20px;
+    padding: 15px;
+    max-width: 200px;
+    font-size: 14px;
+    color: #333;
+    opacity: 0;
+    transition: opacity 0.5s;
+  }
+</style>
+</head>
+<body>
+<div id="dream-container">
+  <canvas id="dream-canvas"></canvas>
+  <div id="hud">
+    <div id="day">Day: 1</div>
+    <div id="time">Time: 00:00</div>
+  </div>
+  <div id="interaction-text"></div>
+  <div id="custom-cursor"></div>
+  <div id="thought-bubble"></div>
+  <svg id="psychedelic-overlay">
+    <filter id='noise' x='0%' y='0%' width='100%' height='100%'>
+      <feTurbulence type="fractalNoise" baseFrequency="0.01" numOctaves="3" result="noise"/>
+      <feColorMatrix in="noise" type="saturate" values="0" result="desaturatedNoise"/>
+      <feComponentTransfer>
+        <feFuncR type="table" tableValues="1 0 1"/>
+        <feFuncG type="table" tableValues="0 1 1"/>
+        <feFuncB type="table" tableValues="1 1 0"/>
+      </feComponentTransfer>
+      <feComposite in2="SourceGraphic" operator="in"/>
+    </filter>
+    <rect width="100%" height="100%" filter="url(#noise)"/>
+  </svg>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
+
+<script>
+let scene, camera, renderer, dreamWorld, raycaster, mouse;
+let isWalking = false;
+let dreamTime = 0;
+const walkSpeed = 0.05;
+const turnSpeed = 0.03;
+
+// Initialize dream sounds
+const ambientSound = new Howl({
+  src: ['https://freesound.org/data/previews/163/163708_2975101-lq.mp3'],
+  loop: true,
+  volume: 0.3
+});
+
+const walkSound = new Howl({
+  src: ['https://freesound.org/data/previews/88/88531_1567806-lq.mp3'],
+  loop: true,
+  volume: 0.2
+});
+
+const interactionSound = new Howl({
+  src: ['https://freesound.org/data/previews/323/323502_5235550-lq.mp3'],
+  volume: 0.5
+});
+
+function init() {
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('dream-canvas'), antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+
+  raycaster = new THREE.Raycaster();
+  mouse = new THREE.Vector2();
+
+  // Create a surreal dream world
+  dreamWorld = new THREE.Group();
+  
+  // Psychedelic sky
+  const skyGeometry = new THREE.SphereGeometry(500, 32, 32);
+  const skyMaterial = new THREE.ShaderMaterial({
+    uniforms: {
+      time: { value: 0 }
+    },
+    vertexShader: `
+      varying vec2 vUV;
+      void main() {
+        vUV = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `
+      uniform float time;
+      varying vec2 vUV;
+      
+      float random(vec2 st) {
+        return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
+      }
+
+      void main() {
+        vec2 p = -1.0 + 2.0 * vUV;
+        float a = time * 40.0;
+        float n = random(p + time);
+        
+        vec3 color1 = vec3(sin(time * 0.1) * 0.5 + 0.5, cos(time * 0.2) * 0.5 + 0.5, sin(time * 0.3) * 0.5 + 0.5);
+        vec3 color2 = vec3(cos(time * 0.2) * 0.5 + 0.5, sin(time * 0.3) * 0.5 + 0.5, cos(time * 0.1) * 0.5 + 0.5);
+        
+        float d = length(p);
+        vec3 color = mix(color1, color2, smoothstep(0.4, 0.6, d));
+        
+        color += vec3(n) * 0.1;  // Add some noise
+        
+        gl_FragColor = vec4(color, 1.0);
+      }
+    `,
+    side: THREE.BackSide
+  });
+  const sky = new THREE.Mesh(skyGeometry, skyMaterial);
+  dreamWorld.add(sky);
+
+  // Surreal ground
+  const groundGeometry = new THREE.PlaneGeometry(100, 100, 50, 50);
+  const groundMaterial = new THREE.ShaderMaterial({
+    uniforms: {
+      time: { value: 0 }
+    },
+    vertexShader: `
+      varying vec2 vUV;
+      uniform float time;
+      void main() {
+        vUV = uv;
+        vec3 pos = position;
+        pos.z += sin(pos.x * 0.2 + time) * cos(pos.y * 0.2 + time) * 2.0;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+      }
+    `,
+    fragmentShader: `
+      uniform float time;
+      varying vec2 vUV;
+      
+      vec3 palette( float t ) {
+        vec3 a = vec3(0.5, 0.5, 0.5);
+        vec3 b = vec3(0.5, 0.5, 0.5);
+        vec3 c = vec3(1.0, 1.0, 1.0);
+        vec3 d = vec3(0.263,0.416,0.557);
+        return a + b*cos( 6.28318*(c*t+d) );
+      }
+
+      void main() {
+        vec2 p = -1.0 + 2.0 * vUV;
+        float r = sqrt(dot(p, p));
+        float a = atan(p.y, p.x) + time * 0.5;
+        vec3 color = palette(r + a * 0.5 + time * 0.1);
+        gl_FragColor = vec4(color, 1.0);
+      }
+    `,
+    side: THREE.DoubleSide
+  });
+  const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+  ground.rotation.x = -Math.PI / 2;
+  dreamWorld.add(ground);
+
+  // Surreal objects
+  const objectTypes = ['icosahedron', 'torus', 'sphere'];
+  for (let i = 0; i < 50; i++) {
+    let geometry;
+    const objectType = objectTypes[Math.floor(Math.random() * objectTypes.length)];
+    switch(objectType) {
+      case 'icosahedron':
+        geometry = new THREE.IcosahedronGeometry(Math.random() * 1 + 0.5, 0);
+        break;
+      case 'torus':
+        geometry = new THREE.TorusGeometry(Math.random() * 0.5 + 0.3, 0.2, 16, 100);
+        break;
+      case 'sphere':
+        geometry = new THREE.SphereGeometry(Math.random() * 0.5 + 0.3, 32, 32);
+        break;
+    }
+    
+    const material = new THREE.ShaderMaterial({
+      uniforms: {
+        time: { value: 0 }
+      },
+      vertexShader: `
+        varying vec3 vNormal;
+        varying vec3 vPosition;
+        uniform float time;
+        void main() {
+          vNormal = normal;
+          vPosition = position;
+          vec3 pos = position;
+          pos += sin(pos.x * 10.0 + time) * normal * 0.1;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+        }
+      `,
+      fragmentShader: `
+        varying vec3 vNormal;
+        varying vec3 vPosition;
+        uniform float time;
+        void main() {
+          vec3 color = normalize(vNormal) * 0.5 + 0.5;
+          color = mix(color, vec3(sin(time + vPosition.x), cos(time + vPosition.y), sin(time * 0.5 + vPosition.z) * 0.5 + 0.5), 0.5);
+          gl_FragColor = vec4(color, 1.0);
+        }
+      `
+    });
+    const surrealistObject = new THREE.Mesh(geometry, material);
+    surrealistObject.position.set(
+      Math.random() * 80 - 40,
+      Math.random() * 10 + 1,
+      Math.random() * 80 - 40
+    );
+    surrealistObject.userData.isInteractive = true;
+    surrealistObject.userData.type = objectType;
+    dreamWorld.add(surrealistObject);
+  }
+
+  // Surreal lighting
+  const ambientLight = new THREE.AmbientLight(0x404040);
+  scene.add(ambientLight);
+
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+  directionalLight.position.set(1, 1, 1);
+  scene.add(directionalLight);
+
+  scene.add(dreamWorld);
+  camera.position.set(0, 2, 5);
+
+  // Start ambient sound
+  ambientSound.play();
+
+  animate();
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+
+  // Update dream time
+  dreamTime += 1/60; // Assuming 60 FPS
+  updateHUD();
+
+  // Update shader uniforms
+  scene.traverse((child) => {
+    if (child.material && child.material.uniforms) {
+      child.material.uniforms.time.value = dreamTime;
+    }
+  });
+
+  // Random color shifts for sky
+  if (Math.random() < 0.01) {
+    const sky = dreamWorld.children[0];
+    sky.material.uniforms.time.value = Math.random() * 1000;
+  }
+
+  // Surreal object movements
+  dreamWorld.children.forEach((object, index) => {
+    if (object.userData.isInteractive) {
+      object.rotation.x = Math.sin(dreamTime * 0.5 + index) * 0.2;
+      object.rotation.y = Math.cos(dreamTime * 0.3 + index) * 0.3;
+      object.position.y = Math.sin(dreamTime + object.position.x) * 0.5 + 3;
+      
+      // Add more complex movements based on object type
+      switch(object.userData.type) {
+        case 'icosahedron':
+          object.scale.x = 1 + Math.sin(dreamTime + index) * 0.2;
+          object.scale.y = 1 + Math.cos(dreamTime + index) * 0.2;
+          object.scale.z = 1 + Math.sin(dreamTime * 1.5 + index) * 0.2;
+          break;
+        case 'torus':
+          object.rotation.z = dreamTime * 0.2;
+          break;
+        case 'sphere':
+          object.position.x += Math.sin(dreamTime + index) * 0.01;
+          object.position.z += Math.cos(dreamTime + index) * 0.01;
+          break;
+      }
+    }
+  });
+
+  // Raycasting for object interaction
+  raycaster.setFromCamera(mouse, camera);
+  const intersects = raycaster.intersectObjects(dreamWorld.children);
+
+  if (intersects.length > 0) {
+    const intersectedObject = intersects[0].object;
+    if (intersectedObject.userData.isInteractive) {
+      document.getElementById('interaction-text').textContent = "Click to interact";
+      document.getElementById('interaction-text').style.opacity = 1;
+      document.getElementById('custom-cursor').style.transform = 'scale(1.5)';
+    }
+  } else {
+    document.getElementById('interaction-text').style.opacity = 0;
+    document.getElementById('custom-cursor').style.transform = 'scale(1)';
+  }
+
+  renderer.render(scene, camera);
+}
+
+function updateHUD() {
+  const minutes = Math.floor(dreamTime);
+  const seconds = Math.floor((dreamTime - minutes) * 60);
+  document.getElementById('time').textContent = `Time: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+function handleKeyDown(event) {
+  switch(event.key) {
+    case 'w':
+      isWalking = true;
+      walkSound.play();
+      break;
+    case 'a':
+      camera.rotation.y += turnSpeed;
+      break;
+    case 'd':
+      camera.rotation.y -= turnSpeed;
+      break;
+  }
+}
+
+function handleKeyUp(event) {
+  if (event.key === 'w') {
+    isWalking = false;
+    walkSound.stop();
+  }
+}
+
+function handleMouseMove(event) {
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+
+  // Update custom cursor position
+  const cursor = document.getElementById('custom-cursor');
+  cursor.style.left = event.clientX + 'px';
+  cursor.style.top = event.clientY + 'px';
+}
+
+function handleClick(event) {
+  raycaster.setFromCamera(mouse, camera);
+  const intersects = raycaster.intersectObjects(dreamWorld.children);
+
+  if (intersects.length > 0) {
+    const intersectedObject = intersects[0].object;
+    if (intersectedObject.userData.isInteractive) {
+      interactionSound.play();
+      // Trigger a surreal effect on the object
+      const originalScale = intersectedObject.scale.clone();
+      const originalPosition = intersectedObject.position.clone();
+      
+      const tween = {
+        progress: 0,
+        duration: 2000,
+        start: Date.now(),
+        update: function() {
+          const now = Date.now();
+          const elapsed = now - this.start;
+          this.progress = Math.min(elapsed / this.duration, 1);
+          
+          const scale = 1 + Math.sin(this.progress * Math.PI * 2) * 0.5;
+          intersectedObject.scale.set(originalScale.x * scale, originalScale.y * scale, originalScale.z * scale);
+          
+          intersectedObject.position.y = originalPosition.y + Math.sin(this.progress * Math.PI * 4) * 3;
+          intersectedObject.rotation.y += 0.1;
+          
+          if (this.progress < 1) {
+            requestAnimationFrame(this.update.bind(this));
+          } else {
+            intersectedObject.scale.copy(originalScale);
+            intersectedObject.position.copy(originalPosition);
+          }
+        }
+      };
+      
+      tween.update();
+      
+      // Change the psychedelic overlay
+      const overlay = document.getElementById('psychedelic-overlay');
+      overlay.style.filter = `hue-rotate(${Math.random() * 360}deg) blur(${Math.random() * 5}px)`;
+      
+      // Show a surreal thought bubble
+      const thoughts = [
+        "Reality melts like Salvador Dali's clocks...",
+        "Colors taste like forbidden frequencies...",
+        "Time is just a construct of human perception...",
+        "The universe whispers secrets in fractal patterns...",
+        "Consciousness expands beyond the limits of the mind..."
+      ];
+      const randomThought = thoughts[Math.floor(Math.random() * thoughts.length)];
+      const thoughtBubble = document.getElementById('thought-bubble');
+      thoughtBubble.textContent = randomThought;
+      thoughtBubble.style.left = event.clientX + 'px';
+      thoughtBubble.style.top = event.clientY + 'px';
+      thoughtBubble.style.opacity = 1;
+      setTimeout(() => {
+        thoughtBubble.style.opacity = 0;
+      }, 5000);
+    }
+  }
+}
+
+function gameLoop() {
+  if (isWalking) {
+    camera.position.x -= Math.sin(camera.rotation.y) * walkSpeed;
+    camera.position.z -= Math.cos(camera.rotation.y) * walkSpeed;
+  }
+
+  requestAnimationFrame(gameLoop);
+}
+
+window.addEventListener('keydown', handleKeyDown);
+window.addEventListener('keyup', handleKeyUp);
+window.addEventListener('mousemove', handleMouseMove);
+window.addEventListener('click', handleClick);
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+init();
+gameLoop();
+</script>
+</body></html>
