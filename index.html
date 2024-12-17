@@ -1,0 +1,190 @@
+<html><head><base href="." /><title>Club Penguin Anti-Piracy Warning</title><meta charset="UTF-8" />
+<style>
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #000;
+    color: #fff;
+    font-family: 'Arial', sans-serif;
+    overflow: hidden;
+}
+
+.warning-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(45deg, #001428 0%, #002952 100%);
+}
+
+.rockhopper-img {
+    width: 300px;
+    height: 300px;
+    margin-bottom: 2rem;
+    animation: angry-wobble 0.5s ease-in-out infinite alternate;
+    object-fit: contain;
+}
+
+.warning-text {
+    text-align: center;
+    max-width: 600px;
+    opacity: 0;
+    animation: text-fade-in 2s forwards;
+}
+
+.glitch-effect {
+    animation: glitch 0.3s infinite;
+    text-shadow: 2px 2px #ff0000, -2px -2px #00ff00;
+}
+
+.button-container {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.play-button, .delete-button, .info-button {
+    background: #ff0000;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    animation: pulse 2s infinite;
+}
+
+.delete-button {
+    background: #880000;
+}
+
+.info-button {
+    background: #0066cc;
+}
+
+.delete-button:hover {
+    background: #660000;
+    animation: shake 0.5s infinite;
+}
+
+.info-button:hover {
+    background: #0052a3;
+}
+
+@keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+    100% { transform: translateX(0); }
+}
+
+@keyframes intense-shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-15px); }
+    75% { transform: translateX(15px); }
+    100% { transform: translateX(0); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+@keyframes angry-wobble {
+    0% { transform: rotate(-5deg); }
+    100% { transform: rotate(5deg); }
+}
+
+@keyframes text-fade-in {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes glitch {
+    0% { transform: translate(0) }
+    20% { transform: translate(-2px, 2px) }
+    40% { transform: translate(-2px, -2px) }
+    60% { transform: translate(2px, 2px) }
+    80% { transform: translate(2px, -2px) }
+    100% { transform: translate(0) }
+}
+
+.alert {
+    color: #ff0000;
+    font-size: 2em;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+</style>
+</head>
+<body>
+<div class="warning-container">
+    <img src="/latest-190409577.png" alt="Pirate Penguin" class="rockhopper-img">
+    
+    <div class="warning-text">
+        <p class="alert glitch-effect">⚠️ WARNING ⚠️</p>
+        <p>Yarr! This copy of Club Penguin be unauthorized, matey!</p>
+        <p>Playin' pirated versions of Club Penguin be against the pirate code and hurts the crew!</p>
+        <p class="glitch-effect">Please contact us at replyto@disney.com</p>
+        <p>Best be purchasin' an official copy to continue yer adventure!</p>
+        <p style="font-size: 0.8em; margin-top: 2rem;">This incident will be reported to Captain Disney Interactive Studios!</p>
+        <div class="button-container">
+            <button class="play-button" onclick="playWarningSound()">Play Warning Message</button>
+            <button class="delete-button" onclick="deleteAccount()">GET OUT!!! (Delete Account)</button>
+            <button class="info-button" onclick="showMoreInfo()">More Info</button>
+        </div>
+    </div>
+</div>
+
+<audio id="warningAudio" src="/5cb600a8-c0c3-45a2-96da-3429790d930c.wav"></audio>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    setInterval(() => {
+        const container = document.querySelector('.warning-container');
+        container.style.transform = `translateX(${Math.random() * 10 - 5}px)`;
+        setTimeout(() => {
+            container.style.transform = 'translateX(0)';
+        }, 50);
+    }, 2000);
+});
+
+function playWarningSound() {
+    const audio = document.getElementById('warningAudio');
+    audio.play();
+}
+
+function showMoreInfo() {
+    alert("Club Penguin Anti-Piracy Information:\n\n" + 
+          "• Pirating Club Penguin is strictly forbidden\n" +
+          "• Violations will result in permanent account deletion\n" +
+          "• All virtual items and coins will be forfeited\n" +
+          "• IP addresses are logged and monitored\n" +
+          "• Multiple violations may result in legal action\n\n" +
+          "Purchase the official version to play safely and legally!");
+}
+
+function deleteAccount() {
+    const container = document.querySelector('.warning-container');
+    let shakeIntensity = 0.3;
+    
+    const shakeInterval = setInterval(() => {
+        shakeIntensity = Math.max(0.05, shakeIntensity * 0.8);
+        container.style.animation = `intense-shake ${shakeIntensity}s infinite`;
+    }, 100);
+
+    setTimeout(() => {
+        clearInterval(shakeInterval);
+        alert("Yer account has been deleted, ye scurvy dog!");
+        alert("Ye be blocked from making new accounts for 12 months!");
+        alert("All yer puffles have been returned to the wild, and yer penguin has been cast into the deepest depths of the ocean!");
+        window.location.href = "https://web.archive.org/web/20111120212828/http://www.clubpenguin.com/";
+    }, 2000);
+}
+</script>
+</body></html>
