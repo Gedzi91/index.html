@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Proximity Structures Simulation</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #000;
+        }
+        #simulationCanvas {
+            display: block;
+        }
+        #controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+            color: #000;
+            max-width: 200px;
+        }
+        #controls h3 {
+            margin-top: 0;
+        }
+        #controls label {
+            display: block;
+            margin-bottom: 10px;
+        }
+        #controls input[type="number"], #controls select {
+            width: 100%;
+            box-sizing: border-box;
+            margin-top: 5px;
+        }
+        #controls button {
+            margin-top: 10px;
+            width: 100%;
+            padding: 5px;
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        #controls button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="simulationCanvas"></canvas>
+    <div id="controls">
+        <h3>Settings</h3>
+        <label>Points Count:
+            <input type="number" id="pointsCount" value="443" min="1">
+            <button id="resetPoints">Reset Points</button>
+        </label>
+        <label>Connection Distance:
+            <input type="number" id="connectionDistance" value="75" min="1">
+        </label>
+        <label>Connection Limit:
+            <input type="number" id="connectionLimit" value="10" min="1">
+        </label>
+        <label>Max Travel Distance:
+            <input type="number" id="maxTravelDistance" value="59" min="1">
+        </label>
+        <label>Cycle Duration:
+            <input type="number" id="cycleDuration" value="60" min="1">
+        </label>
+        <label>Point Size:
+            <input type="number" id="pointSize" value="3" min="1">
+        </label>
+        <label>Line Size:
+            <input type="number" id="lineSize" value="1" min="1">
+        </label>
+        <label>Color Shift:
+            <input type="number" id="colorShift" value="10" min="0">
+        </label>
+        <label>Point Tweening:
+            <select id="tweeningFunction">
+                <option value="linear">Linear</option>
+                <option value="meandering">Meandering</option>
+                <option value="snappy">Snappy</option>
+                <option value="bouncy">Bouncy</option>
+                <option value="elastic">Elastic</option>
+                <option value="overshoot">Overshoot</option>
+            </select>
+        </label>
+        <label>Drawing:
+            <input type="checkbox" id="debugMode"> Debugging
+            <input type="checkbox" id="showFPS"> FPS Counter
+            <input type="checkbox" id="showPoints" checked> Points
+            <input type="checkbox" id="showLines" checked> Lines
+        </label>
+    </div>
+    <script>
+        const canvas = document.getElementById('simulationCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let width, height;
+
+        function resizeCanvas() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        const pointsCountInput = document.getElementById('pointsCount');
+        const connectionDistanceInput = document.getElementById('connectionDistance');
+        const connectionLimitInput = document.getElementById('connectionLimit');
+        const maxTravelDistanceInput = document.getElementById('maxTravelDistance');
+        const cycleDurationInput = document.getElementById('cycleDuration');
+        const pointSizeInput = document.getElementById('pointSize');
+        const lineSizeInput = document.getElementById('lineSize');
+        const colorShiftInput = document.getElementById('colorShift');
+        const tweeningFunctionSelect = document.getElementById('tweeningFunction');
+        const debugModeCheckbox = document.getElementById('debugMode');
+        const showFPSCheckbox = document.getElementById('showFPS');
+        const showPointsCheckbox = document.getElementById('showPoints');
+        const showLinesCheckbox = document.getElementById('showLines');
+        const resetPointsButton = document.getElementById('resetPoints');
+
+        let pointsCount = parseInt(pointsCountInput.value);
+        let connectionDistance = parseInt(connectionDistanceInput.value);
+        let connectionLimit = parseInt(connectionLimitInput.value);
+        let maxTravelDistance = parseInt(maxTravelDistanceInput.value);
+        let cycleDuration = parseInt(cycleDurationInput.value);
+        let pointSize = parseInt(pointSizeInput.value);
+        let lineSize = parseInt(lineSizeInput.value);
+        let colorShift = parseInt(colorShiftInput.value);
+        let currentTweeningFunction = tweeningFunctionSelect.value;
+
+        function updateSettings() {
+            pointsCount = parseInt(pointsCountInput.value);
+            connectionDistance = parseInt(connectionDistanceInput.value);
+            connectionLimit = parseInt(connectionLimitInput.value);
+            maxTravelDistance = parseInt(maxTravelDistanceInput.value);
+            cycleDuration = parseInt(cycleDurationInput.value);
+            pointSize = parseInt(pointSizeInput.value);
+            lineSize = parseInt(lineSizeInput.value);
+            colorShift = parseInt(colorShiftInput.value);
+            currentTweeningFunction = tweeningFunctionSelect.value;
+        }
+        pointsCountInput.addEventListener('change', updateSettings);
+        connectionDistanceInput.addEventListener('change', updateSettings);
+        connectionLimitInput.addEventListener('change', updateSettings);
+        maxTravelDistanceInput.addEventListener('change', updateSettings);
+        cycleDurationInput.addEventListener('change', updateSettings);
+        pointSizeInput.addEventListener('change', updateSettings);
+        lineSizeInput.addEventListener('change', updateSettings);
+        colorShiftInput.addEventListener('change', updateSettings);
+        tweeningFunctionSelect.addEventListener('change', updateSettings);
+
+        let points = [];
+        let quadtree;
+        let fps = 0;
+        let lastTime = performance.now();
+        let animationFrameId;
+        let wheelTimeout;
+
+        function initPoints() {
+            points = [];
+            for (let i = 0; i < pointsCount; i++) {
+                points.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    vx: (Math.random() - 0.5) * 2,
+                    vy: (Math.random() - 0.5) * 2,
+                    connections: 0,
+                    color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+                });
+            }
+        }
+        initPoints();
+
+        resetPointsButton.addEventListener('click', () => {
+            updateSettings();
+            initPoints();
+        });
+
+        function animate(time) {
+            let deltaTime = time - lastTime;
+            fps = 1000 / deltaTime;
+            lastTime = time;
+
+            ctx.save();
+            ctx.clearRect(0, 0, width, height);
+
+            quadtree = new Quadtree(new Rectangle(0, 0, width, height), 4);
+            for (let point of points) {
+                quadtree.insert(point);
+            }
+
+            for (let point of points) {
+                updatePoint(point);
+                if (showPointsCheckbox.checked) drawPoint(point);
+            }
+
+            if (showLinesCheckbox.checked) drawConnections();
+
+            if (showFPSCheckbox.checked) displayFPS();
+            if (debugModeCheckbox.checked) debugQuadtree();
+
+            ctx.restore();
+            animationFrameId = requestAnimationFrame(animate);
+        }
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                cancelAnimationFrame(animationFrameId);
+            } else {
+                lastTime = performance.now();
+                animationFrameId = requestAnimationFrame(animate);
+            }
+        });
+
+        requestAnimationFrame(animate);
+
+        function updatePoint(point) {
+            switch (currentTweeningFunction) {
+                case 'linear':
+                    break;
+                case 'meandering':
+                    point.vx += (Math.random() - 0.5) * 0.1;
+                    point.vy += (Math.random() - 0.5) * 0.1;
+                    break;
+                case 'snappy':
+                    if (Math.random() < 0.05) {
+                        point.vx = (Math.random() - 0.5) * 2;
+                        point.vy = (Math.random() - 0.5) * 2;
+                    }
+                    break;
+                case 'bouncy':
+                    if (point.x <= 0 || point.x >= width) point.vx *= -1;
+                    if (point.y <= 0 || point.y >= height) point.vy *= -1;
+                    break;
+                case 'elastic':
+                    let dx = width / 2 - point.x;
+                    let dy = height / 2 - point.y;
+                    point.vx += dx * 0.0005;
+                    point.vy += dy * 0.0005;
+                    break;
+                case 'overshoot':
+                    point.vx *= 1.05;
+                    point.vy *= 1.05;
+                    break;
+            }
+
+            point.x += point.vx;
+            point.y += point.vy;
+
+            if (point.x < 0) point.x = width;
+            if (point.x > width) point.x = 0;
+            if (point.y < 0) point.y = height;
+            if (point.y > height) point.y = 0;
+        }
+
+        function drawPoint(point) {
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, pointSize, 0, Math.PI * 2);
+            ctx.fillStyle = point.color;
+            ctx.fill();
+        }
+
+        function drawConnections() {
+            for (let i = 0; i < points.length; i++) {
+                let pointA = points[i];
+                pointA.connections = 0;
+                let range = new Rectangle(pointA.x - connectionDistance, pointA.y - connectionDistance, connectionDistance * 2, connectionDistance * 2);
+                let nearbyPoints = quadtree.query(range);
+                for (let pointB of nearbyPoints) {
+                    if (pointA === pointB) continue;
+                    let dx = pointA.x - pointB.x;
+                    let dy = pointA.y - pointB.y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < connectionDistance && pointA.connections < connectionLimit) {
+                        ctx.beginPath();
+                        ctx.moveTo(pointA.x, pointA.y);
+                        ctx.lineTo(pointB.x, pointB.y);
+                        ctx.strokeStyle = `rgba(255, 255, 255, ${1 - distance / connectionDistance})`;
+                        ctx.lineWidth = lineSize;
+                        ctx.stroke();
+                        pointA.connections++;
+                    }
+                }
+            }
+        }
+
+        function displayFPS() {
+            ctx.font = '16px Arial';
+            ctx.fillStyle = '#fff';
+            ctx.fillText(`FPS: ${fps.toFixed(2)}`, 10, 20);
+        }
+
+        function debugQuadtree() {
+            quadtree.show(ctx);
+        }
+
+        canvas.addEventListener('mousemove', (e) => {
+            let rect = canvas.getBoundingClientRect();
+            let mouseX = e.clientX - rect.left;
+            let mouseY = e.clientY - rect.top;
+
+            for (let point of points) {
+                let dx = point.x - mouseX;
+                let dy = point.y - mouseY;
+                let dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 100) {
+                    let angle = Math.atan2(dy, dx);
+                    point.vx += Math.cos(angle);
+                    point.vy += Math.sin(angle);
+                }
+            }
+        });
+
+        canvas.addEventListener('mousedown', (e) => {
+            let rect = canvas.getBoundingClientRect();
+            let mouseX = e.clientX - rect.left;
+            let mouseY = e.clientY - rect.top;
+
+            for (let point of points) {
+                let dx = mouseX - point.x;
+                let dy = mouseY - point.y;
+                let angle = Math.atan2(dy, dx);
+                point.vx += Math.cos(angle) * 2;
+                point.vy += Math.sin(angle) * 2;
+            }
+
+            let startTime = performance.now();
+            function explodePoints(time) {
+                if (time - startTime >= 500) {
+                    for (let point of points) {
+                        let dx = point.x - mouseX;
+                        let dy = point.y - mouseY;
+                        let angle = Math.atan2(dy, dx);
+                        point.vx += Math.cos(angle) * 5;
+                        point.vy += Math.sin(angle) * 5;
+                    }
+                } else {
+                    requestAnimationFrame(explodePoints);
+                }
+            }
+            requestAnimationFrame(explodePoints);
+        });
+
+        window.addEventListener('wheel', (e) => {
+            clearTimeout(wheelTimeout);
+            wheelTimeout = setTimeout(() => {
+                let delta = e.deltaY > 0 ? 0.9 : 1.1;
+                for (let point of points) {
+                    point.vx *= delta;
+                    point.vy *= delta;
+                }
+            }, 100);
+        });
+
+        window.addEventListener('keydown', (e) => {
+            switch (e.key) {
+                case 'ArrowLeft':
+                    for (let point of points) {
+                        if (point.x > width / 2) point.x = width / 2;
+                    }
+                    break;
+                case 'ArrowRight':
+                    for (let point of points) {
+                        if (point.x < width / 2) point.x = width / 2;
+                    }
+                    break;
+                case 'ArrowUp':
+                    for (let point of points) {
+                        if (point.y > height / 2) point.y = height / 2;
+                    }
+                    break;
+                case 'ArrowDown':
+                    for (let point of points) {
+                        if (point.y < height / 2) point.y = height / 2;
+                    }
+                    break;
+                case '1':
+                    currentTweeningFunction = 'linear';
+                    tweeningFunctionSelect.value = 'linear';
+                    break;
+                case '2':
+                    currentTweeningFunction = 'meandering';
+                    tweeningFunctionSelect.value = 'meandering';
+                    break;
+                case '3':
+                    currentTweeningFunction = 'snappy';
+                    tweeningFunctionSelect.value = 'snappy';
+                    break;
+                case '4':
+                    currentTweeningFunction = 'bouncy';
+                    tweeningFunctionSelect.value = 'bouncy';
+                    break;
+                case '5':
+                    currentTweeningFunction = 'elastic';
+                    tweeningFunctionSelect.value = 'elastic';
+                    break;
+                case '6':
+                    currentTweeningFunction = 'overshoot';
+                    tweeningFunctionSelect.value = 'overshoot';
+                    break;
+                case 'f':
+                    showFPSCheckbox.checked = !showFPSCheckbox.checked;
+                    break;
+                case 'd':
+                    debugModeCheckbox.checked = !debugModeCheckbox.checked;
+                    break;
+                case 'n':
+                    showPointsCheckbox.checked = !showPointsCheckbox.checked;
+                    break;
+                case 'l':
+                    showLinesCheckbox.checked = !showLinesCheckbox.checked;
+                    break;
+            }
+        });
+
+        class Rectangle {
+            constructor(x, y, width, height) {
+                this.x = x;
+                this.y = y;
+                this.width = width;
+                this.height = height;
+            }
+
+            contains(point) {
+                return (point.x >= this.x - connectionDistance &&
+                        point.x <= this.x + this.width + connectionDistance &&
+                        point.y >= this.y - connectionDistance &&
+                        point.y <= this.y + this.height + connectionDistance);
+            }
+
+            intersects(range) {
+                return !(range.x > this.x + this.width ||
+                         range.x + range.width < this.x ||
+                         range.y > this.y + this.height ||
+                         range.y + range.height < this.y);
+            }
+        }
+
+        class Quadtree {
+            constructor(boundary, capacity) {
+                this.boundary = boundary;
+                this.capacity = capacity;
+                this.points = [];
+                this.divided = false;
+            }
+
+            subdivide() {
+                let x = this.boundary.x;
+                let y = this.boundary.y;
+                let w = this.boundary.width / 2;
+                let h = this.boundary.height / 2;
+
+                let ne = new Rectangle(x + w, y, w, h);
+                this.northeast = new Quadtree(ne, this.capacity);
+                let nw = new Rectangle(x, y, w, h);
+                this.northwest = new Quadtree(nw, this.capacity);
+                let se = new Rectangle(x + w, y + h, w, h);
+                this.southeast = new Quadtree(se, this.capacity);
+                let sw = new Rectangle(x, y + h, w, h);
+                this.southwest = new Quadtree(sw, this.capacity);
+
+                this.divided = true;
+            }
+
+            insert(point) {
+                if (!this.boundary.contains(point)) {
+                    return false;
+                }
+
+                if (this.points.length < this.capacity) {
+                    this.points.push(point);
+                    return true;
+                } else {
+                    if (!this.divided) {
+                        this.subdivide();
+                    }
+
+                    if (this.northeast.insert(point)) return true;
+                    if (this.northwest.insert(point)) return true;
+                    if (this.southeast.insert(point)) return true;
+                    if (this.southwest.insert(point)) return true;
+                }
+            }
+
+            query(range, found) {
+                if (!found) {
+                    found = [];
+                }
+
+                if (!this.boundary.intersects(range)) {
+                    return found;
+                } else {
+                    for (let p of this.points) {
+                        if (range.contains(p)) {
+                            found.push(p);
+                        }
+                    }
+                    if (this.divided) {
+                        this.northwest.query(range, found);
+                        this.northeast.query(range, found);
+                        this.southwest.query(range, found);
+                        this.southeast.query(range, found);
+                    }
+                }
+                return found;
+            }
+
+            show(ctx) {
+                ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
+                ctx.strokeRect(this.boundary.x, this.boundary.y, this.boundary.width, this.boundary.height);
+                if (this.divided) {
+                    this.northwest.show(ctx);
+                    this.northeast.show(ctx);
+                    this.southwest.show(ctx);
+                    this.southeast.show(ctx);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
