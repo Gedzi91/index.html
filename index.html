@@ -1,0 +1,500 @@
+<html><head><base href="https://websynth-keyboard-visualizer-cosmic-glow.example.com/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeonBeat Synth Studio</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
+<style>
+  body {
+    font-family: 'Orbitron', Arial, sans-serif;
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    overflow: hidden;
+    color: #0f0;
+  }
+  #title {
+    font-size: 2.5rem;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    text-shadow: 0 0 10px #0f0, 0 0 20px #0f0, 0 0 30px #0f0;
+    animation: pulsate 2s infinite alternate;
+    z-index: 10;
+  }
+  @keyframes pulsate {
+    0% {
+      text-shadow: 0 0 10px #0f0, 0 0 20px #0f0, 0 0 30px #0f0;
+    }
+    100% {
+      text-shadow: 0 0 20px #0f0, 0 0 30px #0f0, 0 0 40px #0f0, 0 0 50px #0f0, 0 0 60px #0f0;
+    }
+  }
+  #visualizer {
+    width: 300px;
+    height: 300px;
+    background-color: rgba(0, 20, 0, 0.2);
+    border: 1px solid #0f0;
+    border-radius: 50%;
+    margin-bottom: 20px;
+    box-shadow: 0 0 10px #0f0, inset 0 0 5px #0f0;
+    z-index: 10;
+  }
+  .instrument-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 1200px;
+    z-index: 10;
+  }
+  .keyboard {
+    background: rgba(51, 51, 51, 0.8);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.4), inset 0 0 10px rgba(0, 255, 0, 0.2);
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    overflow-x: auto;
+    max-width: 100%;
+  }
+  .key {
+    width: 40px;
+    height: 160px;
+    margin: 0 2px;
+    background: white;
+    border: 1px solid #0f0;
+    border-radius: 0 0 5px 5px;
+    cursor: pointer;
+    transition: all 0.1s ease;
+    box-shadow: 0 0 5px #0f0;
+  }
+  .key.black {
+    background: #333;
+    height: 100px;
+    width: 30px;
+    margin: 0 -15px;
+    z-index: 2;
+    box-shadow: 0 0 5px #0f0;
+  }
+  .key:active, .key.active {
+    background: #ddd;
+    transform: scale(0.98);
+    box-shadow: 0 0 15px #0f0;
+  }
+  .key.black:active, .key.black.active {
+    background: #555;
+    box-shadow: 0 0 15px #0f0;
+  }
+  @keyframes glow {
+    0% {
+      box-shadow: 0 0 5px #0f0;
+    }
+    50% {
+      box-shadow: 0 0 20px #0f0, 0 0 30px #0f0;
+    }
+    100% {
+      box-shadow: 0 0 5px #0f0;
+    }
+  }
+  .glow {
+    animation: glow 2s infinite;
+  }
+  #background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    overflow: hidden;
+  }
+  .planet, .star, .nebula, .comet, .meteor, .cosmic-dust {
+    position: absolute;
+  }
+  .controls {
+    background: rgba(0, 20, 0, 0.6);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    z-index: 10;
+  }
+  .controls label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #0f0;
+  }
+  .controls input[type="color"],
+  .controls input[type="range"] {
+    width: 100px;
+    margin-top: 5px;
+  }
+  .controls select {
+    background: #000;
+    color: #0f0;
+    border: 1px solid #0f0;
+    padding: 5px;
+    margin-top: 5px;
+  }
+</style>
+</head>
+<body>
+  <div id="background"></div>
+  <h1 id="title">NeonBeat Synth Studio</h1>
+  <div class="controls" id="visualizer-controls">
+    <label>
+      Color
+      <input type="color" id="visualizer-color" value="#00ff00">
+    </label>
+    <label>
+      Shape
+      <select id="visualizer-shape">
+        <option value="circle">Circle</option>
+        <option value="line">Line</option>
+        <option value="bars">Bars</option>
+      </select>
+    </label>
+    <label>
+      Sensitivity
+      <input type="range" id="visualizer-sensitivity" min="1" max="10" value="5">
+    </label>
+    <label>
+      Smoothing
+      <input type="range" id="visualizer-smoothing" min="0" max="0.9" step="0.1" value="0.5">
+    </label>
+  </div>
+  <canvas id="visualizer" class="glow"></canvas>
+  <div class="instrument-container">
+    <div class="keyboard glow" id="keyboard">
+      <!-- Piano keys will be dynamically generated here -->
+    </div>
+  </div>
+
+  <script>
+    const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+    const keyboard = document.getElementById('keyboard');
+    const visualizer = document.getElementById('visualizer');
+    const ctx = visualizer.getContext('2d');
+
+    // Visualizer controls
+    const colorPicker = document.getElementById('visualizer-color');
+    const shapeSelect = document.getElementById('visualizer-shape');
+    const sensitivitySlider = document.getElementById('visualizer-sensitivity');
+    const smoothingSlider = document.getElementById('visualizer-smoothing');
+
+    // Set canvas size
+    visualizer.width = 300;
+    visualizer.height = 300;
+
+    // Visualizer variables
+    const analyser = new Tone.Analyser('waveform', 1024);
+    synth.connect(analyser);
+    let amplitude = 0;
+
+    // Generate piano keys
+    function generateKeys() {
+      keyboard.innerHTML = '';
+      const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+      const startOctave = 3;
+      const endOctave = 5;
+      
+      for (let octave = startOctave; octave <= endOctave; octave++) {
+        notes.forEach(note => {
+          const key = document.createElement('div');
+          key.className = `key${note.includes('#') ? ' black' : ''}`;
+          key.dataset.note = `${note}${octave}`;
+          keyboard.appendChild(key);
+        });
+      }
+
+      attachKeyListeners();
+    }
+
+    function attachKeyListeners() {
+      const keys = keyboard.querySelectorAll('.key');
+
+      keys.forEach(key => {
+        key.addEventListener('mousedown', startNote);
+        key.addEventListener('mouseup', stopNote);
+        key.addEventListener('mouseleave', stopNote);
+        key.addEventListener('touchstart', startNote);
+        key.addEventListener('touchend', stopNote);
+      });
+    }
+
+    generateKeys();
+
+    function animate() {
+      const bufferLength = analyser.size;
+      const dataArray = analyser.getValue();
+
+      ctx.clearRect(0, 0, visualizer.width, visualizer.height);
+      
+      const color = colorPicker.value;
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = 2;
+
+      const centerX = visualizer.width / 2;
+      const centerY = visualizer.height / 2;
+      const radius = Math.min(centerX, centerY) - 10;
+      const sensitivity = parseFloat(sensitivitySlider.value);
+
+      switch (shapeSelect.value) {
+        case 'circle':
+          ctx.beginPath();
+          for (let i = 0; i < bufferLength; i++) {
+            const angle = (i / bufferLength) * Math.PI * 2;
+            const v = dataArray[i] * sensitivity * (1 + amplitude);
+            const x = centerX + Math.cos(angle) * (radius * (1 + v * 0.3));
+            const y = centerY + Math.sin(angle) * (radius * (1 + v * 0.3));
+
+            if (i === 0) {
+              ctx.moveTo(x, y);
+            } else {
+              ctx.lineTo(x, y);
+            }
+          }
+          ctx.closePath();
+          ctx.stroke();
+          break;
+
+        case 'line':
+          ctx.beginPath();
+          for (let i = 0; i < bufferLength; i++) {
+            const x = (i / bufferLength) * visualizer.width;
+            const v = dataArray[i] * sensitivity * (1 + amplitude);
+            const y = (0.5 + v * 0.5) * visualizer.height;
+
+            if (i === 0) {
+              ctx.moveTo(x, y);
+            } else {
+              ctx.lineTo(x, y);
+            }
+          }
+          ctx.stroke();
+          break;
+
+        case 'bars':
+          const barWidth = (visualizer.width / bufferLength) * 2.5;
+          let barHeight;
+          let x = 0;
+
+          for (let i = 0; i < bufferLength; i++) {
+            barHeight = dataArray[i] * sensitivity * (1 + amplitude) * visualizer.height;
+
+            ctx.fillRect(x, visualizer.height - barHeight / 2, barWidth, barHeight);
+
+            x += barWidth + 1;
+          }
+          break;
+      }
+
+      // Add glow effect
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = color;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      // Decay amplitude
+      amplitude *= 0.95;
+
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+
+    function startNote(e) {
+      e.preventDefault();
+      const note = this.dataset.note;
+      synth.triggerAttack(note);
+      this.classList.add('active');
+      amplitude = Math.min(amplitude + 0.3, 1);
+    }
+
+    function stopNote() {
+      const note = this.dataset.note;
+      synth.triggerRelease(note);
+      this.classList.remove('active');
+    }
+
+    // Keyboard controls
+    const keyMap = {
+      'z': 'C', 's': 'C#', 'x': 'D', 'd': 'D#', 'c': 'E', 'v': 'F',
+      'g': 'F#', 'b': 'G', 'h': 'G#', 'n': 'A', 'j': 'A#', 'm': 'B',
+      'q': 'C', '2': 'C#', 'w': 'D', '3': 'D#', 'e': 'E', 'r': 'F',
+      '5': 'F#', 't': 'G', '6': 'G#', 'y': 'A', '7': 'A#', 'u': 'B',
+      'i': 'C', '9': 'C#', 'o': 'D', '0': 'D#', 'p': 'E', '[': 'F',
+      '=': 'F#', ']': 'G'
+    };
+
+    document.addEventListener('keydown', e => {
+      if (!e.repeat) {
+        if (keyMap.hasOwnProperty(e.key)) {
+          const note = keyMap[e.key];
+          const octave = 3 + Math.floor(Object.keys(keyMap).indexOf(e.key) / 12);
+          const fullNote = `${note}${octave}`;
+          synth.triggerAttack(fullNote);
+          const key = document.querySelector(`.key[data-note="${fullNote}"]`);
+          if (key) {
+            key.classList.add('active');
+          }
+          amplitude = Math.min(amplitude + 0.3, 1);
+        }
+      }
+    });
+
+    document.addEventListener('keyup', e => {
+      if (keyMap.hasOwnProperty(e.key)) {
+        const note = keyMap[e.key];
+        const octave = 3 + Math.floor(Object.keys(keyMap).indexOf(e.key) / 12);
+        const fullNote = `${note}${octave}`;
+        synth.triggerRelease(fullNote);
+        const key = document.querySelector(`.key[data-note="${fullNote}"]`);
+        if (key) {
+          key.classList.remove('active');
+        }
+      }
+    });
+
+    // Start audio context on first user interaction
+    document.body.addEventListener('click', () => {
+      Tone.start();
+    }, { once: true });
+
+    // Update analyser smoothing
+    smoothingSlider.addEventListener('input', () => {
+      analyser.smoothing = parseFloat(smoothingSlider.value);
+    });
+
+    // Create cosmic background
+    const background = document.getElementById('background');
+    
+    // Create glowing planets
+    const numPlanets = 5;
+    for (let i = 0; i < numPlanets; i++) {
+      const planet = document.createElement('div');
+      planet.className = 'planet';
+      const size = Math.random() * 100 + 50;
+      planet.style.width = `${size}px`;
+      planet.style.height = `${size}px`;
+      planet.style.left = `${Math.random() * 100}vw`;
+      planet.style.top = `${Math.random() * 100}vh`;
+      planet.style.borderRadius = '50%';
+      planet.style.background = 'radial-gradient(circle at 30% 30%, #0f0, #050)';
+      planet.style.boxShadow = '0 0 20px #0f0, inset 0 0 10px #0f0';
+      planet.style.opacity = '0.7';
+      planet.style.animation = `float ${Math.random() * 10 + 15}s infinite ease-in-out`;
+      background.appendChild(planet);
+    }
+
+    // Create stars
+    const numStars = 200;
+    for (let i = 0; i < numStars; i++) {
+      const star = document.createElement('div');
+      star.className = 'star';
+      const size = Math.random() * 2 + 1;
+      star.style.width = `${size}px`;
+      star.style.height = `${size}px`;
+      star.style.left = `${Math.random() * 100}vw`;
+      star.style.top = `${Math.random() * 100}vh`;
+      star.style.background = '#0f0';
+      star.style.borderRadius = '50%';
+      star.style.animation = `twinkle ${Math.random() * 2 + 1}s infinite alternate`;
+      background.appendChild(star);
+    }
+
+    // Create nebulas
+    const numNebulas = 5;
+    for (let i = 0; i < numNebulas; i++) {
+      const nebula = document.createElement('div');
+      nebula.className = 'nebula';
+      const size = Math.random() * 300 + 200;
+      nebula.style.width = `${size}px`;
+      nebula.style.height = `${size}px`;
+      nebula.style.left = `${Math.random() * 100}vw`;
+      nebula.style.top = `${Math.random() * 100}vh`;
+      nebula.style.borderRadius = '50%';
+      nebula.style.background = 'radial-gradient(circle at center, rgba(0,255,0,0.2), rgba(0,255,0,0))';
+      nebula.style.filter = 'blur(30px)';
+      nebula.style.opacity = '0.3';
+      nebula.style.animation = `pulse ${Math.random() * 10 + 10}s infinite alternate`;
+      background.appendChild(nebula);
+    }
+
+    // Create comets
+    function createComet() {
+      const comet = document.createElement('div');
+      comet.className = 'comet';
+      comet.style.width = '100px';
+      comet.style.height = '2px';
+      comet.style.background = 'linear-gradient(to right, rgba(0,255,0,0), #0f0)';
+      comet.style.top = `${Math.random() * 100}vh`;
+      comet.style.left = '-100px';
+      comet.style.animation = `comet-move ${Math.random() * 5 + 5}s linear`;
+      background.appendChild(comet);
+      comet.addEventListener('animationend', () => {
+        background.removeChild(comet);
+        createComet();
+      });
+    }
+
+    for (let i = 0; i < 3; i++) {
+      setTimeout(createComet, i * 3000);
+    }
+
+    // Create meteors
+    function createMeteor() {
+      const meteor = document.createElement('div');
+      meteor.className = 'meteor';
+      meteor.style.width = '2px';
+      meteor.style.height = '2px';
+      meteor.style.background = '#0f0';
+      meteor.style.top = `${Math.random() * 50}vh`;
+      meteor.style.left = `${Math.random() * 100 + 50}vw`;
+      meteor.style.animation = `meteor ${Math.random() * 2 + 3}s linear`;
+      background.appendChild(meteor);
+      meteor.addEventListener('animationend', () => {
+        background.removeChild(meteor);
+        createMeteor();
+      });
+    }
+
+    for (let i = 0; i < 5; i++) {
+      setTimeout(createMeteor, i * 1000);
+    }
+
+    // Create cosmic dust
+    function createCosmicDust() {
+      const dust = document.createElement('div');
+      dust.className = 'cosmic-dust';
+      dust.style.width = '1px';
+      dust.style.height = '1px';
+      dust.style.background = '#0f0';
+      dust.style.opacity = '0.7';
+      dust.style.left = `${Math.random() * 100}vw`;
+      dust.style.top = '100vh';
+      dust.style.animation = `cosmic-dust ${Math.random() * 5 + 5}s linear`;
+      background.appendChild(dust);
+      dust.addEventListener('animationend', () => {
+        background.removeChild(dust);
+        createCosmicDust();
+      });
+    }
+
+    for (let i = 0; i < 50; i++) {
+      setTimeout(createCosmicDust, i * 200);
+    }
+  </script>
+</body></html>
