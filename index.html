@@ -1,0 +1,539 @@
+<html><head><base href="." target="_blank"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>🐧 Piking NFT Collection Showcase</title>
+<style>
+body {
+    background: #0a0a0a;
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #fff;
+    overflow-x: hidden;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.neon-border {
+    border: 2px solid #0ff;
+    box-shadow: 0 0 20px #0ff, 
+                inset 0 0 20px #0ff;
+    border-radius: 15px;
+    padding: 2rem;
+    margin: 2rem 0;
+    background: rgba(0, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+}
+
+.showcase {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    padding: 2rem;
+}
+
+.nft-card {
+    background: rgba(0, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.nft-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+}
+
+.nft-image {
+    width: 100%;
+    height: 300px;
+    object-fit: contain;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    border: 2px solid #0ff;
+}
+
+.nft-title {
+    color: #0ff;
+    font-size: 1.5rem;
+    text-align: center;
+    margin: 1rem 0;
+    text-shadow: 0 0 10px #0ff;
+}
+
+.neon-text {
+    color: #0ff;
+    text-shadow: 0 0 10px #0ff;
+    font-size: 3rem;
+    text-align: center;
+    margin-bottom: 2rem;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { text-shadow: 0 0 10px #0ff; }
+    50% { text-shadow: 0 0 30px #0ff, 0 0 50px #0ff; }
+    100% { text-shadow: 0 0 10px #0ff; }
+}
+
+.attributes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.attribute {
+    background: rgba(0, 255, 255, 0.1);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    color: #0ff;
+    border: 1px solid #0ff;
+}
+
+.glow-line {
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #0ff, transparent);
+    margin: 2rem 0;
+    animation: glow 2s infinite;
+}
+
+@keyframes glow {
+    0% { opacity: 0.3; }
+    50% { opacity: 1; }
+    100% { opacity: 0.3; }
+}
+
+.first-nft {
+    width: 200px;
+    height: 200px;
+    object-fit: contain;
+    border-radius: 10px;
+    border: 2px solid #0ff;
+}
+
+.AppExhibition {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+.AppExhibition-card {
+    background: rgba(0, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    margin: 2rem;
+}
+
+.AppExhibition-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+}
+
+.AppExhibition-image {
+    width: 100%;
+    height: 300px;
+    object-fit: contain;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    border: 2px solid #0ff;
+}
+
+.AppExhibition-title {
+    color: #0ff;
+    font-size: 1.5rem;
+    text-align: center;
+    margin: 1rem 0;
+    text-shadow: 0 0 10px #0ff;
+}
+</style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="neon-text">🐧 Piking NFT Collection</h1>
+        
+        <div class="neon-border">
+            <div class="showcase">
+                <!-- NFT cards will be generated here -->
+            </div>
+
+            <div class="glow-line"></div>
+
+            <div style="text-align: center; padding: 2rem;">
+                <p style="color: #0ff; font-size: 1.2rem;">
+                    Special Edition: KILL ACTACK RADIKAL IMPACTO SUPREMO<br>
+                    Featuring 37 Unique Digital Collectibles
+                </p>
+            </div>
+        </div>
+        
+        <div class="AppExhibition">
+            <h1 class="neon-text">Piking NFT App Exhibition</h1>
+            <!-- App Exhibition cards will be generated here -->
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.13.0/dist/tf.min.js"></script>
+    <script>
+        let nftCollection = [
+            { 
+                title: "NFT #1", 
+                image: "un logo NFT de un espectacular pinguino con colores mate eléctricos innotizantes, altamente realista y sin letras (1).png", 
+                rarity: "Legendary", 
+                series: "Aurum", 
+                powerLevel: 95, 
+                specialFunction: "+10% Bonus to All Rewards" 
+            },
+            { 
+                title: "NFT #2", 
+                image: "un logo NFT de un espectacular pinguino con colores mate eléctricos innotizantes, altamente realista y sin letras (2).png", 
+                rarity: "Epic", 
+                series: "Argentum", 
+                powerLevel: 88, 
+                specialFunction: "+5% Increase to Mining Speed" 
+            },
+            { 
+                title: "NFT #3", 
+                image: "un logo NFT de un espectacular pinguino con colores mate eléctricos innotizantes, altamente realista y sin letras (3).png", 
+                rarity: "Rare", 
+                series: "Cuprum", 
+                powerLevel: 80, 
+                specialFunction: "+2% Increase to Trading Rewards" 
+            },
+            { 
+                title: "NFT #4", 
+                image: "un logo NFT de un espectacular pinguino con colores mate eléctricos innotizantes, altamente realista y sin letras (4).png", 
+                rarity: "Uncommon", 
+                series: "Ferrum", 
+                powerLevel: 75, 
+                specialFunction: "+1% Increase to Crafting Speed" 
+            },
+            { 
+                title: "NFT #5", 
+                image: "un logo NFT de un espectacular pinguino con colores mate eléctricos innotizantes, altamente realista y sin letras (5).png", 
+                rarity: "Epic", 
+                series: "Aurum", 
+                powerLevel: 90, 
+                specialFunction: "+8% Bonus to All Rewards" 
+            },
+            { 
+                title: "NFT #6", 
+                image: "un logo NFT de un espectacular pinguino con colores mate eléctricos innotizantes, altamente realista y sin letras (6).png", 
+                rarity: "Legendary", 
+                series: "Argentum", 
+                powerLevel: 98, 
+                specialFunction: "+12% Increase to Mining Speed" 
+            },
+            { 
+                title: "NFT #7", 
+                image: "un logo NFT de un espectacular pinguino con colores mate eléctricos innotizantes, altamente realista y sin letras (7).png", 
+                rarity: "Rare", 
+                series: "Cuprum", 
+                powerLevel: 85, 
+                specialFunction: "+3% Increase to Trading Rewards" 
+            },
+            { 
+                title: "NFT #8", 
+                image: "un logo NFT de un espectacular pinguino con colores mate eléctricos innotizantes, altamente realista y sin letras (8).png", 
+                rarity: "Uncommon", 
+                series: "Ferrum", 
+                powerLevel: 80, 
+                specialFunction: "+2% Increase to Crafting Speed" 
+            },
+            { 
+                title: "NFT #9", 
+                image: "un logo NFT de un espectacular pinguino con colores mate eléctricos innotizantes, altamente realista y sin letras (9).png", 
+                rarity: "Epic", 
+                series: "Aurum", 
+                powerLevel: 92, 
+                specialFunction: "+9% Bonus to All Rewards" 
+            },
+            { 
+                title: "NFT #10", 
+                image: "un logo NFT de un espectacular pinguino con colores mate eléctricos innotizantes, altamente realista y sin letras (10).png", 
+                rarity: "Legendary", 
+                series: "Argentum", 
+                powerLevel: 98, 
+                specialFunction: "+12% Increase to Mining Speed" 
+            },
+            { 
+                title: "NFT #11", 
+                image: "un logo NFT de un espectacular pinguino con colores mate eléctricos innotizantes, altamente realista y sin letras (11).png", 
+                rarity: "Rare", 
+                series: "Cuprum", 
+                powerLevel: 85, 
+                specialFunction: "+3% Increase to Trading Rewards" 
+            },
+            { 
+                title: "NFT #12", 
+                image: "un logo NFT de un espectacular pinguino con colores mate eléctricos innotizantes, altamente realista y sin letras (12).png", 
+                rarity: "Uncommon", 
+                series: "Ferrum", 
+                powerLevel: 80, 
+                specialFunction: "+2% Increase to Crafting Speed" 
+            },
+            { 
+                title: "NFT #13", 
+                image: "un logo NFT de un espectacular pinguino con colores mate eléctricos innotizantes, altamente realista y sin letras (13).png", 
+                rarity: "Epic", 
+                series: "Aurum", 
+                powerLevel: 92, 
+                specialFunction: "+9% Bonus to All Rewards" 
+            },
+            { 
+                title: "NFT #14", 
+                image: "un logo NFT de un espectacular pinguino con colores mate eléctricos innotizantes, altamente realista y sin letras (14).png", 
+                rarity: "Legendary", 
+                series: "Argentum", 
+                powerLevel: 98, 
+                specialFunction: "+12% Increase to Mining Speed" 
+            },
+            { 
+                title: "NFT #15", 
+                image: "un logo NFT de un espectacular pinguino con colores mate eléctricos innotizantes, altamente realista y sin letras (15).png", 
+                rarity: "Rare", 
+                series: "Cuprum", 
+                powerLevel: 85, 
+                specialFunction: "+3% Increase to Trading Rewards" 
+            },
+            { 
+                title: "NFT #16", 
+                image: "un logo NFT de un espectacular pinguino con colores mate eléctricos innotizantes, altamente realista y sin letras (16).png", 
+                rarity: "Epic", 
+                series: "Aurum", 
+                powerLevel: 90, 
+                specialFunction: "+8% Bonus to All Rewards" 
+            },
+            { 
+                title: "NFT #17", 
+                image: "un logo NFT de un espectacular pinguino con colores mate eléctricos innotizantes, altamente realista y sin letras (17).png", 
+                rarity: "Legendary", 
+                series: "Argentum", 
+                powerLevel: 98, 
+                specialFunction: "+12% Increase to Mining Speed" 
+            },
+            { 
+                title: "NFT #18", 
+                image: "un logo NFT de un espectacular pinguino con colores mate eléctricos innotizantes, altamente realista y sin letras (18).png", 
+                rarity: "Rare", 
+                series: "Cuprum", 
+                powerLevel: 85, 
+                specialFunction: "+3% Increase to Trading Rewards" 
+            },
+            { 
+                title: "NFT #19", 
+                image: "un logo NFT de un espectacular pinguino con colores mate eléctricos innotizantes, altamente realista y sin letras (19).png", 
+                rarity: "Uncommon", 
+                series: "Ferrum", 
+                powerLevel: 80, 
+                specialFunction: "+2% Increase to Crafting Speed" 
+            },
+            { 
+                title: "NFT #20", 
+                image: "un logo NFT de un espectacular pinguino con colores mate eléctricos innotizantes, altamente realista y sin letras (20).png", 
+                rarity: "Epic", 
+                series: "Aurum", 
+                powerLevel: 92, 
+                specialFunction: "+9% Bonus to All Rewards" 
+            },
+            { 
+                title: "NFT #21", 
+                image: "un logo NFT de un espectacular pinguino con colores mate eléctricos innotizantes, altamente realista y sin letras (21).png", 
+                rarity: "Legendary", 
+                series: "Aurum", 
+                powerLevel: 99, 
+                specialFunction: "+15% Increase to Mining Speed" 
+            },
+            { 
+                title: "NFT #22", 
+                image: "un logo NFT de un espectacular pinguino con colores mate eléctricos innotizantes, altamente realista y sin letras (22).png", 
+                rarity: "Rare", 
+                series: "Cuprum", 
+                powerLevel: 88, 
+                specialFunction: "+4% Increase to Trading Rewards" 
+            },
+            { 
+                title: "NFT #23", 
+                image: "un logo NFT de un espectacular pinguino con colores mate eléctricos innotizantes, altamente realista y sin letras (23).png", 
+                rarity: "Uncommon", 
+                series: "Ferrum", 
+                powerLevel: 82, 
+                specialFunction: "+3% Increase to Crafting Speed" 
+            },
+            { 
+                title: "NFT #24", 
+                image: "un logo NFT de un espectacular pinguino con colores mate eléctricos innotizantes, altamente realista y sin letras (24).png", 
+                rarity: "Epic", 
+                series: "Aurum", 
+                powerLevel: 94, 
+                specialFunction: "+10% Bonus to All Rewards" 
+            },
+            { 
+                title: "NFT #25", 
+                image: "un logo NFT de un espectacular pinguino con colores mate eléctricos innotizantes, altamente realista y sin letras (25).png", 
+                rarity: "Epic", 
+                series: "Aurum", 
+                powerLevel: 91, 
+                specialFunction: "+8% Bonus to All Rewards" 
+            },
+            { 
+                title: "NFT #26", 
+                image: "un logo NFT de un espectacular pinguino con colores mate eléctricos innotizantes, altamente realista y sin letras (26).png", 
+                rarity: "Legendary", 
+                series: "Argentum", 
+                powerLevel: 97, 
+                specialFunction: "+12% Increase to Mining Speed" 
+            },
+            { 
+                title: "NFT #27", 
+                image: "un logo NFT de un espectacular pinguino con colores mate eléctricos innotizantes, altamente realista y sin letras (27).png", 
+                rarity: "Rare", 
+                series: "Cuprum", 
+                powerLevel: 86, 
+                specialFunction: "+3% Increase to Trading Rewards" 
+            },
+            { 
+                title: "NFT #28", 
+                image: "un logo NFT de un espectacular pinguino con colores mate eléctricos innotizantes, altamente realista y sin letras (28).png", 
+                rarity: "Uncommon", 
+                series: "Ferrum", 
+                powerLevel: 81, 
+                specialFunction: "+2% Increase to Crafting Speed" 
+            },
+            { 
+                title: "NFT #29", 
+                image: "un logo NFT de un espectacular pinguino con colores mate eléctricos innotizantes, altamente realista y sin letras (29).png", 
+                rarity: "Epic", 
+                series: "Aurum", 
+                powerLevel: 93, 
+                specialFunction: "+9% Bonus to All Rewards" 
+            },
+            { 
+                title: "NFT #30", 
+                image: "un logo NFT de un espectacular pinguino con colores mate eléctricos innotizantes, altamente realista y sin letras (30).png", 
+                rarity: "Legendary", 
+                series: "Argentum", 
+                powerLevel: 99, 
+                specialFunction: "+15% Increase to Mining Speed" 
+            },
+            { 
+                title: "NFT #31", 
+                image: "un logo NFT de un espectacular pinguino con colores mate eléctricos innotizantes, altamente realista y sin letras (31).png", 
+                rarity: "Rare", 
+                series: "Cuprum", 
+                powerLevel: 87, 
+                specialFunction: "+4% Increase to Trading Rewards" 
+            },
+            { 
+                title: "NFT #32", 
+                image: "un logo NFT de un espectacular pinguino con colores mate eléctricos innotizantes, altamente realista y sin letras (32).png", 
+                rarity: "Uncommon", 
+                series: "Ferrum", 
+                powerLevel: 83, 
+                specialFunction: "+3% Increase to Crafting Speed" 
+            },
+            { 
+                title: "NFT #33", 
+                image: "un logo NFT de un espectacular pinguino con colores mate eléctricos innotizantes, altamente realista y sin letras (33).png", 
+                rarity: "Epic", 
+                series: "Aurum", 
+                powerLevel: 94, 
+                specialFunction: "+10% Bonus to All Rewards" 
+            },
+            { 
+                title: "NFT #34", 
+                image: "un logo NFT de un espectacular pinguino con colores mate eléctricos innotizantes, altamente realista y sin letras (34).png", 
+                rarity: "Legendary", 
+                series: "Argentum", 
+                powerLevel: 98, 
+                specialFunction: "+12% Increase to Mining Speed" 
+            },
+            { 
+                title: "NFT #35", 
+                image: "un logo NFT de un espectacular pinguino con colores mate eléctricos innotizantes, altamente realista y sin letras (35).png", 
+                rarity: "Rare", 
+                series: "Cuprum", 
+                powerLevel: 88, 
+                specialFunction: "+4% Increase to Trading Rewards" 
+            },
+            { 
+                title: "NFT #36", 
+                image: "un logo NFT de un espectacular pinguino con colores mate eléctricos innotizantes, altamente realista y sin letras (36).png", 
+                rarity: "Uncommon", 
+                series: "Ferrum", 
+                powerLevel: 84, 
+                specialFunction: "+3% Increase to Crafting Speed" 
+            },
+            { 
+                title: "NFT #37", 
+                image: "un logo NFT de un espectacular pinguino con colores mate eléctricos innotizantes, altamente realista y sin letras (37).png", 
+                rarity: "Epic", 
+                series: "Aurum", 
+                powerLevel: 92, 
+                specialFunction: "+9% Bonus to All Rewards" 
+            }
+        ];
+
+        // Remove duplicates from nftCollection
+        const uniqueNftCollection = [...new Map(nftCollection.map(item => [item.title, item])).values()];
+
+        const showcase = document.querySelector('.showcase');
+        uniqueNftCollection.forEach((nft, index) => {
+            const nftCard = document.createElement('div');
+            nftCard.classList.add('nft-card');
+            nftCard.innerHTML = `
+                <img src="${nft.image}" alt="${nft.title}" class="nft-image"/>
+                <h2 class="nft-title">${nft.title}</h2>
+                <div class="attributes">
+                    <span class="attribute">Rarity: ${nft.rarity}</span>
+                    <span class="attribute">Series: ${nft.series}</span>
+                    <span class="attribute">Power Level: ${nft.powerLevel}</span>
+                    <span class="attribute">Special Function: ${nft.specialFunction}</span>
+                </div>
+                <p>Esta función especial ${nft.specialFunction}.</p>
+            `;
+            showcase.appendChild(nftCard);
+        });
+
+        const appExhibition = document.querySelector('.AppExhibition');
+        uniqueNftCollection.forEach((nft, index) => {
+            const exhibitionCard = document.createElement('div');
+            exhibitionCard.classList.add('AppExhibition-card');
+            exhibitionCard.innerHTML = `
+                <img class="AppExhibition-image" src="${nft.image}" alt="${nft.title}">
+                <h2 class="AppExhibition-title">${nft.title}</h2>
+                <p>Esta es la descripción de la app.</p>
+            `;
+            appExhibition.appendChild(exhibitionCard);
+        });
+
+        document.querySelectorAll('.nft-card').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                card.style.background = `radial-gradient(circle at ${x}px ${y}px, 
+                                        rgba(0, 255, 255, 0.2), 
+                                        rgba(0, 255, 255, 0.1) 40%)`;
+            });
+
+            card.addEventListener('mouseleave', () => {
+                card.style.background = 'rgba(0, 255, 255, 0.1)';
+            });
+        });
+    </script>
+</body>
+</html>
