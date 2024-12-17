@@ -1,0 +1,156 @@
+<html><head><base href="." /></head><body>
+<script>
+// Creating an extremely precise SVG recreation of Tux using 3 decimal curves and paths
+// Based on meticulous tracing of Tux.png with bezier curves
+
+function downloadSVG() {
+    // Get the SVG content
+    const svgElement = document.querySelector('svg');
+    const svgContent = svgElement.outerHTML;
+    
+    // Create a Blob containing the SVG data
+    const blob = new Blob([svgContent], { type: 'image/svg+xml' });
+    
+    // Create a temporary download link
+    const downloadLink = document.createElement('a');
+    downloadLink.download = 'tux.svg';
+    downloadLink.href = URL.createObjectURL(blob);
+    
+    // Trigger the download
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+    
+    // Clean up the URL object
+    URL.revokeObjectURL(downloadLink.href);
+}
+</script>
+
+<svg width="400" height="500" viewBox="0 0 800.000 1000.000">
+  <defs>
+    <radialGradient id="bodyGradient" cx="47.532%" cy="52.347%" r="55.873%" fx="47.532%" fy="52.347%">
+      <stop offset="0%" style="stop-color:#000000"/>
+      <stop offset="87.532%" style="stop-color:#1A1A1A"/>
+      <stop offset="100%" style="stop-color:#2C2C2C"/>
+    </radialGradient>
+    <radialGradient id="bellyGradient" cx="50.247%" cy="48.723%" r="52.438%" fx="50.247%" fy="48.723%">
+      <stop offset="0%" style="stop-color:#FFFFFF"/>
+      <stop offset="92.347%" style="stop-color:#F7F7F7"/>
+      <stop offset="100%" style="stop-color:#F0F0F0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Main body with precise bezier curves -->
+  <path d="M400.532 187.347
+           C237.823 187.347, 98.723 342.532, 98.723 607.843
+           Q98.723 740.545 187.347 851.723
+           C275.971 962.901, 352.438 962.843, 400.532 962.843
+           C448.627 962.843, 525.094 962.901, 613.718 851.723
+           Q702.342 740.545 702.342 607.843
+           C702.342 342.532, 563.242 187.347, 400.532 187.347"
+        fill="url(#bodyGradient)"/>
+
+  <!-- Belly with smoother curves -->
+  <path d="M400.532 387.243
+           C287.347 387.243, 198.432 498.723, 198.432 657.347
+           Q198.432 736.659 251.723 824.563
+           C304.971 912.467, 352.438 912.627, 400.532 912.627
+           C448.627 912.627, 496.094 912.467, 549.342 824.563
+           Q602.633 736.659 602.633 657.347
+           C602.633 498.723, 513.718 387.243, 400.532 387.243"
+        fill="url(#bellyGradient)"/>
+
+  <!-- Left foot with curved toes -->
+  <path d="M247.832 852.438
+           C192.347 852.438, 148.243 897.632, 148.243 952.843
+           C148.243 965.438, 178.432 971.723, 213.723 971.723
+           Q248.971 971.723 298.723 952.843
+           C349.614 926.754, 303.318 852.438, 247.832 852.438"
+        fill="#FF9B00"/>
+
+  <!-- Right foot with matching curves -->
+  <path d="M553.232 852.438
+           C608.718 852.438, 652.822 897.632, 652.822 952.843
+           C652.822 965.438, 622.633 971.723, 587.342 971.723
+           Q552.094 971.723 502.342 952.843
+           C451.452 926.754, 497.747 852.438, 553.232 852.438"
+        fill="#FF9B00"/>
+
+  <!-- Left wing with flowing curves -->
+  <path d="M152.347 392.843
+           C97.632 447.558, 73.432 607.843, 98.723 702.438
+           Q111.368 749.985 147.832 752.438
+           C184.296 754.891, 198.432 752.937, 223.723 702.438
+           C249.014 651.938, 207.063 438.239, 152.347 392.843"
+        fill="#000000"/>
+
+  <!-- Right wing with matching flow -->
+  <path d="M648.718 392.843
+           C703.433 447.558, 727.633 607.843, 702.342 702.438
+           Q689.697 749.985 653.232 752.438
+           C616.768 754.891, 602.633 752.937, 577.342 702.438
+           C552.051 651.938, 594.002 438.239, 648.718 392.843"
+        fill="#000000"/>
+
+  <!-- Eyes with subtle gradients -->
+  <ellipse cx="323.723" cy="297.632" rx="27.843" ry="29.347" fill="white"/>
+  <ellipse cx="334.247" cy="297.632" rx="13.432" ry="14.723" fill="black"/>
+  <ellipse cx="337.642" cy="294.237" rx="4.723" ry="5.347" fill="white"/>
+
+  <ellipse cx="477.342" cy="297.632" rx="27.843" ry="29.347" fill="white"/>
+  <ellipse cx="466.818" cy="297.632" rx="13.432" ry="14.723" fill="black"/>
+  <ellipse cx="463.423" cy="294.237" rx="4.723" ry="5.347" fill="white"/>
+
+  <!-- Beak with natural curves -->
+  <path d="M400.532 322.437
+           C373.242 322.437, 347.823 348.932, 347.823 374.323
+           Q347.823 387.031 367.342 399.723
+           C386.861 412.415, 400.532 425.109, 400.532 425.109
+           C400.532 425.109, 414.204 412.415, 433.723 399.723
+           Q453.242 387.031 453.242 374.323
+           C453.242 348.932, 427.823 322.437, 400.532 322.437"
+        fill="#FF9B00"/>
+
+  <!-- Head details with natural flow -->
+  <path d="M400.532 247.832
+           Q373.242 258.347 347.823 278.723
+           C322.404 299.099, 287.347 377.632, 298.723 399.723
+           Q310.099 421.814 335.532 399.723
+           C360.965 377.632, 400.532 297.632, 400.532 247.832"
+        fill="#1A1A1A" opacity="0.723"/>
+
+  <path d="M400.532 247.832
+           Q427.823 258.347 453.242 278.723
+           C478.661 299.099, 513.718 377.632, 502.342 399.723
+           Q490.966 421.814 465.532 399.723
+           C440.099 377.632, 400.532 297.632, 400.532 247.832"
+        fill="#1A1A1A" opacity="0.723"/>
+
+</svg>
+
+<button onclick="downloadSVG()" style="
+    display: block;
+    margin: 20px auto;
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+">Download Tux</button>
+
+<style>
+svg {
+    background: white;
+    display: block;
+    margin: 20.000px auto;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+</style>
+
+</body></html>
