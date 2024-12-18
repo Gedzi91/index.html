@@ -1,0 +1,713 @@
+<html><head><base href="https://websim.ai/c/ReiSwQOgNr8chmp7S"><title>Infinite Evolving MCTS 3D Game Engine - Mobile Edition</title><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"><style>
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f0f0f0;
+  color: #333;
+  overflow-x: hidden;
+}
+.container {
+  width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+}
+header {
+  background-color: #4a90e2;
+  color: white;
+  padding: 10px 0;
+  text-align: center;
+}
+h1 {
+  margin: 0;
+  font-size: 1.2em;
+}
+.game-display {
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 10px;
+  margin-top: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+#game-canvas {
+  width: 100%;
+  height: 60vh;
+  touch-action: none;
+}
+.game-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  margin-top: 10px;
+}
+button {
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin: 5px;
+  font-size: 0.9em;
+}
+button:hover {
+  background-color: #357ae8;
+}
+.evolve-progress {
+  margin-top: 10px;
+  background-color: #ddd;
+  border-radius: 5px;
+  overflow: hidden;
+}
+.evolve-bar {
+  width: 0;
+  height: 20px;
+  background-color: #4caf50;
+  text-align: center;
+  line-height: 20px;
+  color: white;
+  font-size: 0.8em;
+}
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+.evolving {
+  animation: pulse 2s infinite;
+}
+#game-state {
+  font-size: 0.9em;
+  text-align: center;
+}
+footer {
+  text-align: center;
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #4a90e2;
+  color: white;
+  font-size: 0.8em;
+}
+footer nav a {
+  color: white;
+  margin: 0 5px;
+  text-decoration: none;
+}
+#joystick {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  width: 100px;
+  height: 100px;
+  background-color: rgba(255,255,255,0.5);
+  border-radius: 50%;
+  display: block;
+}
+#stick {
+  position: absolute;
+  top: 25px;
+  left: 25px;
+  width: 50px;
+  height: 50px;
+  background-color: #4a90e2;
+  border-radius: 50%;
+}
+</style></head><body>
+<header>
+  <h1>Infinite Evolving MCTS 3D Game Engine - Hyper-Dimensional Update</h1>
+</header>
+<div class="container">
+  <div class="game-display">
+    <div id="game-canvas"></div>
+    <div id="joystick"><div id="stick"></div></div>
+    <p id="game-state">Current Game State: Initializing Hyper-Dimensional Space...</p>
+  </div>
+  <div class="game-controls">
+    <button onclick="startNewGame()">New Game</button>
+    <button onclick="makeMove()">Make Move</button>
+    <button onclick="evolveGame()">Evolve Game</button>
+    <button onclick="rotateBoard()">Rotate Board</button>
+    <button onclick="addDimension()">Add Dimension</button>
+    <button onclick="toggleQuantumState()">Toggle Quantum State</button>
+  </div>
+  <div class="evolve-progress">
+    <div id="evolve-bar" class="evolve-bar">0%</div>
+  </div>
+</div>
+
+<script>
+let gameState = {
+  board: [],
+  currentPlayer: 1,
+  dimension: 4,
+  gameType: 'Hyper-Dimensional Tic-Tac-Toe',
+  graphicsLevel: 120,
+  controlLevel: 10,
+  levelDesignLevel: 120,
+  quantumState: false
+};
+
+let scene, camera, renderer, cubes, light, ambientLight;
+let raycaster, mouse;
+
+function initThreeJS() {
+  scene = new THREE.Scene();
+  const aspect = window.innerWidth / (window.innerHeight * 0.6);
+  camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 1000);
+  renderer = new THREE.WebGLRenderer({antialias: true});
+  renderer.setSize(window.innerWidth, window.innerHeight * 0.6);
+  renderer.setClearColor(0x000000, 1);
+  document.getElementById('game-canvas').appendChild(renderer.domElement);
+
+  camera.position.z = 5;
+
+  light = new THREE.PointLight(0xffffff, 1, 100);
+  light.position.set(0, 0, 10);
+  scene.add(light);
+
+  ambientLight = new THREE.AmbientLight(0x404040);
+  scene.add(ambientLight);
+
+  raycaster = new THREE.Raycaster();
+  mouse = new THREE.Vector2();
+}
+
+function createBoard() {
+  cubes = [];
+  const geometry = new THREE.BoxGeometry(0.9, 0.9, 0.9);
+  const material = new THREE.MeshPhongMaterial({ color: 0xcccccc, wireframe: false });
+
+  for (let w = 0; w < gameState.dimension; w++) {
+    for (let x = 0; x < gameState.dimension; x++) {
+      for (let y = 0; y < gameState.dimension; y++) {
+        for (let z = 0; z < gameState.dimension; z++) {
+          const cube = new THREE.Mesh(geometry, material);
+          cube.position.set(
+            x - (gameState.dimension-1)/2,
+            y - (gameState.dimension-1)/2,
+            z - (gameState.dimension-1)/2
+          );
+          cube.scale.setScalar(1 / gameState.dimension);
+          cube.userData.w = w;
+          scene.add(cube);
+          cubes.push(cube);
+        }
+      }
+    }
+  }
+}
+
+function initializeGame() {
+  gameState.board = Array(gameState.dimension).fill().map(() => 
+    Array(gameState.dimension).fill().map(() => 
+      Array(gameState.dimension).fill().map(() =>
+        Array(gameState.dimension).fill(0)
+      )
+    )
+  );
+  gameState.currentPlayer = 1;
+  updateGameDisplay();
+}
+
+function startNewGame() {
+  initializeGame();
+  document.getElementById('game-state').textContent = "New hyper-dimensional game started!";
+}
+
+function makeMove() {
+  const emptySpots = [];
+  for(let w = 0; w < gameState.dimension; w++) {
+    for(let x = 0; x < gameState.dimension; x++) {
+      for(let y = 0; y < gameState.dimension; y++) {
+        for(let z = 0; z < gameState.dimension; z++) {
+          if(gameState.board[w][x][y][z] === 0) emptySpots.push([w,x,y,z]);
+        }
+      }
+    }
+  }
+  if(emptySpots.length > 0) {
+    const [w, x, y, z] = emptySpots[Math.floor(Math.random() * emptySpots.length)];
+    gameState.board[w][x][y][z] = gameState.currentPlayer;
+    gameState.currentPlayer = 3 - gameState.currentPlayer; // Switch between 1 and 2
+    updateGameDisplay();
+  } else {
+    document.getElementById('game-state').textContent = "No more moves possible in this dimension!";
+  }
+}
+
+function updateGameDisplay() {
+  for (let i = 0; i < cubes.length; i++) {
+    const w = cubes[i].userData.w;
+    const x = Math.floor((i % Math.pow(gameState.dimension, 3)) / Math.pow(gameState.dimension, 2));
+    const y = Math.floor((i % Math.pow(gameState.dimension, 2)) / gameState.dimension);
+    const z = i % gameState.dimension;
+    
+    if (gameState.board[w][x][y][z] === 1) {
+      cubes[i].material.color.setHex(0xff0000);
+      cubes[i].material.wireframe = false;
+    } else if (gameState.board[w][x][y][z] === 2) {
+      cubes[i].material.color.setHex(0x0000ff);
+      cubes[i].material.wireframe = false;
+    } else {
+      cubes[i].material.color.setHex(0xcccccc);
+      cubes[i].material.wireframe = gameState.quantumState;
+    }
+  }
+  
+  document.getElementById('game-state').textContent = `Current player: ${gameState.currentPlayer} | Dimension: ${gameState.dimension}D | Quantum State: ${gameState.quantumState ? 'ON' : 'OFF'}`;
+}
+
+function evolveGame() {
+  document.getElementById('game-state').textContent = "Evolving game to higher dimensions...";
+  document.getElementById('evolve-bar').classList.add('evolving');
+  let progress = 0;
+  const evolveInterval = setInterval(() => {
+    progress += 5;
+    document.getElementById('evolve-bar').style.width = `${progress}%`;
+    document.getElementById('evolve-bar').textContent = `${progress}%`;
+    if(progress >= 100) {
+      clearInterval(evolveInterval);
+      completeEvolution();
+    }
+  }, 200);
+}
+
+function completeEvolution() {
+  document.getElementById('evolve-bar').classList.remove('evolving');
+  gameState.dimension++;
+  gameState.gameType = getNextGameType();
+  scene.remove.apply(scene, scene.children);
+  createBoard();
+  initializeGame();
+  document.getElementById('game-state').textContent = `Evolved to ${gameState.dimension}D ${gameState.gameType}!`;
+}
+
+function getNextGameType() {
+  const gameTypes = ['Hyper-Dimensional Tic-Tac-Toe', 'Quantum Connect Four', 'Tesseract Go', '5D Chess', 'Multiversal Entanglement'];
+  const currentIndex = gameTypes.indexOf(gameState.gameType);
+  return gameTypes[(currentIndex + 1) % gameTypes.length];
+}
+
+function rotateBoard() {
+  scene.rotation.y += Math.PI / 4;
+  scene.rotation.x += Math.PI / 6;
+}
+
+function addDimension() {
+  gameState.dimension++;
+  scene.remove.apply(scene, scene.children);
+  createBoard();
+  initializeGame();
+  document.getElementById('game-state').textContent = `Added a dimension! Now playing in ${gameState.dimension}D`;
+}
+
+function toggleQuantumState() {
+  gameState.quantumState = !gameState.quantumState;
+  updateGameDisplay();
+}
+
+function improveGraphics() {
+  gameState.graphicsLevel++;
+  
+  // Improve lighting
+  light.intensity = Math.min(2, light.intensity + 0.1);
+  ambientLight.intensity = Math.min(1, ambientLight.intensity + 0.05);
+  
+  // Improve materials
+  cubes.forEach(cube => {
+    if (cube.material.type !== 'MeshPhongMaterial') {
+      cube.material = new THREE.MeshPhongMaterial({color: cube.material.color});
+    }
+    cube.material.shininess = Math.min(100, (gameState.graphicsLevel * 10));
+  });
+  
+  // Add environment map
+  if (gameState.graphicsLevel % 5 === 0) {
+    const path = 'https://threejs.org/examples/textures/cube/MilkyWay/';
+    const format = '.jpg';
+    const urls = [
+      path + 'dark-s_px' + format, path + 'dark-s_nx' + format,
+      path + 'dark-s_py' + format, path + 'dark-s_ny' + format,
+      path + 'dark-s_pz' + format, path + 'dark-s_nz' + format
+    ];
+    const reflectionCube = new THREE.CubeTextureLoader().load(urls);
+    scene.background = reflectionCube;
+  }
+}
+
+function improveControls() {
+  gameState.controlLevel++;
+  
+  if (gameState.controlLevel === 1) {
+    // Add click-to-move functionality
+    renderer.domElement.addEventListener('click', onDocumentMouseClick, false);
+  } else if (gameState.controlLevel === 2) {
+    // Add drag-to-rotate functionality
+    renderer.domElement.addEventListener('mousedown', onDocumentMouseDown, false);
+    renderer.domElement.addEventListener('mousemove', onDocumentMouseMove, false);
+    renderer.domElement.addEventListener('mouseup', onDocumentMouseUp, false);
+  } else if (gameState.controlLevel === 3) {
+    // Add touch controls for mobile
+    renderer.domElement.addEventListener('touchstart', onDocumentTouchStart, false);
+    renderer.domElement.addEventListener('touchmove', onDocumentTouchMove, false);
+    renderer.domElement.addEventListener('touchend', onDocumentTouchEnd, false);
+  } else if (gameState.controlLevel === 4) {
+    // Add virtual joystick for mobile
+    document.getElementById('joystick').style.display = 'block';
+    initJoystick();
+  } else if (gameState.controlLevel > 4) {
+    // Add advanced control features
+    addAdvancedControls();
+  }
+}
+
+function addAdvancedControls() {
+  // Implement gesture controls
+  let hammer = new Hammer(renderer.domElement);
+  hammer.get('pinch').set({ enable: true });
+  hammer.on('pinch', function(ev) {
+    camera.zoom = Math.max(0.5, Math.min(2, camera.zoom * (1 + (ev.scale - 1) * 0.1)));
+    camera.updateProjectionMatrix();
+  });
+
+  // Implement voice controls
+  if ('webkitSpeechRecognition' in window) {
+    let recognition = new webkitSpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    recognition.onresult = function(event) {
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          let transcript = event.results[i][0].transcript.toLowerCase();
+          if (transcript.includes('rotate'))  {
+            rotateBoard();
+          } else if (transcript.includes('new game')) {
+            startNewGame();
+          } else if (transcript.includes('make move')) {
+            makeMove();
+          } else if (transcript.includes('evolve')) {
+            evolveGame();
+          } else if (transcript.includes('quantum')) {
+            toggleQuantumState();
+          }
+        }
+      }
+    };
+
+    recognition.start();
+  }
+
+  // Implement eye-tracking controls
+  if ('EyeTracker' in window) {
+    let eyeTracker = new EyeTracker();
+    eyeTracker.on('gaze', function(x, y) {
+      // Use gaze position to control camera focus
+      let vector = new THREE.Vector3(x * 2 - 1, -y * 2 + 1, 0.5);
+      vector.unproject(camera);
+      let dir = vector.sub(camera.position).normalize();
+      let distance = -camera.position.z / dir.z;
+      camera.lookAt(camera.position.clone().add(dir.multiplyScalar(distance)));
+    });
+  }
+}
+
+function improveLevelDesign() {
+  gameState.levelDesignLevel++;
+  
+  switch (gameState.levelDesignLevel % 5) {
+    case 1:
+      addHyperObstacles();
+      break;
+    case 2:
+      addQuantumPowerUps();
+      break;
+    case 3:
+      addInterDimensionalPlatforms();
+      break;
+    case 4:
+      addWormholes();
+      break;
+    case 0:
+      addTimeDistortionFields();
+      break;
+  }
+  
+  document.getElementById('game-state').textContent = `Level design improved! Level: ${gameState.levelDesignLevel}`;
+}
+
+function addHyperObstacles() {
+  const obstacleGeometry = new THREE.DodecahedronGeometry(0.2);
+  const obstacleMaterial = new THREE.MeshPhongMaterial({color: 0xff00ff});
+  
+  for (let i = 0; i < gameState.dimension; i++) {
+    const obstacle = new THREE.Mesh(obstacleGeometry, obstacleMaterial);
+    obstacle.position.set(
+      Math.random() * gameState.dimension - gameState.dimension/2,
+      Math.random() * gameState.dimension - gameState.dimension/2,
+      Math.random() * gameState.dimension - gameState.dimension/2
+    );
+    obstacle.userData.w = Math.floor(Math.random() * gameState.dimension);
+    scene.add(obstacle);
+  }
+}
+
+function addQuantumPowerUps() {
+  const powerUpGeometry = new THREE.TorusKnotGeometry(0.1, 0.03, 100, 16);
+  const powerUpMaterial = new THREE.MeshPhongMaterial({color: 0xffff00, emissive: 0xffff00, emissiveIntensity: 0.5});
+  
+  for (let i = 0; i < gameState.dimension - 1; i++) {
+    const powerUp = new THREE.Mesh(powerUpGeometry, powerUpMaterial);
+    powerUp.position.set(
+      Math.random() * gameState.dimension - gameState.dimension/2,
+      Math.random() * gameState.dimension - gameState.dimension/2,
+      Math.random() * gameState.dimension - gameState.dimension/2
+    );
+    powerUp.userData.w = Math.floor(Math.random() * gameState.dimension);
+    scene.add(powerUp);
+    
+    // Add quantum fluctuation effect
+    const fluctuate = () => {
+      powerUp.scale.x = 1 + Math.sin(Date.now() * 0.01) * 0.2;
+      powerUp.scale.y = 1 + Math.cos(Date.now() * 0.01) * 0.2;
+      powerUp.scale.z = 1 + Math.sin(Date.now() * 0.015) * 0.2;
+      requestAnimationFrame(fluctuate);
+    };
+    fluctuate();
+  }
+}
+
+function addInterDimensionalPlatforms() {
+  const platformGeometry = new THREE.BoxGeometry(1, 0.1, 1);
+  const platformMaterial = new THREE.MeshPhongMaterial({color: 0x00ff00, transparent: true, opacity: 0.7});
+  
+  for (let i = 0; i < gameState.dimension - 2; i++) {
+    const platform = new THREE.Mesh(platformGeometry, platformMaterial);
+    platform.position.set(
+      Math.random() * gameState.dimension - gameState.dimension/2,
+      Math.random() * gameState.dimension - gameState.dimension/2,
+      Math.random() * gameState.dimension - gameState.dimension/2
+    );
+    platform.userData.w = Math.floor(Math.random() * gameState.dimension);
+    scene.add(platform);
+    
+    // Add inter-dimensional shift effect
+    const shift = () => {
+      platform.userData.w = (platform.userData.w + 1) % gameState.dimension;
+      platform.material.opacity = 0.3 + (platform.userData.w / gameState.dimension) * 0.7;
+      setTimeout(shift, 2000 + Math.random() * 3000);
+    };
+    shift();
+  }
+}
+
+function addWormholes() {
+  const wormholeGeometry = new THREE.TorusGeometry(0.3, 0.1, 16, 100);
+  const wormholeMaterial = new THREE.MeshPhongMaterial({color: 0x800080, side: THREE.DoubleSide});
+  
+  for (let i = 0; i < gameState.dimension / 2; i++) {
+    const wormholeA = new THREE.Mesh(wormholeGeometry, wormholeMaterial);
+    const wormholeB = new THREE.Mesh(wormholeGeometry, wormholeMaterial);
+    
+    wormholeA.position.set(
+      Math.random() * gameState.dimension - gameState.dimension/2,
+      Math.random() * gameState.dimension - gameState.dimension/2,
+      Math.random() * gameState.dimension - gameState.dimension/2
+    );
+    wormholeB.position.set(
+      Math.random() * gameState.dimension - gameState.dimension/2,
+      Math.random() * gameState.dimension - gameState.dimension/2,
+      Math.random() * gameState.dimension - gameState.dimension/2
+    );
+    
+    wormholeA.userData.w = Math.floor(Math.random() * gameState.dimension);
+    wormholeB.userData.w = Math.floor(Math.random() * gameState.dimension);
+    
+    scene.add(wormholeA);
+    scene.add(wormholeB);
+    
+    // Add wormhole effect
+    const wormholeEffect = () => {
+      wormholeA.rotation.x += 0.01;
+      wormholeA.rotation.y += 0.02;
+      wormholeB.rotation.x -= 0.02;
+      wormholeB.rotation.y -= 0.01;
+      requestAnimationFrame(wormholeEffect);
+    };
+    wormholeEffect();
+  }
+}
+
+function addTimeDistortionFields() {
+  const fieldGeometry = new THREE.SphereGeometry(0.5, 32, 32);
+  const fieldMaterial = new THREE.MeshPhongMaterial({color: 0x00ffff, transparent: true, opacity: 0.3});
+  
+  for (let i = 0; i < gameState.dimension / 2; i++) {
+    const field = new THREE.Mesh(fieldGeometry, fieldMaterial);
+    field.position.set(
+      Math.random() * gameState.dimension - gameState.dimension/2,
+      Math.random() * gameState.dimension - gameState.dimension/2,
+      Math.random() * gameState.dimension - gameState.dimension/2
+    );
+    field.userData.w = Math.floor(Math.random() * gameState.dimension);
+    scene.add(field);
+    
+    // Add time distortion effect
+    const distort = () => {
+      field.scale.x = 1 + Math.sin(Date.now() * 0.001) * 0.5;
+      field.scale.y = 1 + Math.cos(Date.now() * 0.002) * 0.5;
+      field.scale.z = 1 + Math.sin(Date.now() * 0.003) * 0.5;
+      requestAnimationFrame(distort);
+    };
+    distort();
+  }
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  renderer.render(scene, camera);
+  improveGraphics();
+  improveControls();
+  improveLevelDesign();
+  updateGameLogic();
+}
+
+function updateGameLogic() {
+  // Check for win conditions
+  if (checkWinCondition()) {
+    document.getElementById('game-state').textContent = `Player ${gameState.currentPlayer} wins in ${gameState.dimension}D!`;
+    // Disable further moves
+    renderer.domElement.removeEventListener('click', onDocumentMouseClick);
+  }
+  
+  // Update quantum power-ups
+  updateQuantumPowerUps();
+  
+  // Update inter-dimensional platforms
+  updateInterDimensionalPlatforms();
+  
+  // Update wormholes
+  updateWormholes();
+  
+  // Update time distortion fields
+  updateTimeDistortionFields();
+}
+
+function checkWinCondition() {
+  // Implement win condition check for hyper-dimensional game
+  // This is a simplified version and may need to be expanded for higher dimensions
+  for (let w = 0; w < gameState.dimension; w++) {
+    for (let x = 0; x < gameState.dimension; x++) {
+      for (let y = 0; y < gameState.dimension; y++) {
+        for (let z = 0; z < gameState.dimension; z++) {
+          if (gameState.board[w][x][y][z] !== 0) {
+            if (checkHyperLine(w, x, y, z, 1, 0, 0, 0) || 
+                checkHyperLine(w, x, y, z, 0, 1, 0, 0) || 
+                checkHyperLine(w, x, y, z, 0, 0, 1, 0) || 
+                checkHyperLine(w, x, y, z, 0, 0, 0, 1) || 
+                checkHyperLine(w, x, y, z, 1, 1, 1, 1) || 
+                checkHyperLine(w, x, y, z, 1, 1, 1, -1) || 
+                checkHyperLine(w, x, y, z, 1, 1, -1, 1) || 
+                checkHyperLine(w, x, y, z, 1, -1, 1, 1) || 
+                checkHyperLine(w, x, y, z, -1, 1, 1, 1)) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+  }
+  return false;
+}
+
+function checkHyperLine(w, x, y, z, dw, dx, dy, dz) {
+  const player = gameState.board[w][x][y][z];
+  for (let i = 1; i < gameState.dimension; i++) {
+    let nw = w + i * dw;
+    let nx = x + i * dx;
+    let ny = y + i * dy;
+    let nz = z + i * dz;
+    if (nw < 0 || nw >= gameState.dimension || 
+        nx < 0 || nx >= gameState.dimension || 
+        ny < 0 || ny >= gameState.dimension || 
+        nz < 0 || nz >= gameState.dimension ||
+        gameState.board[nw][nx][ny][nz] !== player) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function updateQuantumPowerUps() {
+  scene.children.forEach(child => {
+    if (child.geometry instanceof THREE.TorusKnotGeometry) {
+      child.rotation.x += 0.01;
+      child.rotation.y += 0.01;
+      child.rotation.z += 0.01;
+    }
+  });
+}
+
+function updateInterDimensionalPlatforms() {
+  scene.children.forEach(child => {
+    if (child.geometry instanceof THREE.BoxGeometry && child.material.transparent) {
+      child.position.y = Math.sin(Date.now() * 0.001 + child.userData.w) * 0.5;
+    }
+  });
+}
+
+function updateWormholes() {
+  const wormholes = scene.children.filter(child => child.geometry instanceof THREE.TorusGeometry);
+  for (let i = 0; i < wormholes.length; i += 2) {
+    const wormholeA = wormholes[i];
+    const wormholeB = wormholes[i+1];
+    cubes.forEach(cube => {
+      if (cube.position.distanceTo(wormholeA.position) < 0.3) {
+        cube.position.copy(wormholeB.position);
+        cube.userData.w = wormholeB.userData.w;
+      } else if (cube.position.distanceTo(wormholeB.position) < 0.3) {
+        cube.position.copy(wormholeA.position);
+        cube.userData.w = wormholeA.userData.w;
+      }
+    });
+  }
+}
+
+function updateTimeDistortionFields() {
+  const timeFields = scene.children.filter(child => child.geometry instanceof THREE.SphereGeometry && child.material.transparent);
+  cubes.forEach(cube => {
+    timeFields.forEach(field => {
+      const distance = cube.position.distanceTo(field.position);
+      if (distance < 1) {
+        const timeScale = 1 + (1 - distance) * Math.sin(Date.now() * 0.001);
+        cube.scale.setScalar(timeScale);
+      }
+    });
+  });
+}
+
+initThreeJS();
+createBoard();
+initializeGame();
+animate();
+
+window.addEventListener('resize', function() {
+  const aspect = window.innerWidth / (window.innerHeight * 0.6);
+  camera.aspect = aspect;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight * 0.6);
+});
+
+</script>
+
+<footer>
+  <p>Infinite Evolving MCTS 3D Game Engine - Hyper-Dimensional Update © 2023 WebSim AI</p>
+  <nav>
+    <a href="https://websim.ai/releases">Release Notes</a>
+    <a href="https://websim.ai/blog">Dev Blog</a>
+    <a href="https://websim.ai/community">Community</a>
+  </nav>
+</footer>
+
+</body></html>
