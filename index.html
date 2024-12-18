@@ -1,0 +1,253 @@
+<html><head><base href="https://5dgame.example.com/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pentachoron: The World's First 5D Game</title>
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Orbitron', sans-serif;
+    background-color: #000;
+    color: #0ff;
+  }
+  #game-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  #hud {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 18px;
+  }
+  #controls {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    font-size: 14px;
+  }
+  #dimension-indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 72px;
+    opacity: 0.5;
+    pointer-events: none;
+  }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/9.4.4/math.js"></script>
+</head>
+<body>
+<div id="game-container"></div>
+<div id="hud">
+  Dimension: <span id="dimension">3</span><br>
+  Score: <span id="score">0</span>
+</div>
+<div id="controls">
+  WASD: Move in 3D<br>
+  QE: Move in 4th dimension<br>
+  RF: Move in 5th dimension<br>
+  Mouse: Look around<br>
+  Click: Interact
+</div>
+<div id="dimension-indicator"></div>
+
+<script>
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer();
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.getElementById('game-container').appendChild(renderer.domElement);
+
+// Create a 5D pentachoron (5-simplex)
+const pentachoron = new THREE.Group();
+const vertexGeometry = new THREE.SphereGeometry(0.1, 32, 32);
+const edgeGeometry = new THREE.CylinderGeometry(0.02, 0.02, 1, 8);
+const vertexMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+const edgeMaterial = new THREE.MeshBasicMaterial({ color: 0x00ffff });
+
+// 6 vertices of a 5-simplex
+const vertices = [
+  [1, 1, 1, 1, 1],
+  [-1, -1, 1, 1, 1],
+  [-1, 1, -1, 1, 1],
+  [1, -1, -1, 1, 1],
+  [1, 1, 1, -1, 1],
+  [1, 1, 1, 1, -1]
+];
+
+// Create vertices
+vertices.forEach(pos => {
+  const vertex = new THREE.Mesh(vertexGeometry, vertexMaterial);
+  vertex.position.set(pos[0], pos[1], pos[2]);
+  pentachoron.add(vertex);
+});
+
+// Create edges
+for (let i = 0; i < vertices.length; i++) {
+  for (let j = i + 1; j < vertices.length; j++) {
+    const edge = new THREE.Mesh(edgeGeometry, edgeMaterial);
+    pentachoron.add(edge);
+  }
+}
+
+scene.add(pentachoron);
+camera.position.z = 5;
+
+let w = 0; // 4th dimension position
+let v = 0; // 5th dimension position
+let score = 0;
+
+// Particle system for 5D effects
+const particleCount = 1000;
+const particles = new THREE.BufferGeometry();
+const positions = new Float32Array(particleCount * 3);
+
+for (let i = 0; i < particleCount * 3; i += 3) {
+  positions[i] = (Math.random() - 0.5) * 10;
+  positions[i + 1] = (Math.random() - 0.5) * 10;
+  positions[i + 2] = (Math.random() - 0.5) * 10;
+}
+
+particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+const particleMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.05 });
+const particleSystem = new THREE.Points(particles, particleMaterial);
+scene.add(particleSystem);
+
+function updatePentachoron() {
+  const scale4 = 1 / (Math.abs(w) + 2);
+  const scale5 = 1 / (Math.abs(v) + 2);
+  const totalScale = scale4 * scale5;
+
+  // Update vertices
+  pentachoron.children.forEach((child, index) => {
+    if (child.geometry.type === 'SphereGeometry') {
+      const [x, y, z, w4, v5] = vertices[index];
+      const projectedX = x * scale4 * scale5;
+      const projectedY = y * scale4 * scale5;
+      const projectedZ = z * scale4 * scale5;
+      child.position.set(projectedX, projectedY, projectedZ);
+      child.scale.setScalar(totalScale);
+    }
+  });
+
+  // Update edges
+  let edgeIndex = 0;
+  for (let i = 0; i < vertices.length; i++) {
+    for (let j = i + 1; j < vertices.length; j++) {
+      const edge = pentachoron.children[vertices.length + edgeIndex];
+      const [x1, y1, z1] = vertices[i];
+      const [x2, y2, z2] = vertices[j];
+      
+      const midX = (x1 + x2) / 2 * totalScale;
+      const midY = (y1 + y2) / 2 * totalScale;
+      const midZ = (z1 + z2) / 2 * totalScale;
+      
+      edge.position.set(midX, midY, midZ);
+      
+      const dx = (x2 - x1) * totalScale;
+      const dy = (y2 - y1) * totalScale;
+      const dz = (z2 - z1) * totalScale;
+      
+      const length = Math.sqrt(dx * dx + dy * dy + dz * dz);
+      edge.scale.set(1, length, 1);
+      edge.lookAt(x2 * totalScale, y2 * totalScale, z2 * totalScale);
+      
+      edgeIndex++;
+    }
+  }
+}
+
+function updateParticles() {
+  const positions = particles.attributes.position.array;
+  for (let i = 0; i < positions.length; i += 3) {
+    positions[i] += Math.sin(Date.now() * 0.001 + i) * 0.01;
+    positions[i + 1] += Math.cos(Date.now() * 0.002 + i) * 0.01;
+    positions[i + 2] += Math.sin(Date.now() * 0.003 + i) * 0.01;
+  }
+  particles.attributes.position.needsUpdate = true;
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  updatePentachoron();
+  updateParticles();
+  renderer.render(scene, camera);
+}
+
+animate();
+
+// Game logic
+document.addEventListener('keydown', (event) => {
+  const key = event.key.toLowerCase();
+  if (key === 'w') camera.position.z -= 0.1;
+  if (key === 's') camera.position.z += 0.1;
+  if (key === 'a') camera.position.x -= 0.1;
+  if (key === 'd') camera.position.x += 0.1;
+  if (key === 'q') w -= 0.1;
+  if (key === 'e') w += 0.1;
+  if (key === 'r') v -= 0.1;
+  if (key === 'f') v += 0.1;
+
+  updateDimensionDisplay();
+  updateScore();
+});
+
+function updateDimensionDisplay() {
+  let dimension = 3;
+  if (Math.abs(w) > 0.5) dimension = 4;
+  if (Math.abs(v) > 0.5) dimension = 5;
+  document.getElementById('dimension').textContent = dimension;
+  
+  const indicator = document.getElementById('dimension-indicator');
+  indicator.textContent = dimension + 'D';
+  indicator.style.opacity = '1';
+  setTimeout(() => {
+    indicator.style.opacity = '0';
+  }, 1000);
+}
+
+function updateScore() {
+  if (Math.abs(w) > 0.5 || Math.abs(v) > 0.5) {
+    score += 10;
+    if (Math.abs(w) > 0.5 && Math.abs(v) > 0.5) {
+      score += 20; // Bonus for being in 5D
+    }
+    document.getElementById('score').textContent = score;
+  }
+}
+
+// Resize handler
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// Mouse look
+let mouseX = 0, mouseY = 0;
+document.addEventListener('mousemove', (event) => {
+  mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+  mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+  camera.rotation.y = mouseX * Math.PI / 4;
+  camera.rotation.x = mouseY * Math.PI / 4;
+});
+
+// Interaction
+document.addEventListener('click', () => {
+  const randomVertex = pentachoron.children[Math.floor(Math.random() * vertices.length)];
+  randomVertex.material.color.setHex(Math.random() * 0xffffff);
+  score += 50;
+  document.getElementById('score').textContent = score;
+});
+</script>
+</body>
+</html>
