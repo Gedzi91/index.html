@@ -1,0 +1,211 @@
+<html><head><base href="https://websim.ai/genius-deep-thoughts/"><title>Infinite Deep Thoughts of a Genius</title>
+<style>
+  body {
+    font-family: 'Courier New', monospace;
+    background: #000;
+    color: #0F0;
+    text-align: center;
+    padding: 20px;
+    overflow: hidden;
+  }
+  #thought-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+  .deep-thought {
+    position: absolute;
+    font-size: 18px;
+    padding: 10px;
+    background-color: rgba(0, 255, 0, 0.1);
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+    max-width: 300px;
+    word-wrap: break-word;
+  }
+  #matrix-rain {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+  }
+  #mind-map {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+  }
+</style>
+</head>
+<body>
+  <h1>The Infinite Deep Thoughts of a Genius</h1>
+  <div id="thought-container"></div>
+  <canvas id="matrix-rain"></canvas>
+  <svg id="mind-map"></svg>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script>
+    const thoughtContainer = document.getElementById('thought-container');
+    
+    const deepThoughts = [
+      "What if our consciousness is just a simulation within a simulation?",
+      "Is the color blue you see the same blue I see?",
+      "Do parallel universes have parallel thoughts?",
+      "What if every decision creates a new timeline?",
+      "Are we living in a memory of the future?",
+      "Is silence just the absence of noise, or a sound we can't hear?",
+      "What if dreams are glimpses into our lives in other dimensions?",
+      "Is time just a construct to prevent everything from happening at once?",
+      "What if the Earth is sentient and we're its neurons?",
+      "Are numbers infinite, or do they loop back on themselves at some point?",
+      "What if déjà vu is just a glitch in the matrix?",
+      "Is reality objective or just a consensus hallucination?",
+      "What if our universe is just an atom in a larger universe?",
+      "Do fish have a concept of water, or is it just their reality?",
+      "What if gravity is just love on a cosmic scale?",
+      "Is language limiting our ability to perceive reality?",
+      "What if we're all one consciousness experiencing itself subjectively?",
+      "Are we living in the present, or just remembering the past?",
+      "What if every person is the main character in their own movie?",
+      "Is free will an illusion, or the only real thing we possess?",
+      "What if our dreams are our real lives and this is the dream?",
+      "Is the universe infinite, or just really good at looping?",
+      "What if dark matter is just the thoughts we haven't thought yet?",
+      "Are we alone in the universe, or just in this part of it?",
+      "What if reality is just a really immersive VR game?",
+      "Is consciousness a fundamental property of the universe?",
+      "What if every possible reality exists simultaneously?",
+      "Are we living in a holographic projection of a 2D universe?",
+      "What if time is circular and we're constantly reliving our lives?",
+      "Is the speed of light just the processing speed of our reality?"
+    ];
+
+    function createDeepThought() {
+      const thought = document.createElement('div');
+      thought.className = 'deep-thought';
+      thought.textContent = deepThoughts[Math.floor(Math.random() * deepThoughts.length)];
+      
+      thought.style.left = Math.random() * (window.innerWidth - 300) + 'px';
+      thought.style.top = Math.random() * (window.innerHeight - 100) + 'px';
+      
+      thoughtContainer.appendChild(thought);
+
+      anime({
+        targets: thought,
+        opacity: [0, 1],
+        scale: [0, 1],
+        duration: 2000,
+        easing: 'easeOutElastic(1, .5)'
+      });
+
+      setTimeout(() => {
+        anime({
+          targets: thought,
+          opacity: 0,
+          scale: 0,
+          duration: 1000,
+          easing: 'easeInQuad',
+          complete: () => thought.remove()
+        });
+      }, 10000 + Math.random() * 5000);
+    }
+
+    setInterval(createDeepThought, 2000);
+
+    // Matrix rain effect
+    const canvas = document.getElementById('matrix-rain');
+    const ctx = canvas.getContext('2d');
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const columns = canvas.width / 20;
+    const drops = [];
+
+    for (let i = 0; i < columns; i++) {
+      drops[i] = 1;
+    }
+
+    function drawMatrixRain() {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = '#0F0';
+      ctx.font = '15px monospace';
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = String.fromCharCode(Math.floor(Math.random() * 128));
+        ctx.fillText(text, i * 20, drops[i] * 20);
+
+        if (drops[i] * 20 > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+
+        drops[i]++;
+      }
+    }
+
+    setInterval(drawMatrixRain, 50);
+
+    // Mind map
+    const svg = d3.select("#mind-map");
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    const simulation = d3.forceSimulation()
+      .force("link", d3.forceLink().id(d => d.id))
+      .force("charge", d3.forceManyBody().strength(-50))
+      .force("center", d3.forceCenter(width / 2, height / 2));
+
+    const nodes = deepThoughts.map((thought, index) => ({ id: index, text: thought }));
+    const links = [];
+
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        if (Math.random() < 0.1) {
+          links.push({ source: i, target: j });
+        }
+      }
+    }
+
+    simulation.nodes(nodes);
+    simulation.force("link").links(links);
+
+    const link = svg.append("g")
+      .selectAll("line")
+      .data(links)
+      .enter().append("line")
+      .attr("stroke", "#0F0")
+      .attr("stroke-opacity", 0.2);
+
+    const node = svg.append("g")
+      .selectAll("circle")
+      .data(nodes)
+      .enter().append("circle")
+      .attr("r", 3)
+      .attr("fill", "#0F0");
+
+    simulation.on("tick", () => {
+      link
+        .attr("x1", d => d.source.x)
+        .attr("y1", d => d.source.y)
+        .attr("x2", d => d.target.x)
+        .attr("y2", d => d.target.y);
+
+      node
+        .attr("cx", d => d.x)
+        .attr("cy", d => d.y);
+    });
+  </script>
+</body></html>
