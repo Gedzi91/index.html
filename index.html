@@ -1,0 +1,151 @@
+<html><head><base href="https://run.gptengineer.app/">
+<title>Halo 7: The Endless - Graphics Technology Deep Dive</title>
+<style>
+    body, html {
+        margin: 0;
+        padding: 0;
+        font-family: 'Segoe UI', 'Arial', sans-serif;
+        background-color: #0A0A0A;
+        color: #E0E0E0;
+        height: 100%;
+        overflow: hidden;
+    }
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+    h1 {
+        font-size: 3em;
+        text-align: center;
+        color: #7ADBF3;
+        text-shadow: 0 0 10px #7ADBF3;
+        margin-bottom: 20px;
+    }
+    .tech-showcase {
+        display: flex;
+        flex-grow: 1;
+        overflow: hidden;
+    }
+    .tech-details {
+        flex: 1;
+        padding: 20px;
+        background-color: rgba(10, 10, 10, 0.8);
+        border-radius: 10px;
+        margin: 10px;
+        overflow-y: auto;
+    }
+    .tech-visual {
+        flex: 2;
+        padding: 20px;
+        background-color: rgba(10, 10, 10, 0.8);
+        border-radius: 10px;
+        margin: 10px;
+        overflow: hidden;
+        position: relative;
+    }
+    h2 {
+        color: #FFA500;
+        border-bottom: 2px solid #FFA500;
+        padding-bottom: 10px;
+    }
+    .feature {
+        background-color: #1A1A1A;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+        border-left: 4px solid #7ADBF3;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    .feature:hover {
+        background-color: #2A2A2A;
+    }
+    .feature h3 {
+        color: #7ADBF3;
+        margin-top: 0;
+    }
+    #tech-demo {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 10px;
+    }
+    #demo-overlay {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background-color: rgba(0, 0, 0, 0.7);
+        color: #FFF;
+        padding: 10px;
+        border-radius: 5px;
+        font-size: 1.2em;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>Halo 7: The Endless - Graphics Technology Deep Dive</h1>
+    
+    <div class="tech-showcase">
+        <div class="tech-details">
+            <h2>Unreal Engine 5.5 Features</h2>
+            <div class="feature" onclick="showDemo('nanite')">
+                <h3>Nanite Virtualized Geometry</h3>
+                <p>Experience unprecedented detail with billions of polygons in view, creating hyper-realistic environments and character models.</p>
+            </div>
+            <div class="feature" onclick="showDemo('lumen')">
+                <h3>Lumen Global Illumination</h3>
+                <p>Enjoy fully dynamic global illumination that adapts to changing light conditions in real-time, enhancing the visual fidelity of every scene.</p>
+            </div>
+            <div class="feature" onclick="showDemo('metahuman')">
+                <h3>MetaHuman Integration</h3>
+                <p>Witness the most lifelike character expressions and animations in Halo history, powered by MetaHuman technology.</p>
+            </div>
+            <div class="feature" onclick="showDemo('raytracing')">
+                <h3>Ray Tracing</h3>
+                <p>Immerse yourself in the Halo universe with true-to-life reflections, shadows, and lighting effects that bring every surface to life.</p>
+            </div>
+        </div>
+        <div class="tech-visual">
+            <video id="tech-demo" autoplay loop muted>
+                <source src="https://cdn.akamai.steamstatic.com/steam/apps/256904275/movie480_vp9.webm" type="video/webm">
+                Your browser does not support the video tag.
+            </video>
+            <div id="demo-overlay">Unreal Engine 5.5 Technology Demo</div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showDemo(tech) {
+    const video = document.getElementById('tech-demo');
+    const overlay = document.getElementById('demo-overlay');
+    
+    switch(tech) {
+        case 'nanite':
+            video.src = "https://cdn.akamai.steamstatic.com/steam/apps/256904275/movie480_vp9.webm";
+            overlay.textContent = "Nanite Virtualized Geometry Demo";
+            break;
+        case 'lumen':
+            video.src = "https://cdn.akamai.steamstatic.com/steam/apps/256904276/movie480_vp9.webm";
+            overlay.textContent = "Lumen Global Illumination Demo";
+            break;
+        case 'metahuman':
+            video.src = "https://cdn.akamai.steamstatic.com/steam/apps/256904277/movie480_vp9.webm";
+            overlay.textContent = "MetaHuman Integration Demo";
+            break;
+        case 'raytracing':
+            video.src = "https://cdn.akamai.steamstatic.com/steam/apps/256904278/movie480_vp9.webm";
+            overlay.textContent = "Ray Tracing Demo";
+            break;
+    }
+    
+    video.load();
+    video.play();
+}
+</script>
+</body></html>
