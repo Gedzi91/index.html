@@ -1,0 +1,251 @@
+<html><head><base href="https://www.fractalzoom.com/rainbow/">
+<title>Infinite Rainbow Mandelbrot Zoom - Color Scheme Selector</title>
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: black;
+    font-family: Arial, sans-serif;
+  }
+  canvas {
+    display: block;
+  }
+  #info {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    color: white;
+    font-size: 14px;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    border-radius: 5px;
+  }
+  #controls {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    border-radius: 5px;
+    color: white;
+  }
+  #restart {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  #restart:hover {
+    background-color: #45a049;
+  }
+  select {
+    margin-top: 10px;
+    padding: 5px;
+    font-size: 14px;
+    background-color: #333;
+    color: white;
+    border: 1px solid #555;
+    border-radius: 3px;
+  }
+</style>
+</head>
+<body>
+<canvas id="fractalCanvas"></canvas>
+<div id="info">Click to pause/resume</div>
+<div id="controls">
+  <label for="colorScheme">Color Scheme:</label>
+  <select id="colorScheme">
+    <option value="rainbow">Rainbow</option>
+    <option value="fire">Fire</option>
+    <option value="ocean">Ocean</option>
+    <option value="psychedelic">Psychedelic</option>
+    <option value="grayscale">Grayscale</option>
+  </select>
+</div>
+<button id="restart">Restart</button>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"></script>
+<script>
+const canvas = document.getElementById('fractalCanvas');
+const gl = canvas.getContext('webgl');
+
+if (!gl) {
+  alert('WebGL not supported');
+  throw new Error('WebGL not supported');
+}
+
+const vertexShaderSource = `
+  attribute vec2 a_position;
+  void main() {
+    gl_Position = vec4(a_position, 0.0, 1.0);
+  }
+`;
+
+const fragmentShaderSource = `
+  precision highp float;
+  uniform vec2 u_resolution;
+  uniform vec2 u_center;
+  uniform float u_zoom;
+  uniform float u_time;
+  uniform int u_colorScheme;
+
+  vec3 hsv2rgb(vec3 c) {
+    vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+  }
+
+  vec3 getColor(float t, int scheme) {
+    t = mod(t + u_time * 0.1, 1.0);
+    if (scheme == 0) { // Rainbow
+      return hsv2rgb(vec3(t, 1.0, 1.0));
+    } else if (scheme == 1) { // Fire
+      return mix(vec3(1.0, 0.0, 0.0), vec3(1.0, 1.0, 0.0), t);
+    } else if (scheme == 2) { // Ocean
+      return mix(vec3(0.0, 0.0, 0.5), vec3(0.0, 1.0, 1.0), t);
+    } else if (scheme == 3) { // Psychedelic
+      return hsv2rgb(vec3(sin(t*20.0)*0.5+0.5, 1.0, 1.0));
+    } else if (scheme == 4) { // Grayscale
+      return vec3(t);
+    }
+    return vec3(1.0); // Default white
+  }
+
+  void main() {
+    vec2 z, c;
+    c.x = (gl_FragCoord.x - u_resolution.x * 0.5) / (u_resolution.y * 0.5 * u_zoom) + u_center.x;
+    c.y = (gl_FragCoord.y - u_resolution.y * 0.5) / (u_resolution.y * 0.5 * u_zoom) + u_center.y;
+    
+    z = c;
+    float iter = 0.0;
+    const float max_iter = 1000.0;
+    for(float i = 0.0; i < max_iter; i++) {
+      if(z.x*z.x + z.y*z.y > 4.0) break;
+      float x = z.x*z.x - z.y*z.y + c.x;
+      float y = 2.0*z.x*z.y + c.y;
+      z.x = x;
+      z.y = y;
+      iter++;
+    }
+    
+    if(iter < max_iter) {
+      float t = iter / max_iter;
+      vec3 color = getColor(t, u_colorScheme);
+      gl_FragColor = vec4(color, 1.0);
+    } else {
+      gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+    }
+  }
+`;
+
+function createShader(gl, type, source) {
+  const shader = gl.createShader(type);
+  gl.shaderSource(shader, source);
+  gl.compileShader(shader);
+  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    console.error('Shader compile error:', gl.getShaderInfoLog(shader));
+    gl.deleteShader(shader);
+    return null;
+  }
+  return shader;
+}
+
+const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
+const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+
+const program = gl.createProgram();
+gl.attachShader(program, vertexShader);
+gl.attachShader(program, fragmentShader);
+gl.linkProgram(program);
+
+if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+  console.error('Program link error:', gl.getProgramInfoLog(program));
+  throw new Error('Program link error');
+}
+
+const positionBuffer = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+
+const positionAttributeLocation = gl.getAttribLocation(program, 'a_position');
+gl.enableVertexAttribArray(positionAttributeLocation);
+gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
+
+const resolutionUniformLocation = gl.getUniformLocation(program, 'u_resolution');
+const centerUniformLocation = gl.getUniformLocation(program, 'u_center');
+const zoomUniformLocation = gl.getUniformLocation(program, 'u_zoom');
+const timeUniformLocation = gl.getUniformLocation(program, 'u_time');
+const colorSchemeUniformLocation = gl.getUniformLocation(program, 'u_colorScheme');
+
+// Initial values focusing on a tentacle area
+const initialCenterX = -0.745;
+const initialCenterY = 0.1;
+const initialZoom = 5;
+
+let centerX = initialCenterX;
+let centerY = initialCenterY;
+let zoom = initialZoom;
+let isAnimating = true;
+let colorScheme = 0;
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  gl.viewport(0, 0, canvas.width, canvas.height);
+}
+
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+function render(time) {
+  if (isAnimating) {
+    zoom *= 1.01;
+    
+    // Adjust the center to follow the tentacle shape
+    centerX += 0.00000005 / zoom;
+    centerY += 0.00000003 / zoom;
+  }
+  
+  gl.useProgram(program);
+  gl.uniform2f(resolutionUniformLocation, canvas.width, canvas.height);
+  gl.uniform2f(centerUniformLocation, centerX, centerY);
+  gl.uniform1f(zoomUniformLocation, zoom);
+  gl.uniform1f(timeUniformLocation, time * 0.001);
+  gl.uniform1i(colorSchemeUniformLocation, colorScheme);
+  
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  
+  requestAnimationFrame(render);
+}
+
+canvas.addEventListener('click', () => {
+  isAnimating = !isAnimating;
+});
+
+const restartButton = document.getElementById('restart');
+restartButton.addEventListener('click', () => {
+  centerX = initialCenterX;
+  centerY = initialCenterY;
+  zoom = initialZoom;
+  isAnimating = true;
+});
+
+const colorSchemeSelect = document.getElementById('colorScheme');
+colorSchemeSelect.addEventListener('change', (event) => {
+  colorScheme = event.target.selectedIndex;
+});
+
+requestAnimationFrame(render);
+</script>
+</body>
+</html>
