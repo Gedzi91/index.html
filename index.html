@@ -1,0 +1,179 @@
+<html><head><base href="https://websim.ai" />
+<title>WebSim AI - Fractal Generator with Reverse and Forward Animation</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #111;
+    color: #fff;
+  }
+  canvas {
+    border: 1px solid #444;
+    background-color: black;
+  }
+  #controls {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    margin: 10px;
+    background-color: #333;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+  }
+  button:hover {
+    background-color: #555;
+  }
+  #info {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #aaa;
+    text-align: center;
+  }
+  #speedControl {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+  }
+  #speedSlider {
+    width: 300px;
+    margin: 0 10px;
+  }
+</style>
+</head>
+<body>
+<canvas id="canvas" width="800" height="800"></canvas>
+<div id="controls">
+  <div>
+    <button id="generateBtn">Generate New Fractal</button>
+    <button id="animateBtn">Start Animation</button>
+  </div>
+  <div id="speedControl">
+    <span>Fast Reverse</span>
+    <input type="range" id="speedSlider" min="-100" max="100" value="0">
+    <span>Fast Forward</span>
+  </div>
+</div>
+<div id="info">
+  Slide left for reverse, right for forward, center to pause.<br>
+  Current Speed: <span id="speedDisplay">0</span>
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const generateBtn = document.getElementById('generateBtn');
+const animateBtn = document.getElementById('animateBtn');
+const speedSlider = document.getElementById('speedSlider');
+const speedDisplay = document.getElementById('speedDisplay');
+
+let animationId;
+let hue = 0;
+
+function randomBetween(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
+function drawShape(x, y, radius, sides, rotationAngle) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(rotationAngle);
+  ctx.beginPath();
+  for (let i = 0; i < sides; i++) {
+    ctx.lineTo(
+      Math.cos((i * 2 * Math.PI) / sides) * radius,
+      Math.sin((i * 2 * Math.PI) / sides) * radius
+    );
+  }
+  ctx.closePath();
+  ctx.stroke();
+  ctx.restore();
+}
+
+let fractalParams = {};
+
+function initFractalParams() {
+  fractalParams = {
+    centerX: canvas.width / 2,
+    centerY: canvas.height / 2,
+    radius: randomBetween(300, 400),
+    angle: 0,
+    sides: Math.floor(randomBetween(3, 8)),
+    iterations: Math.floor(randomBetween(300, 700)),
+    radiusDecay: randomBetween(0.93, 0.97),
+    angleIncrement: randomBetween(0.05, 0.2),
+    colorSpeed: randomBetween(0.5, 2)
+  };
+}
+
+function generateFractal() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  let { centerX, centerY, radius, angle, sides, iterations, radiusDecay, angleIncrement, colorSpeed } = fractalParams;
+
+  for (let i = 0; i < iterations; i++) {
+    ctx.strokeStyle = `hsla(${(hue + i * colorSpeed) % 360}, 100%, 50%, ${1 - i / iterations})`;
+    drawShape(centerX, centerY, radius, sides, angle);
+    radius *= radiusDecay;
+    angle += angleIncrement;
+  }
+}
+
+function animate() {
+  generateFractal();
+  
+  const speed = speedSlider.value / 10; // -10 to 10
+  hue = (hue + speed + 360) % 360;
+  fractalParams.angle += speed * 0.02;
+
+  speedDisplay.textContent = speed.toFixed(1);
+
+  if (speed !== 0) {
+    animationId = requestAnimationFrame(animate);
+  }
+}
+
+generateBtn.addEventListener('click', () => {
+  cancelAnimationFrame(animationId);
+  hue = Math.random() * 360;
+  initFractalParams();
+  generateFractal();
+});
+
+animateBtn.addEventListener('click', () => {
+  if (animationId) {
+    cancelAnimationFrame(animationId);
+    animationId = null;
+    animateBtn.textContent = 'Start Animation';
+  } else {
+    animate();
+    animateBtn.textContent = 'Stop Animation';
+  }
+});
+
+speedSlider.addEventListener('input', () => {
+  if (speedSlider.value == 0) {
+    cancelAnimationFrame(animationId);
+    animationId = null;
+  } else if (!animationId) {
+    animate();
+  }
+});
+
+// Initial generation
+initFractalParams();
+generateFractal();
+</script>
+</body></html>
