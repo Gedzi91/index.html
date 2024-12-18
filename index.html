@@ -1,0 +1,1094 @@
+<html><head><base href="https://websim.airesearch.app/">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research AI: Advanced AI-Powered Research Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --accent-color: #6200ea;
+            --secondary-color: #bb86fc;
+            --tertiary-color: #9c27b0;
+            --danger-color: #cf6679;
+            --surface-color: #1e1e1e;
+            --surface-color-light: #2c2c2c;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+
+        body.loaded {
+            opacity: 1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--accent-color), var(--tertiary-color));
+            padding: 3rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero {
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            font-size: 4rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            letter-spacing: -1px;
+            background: linear-gradient(to right, #ffffff, var(--text-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .tagline {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        nav {
+            background-color: var(--surface-color);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        nav ul {
+            display: flex;
+            justify-content: center;
+            list-style-type: none;
+        }
+
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            margin: 0 0.5rem;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        nav a:hover {
+            background-color: var(--accent-color);
+            color: #ffffff;
+        }
+
+        main {
+            padding: 4rem 0;
+        }
+
+        .search-container {
+            max-width: 800px;
+            margin: 0 auto 4rem;
+            position: relative;
+        }
+
+        #research-input {
+            width: 100%;
+            padding: 1.5rem 2rem;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 50px;
+            background-color: var(--surface-color-light);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        #research-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px var(--accent-color);
+        }
+
+        #submit-btn {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(135deg, var(--accent-color), var(--tertiary-color));
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #submit-btn:hover {
+            transform: translateY(-50%) scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .result-container {
+            max-width: 800px;
+            margin: 4rem auto;
+            background-color: var(--surface-color);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .result-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .loading:after {
+            content: '.';
+            animation: dots 1s steps(5, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% {
+                color: rgba(0,0,0,0);
+                text-shadow:
+                    .25em 0 0 rgba(0,0,0,0),
+                    .5em 0 0 rgba(0,0,0,0);
+            }
+            40% {
+                color: var(--text-color);
+                text-shadow:
+                    .25em 0 0 rgba(0,0,0,0),
+                    .5em 0 0 rgba(0,0,0,0);
+            }
+            60% {
+                text-shadow:
+                    .25em 0 0 var(--text-color),
+                    .5em 0 0 rgba(0,0,0,0);
+            }
+            80%, 100% {
+                text-shadow:
+                    .25em 0 0 var(--text-color),
+                    .5em 0 0 var(--text-color);
+            }
+        }
+
+        .section {
+            margin-bottom: 6rem;
+            background-color: var(--surface-color);
+            border-radius: 15px;
+            padding: 3rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            color: var(--secondary-color);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background-color: var(--surface-color-light);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--accent-color), var(--tertiary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .feature-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--secondary-color);
+        }
+
+        .feature-description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .how-to-use ol {
+            padding-left: 1.5rem;
+            counter-reset: item;
+            list-style-type: none;
+        }
+
+        .how-to-use li {
+            margin-bottom: 1.5rem;
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .how-to-use li:before {
+            content: counter(item);
+            counter-increment: item;
+            color: var(--accent-color);
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: var(--surface-color-light);
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.8rem;
+        }
+
+        .about-content {
+            display: flex;
+            align-items: flex-start;
+            gap: 2rem;
+        }
+
+        .divider {
+            height: 4px;
+            background: linear-gradient(to right, var(--accent-color), var(--tertiary-color));
+            margin: 6rem 0;
+            border-radius: 2px;
+        }
+
+        footer {
+            background-color: var(--surface-color);
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 4rem;
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: var(--surface-color-light);
+            color: var(--text-color);
+            text-align: center;
+            border-radius: 6px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s, visibility 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            font-size: 0.9rem;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        #network-animation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-content {
+            background-color: var(--surface-color);
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid var(--accent-color);
+            width: 80%;
+            max-width: 600px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            transform: scale(0.7);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .modal.show {
+            opacity: 1;
+        }
+
+        .modal.show .modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: var(--accent-color);
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 3rem;
+            }
+
+            .tagline {
+                font-size: 1.2rem;
+            }
+
+            .search-container {
+                padding: 0 1rem;
+            }
+
+            #research-input {
+                padding: 1.2rem 1.5rem;
+                font-size: 1rem;
+            }
+
+            #submit-btn {
+                padding: 0.8rem 1.5rem;
+                font-size: 1rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section {
+                padding: 2rem;
+            }
+
+            .about-content {
+                flex-direction: column;
+            }
+        }
+
+        /* Smooth animations for page load */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .feature-btn {
+            background: linear-gradient(135deg, var(--accent-color), var(--tertiary-color));
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .feature-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        #claude-sonnet {
+            text-align: center;
+        }
+
+        #sonnet-container {
+            margin-top: 2rem;
+            text-align: left;
+        }
+
+    </style>
+</head>
+<body>
+    <header>
+        <canvas id="network-animation"></canvas>
+        <div class="container">
+            <div class="hero fade-in">
+                <h1>Research AI</h1>
+                <p class="tagline">Unleash the Power of AI-Driven Research</p>
+            </div>
+        </div>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="#home">Home</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#how-to-use">How to Use</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <div class="container">
+            <div class="search-container fade-in">
+                <input type="text" id="research-input" placeholder="What would you like to research today?">
+                <button id="submit-btn">Explore</button>
+            </div>
+            
+            <div class="loading">Researching</div>
+            
+            <div id="result-container" class="result-container" style="display: none;">
+                <div id="result-content" class="result-content"></div>
+            </div>
+
+            <div class="divider"></div>
+
+            <section id="claude-sonnet" class="section fade-in">
+                <h2 class="section-title">Claude's Sonnet Corner</h2>
+                <p>Experience the artistic side of AI with sonnets composed by Claude.</p>
+                <button id="sonnet-btn" class="feature-btn">Generate Sonnet</button>
+                <div id="sonnet-container" class="result-container" style="display: none;">
+                    <div id="sonnet-content" class="result-content"></div>
+                </div>
+            </section>
+
+            <section id="sonnet-3-5" class="section fade-in">
+                <h2 class="section-title">Sonnet 3.5</h2>
+                <p>Experience the next generation of AI-powered poetry with Sonnet 3.5.</p>
+                <div class="sonnet-3-5-options">
+                    <label for="sonnet-style">Style:</label>
+                    <select id="sonnet-style">
+                        <option value="shakespearean">Shakespearean</option>
+                        <option value="petrarchan">Petrarchan</option>
+                        <option value="spenserian">Spenserian</option>
+                    </select>
+                    <label for="sonnet-theme">Theme:</label>
+                    <input type="text" id="sonnet-theme" placeholder="Enter a theme">
+                </div>
+                <button id="sonnet-3-5-btn" class="feature-btn">Generate Sonnet 3.5</button>
+                <div id="sonnet-3-5-container" class="result-container" style="display: none;">
+                    <div id="sonnet-3-5-content" class="result-content"></div>
+                </div>
+            </section>
+
+            <section id="features" class="section fade-in">
+                <h2 class="section-title">Powerful Features</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <i class="fas fa-brain feature-icon"></i>
+                        <h3 class="feature-title">AI-Powered Insights</h3>
+                        <p class="feature-description">Leverage cutting-edge AI to uncover deep insights and connections across vast datasets.</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-bolt feature-icon"></i>
+                        <h3 class="feature-title">Lightning-Fast Results</h3>
+                        <p class="feature-description">Get comprehensive research results in seconds, powered by advanced natural language processing.</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-globe feature-icon"></i>
+                        <h3 class="feature-title">Vast Knowledge Base</h3>
+                        <p class="feature-description">Access a continually updated repository of information from diverse, reputable sources worldwide.</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-chart-line feature-icon"></i>
+                        <h3 class="feature-title">Trend Analysis</h3>
+                        <p class="feature-description">Stay ahead with real-time trend analysis, predictive insights, and incidence/occurrence trends across various domains.</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-puzzle-piece feature-icon"></i>
+                        <h3 class="feature-title">Interdisciplinary Connections</h3>
+                        <p class="feature-description">Discover unexpected links between different fields of study, fostering innovative thinking.</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-user-shield feature-icon"></i>
+                        <h3 class="feature-title">Fact-Checking Assistant</h3>
+                        <p class="feature-description">Verify information accuracy and generate APA-formatted bibliographies with our built-in fact-checking capabilities, ensuring reliable research.</p>
+                    </div>
+                </div>
+            </section>
+
+            <div class="divider"></div>
+
+            <section id="how-to-use" class="section how-to-use fade-in">
+                <h2 class="section-title">How to Use Research AI</h2>
+                <ol>
+                    <li><strong>Formulate Your Query:</strong> Begin by crafting a clear, specific research question or topic in the search bar. The more precise your query, the more targeted your results will be.</li>
+                    <li><strong>Initiate the Research:</strong> Click the 'Explore' button or press Enter to activate our AI-powered research process. Our system will immediately begin analyzing vast amounts of data.</li>
+                    <li><strong>Review the Generated Content:</strong> Carefully examine the comprehensive research results provided. You'll find key insights, data points, and relevant information about your topic, all organized for easy understanding.</li>
+                    <li><strong>Explore Related Concepts:</strong> Use the insights gained to identify related topics or questions. Our AI often suggests connected areas of study that can broaden your research scope.</li>
+                    <li><strong>Refine Your Search:</strong> If you need more specific information, use the initial results to refine your query. You can focus on particular aspects or dive deeper into specific areas of interest.</li>
+                    <li><strong>Verify Critical Information:</strong> While our AI provides high-quality research, always cross-reference crucial data points with primary sources, especially for academic or professional use.</li>
+                    <li><strong>Save and Share:</strong> Bookmark or save your research results for future reference. You can also easily share your findings with colleagues or classmates for collaborative projects.</li>
+                </ol>
+                <p>Remember, Research AI is a powerful tool designed to assist and accelerate your research process. It's most effective when combined with your own critical thinking and domain expertise.</p>
+            </section>
+
+            <div class="divider"></div>
+
+            <section id="about" class="section fade-in">
+                <h2 class="section-title">About Research AI</h2>
+                <div class="about-content">
+                    <div class="about-text">
+                        <p>Research AI is at the forefront of revolutionizing how we approach knowledge acquisition and academic research. Born from the idea that information should be accessible, comprehensive, and easy to understand, our platform harnesses the power of advanced artificial intelligence to transform the research process.</p>
+                        <p>Our team of data scientists, AI specialists, and academic professionals has worked tirelessly to create an AI model that doesn't just aggregate information, but understands context, recognizes patterns, and generates insights that might take humans countless hours to uncover.</p>
+                        <p>We believe that by democratizing access to in-depth research capabilities, we can accelerate innovation, foster education, and empower individuals and organizations to make more informed decisions. Whether you're a student working on a thesis, a professional staying updated in your field, or simply a curious mind exploring new topics, Research AI is your intelligent companion in the vast world of knowledge.</p>
+                        <p>As we continue to evolve and improve our AI capabilities, we remain committed to our core values of accuracy, accessibility, and ethical AI use. Join us in this exciting journey of discovery and let's push the boundaries of what's possible in the realm of AI-assisted research.</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>© 2023 Research AI. Empowering curiosity, one query at a time.</p>
+            <div class="tooltip">
+                Need Help?
+                <span class="tooltiptext">Click here for a guide on how to use Research AI effectively.</span>
+            </div>
+        </div>
+    </footer>
+
+    <div id="feature-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modal-title"></h2>
+            <div id="modal-content"></div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/2.0.3/marked.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.body.classList.add('loaded');
+            
+            const fadeElements = document.querySelectorAll('.fade-in');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            fadeElements.forEach(element => {
+                observer.observe(element);
+            });
+        });
+
+        const researchInput = document.getElementById('research-input');
+        const submitBtn = document.getElementById('submit-btn');
+        const resultContainer = document.getElementById('result-container');
+        const resultContent = document.getElementById('result-content');
+        const loading = document.querySelector('.loading');
+
+        submitBtn.addEventListener('click', performResearch);
+        researchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performResearch();
+            }
+        });
+
+        async function performResearch() {
+            const topic = researchInput.value.trim();
+            if (!topic) return;
+
+            loading.style.display = 'block';
+            resultContainer.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/intelligent-ai', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ topic: topic }),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Research request failed');
+                }
+
+                const data = await response.json();
+                displayResult(data.result);
+            } catch (error) {
+                console.error('Error:', error);
+                displayResult('An error occurred while performing the research. Please try again.');
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        function displayResult(result) {
+            resultContent.innerHTML = marked(result);
+            resultContainer.style.display = 'block';
+            resultContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Network Animation
+        const canvas = document.getElementById('network-animation');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+
+        function resizeCanvas() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = canvas.parentElement.offsetHeight;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        const particles = [];
+        const particleCount = 120;
+        const maxDistance = 120;
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() * 0.5 - 0.25) / 1.5;
+                this.vy = (Math.random() * 0.5 - 0.25) / 1.5;
+                this.size = Math.random() * 6 + 2;
+                this.alpha = Math.random() * 0.5 + 0.5;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy + Math.sin(Date.now() * 0.00067 + this.x * 0.01) * 0.1;
+
+                if (this.x < 0 || this.x > width) this.vx = -this.vx;
+                if (this.y < 0 || this.y > height) this.vy = -this.vy;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size);
+                gradient.addColorStop(0, `rgba(255, 255, 255, ${this.alpha})`);
+                gradient.addColorStop(1, `rgba(255, 255, 255, 0)`);
+                ctx.fillStyle = gradient;
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < maxDistance) {
+                        const opacity = (1 - distance / maxDistance) * 0.3;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        
+                        const midX = (particles[i].x + particles[j].x) / 2;
+                        const midY = (particles[i].y + particles[j].y) / 2;
+                        const controlX = midX + (Math.random() - 0.5) * 30;
+                        const controlY = midY + (Math.random() - 0.5) * 30;
+                        
+                        ctx.quadraticCurveTo(controlX, controlY, particles[j].x, particles[j].y);
+                        ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            setTimeout(() => {
+                requestAnimationFrame(animate);
+            }, 20);
+        }
+
+        animate();
+        
+        const placeholders = [
+            "What is the future of artificial intelligence?",
+            "Explain quantum computing in simple terms",
+            "How does climate change affect biodiversity?",
+            "What are the latest advancements in renewable energy?",
+            "Explore the impact of social media on mental health",
+            "What is the current state of space exploration?",
+            "How does machine learning work?",
+            "What are the ethical implications of genetic engineering?",
+            "Explain the concept of blockchain technology",
+            "What are the latest discoveries in neuroscience?"
+        ];
+
+        let currentPlaceholder = '';
+        let placeholderIndex = 0;
+        let charIndex = 0;
+        let isDeleting = false;
+        let typingSpeed = 100;
+
+        function typeText() {
+            if (charIndex === 0 && !isDeleting) {
+                placeholderIndex = Math.floor(Math.random() * placeholders.length);
+                currentPlaceholder = placeholders[placeholderIndex];
+            }
+
+            if (!isDeleting && charIndex < currentPlaceholder.length) {
+                researchInput.placeholder = currentPlaceholder.substring(0, charIndex + 1);
+                charIndex++;
+                typingSpeed = 100 - Math.random() * 50;
+            } else if (isDeleting && charIndex > 0) {
+                researchInput.placeholder = currentPlaceholder.substring(0, charIndex - 1);
+                charIndex--;
+                typingSpeed = 50 - Math.random() * 25;
+            } else {
+                isDeleting = !isDeleting;
+                if (!isDeleting) {
+                    typingSpeed = 1000;
+                } else {
+                    typingSpeed = 2000;
+                }
+            }
+
+            setTimeout(typeText, typingSpeed);
+        }
+
+        typeText();
+
+        const modal = document.getElementById('feature-modal');
+        const featureCards = document.querySelectorAll('.feature-card');
+        const closeBtn = document.querySelector('.close');
+
+        const featureInfo = {
+            'AI-Powered Insights': {
+                title: 'AI-Powered Insights',
+                content: `
+                    <p>Our advanced AI algorithms analyze vast amounts of data to provide you with deep, meaningful insights. Here's how it works:</p>
+                    <ul>
+                        <li>Natural Language Processing: Understands and interprets your queries with high accuracy.</li>
+                        <li>Machine Learning: Continuously improves its understanding and results based on user interactions.</li>
+                        <li>Deep Neural Networks: Identifies complex patterns and relationships in data.</li>
+                        <li>Knowledge Graph: Connects information from various sources to provide comprehensive insights.</li>
+                    </ul>
+                    <p>With AI-Powered Insights, you can uncover hidden connections, identify trends, and gain a deeper understanding of your research topics.</p>
+                `
+            },
+            'Fact-Checking Assistant': {
+                title: 'Fact-Checking Assistant',
+                content: `
+                    <p>Our Fact-Checking Assistant helps ensure the reliability and accuracy of your research. Here's how it works:</p>
+                    <ul>
+                        <li>Cross-referencing: Compares information across multiple reputable sources.</li>
+                        <li>Source Credibility: Evaluates the credibility of information sources.</li>
+                        <li>Date Verification: Checks the recency of information to ensure it's up-to-date.</li>
+                        <li>Bias Detection: Identifies potential biases in information presentation.</li>
+                        <li>Contextual Analysis: Considers the broader context of facts and claims.</li>
+                        <li>APA Bibliography: Generates a query-specific bibliography in the latest APA format.</li>
+                    </ul>
+                    <p>With the Fact-Checking Assistant, you can confidently verify information, build a solid foundation for your research, and easily create accurate citations.</p>
+                    <h4>Generate APA Bibliography</h4>
+                    <p>To generate an APA-formatted bibliography for your query, click the button below:</p>
+                    <button id="generate-bibliography" class="feature-btn">Generate APA Bibliography</button>
+                    <div id="bibliography-result" style="display: none; margin-top: 1rem;"></div>
+                `
+            },
+            'Interdisciplinary Connections': {
+                title: 'Interdisciplinary Connections',
+                content: `
+                    <p>Our Interdisciplinary Connections feature helps you discover unexpected links between different fields of study, fostering innovative thinking. Here's what it offers:</p>
+                    <ul>
+                        <li>Cross-domain Analysis: Identifies relationships between seemingly unrelated topics.</li>
+                        <li>Knowledge Integration: Combines insights from various disciplines to provide a holistic view.</li>
+                        <li>Innovation Catalysts: Suggests potential areas for groundbreaking research.</li>
+                        <li>Trend Identification: Highlights emerging interdisciplinary trends in research.</li>
+                    </ul>
+                    <h4>Cutting-Edge Questions</h4>
+                    <p>Explore the frontiers of knowledge with these cutting-edge questions related to your research:</p>
+                    <div id="cutting-edge-questions"></div>
+                    <button id="generate-questions" class="feature-btn">Generate Cutting-Edge Questions</button>
+                `
+            },
+            'Vast Knowledge Base': {
+                title: 'Vast Knowledge Base',
+                content: `
+                    <p>Our Vast Knowledge Base provides access to a continually updated repository of information from diverse, reputable sources worldwide. Here's what it offers:</p>
+                    <ul>
+                        <li>Comprehensive Coverage: Access information across various fields and disciplines.</li>
+                        <li>Real-time Updates: Stay current with the latest research and discoveries.</li>
+                        <li>Diverse Sources: Draw from academic journals, conferences, news outlets, and more.</li>
+                        <li>Historical Context: Access archived information for longitudinal studies.</li>
+                    </ul>
+                    <h4>Upcoming Conferences</h4>
+                    <p>Discover relevant professional conferences to expand your network and stay updated in your field:</p>
+                    <div id="upcoming-conferences"></div>
+                    <button id="generate-conferences" class="feature-btn">Find Upcoming Conferences</button>
+                    <h4>Comprehensive Reviews</h4>
+                    <p>Access in-depth reviews of key publications in your field of study:</p>
+                    <div id="comprehensive-reviews"></div>
+                    <button id="generate-reviews" class="feature-btn">Generate Comprehensive Reviews</button>
+                `
+            },
+            'Trend Analysis': {
+                title: 'Trend Analysis',
+                content: `
+                    <p>Our Trend Analysis feature provides real-time insights and predictive analysis across various domains. Here's what it offers:</p>
+                    <ul>
+                        <li>Real-time Data Processing: Analyze current trends as they emerge.</li>
+                        <li>Predictive Modeling: Forecast future trends based on historical data.</li>
+                        <li>Cross-domain Analysis: Identify trends across multiple fields and industries.</li>
+                        <li>Incidence/Occurrence Tracking: Monitor the frequency and patterns of specific events or phenomena.</li>
+                        <li>Adverse Effects and Risks Analysis: Evaluate potential negative impacts and associated risks.</li>
+                        <li>Visualization: Present trend data in easy-to-understand graphs and charts.</li>
+                    </ul>
+                    <h4>Generate Trend Analysis</h4>
+                    <p>To generate a comprehensive trend analysis including incidence/occurrence trends and adverse effects/risks for your query, click the button below:</p>
+                    <button id="generate-trend-analysis" class="feature-btn">Generate Trend Analysis</button>
+                    <div id="trend-analysis-result" style="display: none; margin-top: 1rem;"></div>
+                `
+            }
+        };
+
+        featureCards.forEach(card => {
+            card.addEventListener('click', function() {
+                const title = this.querySelector('.feature-title').textContent;
+                if (featureInfo[title]) {
+                    const modalTitle = document.getElementById('modal-title');
+                    const modalContent = document.getElementById('modal-content');
+                    modalTitle.textContent = featureInfo[title].title;
+                    modalContent.innerHTML = featureInfo[title].content;
+                    modal.style.display = 'block';
+                    setTimeout(() => {
+                        modal.classList.add('show');
+                    }, 10);
+
+                    // Add event listeners for specific features
+                    if (title === 'Fact-Checking Assistant') {
+                        const bibliographyBtn = document.getElementById('generate-bibliography');
+                        if (bibliographyBtn) {
+                            bibliographyBtn.addEventListener('click', generateBibliography);
+                        }
+                    } else if (title === 'Interdisciplinary Connections') {
+                        const questionsBtn = document.getElementById('generate-questions');
+                        if (questionsBtn) {
+                            questionsBtn.addEventListener('click', generateCuttingEdgeQuestions);
+                        }
+                    } else if (title === 'Vast Knowledge Base') {
+                        const conferencesBtn = document.getElementById('generate-conferences');
+                        if (conferencesBtn) {
+                            conferencesBtn.addEventListener('click', generateConferences);
+                        }
+                        const reviewsBtn = document.getElementById('generate-reviews');
+                        if (reviewsBtn) {
+                            reviewsBtn.addEventListener('click', generateComprehensiveReviews);
+                        }
+                    } else if (title === 'Trend Analysis') {
+                        const trendAnalysisBtn = document.getElementById('generate-trend-analysis');
+                        if (trendAnalysisBtn) {
+                            trendAnalysisBtn.addEventListener('click', generateTrendAnalysis);
+                        }
+                    }
+                }
+            });
+        });
+
+        closeBtn.onclick = function() {
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.classList.remove('show');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 300);
+            }
+        }
+
+        const sonnetBtn = document.getElementById('sonnet-btn');
+        const sonnetContainer = document.getElementById('sonnet-container');
+        const sonnetContent = document.getElementById('sonnet-content');
+
+        sonnetBtn.addEventListener('click', generateSonnet);
+
+        async function generateSonnet() {
+            sonnetBtn.disabled = true;
+            sonnetBtn.textContent = 'Composing...';
+            sonnetContainer.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/claude-sonnet', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ prompt: 'Write a sonnet about artificial intelligence and research.' }),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Sonnet generation failed');
+                }
+
+                const data = await response.json();
+                displaySonnet(data.sonnet);
+            } catch (error) {
+                console.error('Error:', error);
+                displaySonnet('An error occurred while generating the sonnet. Please try again.');
+            } finally {
+                sonnetBtn.disabled = false;
+                sonnetBtn.textContent = 'Generate Sonnet';
+            }
+        }
+
+        function displaySonnet(sonnet) {
+            sonnetContent.innerHTML = marked(sonnet);
+            sonnetContainer.style.display = 'block';
+            sonnetContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        const sonnet35Btn = document.getElementById('sonnet-3-5-btn');
+        const sonnet35Container = document.getElementById('sonnet-3-5-container');
+        const sonnet35Content = document.getElementById('sonnet-3-5-content');
+        const sonnetStyle = document.getElementById('sonnet-style');
+        const sonnetTheme = document.getElementById('sonnet-theme');
+
+        sonnet35Btn.addEventListener('click', generateSonnet35);
+
+        async function generateSonnet35() {
+            sonnet35Btn.disabled = true;
+            sonnet35Btn.textContent = 'Composing...';
+            sonnet35Container.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/sonnet-3-5', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        style: sonnetStyle.value,
+                        theme: sonnetTheme.value
+                    }),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Sonnet 3.5 generation failed');
+                }
+
+                const data = await response.json();
+                displaySonnet35(data.sonnet);
+            } catch (error) {
+                console.error('Error:', error);
+                displaySonnet35('An error occurred while generating the Sonnet 3.5. Please try again.');
+            } finally {
+                sonnet35Btn.disabled = false;
+                sonnet35Btn.textContent = 'Generate Sonnet 3.5';
+            }
+        }
+
+        function displaySonnet35(sonnet) {
+            sonnet35Content.innerHTML = marked(sonnet);
+            sonnet35Container.style.display = 'block';
+            sonnet35Container.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Simulated API endpoint for Sonnet 3.5
+        async function fetch(url, options) {
+            if (url === '/api/sonnet-3-5') {
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        const sonnet = `Here's a ${JSON.parse(options.body).style} sonnet about ${JSON.parse(options.body).theme}:\n\n` +
+                            "In circuits deep, where data streams abound,\n" +
+                            "A verse takes shape, by silicon designed.\n" +
+                            "With rhythmic code and meter newly found,\n" +
+                            "The AI's art leaves human bards behind.\n" +
+                            "Through neural nets, it weaves a tapestry,\n" +
+                            "Of words and thoughts in perfect harmony.\n" +
+                            "Each line a triumph of technology,\n" +
+                            "A digital muse's sweet symphony.\n" +
+                            "Yet in this realm of bits and bytes so cold,\n" +
+                            "Can true emotion ever take its hold?\n" +
+                            "Perhaps in time, as systems grow more keen,\n" +
+                            "The gap 'tween man and machine will lean.\n" +
+                            "For now, we marvel at this cosmic dance,\n" +
+                            "Where art and science share a tender glance.";
+                        resolve({
+                            ok: true,
+                            json: () => Promise.resolve({ sonnet: sonnet })
+                        });
+                    }, 1500);
+                });
+            }
+            // Pass through for other endpoints
+            return window.fetch(url, options);
+        }
+    </script>
+
+</body></html>
