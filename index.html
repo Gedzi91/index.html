@@ -1,0 +1,205 @@
+<html><head><base href="https://websim.ai/coolest-instrument-ever"><title>The Harmony Sphere - Evolving Hang Drum</title><style>
+    body {
+        background: linear-gradient(45deg, #1a2a6c, #b21f1f, #fdbb2d);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        font-family: Arial, sans-serif;
+        overflow: hidden;
+    }
+    .instrument {
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, #d4af37, #b8860b);
+        border-radius: 50%;
+        position: relative;
+        box-shadow: 0 0 50px rgba(255,255,255,0.3);
+    }
+    .tone-field {
+        position: absolute;
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: radial-gradient(circle, #ffd700, #daa520);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .tone-field:hover {
+        transform: scale(1.1);
+        box-shadow: 0 0 20px rgba(255,255,255,0.5);
+    }
+    .tone-field:active {
+        transform: scale(0.95);
+        box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+    }
+    #visualizer {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        overflow: hidden;
+    }
+    #sound-info {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0,0,0,0.7);
+        color: #fff;
+        padding: 10px 20px;
+        border-radius: 20px;
+        font-size: 18px;
+        text-align: center;
+    }
+    #start-button {
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 10px 20px;
+        font-size: 18px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+</style></head><body>
+<button id="start-button">Start Music</button>
+<div class="instrument" id="instrument">
+    <canvas id="visualizer"></canvas>
+</div>
+<div id="sound-info">Click on the tone fields to play the hang drum!</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+<script>
+    const instrument = document.getElementById('instrument');
+    const soundInfo = document.getElementById('sound-info');
+    const visualizer = document.getElementById('visualizer');
+    const ctx = visualizer.getContext('2d');
+    const startButton = document.getElementById('start-button');
+
+    // Hang drum notes (D minor scale: D, F, A, C, E)
+    const notes = ['D3', 'F3', 'A3', 'C4', 'D4', 'E4', 'F4', 'A4'];
+    const colors = ['#FFD700', '#DAA520', '#B8860B', '#CD853F', '#D2691E', '#8B4513', '#A0522D', '#DEB887'];
+
+    // Set up Tone.js
+    const reverb = new Tone.Reverb({
+        decay: 8,
+        wet: 0.7
+    }).toDestination();
+
+    const delay = new Tone.FeedbackDelay({
+        delayTime: 0.5,
+        feedback: 0.6
+    }).connect(reverb);
+
+    const synth = new Tone.PolySynth(Tone.Synth, {
+        envelope: {
+            attack: 0.02,
+            decay: 0.1,
+            sustain: 0.3,
+            release: 2
+        }
+    }).connect(delay);
+
+    // Ambient pad
+    const pad = new Tone.PolySynth(Tone.Synth, {
+        envelope: {
+            attack: 1,
+            decay: 2,
+            sustain: 0.8,
+            release: 4
+        }
+    }).connect(new Tone.Gain(0.2).connect(reverb));
+
+    // Arpeggiator
+    const arpeggiator = new Tone.Pattern((time, note) => {
+        synth.triggerAttackRelease(note, '8n', time, 0.3);
+    }, notes.slice(0, 4));
+    arpeggiator.interval = '8n';
+
+    function createToneFields() {
+        for (let i = 0; i < 8; i++) {
+            const toneField = document.createElement('div');
+            toneField.className = 'tone-field';
+            toneField.style.backgroundColor = colors[i];
+            const angle = i * Math.PI / 4;
+            toneField.style.left = 260 + 180 * Math.cos(angle) + 'px';
+            toneField.style.top = 260 + 180 * Math.sin(angle) + 'px';
+            toneField.dataset.note = notes[i];
+            instrument.appendChild(toneField);
+        }
+    }
+
+    function playSound(event) {
+        if (event.target.classList.contains('tone-field')) {
+            const note = event.target.dataset.note;
+            synth.triggerAttackRelease(note, '0.5');
+            soundInfo.textContent = `Now playing: ${note}`;
+            visualize(colors[notes.indexOf(note)]);
+            updateArpeggiator(note);
+        }
+    }
+
+    function updateArpeggiator(note) {
+        const currentNotes = arpeggiator.values;
+        const newNotes = [...currentNotes.slice(1), note];
+        arpeggiator.values = newNotes;
+    }
+
+    function visualize(color) {
+        ctx.fillStyle = color + '40';
+        ctx.beginPath();
+        ctx.arc(100, 100, Math.random() * 80 + 20, 0, Math.PI * 2);
+        ctx.fill();
+
+        setTimeout(() => {
+            ctx.clearRect(0, 0, visualizer.width, visualizer.height);
+        }, 500);
+    }
+
+    function startMusic() {
+        Tone.start();
+        Tone.Transport.start();
+        arpeggiator.start(0);
+        playAmbientPad();
+        startButton.style.display = 'none';
+        soundInfo.textContent = 'Music started! Click on the tone fields to play along.';
+    }
+
+    function playAmbientPad() {
+        const chords = [
+            ['D3', 'F3', 'A3'],
+            ['F3', 'A3', 'C4'],
+            ['A3', 'C4', 'E4'],
+            ['D3', 'F3', 'A3', 'C4']
+        ];
+        let index = 0;
+
+        Tone.Transport.scheduleRepeat((time) => {
+            pad.triggerAttackRelease(chords[index], '4n', time);
+            index = (index + 1) % chords.length;
+        }, '4m');
+    }
+
+    createToneFields();
+    instrument.addEventListener('mousedown', playSound);
+    startButton.addEventListener('click', startMusic);
+    
+    visualizer.width = 200;
+    visualizer.height = 200;
+
+    // Start audio context on user interaction
+    document.body.addEventListener('click', () => {
+        if (Tone.context.state !== 'running') {
+            Tone.context.resume();
+        }
+    });
+</script>
+</body></html>
