@@ -1,0 +1,474 @@
+<html><head><base href="https://websim.ai/subconscious-explorer?mode=cosmic&depth=boundless&animation=fractal&connections=holographic&colorScheme=transcendent&insights=eternal&soundscape=celestial_harmonies&visualEffects=quantum_foam&personalizeInsights=cosmic&expandView=multiversal&consciousness=universal_mind">
+<title>Cosmic Consciousness Explorer</title>
+<style>
+:root {
+  --primary-glow: rgba(191, 123, 255, 0.8);
+  --secondary-glow: rgba(123, 255, 247, 0.6);
+}
+
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background: #000;
+  color: #fff;
+  font-family: 'Arial', sans-serif;
+}
+
+#fractal-universe {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.holographic-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, 
+    rgba(255,255,255,0.05),
+    rgba(255,255,255,0.02));
+  pointer-events: none;
+}
+
+.cosmic-insight {
+  position: fixed;
+  font-size: 1.5rem;
+  color: rgba(255,255,255,0.9);
+  text-shadow: 0 0 10px var(--primary-glow);
+  opacity: 0;
+  transition: opacity 2s ease;
+  pointer-events: none;
+  text-align: center;
+  width: 80%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.quantum-particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: white;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+#consciousness-field {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle at center,
+    var(--primary-glow) 0%,
+    transparent 70%);
+  animation: pulse 4s ease infinite;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+#consciousness-field:hover {
+  width: 250px;
+  height: 250px;
+  box-shadow: 
+    0 0 50px var(--primary-glow),
+    0 0 100px var(--secondary-glow);
+}
+
+#consciousness-field::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  bottom: -10px;
+  border-radius: 50%;
+  border: 2px solid var(--primary-glow);
+  animation: rotate 8s linear infinite;
+}
+
+#consciousness-field::after {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: -20px;
+  right: -20px;
+  bottom: -20px;
+  border-radius: 50%;
+  border: 1px solid var(--secondary-glow);
+  animation: rotate 12s linear infinite reverse;
+}
+
+@keyframes pulse {
+  0% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+  50% { transform: translate(-50%, -50%) scale(1.5); opacity: 0.8; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.consciousness-ripple {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid var(--primary-glow);
+  animation: ripple 2s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes ripple {
+  0% {
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    opacity: 1;
+  }
+  100% {
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    opacity: 0;
+  }
+}
+
+.fractal-controls {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.7);
+  padding: 15px;
+  border-radius: 15px;
+  border: 1px solid var(--primary-glow);
+  display: flex;
+  gap: 20px;
+  z-index: 1000;
+  box-shadow: 0 0 20px var(--secondary-glow);
+}
+
+.fractal-control {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: white;
+}
+
+.fractal-control label {
+  margin-bottom: 5px;
+  font-size: 0.8em;
+  color: var(--secondary-glow);
+}
+
+.fractal-control input {
+  width: 100px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  height: 4px;
+  border-radius: 2px;
+  -webkit-appearance: none;
+}
+
+.fractal-control input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--primary-glow);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.fractal-control input::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 10px var(--primary-glow);
+}
+</style>
+</head>
+<body>
+
+<canvas id="fractal-universe"></canvas>
+<div class="holographic-overlay"></div>
+<div id="consciousness-field"></div>
+
+<div class="fractal-controls">
+  <div class="fractal-control">
+    <label>Zoom</label>
+    <input type="range" id="zoom" min="0.5" max="3" step="0.1" value="1.5">
+  </div>
+  <div class="fractal-control">
+    <label>Rotation Speed</label>
+    <input type="range" id="rotation" min="0" max="0.5" step="0.01" value="0.1">
+  </div>
+  <div class="fractal-control">
+    <label>Color Shift</label>
+    <input type="range" id="color" min="0" max="1" step="0.01" value="0.1">
+  </div>
+  <div class="fractal-control">
+    <label>Iterations</label>
+    <input type="range" id="iterations" min="50" max="200" step="10" value="100">
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+<script>
+// Initialize WebGL Context
+const canvas = document.getElementById('fractal-universe');
+const gl = canvas.getContext('webgl2');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+gl.viewport(0, 0, canvas.width, canvas.height);
+
+// Shader Programs
+const vertexShaderSource = `#version 300 es
+in vec2 position;
+void main() {
+    gl_Position = vec4(position, 0.0, 1.0);
+}`;
+
+const fragmentShaderSource = `#version 300 es
+precision highp float;
+out vec4 fragColor;
+uniform vec2 resolution;
+uniform float time;
+uniform float zoom;
+uniform float rotationSpeed;
+uniform float colorShift;
+uniform int iterations;
+
+vec3 hsv2rgb(vec3 c) {
+    vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
+
+float mandelbrot(vec2 c) {
+    vec2 z = vec2(0.0);
+    for(int i = 0; i < 500; i++) {
+        if(i >= iterations) break;
+        z = vec2(z.x * z.x - z.y * z.y, 2.0 * z.x * z.y) + c;
+        if(dot(z,z) > 4.0) return float(i)/float(iterations);
+    }
+    return 0.0;
+}
+
+void main() {
+    vec2 uv = (gl_FragCoord.xy - 0.5 * resolution.xy) / min(resolution.x, resolution.y);
+    
+    float angle = time * rotationSpeed;
+    mat2 rot = mat2(cos(angle), -sin(angle), sin(angle), cos(angle));
+    uv = rot * uv;
+    uv *= zoom;
+    
+    float m = mandelbrot(uv);
+    vec3 color = hsv2rgb(vec3(m + time * colorShift, 0.8, m));
+    color += vec3(0.1, 0.2, 0.3) * (1.0 - m);
+    
+    fragColor = vec4(color, 1.0);
+}`;
+
+// Compile Shaders
+function compileShader(source, type) {
+    const shader = gl.createShader(type);
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        console.error('Shader compile error:', gl.getShaderInfoLog(shader));
+        gl.deleteShader(shader);
+        return null;
+    }
+    return shader;
+}
+
+const vertexShader = compileShader(vertexShaderSource, gl.VERTEX_SHADER);
+const fragmentShader = compileShader(fragmentShaderSource, gl.FRAGMENT_SHADER);
+
+// Create Program
+const program = gl.createProgram();
+gl.attachShader(program, vertexShader);
+gl.attachShader(program, fragmentShader);
+gl.linkProgram(program);
+
+if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    console.error('Program link error:', gl.getProgramInfoLog(program));
+}
+
+// Initialize control variables
+const zoomControl = document.getElementById('zoom');
+const rotationControl = document.getElementById('rotation');
+const colorControl = document.getElementById('color');
+const iterationsControl = document.getElementById('iterations');
+
+// Set up geometry
+const positions = new Float32Array([
+    -1, -1,
+    1, -1,
+    -1, 1,
+    1, 1
+]);
+
+const positionBuffer = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+
+const positionLocation = gl.getAttribLocation(program, 'position');
+const timeLocation = gl.getUniformLocation(program, 'time');
+const resolutionLocation = gl.getUniformLocation(program, 'resolution');
+
+// Add uniform locations
+const zoomLocation = gl.getUniformLocation(program, 'zoom');
+const rotationSpeedLocation = gl.getUniformLocation(program, 'rotationSpeed');
+const colorShiftLocation = gl.getUniformLocation(program, 'colorShift');
+const iterationsLocation = gl.getUniformLocation(program, 'iterations');
+
+// Celestial Harmonies Soundscape
+const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+const reverb = new Tone.Reverb(5).toDestination();
+synth.connect(reverb);
+
+function playCelestialNote() {
+    const notes = ['C4', 'E4', 'G4', 'B4', 'D5'];
+    const note = notes[Math.floor(Math.random() * notes.length)];
+    synth.triggerAttackRelease(note, '4n');
+}
+
+setInterval(playCelestialNote, 2000);
+
+// Cosmic Insights
+const insights = [
+    "All is one in the infinite dance of creation",
+    "The universe observes itself through countless eyes",
+    "Time is but a dream of the eternal now",
+    "In stillness, find the movement of galaxies",
+    "Consciousness is the fabric of reality",
+    "Every moment contains infinite possibilities"
+];
+
+function showInsight() {
+    const insight = document.createElement('div');
+    insight.className = 'cosmic-insight';
+    insight.style.top = `${Math.random() * 80 + 10}%`;
+    insight.textContent = insights[Math.floor(Math.random() * insights.length)];
+    document.body.appendChild(insight);
+    
+    setTimeout(() => insight.style.opacity = '1', 100);
+    setTimeout(() => {
+        insight.style.opacity = '0';
+        setTimeout(() => insight.remove(), 2000);
+    }, 4000);
+}
+
+setInterval(showInsight, 6000);
+
+// Quantum Foam Visual Effects
+function createQuantumParticle() {
+    const particle = document.createElement('div');
+    particle.className = 'quantum-particle';
+    particle.style.left = `${Math.random() * 100}%`;
+    particle.style.top = `${Math.random() * 100}%`;
+    document.body.appendChild(particle);
+    
+    setTimeout(() => particle.remove(), 2000);
+}
+
+setInterval(createQuantumParticle, 100);
+
+// Enhanced Consciousness Field Interactions
+const consciousnessField = document.getElementById('consciousness-field');
+
+consciousnessField.addEventListener('click', (e) => {
+    // Create ripple effect
+    const ripple = document.createElement('div');
+    ripple.className = 'consciousness-ripple';
+    consciousnessField.appendChild(ripple);
+    
+    // Play ethereal sound
+    const note = ['C5', 'E5', 'G5', 'B5'][Math.floor(Math.random() * 4)];
+    synth.triggerAttackRelease(note, '2n');
+    
+    // Trigger quantum burst
+    for(let i = 0; i < 20; i++) {
+        setTimeout(createQuantumParticle, i * 50);
+    }
+    
+    // Show immediate insight
+    showInsight();
+    
+    // Remove ripple after animation
+    setTimeout(() => ripple.remove(), 2000);
+});
+
+consciousnessField.addEventListener('mouseover', () => {
+    synth.triggerAttackRelease('F4', '8n', undefined, 0.1);
+});
+
+// Enhanced consciousness field movement with smooth interpolation
+let targetX = window.innerWidth / 2;
+let targetY = window.innerHeight / 2;
+let currentX = targetX;
+let currentY = targetY;
+
+document.addEventListener('mousemove', (e) => {
+    targetX = e.clientX;
+    targetY = e.clientY;
+});
+
+function updateFieldPosition() {
+    currentX += (targetX - currentX) * 0.1;
+    currentY += (targetY - currentY) * 0.1;
+    
+    consciousnessField.style.transform = `translate(
+        calc(${currentX}px - 50%),
+        calc(${currentY}px - 50%)
+    )`;
+    
+    requestAnimationFrame(updateFieldPosition);
+}
+
+updateFieldPosition();
+
+// Modified render function
+function render(time) {
+    time *= 0.001;
+    
+    gl.useProgram(program);
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.enableVertexAttribArray(positionLocation);
+    gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+    
+    gl.uniform1f(timeLocation, time);
+    gl.uniform2f(resolutionLocation, canvas.width, canvas.height);
+    gl.uniform1f(zoomLocation, parseFloat(zoomControl.value));
+    gl.uniform1f(rotationSpeedLocation, parseFloat(rotationControl.value));
+    gl.uniform1f(colorShiftLocation, parseFloat(colorControl.value));
+    gl.uniform1i(iterationsLocation, parseInt(iterationsControl.value));
+    
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    
+    requestAnimationFrame(render);
+}
+
+// Start the animation
+requestAnimationFrame(render);
+
+// Handle Window Resize
+window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    gl.viewport(0, 0, canvas.width, canvas.height);
+});
+</script>
+
+</body></html>
