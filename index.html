@@ -1,0 +1,143 @@
+<html><head><base href="realfart.gg"><style>
+body {
+  background: linear-gradient(135deg, #4a0072, #160024);
+  height: 100vh;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Comic Sans MS', cursive;
+  overflow: hidden;
+}
+
+.container {
+  text-align: center;
+}
+
+.cloud {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  cursor: pointer;
+}
+
+.fart-text {
+  color: #ff69b4;
+  font-size: 48px;
+  text-shadow: 0 0 10px #ff69b4;
+  margin-top: 20px;
+  animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+.particles {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.particle {
+  position: absolute;
+  background: #a67c00;
+  border-radius: 50%;
+  opacity: 0;
+}
+
+@keyframes float {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(var(--tx), var(--ty)) rotate(360deg);
+    opacity: 0;
+  }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <svg class="cloud" viewBox="0 0 200 200">
+    <path d="M50,120 C20,120 20,80 50,80 C50,40 90,40 100,80 C110,40 150,40 150,80 C180,80 180,120 150,120 Z" 
+          fill="#ffffff"
+          stroke="#cccccc"
+          stroke-width="2"/>
+  </svg>
+  <div class="particles"></div>
+  <h1 class="fart-text">REAL FART!</h1>
+</div>
+
+<script>
+document.querySelector('.cloud').addEventListener('click', function(e) {
+  // Play fart sound
+  const fartSound = new Audio('data:audio/wav;base64,UklGRl9vT19...'); // Removed for brevity
+  fartSound.play();
+
+  // Create particles
+  for (let i = 0; i < 20; i++) {
+    createParticle(e.clientX, e.clientY);
+  }
+
+  // Shake the cloud
+  this.style.animation = 'shake 0.5s';
+  setTimeout(() => this.style.animation = '', 500);
+});
+
+function createParticle(x, y) {
+  const particle = document.createElement('div');
+  particle.className = 'particle';
+  
+  // Random size between 5-15px
+  const size = Math.random() * 10 + 5;
+  particle.style.width = `${size}px`;
+  particle.style.height = `${size}px`;
+  
+  // Set starting position
+  particle.style.left = `${x}px`;
+  particle.style.top = `${y}px`;
+  
+  // Random direction
+  const angle = Math.random() * Math.PI * 2;
+  const distance = Math.random() * 100 + 50;
+  const tx = Math.cos(angle) * distance;
+  const ty = Math.sin(angle) * distance;
+  
+  particle.style.setProperty('--tx', `${tx}px`);
+  particle.style.setProperty('--ty', `${ty}px`);
+  
+  // Add animation
+  particle.style.animation = 'float 1s forwards';
+  
+  document.querySelector('.particles').appendChild(particle);
+  
+  // Remove particle after animation
+  setTimeout(() => particle.remove(), 1000);
+}
+
+// Easter egg: Konami code
+let konamiCode = '';
+const secretCode = 'ArrowUpArrowUpArrowDownArrowDownArrowLeftArrowRightArrowLeftArrowRightba';
+
+document.addEventListener('keydown', (e) => {
+  konamiCode += e.key;
+  if (konamiCode.length > secretCode.length) {
+    konamiCode = konamiCode.substring(1);
+  }
+  if (konamiCode === secretCode) {
+    // Super fart mode activated!
+    document.body.style.animation = 'rainbow 1s infinite';
+    for (let i = 0; i < 100; i++) {
+      setTimeout(() => createParticle(
+        Math.random() * window.innerWidth,
+        Math.random() * window.innerHeight
+      ), i * 50);
+    }
+  }
+});
+</script>
+</body></html>
