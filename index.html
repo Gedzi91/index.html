@@ -1,0 +1,353 @@
+<html><head><base href="https://adaptive-display.com/iridescent-subpixel-distortion-glitch-art&interactive-touch&mouse/yes,%20this%20is%20getting%20there.%20i%20wonder%20if%20we%20can%20do%20something%20really%20weird%20and%20wild%20with%20the%20display/dev-commentary=on">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Higher-Dimensional Polytope Explorer</title>
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    background-color: #000;
+    font-family: 'Courier New', monospace;
+    color: #00ff00;
+  }
+  #polytope-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+  }
+  #controls {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    z-index: 10;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 10px;
+    border-radius: 5px;
+  }
+  #info, #dev-commentary {
+    position: absolute;
+    top: 20px;
+    color: #00ff00;
+    z-index: 10;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 10px;
+    border-radius: 5px;
+    max-width: 400px;
+    overflow-y: auto;
+    max-height: 80vh;
+  }
+  #info { left: 20px; }
+  #dev-commentary { right: 20px; }
+  button, select, input {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  input[type="range"] {
+    width: 100%;
+  }
+</style>
+</head>
+<body>
+<canvas id="polytope-canvas"></canvas>
+
+<div id="info">
+  <h2>Higher-Dimensional Polytope Explorer</h2>
+  <p>Visualize complex higher-dimensional objects including hypercubes, 5D dodecahedron, and 120-cell.</p>
+</div>
+
+<div id="controls">
+  <button id="toggleAnimation">Toggle Animation</button>
+  <select id="polytopeType">
+    <option value="hypercube">Hypercube</option>
+    <option value="5d-dodecahedron">5D Dodecahedron</option>
+    <option value="120-cell">120-Cell</option>
+  </select>
+  <select id="projectionMethod">
+    <option value="orthographic">Orthographic</option>
+    <option value="perspective">Perspective</option>
+    <option value="stereographic">Stereographic</option>
+  </select>
+  <br>
+  <label for="rotationSpeed">Rotation Speed:</label>
+  <input type="range" id="rotationSpeed" min="0" max="0.1" step="0.001" value="0.01">
+</div>
+
+<div id="dev-commentary">
+  <h3>Developer Commentary</h3>
+  <p>This visualization explores complex higher-dimensional polytopes. Key aspects:</p>
+  <ol>
+    <li>Polytope Generation: We implement algorithms to generate vertices and edges for various polytopes.</li>
+    <li>5D Dodecahedron: A 5D analog of the dodecahedron, with 120 vertices and 1200 edges.</li>
+    <li>120-Cell: A 4D analog of the dodecahedron, with 600 vertices and 1200 edges.</li>
+    <li>Projection Methods: Users can switch between orthographic, perspective, and stereographic projections.</li>
+  </ol>
+  <p>Challenges and Considerations:</p>
+  <ul>
+    <li>Generating complex polytopes requires sophisticated mathematical algorithms.</li>
+    <li>Performance optimization is crucial due to the high number of vertices and edges.</li>
+    <li>Visualizing 5D and 4D objects in 2D space is inherently challenging and abstract.</li>
+  </ul>
+  <p>Potential Enhancements:</p>
+  <ul>
+    <li>Implement more polytopes (e.g., 600-cell, 24-cell).</li>
+    <li>Add color-coding to represent additional dimensions or structure.</li>
+    <li>Implement slice visualization to explore internal structure.</li>
+    <li>Add VR support for immersive exploration of higher-dimensional spaces.</li>
+  </ul>
+</div>
+
+<script>
+const canvas = document.getElementById('polytope-canvas');
+const ctx = canvas.getContext('2d');
+let width, height;
+let isAnimating = true;
+let polytopeType = 'hypercube';
+let projectionMethod = 'orthographic';
+let rotationSpeed = 0.01;
+let polytope = [];
+let edges = [];
+let rotationAngles = [];
+const PHI = (1 + Math.sqrt(5)) / 2;
+
+function resizeCanvas() {
+  width = window.innerWidth;
+  height = window.innerHeight;
+  canvas.width = width;
+  canvas.height = height;
+}
+
+function generateHypercube(dim) {
+  const vertices = [];
+  const numVertices = Math.pow(2, dim);
+
+  for (let i = 0; i < numVertices; i++) {
+    const vertex = [];
+    for (let j = 0; j < dim; j++) {
+      vertex.push((i & (1 << j)) ? 1 : -1);
+    }
+    vertices.push(vertex);
+  }
+
+  return { vertices, edges: generateHypercubeEdges(vertices) };
+}
+
+function generateHypercubeEdges(vertices) {
+  const edges = [];
+  for (let i = 0; i < vertices.length; i++) {
+    for (let j = i + 1; j < vertices.length; j++) {
+      if (hammingDistance(i, j) === 1) {
+        edges.push([i, j]);
+      }
+    }
+  }
+  return edges;
+}
+
+function hammingDistance(a, b) {
+  return (a ^ b).toString(2).replace(/0/g, '').length;
+}
+
+function generate5DDodecahedron() {
+  const vertices = [];
+  const edges = [];
+
+  // Generate vertices
+  for (let a = -1; a <= 1; a += 2) {
+    for (let b = -1; b <= 1; b += 2) {
+      for (let c = -1; c <= 1; c += 2) {
+        vertices.push([a, b, c, 0, 0]);
+        vertices.push([a, b, 0, c, 0]);
+        vertices.push([a, b, 0, 0, c]);
+        vertices.push([a, 0, b, c, 0]);
+        vertices.push([a, 0, b, 0, c]);
+        vertices.push([0, a, b, c, 0]);
+        vertices.push([0, a, b, 0, c]);
+        vertices.push([0, 0, a, b, c]);
+      }
+    }
+  }
+
+  // Generate edges (this is a simplified version, not all edges are represented)
+  for (let i = 0; i < vertices.length; i++) {
+    for (let j = i + 1; j < vertices.length; j++) {
+      if (distance(vertices[i], vertices[j]) < 2.1) {
+        edges.push([i, j]);
+      }
+    }
+  }
+
+  return { vertices, edges };
+}
+
+function generate120Cell() {
+  // This is a simplified version of the 120-cell
+  // In reality, it has 600 vertices and 1200 edges
+  const vertices = [];
+  const edges = [];
+
+  // Generate some vertices (not all 600)
+  for (let a = -1; a <= 1; a += 2) {
+    for (let b = -1; b <= 1; b += 2) {
+      for (let c = -1; c <= 1; c += 2) {
+        for (let d = -1; d <= 1; d += 2) {
+          vertices.push([a * PHI, b * PHI, c * PHI, d * PHI]);
+        }
+      }
+    }
+  }
+
+  // Generate some edges (not all 1200)
+  for (let i = 0; i < vertices.length; i++) {
+    for (let j = i + 1; j < vertices.length; j++) {
+      if (distance(vertices[i], vertices[j]) < 2.1) {
+        edges.push([i, j]);
+      }
+    }
+  }
+
+  return { vertices, edges };
+}
+
+function distance(a, b) {
+  return Math.sqrt(a.reduce((sum, val, i) => sum + Math.pow(val - b[i], 2), 0));
+}
+
+function rotatePoint(point, angles) {
+  let rotated = [...point];
+
+  for (let i = 0; i < angles.length; i++) {
+    for (let j = i + 1; j < point.length; j++) {
+      const a = rotated[i];
+      const b = rotated[j];
+      rotated[i] = a * Math.cos(angles[i]) - b * Math.sin(angles[i]);
+      rotated[j] = a * Math.sin(angles[i]) + b * Math.cos(angles[i]);
+    }
+  }
+
+  return rotated;
+}
+
+function projectPoint(point) {
+  switch (projectionMethod) {
+    case 'orthographic':
+      return [point[0], point[1]];
+    case 'perspective':
+      const z = point[2] + 3;  // Adjust for better perspective
+      return [point[0] / z, point[1] / z];
+    case 'stereographic':
+      const r = 1 / (2 - point[point.length - 1]);
+      return [r * point[0], r * point[1]];
+    default:
+      return [point[0], point[1]];
+  }
+}
+
+function drawPolytope() {
+  ctx.strokeStyle = '#00ff00';
+  ctx.lineWidth = 1;
+
+  const projectedVertices = polytope.vertices.map(vertex => {
+    const rotated = rotatePoint(vertex, rotationAngles);
+    const projected = projectPoint(rotated);
+    return {
+      x: (projected[0] * 100) + width / 2,
+      y: (projected[1] * 100) + height / 2
+    };
+  });
+
+  // Draw edges
+  edges.forEach(edge => {
+    const v1 = projectedVertices[edge[0]];
+    const v2 = projectedVertices[edge[1]];
+    ctx.beginPath();
+    ctx.moveTo(v1.x, v1.y);
+    ctx.lineTo(v2.x, v2.y);
+    ctx.stroke();
+  });
+
+  // Draw vertices
+  ctx.fillStyle = '#ff0000';
+  projectedVertices.forEach(v => {
+    ctx.beginPath();
+    ctx.arc(v.x, v.y, 2, 0, Math.PI * 2);
+    ctx.fill();
+  });
+}
+
+function animate() {
+  if (isAnimating) {
+    ctx.clearRect(0, 0, width, height);
+    drawPolytope();
+
+    // Update rotation angles
+    for (let i = 0; i < rotationAngles.length; i++) {
+      rotationAngles[i] += rotationSpeed * (i + 1);
+    }
+  }
+  requestAnimationFrame(animate);
+}
+
+function initPolytope() {
+  switch (polytopeType) {
+    case 'hypercube':
+      const result = generateHypercube(5);  // 5D hypercube
+      polytope = { vertices: result.vertices };
+      edges = result.edges;
+      break;
+    case '5d-dodecahedron':
+      const dodeca = generate5DDodecahedron();
+      polytope = { vertices: dodeca.vertices };
+      edges = dodeca.edges;
+      break;
+    case '120-cell':
+      const cell120 = generate120Cell();
+      polytope = { vertices: cell120.vertices };
+      edges = cell120.edges;
+      break;
+  }
+  rotationAngles = Array(polytope.vertices[0].length * (polytope.vertices[0].length - 1) / 2).fill(0);
+}
+
+function init() {
+  resizeCanvas();
+  initPolytope();
+  animate();
+}
+
+init();
+
+// Event listeners
+document.getElementById('toggleAnimation').addEventListener('click', () => {
+  isAnimating = !isAnimating;
+});
+
+document.getElementById('polytopeType').addEventListener('change', (e) => {
+  polytopeType = e.target.value;
+  initPolytope();
+});
+
+document.getElementById('projectionMethod').addEventListener('change', (e) => {
+  projectionMethod = e.target.value;
+});
+
+document.getElementById('rotationSpeed').addEventListener('input', (e) => {
+  rotationSpeed = parseFloat(e.target.value);
+});
+
+window.addEventListener('resize', resizeCanvas);
+</script>
+</body></html>
