@@ -1,0 +1,505 @@
+<html><head><base href="https://www.neural-explorer.edu">
+<title>Neural Explorer: Interactive Brain Simulation</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Explore the human brain's neural network in stunning 3D. Discover how our minds work and inspire AI innovation.">
+<meta name="keywords" content="brain simulation, neural network visualization, interactive neuroscience, AI and the brain">
+<style>
+    body, html {
+        margin: 0;
+        padding: 0;
+        font-family: 'Roboto', sans-serif;
+        overflow: hidden;
+        height: 100%;
+        background-color: #f0f0f0;
+    }
+    #container {
+        width: 100%;
+        height: 100%;
+        display: flex;
+    }
+    #brain-container {
+        flex: 3;
+        position: relative;
+    }
+    #info-panel {
+        flex: 1;
+        background-color: rgba(255, 255, 255, 0.9);
+        padding: 20px;
+        overflow-y: auto;
+        box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+    }
+    h1, h2, h3 {
+        color: #333;
+        font-weight: 300;
+    }
+    #controls {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        z-index: 10;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    button {
+        background-color: #4CAF50;
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: background-color 0.3s, transform 0.1s;
+    }
+    button:hover {
+        background-color: #45a049;
+        transform: scale(1.05);
+    }
+    button:focus {
+        outline: 2px solid #2C7A2C;
+    }
+    #loading {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 24px;
+        color: #333;
+    }
+    .tooltip {
+        position: absolute;
+        background-color: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 10px;
+        border-radius: 5px;
+        font-size: 14px;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.3s;
+        z-index: 100;
+    }
+    #activity-panel {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background-color: rgba(255, 255, 255, 0.9);
+        padding: 10px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    #neural-activity {
+        width: 200px;
+        height: 100px;
+    }
+    #ai-connection {
+        margin-top: 20px;
+        padding: 10px;
+        background-color: #e6f7ff;
+        border-radius: 5px;
+    }
+    #learning-panel {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background-color: rgba(255, 255, 255, 0.9);
+        padding: 10px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    #learning-progress {
+        width: 200px;
+        height: 20px;
+        background-color: #ddd;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    #learning-bar {
+        width: 0;
+        height: 100%;
+        background-color: #4CAF50;
+        transition: width 0.5s;
+    }
+    .accessibility-controls {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 1000;
+    }
+    .skip-link {
+        position: absolute;
+        top: -40px;
+        left: 0;
+        background: #4CAF50;
+        color: white;
+        padding: 8px;
+        z-index: 100;
+    }
+    .skip-link:focus {
+        top: 0;
+    }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.7.1/gsap.min.js"></script>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div class="accessibility-controls">
+    <button id="high-contrast">Toggle High Contrast</button>
+    <button id="increase-font">Increase Font Size</button>
+    <button id="decrease-font">Decrease Font Size</button>
+</div>
+<div id="container">
+    <div id="brain-container">
+        <div id="loading" aria-live="polite">Loading 3D Brain Model...</div>
+        <div id="controls" role="group" aria-label="Brain Exploration Controls">
+            <button id="zoom-in" aria-label="Zoom In">Zoom In</button>
+            <button id="zoom-out" aria-label="Zoom Out">Zoom Out</button>
+            <button id="rotate" aria-label="Toggle Rotation">Rotate</button>
+            <button id="highlight-regions" aria-label="Highlight Random Brain Region">Highlight Regions</button>
+            <button id="simulate-activity" aria-label="Simulate Neural Activity">Simulate Activity</button>
+            <button id="start-learning" aria-label="Start Learning Simulation">Start Learning</button>
+        </div>
+        <div id="activity-panel">
+            <h3>Neural Activity</h3>
+            <canvas id="neural-activity" aria-label="Graph showing neural activity patterns"></canvas>
+        </div>
+        <div id="learning-panel">
+            <h3>Learning Progress</h3>
+            <div id="learning-progress" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                <div id="learning-bar"></div>
+            </div>
+        </div>
+    </div>
+    <div id="info-panel" role="complementary" aria-label="Brain Information Panel">
+        <h1>Neural Explorer</h1>
+        <h2>Interactive Brain Simulation</h2>
+        <div id="main-content" tabindex="-1">
+            <p>Welcome to Neural Explorer, an interactive 3D simulation of the human brain's neural network. Discover the intricate beauty and complexity of our minds, and explore the connections between neuroscience and artificial intelligence.</p>
+            <div id="region-info" aria-live="polite"></div>
+            <div id="ai-connection" aria-live="polite"></div>
+        </div>
+    </div>
+</div>
+<div class="tooltip" id="tooltip" role="tooltip"></div>
+
+<script>
+let scene, camera, renderer, brain, light, raycaster, mouse;
+let isRotating = false;
+let neurons = [];
+let synapses = [];
+let learningInterval;
+const brainRegions = {
+    frontalLobe: { color: 0xff0000, name: "Frontal Lobe", info: "Responsible for executive functions, decision-making, and personality." },
+    parietalLobe: { color: 0x00ff00, name: "Parietal Lobe", info: "Processes sensory information and spatial awareness." },
+    temporalLobe: { color: 0x0000ff, name: "Temporal Lobe", info: "Involved in memory, language processing, and emotion." },
+    occipitalLobe: { color: 0xffff00, name: "Occipital Lobe", info: "Processes visual information." },
+    cerebellum: { color: 0xff00ff, name: "Cerebellum", info: "Coordinates movement and balance." },
+    brainstem: { color: 0x00ffff, name: "Brainstem", info: "Regulates vital functions like breathing and heart rate." }
+};
+
+function init() {
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth * 0.75, window.innerHeight);
+    document.getElementById('brain-container').appendChild(renderer.domElement);
+
+    camera.position.z = 5;
+
+    light = new THREE.PointLight(0xffffff, 1, 100);
+    light.position.set(0, 0, 10);
+    scene.add(light);
+
+    const ambientLight = new THREE.AmbientLight(0x404040);
+    scene.add(ambientLight);
+
+    raycaster = new THREE.Raycaster();
+    mouse = new THREE.Vector2();
+
+    createBrain();
+    animate();
+
+    window.addEventListener('resize', onWindowResize, false);
+    renderer.domElement.addEventListener('mousemove', onMouseMove, false);
+
+    document.getElementById('zoom-in').addEventListener('click', () => {
+        gsap.to(camera.position, { duration: 1, z: camera.position.z * 0.8 });
+    });
+
+    document.getElementById('zoom-out').addEventListener('click', () => {
+        gsap.to(camera.position, { duration: 1, z: camera.position.z * 1.2 });
+    });
+
+    document.getElementById('rotate').addEventListener('click', () => {
+        isRotating = !isRotating;
+    });
+
+    document.getElementById('highlight-regions').addEventListener('click', highlightRandomRegion);
+    document.getElementById('simulate-activity').addEventListener('click', simulateNeuralActivity);
+    document.getElementById('start-learning').addEventListener('click', startLearningSimulation);
+
+    // Accessibility features
+    document.getElementById('high-contrast').addEventListener('click', toggleHighContrast);
+    document.getElementById('increase-font').addEventListener('click', () => changeFontSize(1));
+    document.getElementById('decrease-font').addEventListener('click', () => changeFontSize(-1));
+}
+
+function createBrain() {
+    const brainGeometry = new THREE.SphereGeometry(2, 64, 64);
+    const brainMaterial = new THREE.MeshPhongMaterial({
+        color: 0xcccccc,
+        transparent: true,
+        opacity: 0.7,
+        wireframe: true
+    });
+    brain = new THREE.Mesh(brainGeometry, brainMaterial);
+    scene.add(brain);
+
+    Object.keys(brainRegions).forEach(region => {
+        const regionGeometry = new THREE.SphereGeometry(0.5, 32, 32);
+        const regionMaterial = new THREE.MeshPhongMaterial({
+            color: brainRegions[region].color,
+            transparent: true,
+            opacity: 0.7
+        });
+        const regionMesh = new THREE.Mesh(regionGeometry, regionMaterial);
+        regionMesh.position.set(
+            Math.random() * 1.5 - 0.75,
+            Math.random() * 1.5 - 0.75,
+            Math.random() * 1.5 - 0.75
+        );
+        regionMesh.userData = { region: region };
+        brain.add(regionMesh);
+    });
+
+    createNeurons();
+    createSynapses();
+    document.getElementById('loading').style.display = 'none';
+}
+
+function createNeurons() {
+    const neuronGeometry = new THREE.SphereGeometry(0.02, 16, 16);
+    const neuronMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
+
+    for (let i = 0; i < 1000; i++) {
+        const neuron = new THREE.Mesh(neuronGeometry, neuronMaterial);
+        neuron.position.set(
+            Math.random() * 4 - 2,
+            Math.random() * 4 - 2,
+            Math.random() * 4 - 2
+        );
+        neurons.push(neuron);
+        brain.add(neuron);
+    }
+}
+
+function createSynapses() {
+    const synapseMaterial = new THREE.LineBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.3 });
+
+    for (let i = 0; i < 500; i++) {
+        const startNeuron = neurons[Math.floor(Math.random() * neurons.length)];
+        const endNeuron = neurons[Math.floor(Math.random() * neurons.length)];
+
+        const synapseGeometry = new THREE.BufferGeometry().setFromPoints([
+            startNeuron.position,
+            endNeuron.position
+        ]);
+        const synapse = new THREE.Line(synapseGeometry, synapseMaterial);
+        synapses.push(synapse);
+        brain.add(synapse);
+    }
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+
+    if (isRotating) {
+        brain.rotation.y += 0.005;
+    }
+
+    renderer.render(scene, camera);
+}
+
+function onWindowResize() {
+    camera.aspect = window.innerWidth * 0.75 / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth * 0.75, window.innerHeight);
+}
+
+function highlightRandomRegion() {
+    const regions = Object.keys(brainRegions);
+    const randomRegion = regions[Math.floor(Math.random() * regions.length)];
+    
+    brain.children.forEach((child) => {
+        if (child.userData && child.userData.region) {
+            gsap.to(child.material, {
+                duration: 1,
+                opacity: child.userData.region === randomRegion ? 1 : 0.3
+            });
+        }
+    });
+
+    const regionInfo = brainRegions[randomRegion];
+    document.getElementById('region-info').innerHTML = `
+        <h3>${regionInfo.name}</h3>
+        <p>${regionInfo.info}</p>
+    `;
+
+    updateAIConnection(regionInfo.name);
+}
+
+function updateAIConnection(regionName) {
+    const aiConnections = {
+        "Frontal Lobe": "The frontal lobe's role in decision-making inspires AI algorithms for strategic planning and problem-solving in autonomous systems.",
+        "Parietal Lobe": "The parietal lobe's spatial processing capabilities influence AI development in areas like computer vision and robotic navigation.",
+        "Temporal Lobe": "The temporal lobe's functions in memory and language processing inspire AI models for natural language understanding and generation.",
+        "Occipital Lobe": "The occipital lobe's visual processing abilities guide the development of AI-powered image and video analysis systems.",
+        "Cerebellum": "The cerebellum's role in motor control and learning informs AI algorithms for robotic movement and adaptive control systems.",
+        "Brainstem": "The brainstem's regulation of vital functions inspires AI systems for monitoring and maintaining critical processes in various applications."
+    };
+
+    document.getElementById('ai-connection').innerHTML = `
+        <h3>AI Connection</h3>
+        <p>${aiConnections[regionName]}</p>
+    `;
+}
+
+function onMouseMove(event) {
+    mouse.x = (event.clientX / (window.innerWidth * 0.75)) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(brain.children);
+
+    if (intersects.length > 0) {
+        const intersectedObject = intersects[0].object;
+        if (intersectedObject.userData && intersectedObject.userData.region) {
+            const region = brainRegions[intersectedObject.userData.region];
+            showTooltip(region.name, event.clientX, event.clientY);
+        }
+    } else {
+        hideTooltip();
+    }
+}
+
+function showTooltip(text, x, y) {
+    const tooltip = document.getElementById('tooltip');
+    tooltip.textContent = text;
+    tooltip.style.left = `${x + 10}px`;
+    tooltip.style.top = `${y + 10}px`;
+    tooltip.style.opacity = 1;
+}
+
+function hideTooltip() {
+    const tooltip = document.getElementById('tooltip');
+    tooltip.style.opacity = 0;
+}
+
+function simulateNeuralActivity() {
+    const canvas = document.getElementById('neural-activity');
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+
+    ctx.clearRect(0, 0, width, height);
+    ctx.strokeStyle = 'rgba(0, 255, 0, 0.5)';
+    ctx.lineWidth = 2;
+
+    ctx.beginPath();
+    ctx.moveTo(0, height / 2);
+
+    for (let x = 0; x < width; x++) {
+        const y = height / 2 + Math.sin(x * 0.1) * 20 + Math.random() * 10;
+        ctx.lineTo(x, y);
+    }
+
+    ctx.stroke();
+
+    neurons.forEach(neuron => {
+        gsap.to(neuron.scale, {
+            duration: 0.5,
+            x: Math.random() * 0.5 + 0.5,
+            y: Math.random() * 0.5 + 0.5,
+            z: Math.random() * 0.5 + 0.5,
+            yoyo: true,
+            repeat: 1
+        });
+    });
+
+    synapses.forEach(synapse => {
+        gsap.to(synapse.material, {
+            duration: 0.5,
+            opacity: Math.random(),
+            yoyo: true,
+            repeat: 1
+        });
+    });
+}
+
+function startLearningSimulation() {
+    let progress = 0;
+    const learningBar = document.getElementById('learning-bar');
+
+    if (learningInterval) {
+        clearInterval(learningInterval);
+    }
+
+    learningInterval = setInterval(() => {
+        progress += 1;
+        learningBar.style.width = `${progress}%`;
+        learningBar.setAttribute('aria-valuenow', progress);
+
+        if (progress >= 100) {
+            clearInterval(learningInterval);
+            simulateNeuralAdaptation();
+        }
+    }, 100);
+}
+
+function simulateNeuralAdaptation() {
+    const newSynapses = [];
+    const synapseMaterial = new THREE.LineBasicMaterial({ color: 0xff00ff, transparent: true, opacity: 0.5 });
+
+    for (let i = 0; i < 50; i++) {
+        const startNeuron = neurons[Math.floor(Math.random() * neurons.length)];
+        const endNeuron = neurons[Math.floor(Math.random() * neurons.length)];
+
+        const synapseGeometry = new THREE.BufferGeometry().setFromPoints([
+            startNeuron.position,
+            endNeuron.position
+        ]);
+        const synapse = new THREE.Line(synapseGeometry, synapseMaterial);
+        newSynapses.push(synapse);
+        brain.add(synapse);
+    }
+
+    gsap.from(newSynapses.map(s => s.material), {
+        opacity: 0,
+        duration: 2,
+        stagger: 0.05,
+        onComplete: () => {
+            synapses.push(...newSynapses);
+        }
+    });
+}
+
+function toggleHighContrast() {
+    document.body.classList.toggle('high-contrast');
+    // Add more specific high contrast styles as needed
+}
+
+function changeFontSize(delta) {
+    const currentSize = parseFloat(getComputedStyle(document.body).fontSize);
+    document.body.style.fontSize = `${currentSize + delta}px`;
+}
+
+init();
+</script>
+</body>
+</html>
