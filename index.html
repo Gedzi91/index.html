@@ -1,0 +1,293 @@
+<html lang="en">
+<head>
+    <base href="https://">
+    <meta charset="UTF-8">
+    <title>Hyperrealistic Quantum Fractal Explorer</title>
+    
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.module.js"
+        }
+    }
+    </script>
+    
+    <style>
+        body, html { margin: 0; padding: 0; overflow: hidden; background: #000; font-family: Arial, sans-serif; }
+        #info, #thesis, #controls {
+            position: absolute;
+            color: #ffffff;
+            background: rgba(0,0,0,0.5);
+            padding: 10px;
+            border-radius: 5px;
+        }
+        #info { top: 10px; left: 10px; max-width: 300px; }
+        #thesis { top: 10px; right: 10px; max-width: 400px; max-height: 80%; overflow-y: auto; }
+        #controls { bottom: 10px; left: 10px; }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <h2>Hyperrealistic Quantum Fractal Explorer</h2>
+        <p>Visualizing Majorana Zero Modes (MZMs) and Majorana Surface Codes (MSCs)</p>
+    </div>
+    <div id="thesis"></div>
+    <div id="controls">
+        <p>Controls:</p>
+        <ul>
+            <li>WASD: Move camera</li>
+            <li>Mouse drag: Rotate view</li>
+            <li>Mouse wheel: Zoom</li>
+            <li>Space: Reset view</li>
+        </ul>
+    </div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/controls/OrbitControls.js';
+        import { RGBELoader } from 'https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/loaders/RGBELoader.js';
+        import { EffectComposer } from 'https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/postprocessing/RenderPass.js';
+        import { UnrealBloomPass } from 'https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/postprocessing/UnrealBloomPass.js';
+        import * as CANNON from 'https://cdn.jsdelivr.net/npm/cannon-es@0.18.0/dist/cannon-es.js';
+
+        let scene, camera, renderer, controls, composer, fractalMesh, world;
+        const clock = new THREE.Clock();
+
+        let f = 0, k = 88;
+        let d = Math.PI / 80;
+
+        const thesisContent = `Abstract
+Majorana zero modes (MZMs) are promising candidates for topologically-protected quantum computing hardware, however their large-scale use will likely require quantum error correction. Majorana surface codes (MSCs) have been proposed to achieve this. However, many MSC properties remain unexplored. We present a unified framework for MSC "twist defects" - anyon-like objects encoding quantum information. We show that twist defects in MSCs can encode twice the amount of topologically protected information as in qubit-based codes or other MSC encoding schemes. This is due to twists encoding both logical qubits and "logical MZMs," with the latter enhancing the protection microscopic MZMs can offer. We explain how to perform universal computation with logical qubits and logical MZMs while potentially using far fewer resources than in other MSC schemes. All Clifford gates can be implemented on logical qubits by braiding twist defects. We introduce lattice-surgery-based techniques for computing with logical MZMs and logical qubits, achieving the effect of Clifford gates with zero time overhead. We also show that logical MZMs may result in improved spatial overheads for sufficiently low rates of quasiparticle poisoning. Finally, we introduce a novel MSC analogue of transversal gates that achieves encoded Clifford gates in small codes by braiding microscopic MZMs. MSC twist defects thus open new paths towards fault-tolerant quantum computation.`;
+
+        init();
+        animate();
+
+        function init() {
+            world = new CANNON.World();
+            world.gravity.set(0, -9.82, 0);
+
+            const groundBody = new CANNON.Body({
+                mass: 0,
+                shape: new CANNON.Plane(),
+            });
+            groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
+            world.addBody(groundBody);
+
+            scene = new THREE.Scene();
+
+            const hdrLoader = new RGBELoader();
+            hdrLoader.load('https://example.com/your-hdr-image.hdr', function(texture) {
+                texture.mapping = THREE.EquirectangularReflectionMapping;
+                scene.background = texture;
+                scene.environment = texture;
+            });
+
+            const moonGeometry = new THREE.SphereGeometry(50, 64, 64);
+            const moonTexture = new THREE.TextureLoader().load('https://cdn.jsdelivr.net/gh/mrdoob/three.js@master/examples/textures/moon_1024.jpg');
+            const moonMaterial = new THREE.MeshPhysicalMaterial({
+                map: moonTexture,
+                roughness: 0.5,
+                metalness: 0.5,
+                clearcoat: 1.0,
+                clearcoatRoughness: 0.1,
+            });
+            const moon = new THREE.Mesh(moonGeometry, moonMaterial);
+            moon.position.set(200, 0, -200);
+            scene.add(moon);
+
+            camera = new THREE.PerspectiveCamera(
+                75,
+                window.innerWidth / window.innerHeight,
+                0.1,
+                10000
+            );
+            camera.position.set(0, 100, 500);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            document.body.appendChild(renderer.domElement);
+
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.enableZoom = true;
+            controls.target.set(0, 0, 0);
+
+            renderer.physicallyCorrectLights = true;
+
+            const ambientLight = new THREE.AmbientLight(0x888888);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(100, 100, 100);
+            scene.add(directionalLight);
+
+            const geometry = new THREE.BufferGeometry();
+            const positions = [];
+            const colors = [];
+
+            for (let u = 0; u <= Math.PI * 2; u += d) {
+                for (let v = 0; v <= Math.PI; v += d) {
+                    for (let i = 0; i < Math.PI * 2; i += Math.PI / 2) {
+                        const I = Math.sin(i / 2 + v + f);
+                        const Y = k * Math.sin(u) * Math.sin(v) * I;
+                        const x = k * Math.cos(u) * Math.sin(v) + k * Math.sin(i);
+                        const y = k * Math.sin(u) * Math.cos(v) * I + k * Math.cos(i);
+                        const z = Y;
+
+                        positions.push(x, y, z);
+
+                        const color = new THREE.Color();
+                        color.setHSL((Y / k + 1) / 2, 1.0, 0.5);
+                        colors.push(color.r, color.g, color.b);
+                    }
+                }
+            }
+
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+            geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+            geometry.computeBoundingSphere();
+
+            const vertexShader = `
+                precision highp float;
+                varying vec3 vColor;
+                void main() {
+                    vColor = color;
+                    gl_PointSize = 2.0;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `;
+
+            const fragmentShader = `
+                precision highp float;
+                varying vec3 vColor;
+                void main() {
+                    vec2 uv = gl_PointCoord.xy - 0.5;
+                    float alpha = 1.0 - length(uv) * 2.0;
+                    alpha = smoothstep(0.0, 1.0, alpha);
+                    gl_FragColor = vec4(vColor, alpha);
+                }
+            `;
+
+            const material = new THREE.ShaderMaterial({
+                uniforms: {},
+                vertexShader: vertexShader,
+                fragmentShader: fragmentShader,
+                vertexColors: true,
+                transparent: true,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false,
+            });
+
+            fractalMesh = new THREE.Points(geometry, material);
+            scene.add(fractalMesh);
+
+            const sphereGeometry = new THREE.SphereGeometry(10, 32, 32);
+            const sphereMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+            const sphereMesh = new THREE.Mesh(sphereGeometry, sphereMaterial);
+            sphereMesh.position.set(0, 100, 0);
+            scene.add(sphereMesh);
+
+            const sphereShape = new CANNON.Sphere(10);
+            const sphereBody = new CANNON.Body({
+                mass: 1,
+                shape: sphereShape,
+                position: new CANNON.Vec3(0, 100, 0),
+            });
+            world.addBody(sphereBody);
+
+            document.getElementById('thesis').innerText = thesisContent;
+
+            composer = new EffectComposer(renderer);
+            const renderPass = new RenderPass(scene, camera);
+            composer.addPass(renderPass);
+
+            const bloomPass = new UnrealBloomPass(
+                new THREE.Vector2(window.innerWidth, window.innerHeight),
+                1.5,
+                0.4,
+                0.85
+            );
+            composer.addPass(bloomPass);
+
+            window.addEventListener('resize', onWindowResize, false);
+            document.addEventListener('keydown', onKeyDown, false);
+            renderer.domElement.addEventListener('wheel', onMouseWheel, false);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            let delta = clock.getDelta();
+            world.step(delta);
+
+            f += delta * 0.5;
+            fractalMesh.rotation.y += delta * 0.1;
+            fractalMesh.rotation.x += delta * 0.05;
+
+            const positions = fractalMesh.geometry.attributes.position.array;
+            let index = 0;
+
+            for (let u = 0; u <= Math.PI * 2; u += d) {
+                for (let v = 0; v <= Math.PI; v += d) {
+                    for (let i = 0; i < Math.PI * 2; i += Math.PI / 2) {
+                        const I = Math.sin(i / 2 + v + f);
+                        const Y = k * Math.sin(u) * Math.sin(v) * I;
+                        const x = k * Math.cos(u) * Math.sin(v) + k * Math.sin(i);
+                        const y = k * Math.sin(u) * Math.cos(v) * I + k * Math.cos(i);
+                        const z = Y;
+
+                        positions[index++] = x;
+                        positions[index++] = y;
+                        positions[index++] = z;
+                    }
+                }
+            }
+
+            fractalMesh.geometry.attributes.position.needsUpdate = true;
+
+            controls.update();
+            composer.render();
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            composer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function onKeyDown(event) {
+            const key = event.key.toLowerCase();
+            const speed = 10;
+            switch (key) {
+                case 'w':
+                    camera.position.z -= speed;
+                    break;
+                case 's':
+                    camera.position.z += speed;
+                    break;
+                case 'a':
+                    camera.position.x -= speed;
+                    break;
+                case 'd':
+                    camera.position.x += speed;
+                    break;
+                case ' ':
+                    camera.position.set(0, 100, 500);
+                    controls.target.set(0, 0, 0);
+                    controls.update();
+                    break;
+            }
+        }
+
+        function onMouseWheel(event) {
+            event.preventDefault();
+            camera.position.z += event.deltaY * 0.1;
+        }
+    </script>
+</body>
+</html>
