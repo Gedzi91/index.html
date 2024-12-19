@@ -1,0 +1,144 @@
+<html><head><base href="https://websim.ai/" /><title>Rotating Galaxy Simulation | WebSim.ai</title><style>
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: #000;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+    color: #fff;
+  }
+  #canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  #info {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 10px;
+    border-radius: 5px;
+  }
+  #controls {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 10px;
+    border-radius: 5px;
+  }
+  input[type="range"] {
+    width: 200px;
+  }
+  label {
+    display: inline-block;
+    width: 150px;
+  }
+</style></head><body>
+<canvas id="canvas"></canvas>
+<div id="info">
+  <h2>Rotating Galaxy Simulation</h2>
+  <p>Number of stars: <span id="starCount">10000</span></p>
+  <p>Rotation speed: <span id="rotationSpeed">1</span></p>
+</div>
+<div id="controls">
+  <label for="starsSlider">Number of stars:</label>
+  <input type="range" id="starsSlider" min="1000" max="50000" value="10000"><br>
+  <label for="rotationSlider">Rotation speed:</label>
+  <input type="range" id="rotationSlider" min="0.1" max="5" step="0.1" value="1"><br>
+  <label for="colorSelect">Galaxy color:</label>
+  <select id="colorSelect">
+    <option value="blue">Blue</option>
+    <option value="red">Red</option>
+    <option value="green">Green</option>
+    <option value="purple">Purple</option>
+    <option value="rainbow">Rainbow</option>
+  </select>
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let width = canvas.width = window.innerWidth;
+let height = canvas.height = window.innerHeight;
+
+let stars = [];
+let galaxyRadius = Math.min(width, height) * 0.4;
+let rotationSpeed = 0.001;
+let galaxyColor = 'blue';
+
+function createStars(count) {
+  stars = [];
+  for (let i = 0; i < count; i++) {
+    let r = Math.random() * galaxyRadius;
+    let theta = Math.random() * 2 * Math.PI;
+    stars.push({
+      x: r * Math.cos(theta),
+      y: r * Math.sin(theta),
+      z: (Math.random() - 0.5) * galaxyRadius * 0.1,
+      size: Math.random() * 2 + 1
+    });
+  }
+}
+
+function drawGalaxy() {
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+  ctx.fillRect(0, 0, width, height);
+  
+  ctx.save();
+  ctx.translate(width / 2, height / 2);
+  
+  stars.forEach(star => {
+    let x = star.x * Math.cos(rotationSpeed) - star.y * Math.sin(rotationSpeed);
+    let y = star.x * Math.sin(rotationSpeed) + star.y * Math.cos(rotationSpeed);
+    star.x = x;
+    star.y = y;
+    
+    let scale = galaxyRadius / (galaxyRadius - star.z);
+    let screenX = x * scale;
+    let screenY = y * scale;
+    
+    if (galaxyColor === 'rainbow') {
+      ctx.fillStyle = `hsl(${(Math.atan2(y, x) * 180 / Math.PI + 180)}, 100%, 50%)`;
+    } else {
+      ctx.fillStyle = galaxyColor;
+    }
+    
+    ctx.globalAlpha = (star.size - 1) / 2;
+    ctx.beginPath();
+    ctx.arc(screenX, screenY, star.size * scale, 0, 2 * Math.PI);
+    ctx.fill();
+  });
+  
+  ctx.restore();
+  
+  requestAnimationFrame(drawGalaxy);
+}
+
+function updateSimulation() {
+  let starCount = parseInt(document.getElementById('starsSlider').value);
+  rotationSpeed = parseFloat(document.getElementById('rotationSlider').value) * 0.001;
+  galaxyColor = document.getElementById('colorSelect').value;
+  
+  document.getElementById('starCount').textContent = starCount;
+  document.getElementById('rotationSpeed').textContent = rotationSpeed * 1000;
+  
+  createStars(starCount);
+}
+
+window.addEventListener('resize', () => {
+  width = canvas.width = window.innerWidth;
+  height = canvas.height = window.innerHeight;
+  galaxyRadius = Math.min(width, height) * 0.4;
+  createStars(parseInt(document.getElementById('starsSlider').value));
+});
+
+document.getElementById('starsSlider').addEventListener('input', updateSimulation);
+document.getElementById('rotationSlider').addEventListener('input', updateSimulation);
+document.getElementById('colorSelect').addEventListener('change', updateSimulation);
+
+createStars(10000);
+drawGalaxy();
+</script>
+</body></html>
