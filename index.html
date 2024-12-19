@@ -1,0 +1,192 @@
+<html><head><base href="https://azure.microsoft.com/"><title>Azure Cloud Explorer</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+body { margin: 0; overflow: hidden; background-color: #0078D4; }
+canvas { width: 100%; height: 100% }
+#info {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    color: white;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    background-color: rgba(0,120,212,0.7);
+    padding: 10px;
+    border-radius: 5px;
+}
+</style>
+</head>
+<body>
+<div id="info">Use WASD to move, Mouse to look around. Fly through Azure resources!</div>
+<script>
+let scene, camera, renderer, clouds = [], resources = [];
+const moveSpeed = 0.5;
+const mouseSensitivity = 0.002;
+
+function init() {
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xAED7FF); // Light blue sky
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Add ambient light
+    const ambientLight = new THREE.AmbientLight(0xAED7FF, 0.6);
+    scene.add(ambientLight);
+
+    // Add directional light (sun)
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    directionalLight.position.set(1, 1, 1);
+    scene.add(directionalLight);
+
+    // Create clouds
+    for (let i = 0; i < 300; i++) {
+        const geometry = new THREE.SphereGeometry(Math.random() * 2 + 1, 32, 32);
+        const material = new THREE.MeshPhongMaterial({ color: 0xAED7FF, transparent: true, opacity: 0.8 });
+        const cloud = new THREE.Mesh(geometry, material);
+        cloud.position.set(
+            Math.random() * 200 - 100,
+            Math.random() * 50 - 25,
+            Math.random() * 200 - 100
+        );
+        clouds.push(cloud);
+        scene.add(cloud);
+    }
+
+    // Create Azure resources with logos
+    const resourceTypes = [
+        { name: 'Virtual Machines', logo: 'https://azurecomcdn.azureedge.net/cvt-1e062bfe62b371303d7ba3612723f5e334cd5f56fd4e3ea4c0f6e8138bf939ff/svg/virtual-machines.svg' },
+        { name: 'Storage', logo: 'https://azurecomcdn.azureedge.net/cvt-1e062bfe62b371303d7ba3612723f5e334cd5f56fd4e3ea4c0f6e8138bf939ff/svg/storage.svg' },
+        { name: 'Azure SQL Database', logo: 'https://azurecomcdn.azureedge.net/cvt-1e062bfe62b371303d7ba3612723f5e334cd5f56fd4e3ea4c0f6e8138bf939ff/svg/azure-sql-database.svg' },
+        { name: 'Azure Functions', logo: 'https://azurecomcdn.azureedge.net/cvt-1e062bfe62b371303d7ba3612723f5e334cd5f56fd4e3ea4c0f6e8138bf939ff/svg/azure-functions.svg' },
+        { name: 'App Service', logo: 'https://azurecomcdn.azureedge.net/cvt-1e062bfe62b371303d7ba3612723f5e334cd5f56fd4e3ea4c0f6e8138bf939ff/svg/app-service.svg' },
+        { name: 'Cosmos DB', logo: 'https://azurecomcdn.azureedge.net/cvt-1e062bfe62b371303d7ba3612723f5e334cd5f56fd4e3ea4c0f6e8138bf939ff/svg/cosmos-db.svg' },
+        { name: 'Azure Kubernetes Service', logo: 'https://azurecomcdn.azureedge.net/cvt-1e062bfe62b371303d7ba3612723f5e334cd5f56fd4e3ea4c0f6e8138bf939ff/svg/kubernetes-services.svg' },
+        { name: 'Azure Active Directory', logo: 'https://azurecomcdn.azureedge.net/cvt-1e062bfe62b371303d7ba3612723f5e334cd5f56fd4e3ea4c0f6e8138bf939ff/svg/azure-active-directory.svg' },
+        { name: 'Azure Monitor', logo: 'https://azurecomcdn.azureedge.net/cvt-1e062bfe62b371303d7ba3612723f5e334cd5f56fd4e3ea4c0f6e8138bf939ff/svg/monitor.svg' },
+        { name: 'Azure DevOps', logo: 'https://azurecomcdn.azureedge.net/cvt-1e062bfe62b371303d7ba3612723f5e334cd5f56fd4e3ea4c0f6e8138bf939ff/svg/azure-devops.svg' },
+        { name: 'Azure IoT Hub', logo: 'https://azurecomcdn.azureedge.net/cvt-1e062bfe62b371303d7ba3612723f5e334cd5f56fd4e3ea4c0f6e8138bf939ff/svg/iot-hub.svg' },
+        { name: 'Azure Cognitive Services', logo: 'https://azurecomcdn.azureedge.net/cvt-1e062bfe62b371303d7ba3612723f5e334cd5f56fd4e3ea4c0f6e8138bf939ff/svg/cognitive-services.svg' },
+        { name: 'Azure Blockchain', logo: 'https://azurecomcdn.azureedge.net/cvt-1e062bfe62b371303d7ba3612723f5e334cd5f56fd4e3ea4c0f6e8138bf939ff/svg/blockchain.svg' },
+        { name: 'Azure CDN', logo: 'https://azurecomcdn.azureedge.net/cvt-1e062bfe62b371303d7ba3612723f5e334cd5f56fd4e3ea4c0f6e8138bf939ff/svg/cdn.svg' },
+        { name: 'Azure Databricks', logo: 'https://azurecomcdn.azureedge.net/cvt-1e062bfe62b371303d7ba3612723f5e334cd5f56fd4e3ea4c0f6e8138bf939ff/svg/azure-databricks.svg' },
+        { name: 'Azure Data Factory', logo: 'https://azurecomcdn.azureedge.net/cvt-1e062bfe62b371303d7ba3612723f5e334cd5f56fd4e3ea4c0f6e8138bf939ff/svg/data-factory.svg' },
+        { name: 'Azure Data Lake', logo: 'https://azurecomcdn.azureedge.net/cvt-1e062bfe62b371303d7ba3612723f5e334cd5f56fd4e3ea4c0f6e8138bf939ff/svg/data-lake.svg' },
+        { name: 'Azure Event Hubs', logo: 'https://azurecomcdn.azureedge.net/cvt-1e062bfe62b371303d7ba3612723f5e334cd5f56fd4e3ea4c0f6e8138bf939ff/svg/event-hubs.svg' },
+        { name: 'Azure HDInsight', logo: 'https://azurecomcdn.azureedge.net/cvt-1e062bfe62b371303d7ba3612723f5e334cd5f56fd4e3ea4c0f6e8138bf939ff/svg/hdinsight.svg' },
+        { name: 'Azure Key Vault', logo: 'https://azurecomcdn.azureedge.net/cvt-1e062bfe62b371303d7ba3612723f5e334cd5f56fd4e3ea4c0f6e8138bf939ff/svg/key-vault.svg' },
+        { name: 'Azure Logic Apps', logo: 'https://azurecomcdn.azureedge.net/cvt-1e062bfe62b371303d7ba3612723f5e334cd5f56fd4e3ea4c0f6e8138bf939ff/svg/logic-apps.svg' },
+        { name: 'Azure Machine Learning', logo: 'https://azurecomcdn.azureedge.net/cvt-1e062bfe62b371303d7ba3612723f5e334cd5f56fd4e3ea4c0f6e8138bf939ff/svg/machine-learning.svg' },
+        { name: 'Azure Redis Cache', logo: 'https://azurecomcdn.azureedge.net/cvt-1e062bfe62b371303d7ba3612723f5e334cd5f56fd4e3ea4c0f6e8138bf939ff/svg/redis-cache.svg' },
+        { name: 'Azure Service Bus', logo: 'https://azurecomcdn.azureedge.net/cvt-1e062bfe62b371303d7ba3612723f5e334cd5f56fd4e3ea4c0f6e8138bf939ff/svg/service-bus.svg' },
+        { name: 'Azure Stream Analytics', logo: 'https://azurecomcdn.azureedge.net/cvt-1e062bfe62b371303d7ba3612723f5e334cd5f56fd4e3ea4c0f6e8138bf939ff/svg/stream-analytics.svg' },
+        { name: 'Azure Synapse Analytics', logo: 'https://azurecomcdn.azureedge.net/cvt-1e062bfe62b371303d7ba3612723f5e334cd5f56fd4e3ea4c0f6e8138bf939ff/svg/synapse-analytics.svg' },
+        { name: 'Azure Virtual Network', logo: 'https://azurecomcdn.azureedge.net/cvt-1e062bfe62b371303d7ba3612723f5e334cd5f56fd4e3ea4c0f6e8138bf939ff/svg/virtual-network.svg' },
+        // Additional 10 Azure networking resources
+        { name: 'Azure Firewall', logo: 'https://azurecomcdn.azureedge.net/cvt-1e062bfe62b371303d7ba3612723f5e334cd5f56fd4e3ea4c0f6e8138bf939ff/svg/azure-firewall.svg' },
+        { name: 'Azure VPN Gateway', logo: 'https://azurecomcdn.azureedge.net/cvt-1e062bfe62b371303d7ba3612723f5e334cd5f56fd4e3ea4c0f6e8138bf939ff/svg/vpn-gateway.svg' },
+        { name: 'Azure ExpressRoute', logo: 'https://azurecomcdn.azureedge.net/cvt-1e062bfe62b371303d7ba3612723f5e334cd5f56fd4e3ea4c0f6e8138bf939ff/svg/expressroute.svg' },
+        { name: 'Azure Load Balancer', logo: 'https://azurecomcdn.azureedge.net/cvt-1e062bfe62b371303d7ba3612723f5e334cd5f56fd4e3ea4c0f6e8138bf939ff/svg/load-balancer.svg' },
+        { name: 'Azure Application Gateway', logo: 'https://azurecomcdn.azureedge.net/cvt-1e062bfe62b371303d7ba3612723f5e334cd5f56fd4e3ea4c0f6e8138bf939ff/svg/application-gateway.svg' },
+        { name: 'Azure DNS', logo: 'https://azurecomcdn.azureedge.net/cvt-1e062bfe62b371303d7ba3612723f5e334cd5f56fd4e3ea4c0f6e8138bf939ff/svg/dns.svg' },
+        { name: 'Azure Traffic Manager', logo: 'https://azurecomcdn.azureedge.net/cvt-1e062bfe62b371303d7ba3612723f5e334cd5f56fd4e3ea4c0f6e8138bf939ff/svg/traffic-manager.svg' },
+        { name: 'Azure Front Door', logo: 'https://azurecomcdn.azureedge.net/cvt-1e062bfe62b371303d7ba3612723f5e334cd5f56fd4e3ea4c0f6e8138bf939ff/svg/front-door.svg' },
+        { name: 'Azure Bastion', logo: 'https://azurecomcdn.azureedge.net/cvt-1e062bfe62b371303d7ba3612723f5e334cd5f56fd4e3ea4c0f6e8138bf939ff/svg/bastion.svg' },
+        { name: 'Azure DDoS Protection', logo: 'https://azurecomcdn.azureedge.net/cvt-1e062bfe62b371303d7ba3612723f5e334cd5f56fd4e3ea4c0f6e8138bf939ff/svg/ddos-protection.svg' }
+    ];
+
+    resourceTypes.forEach(resourceType => {
+        const loader = new THREE.TextureLoader();
+        loader.load(resourceType.logo, (texture) => {
+            const material = new THREE.SpriteMaterial({ map: texture });
+            for (let i = 0; i < 3; i++) { // Reduced number of instances per resource type
+                const sprite = new THREE.Sprite(material);
+                sprite.scale.set(5, 5, 1);
+                sprite.position.set(
+                    Math.random() * 200 - 100,
+                    Math.random() * 50 - 25,
+                    Math.random() * 200 - 100
+                );
+                sprite.userData = { type: resourceType.name };
+                resources.push(sprite);
+                scene.add(sprite);
+            }
+        });
+    });
+
+    camera.position.set(0, 0, 50);
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('keydown', onKeyDown);
+    document.addEventListener('click', onMouseClick);
+    window.addEventListener('resize', onWindowResize);
+}
+
+function onMouseMove(event) {
+    const movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
+    const movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
+
+    camera.rotation.y -= movementX * mouseSensitivity;
+    camera.rotation.x -= movementY * mouseSensitivity;
+    camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
+}
+
+function onKeyDown(event) {
+    const keyCode = event.which;
+    const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+    const right = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
+
+    if (keyCode === 87) { // W key
+        camera.position.add(forward.multiplyScalar(moveSpeed));
+    } else if (keyCode === 83) { // S key
+        camera.position.add(forward.multiplyScalar(-moveSpeed));
+    } else if (keyCode === 65) { // A key
+        camera.position.add(right.multiplyScalar(-moveSpeed));
+    } else if (keyCode === 68) { // D key
+        camera.position.add(right.multiplyScalar(moveSpeed));
+    }
+}
+
+function onMouseClick(event) {
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(resources);
+
+    if (intersects.length > 0) {
+        const resource = intersects[0].object;
+        alert(`You've clicked on an ${resource.userData.type} resource!`);
+    }
+}
+
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+
+    // Animate clouds
+    clouds.forEach(cloud => {
+        cloud.rotation.x += 0.001;
+        cloud.rotation.y += 0.001;
+    });
+
+    // Animate resources
+    resources.forEach(resource => {
+        resource.material.rotation += 0.01;
+    });
+
+    renderer.render(scene, camera);
+}
+
+init();
+animate();
+</script>
+</body>
+</html>
