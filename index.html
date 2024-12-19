@@ -1,0 +1,308 @@
+<html><head><base href="blob:https://party.websim.ai/b48686b4-80c0-466a-95b9-4855163bfc91">
+    <title>Advanced Neural Network Explorer with Crypto Data and Knowledge Graph</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #000; font-family: Arial, sans-serif; }
+        #info, #cryptoData, #controls { position: absolute; color: white; padding: 10px; background-color: rgba(0,0,0,0.7); border-radius: 5px; }
+        #info { top: 10px; left: 10px; }
+        #cryptoData { top: 10px; right: 10px; max-width: 200px; }
+        #controls { bottom: 10px; left: 10px; }
+        button { margin: 5px; padding: 5px 10px; background-color: #4CAF50; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #45a049; }
+        #legend { position: absolute; bottom: 10px; right: 10px; color: white; background-color: rgba(0,0,0,0.7); padding: 10px; border-radius: 5px; }
+        .legend-item { display: flex; align-items: center; margin-bottom: 5px; }
+        .legend-color { width: 20px; height: 20px; margin-right: 10px; border-radius: 50%; }
+    </style>
+</head>
+<body>
+    <div id="info"></div>
+    <div id="cryptoData"></div>
+    <div id="controls">
+        <button onclick="toggleRotation()">Toggle Rotation</button>
+        <button onclick="toggleDataFlow()">Toggle Data Flow</button>
+        <button onclick="downloadProjectCode()">Download Project Code</button>
+    </div>
+    <div id="legend"></div>
+
+    <script>
+        // Three.js setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        camera.position.z = 200;
+
+        // Node and line arrays
+        const nodes = [];
+        const lines = [];
+
+        // Color scheme
+        const colorScheme = {
+            master: 0xffff00,
+            subMaster: 0xff00ff,
+            topic: 0x00ffff,
+            subTopic: 0x00ff00,
+            dataNode: 0xff0000,
+            crypto: 0x0000ff
+        };
+
+        // Create node function
+        function createNode(x, y, z, parent, name, type) {
+            const geometry = new THREE.SphereGeometry(type === 'master' ? 4 : 2, 32, 32);
+            const material = new THREE.MeshBasicMaterial({ color: colorScheme[type] });
+            const sphere = new THREE.Mesh(geometry, material);
+            sphere.position.set(x, y, z);
+            scene.add(sphere);
+
+            const node = { x, y, z, parent, name, type, object3D: sphere };
+            nodes.push(node);
+
+            if (parent) {
+                const lineGeometry = new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(x, y, z),
+                    new THREE.Vector3(parent.x, parent.y, parent.z)
+                ]);
+                const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
+                const line = new THREE.Line(lineGeometry, lineMaterial);
+                scene.add(line);
+                lines.push({ line, start: node, end: parent });
+            }
+
+            return node;
+        }
+
+        // Create network structure
+        const masterNode = createNode(0, 0, 0, null, "Master Hub", 'master');
+
+        // Create sub-master nodes
+        for (let i = 0; i < 9; i++) {
+            const subMaster = createNode(
+                Math.random() * 100 - 50,
+                Math.random() * 100 - 50,
+                Math.random() * 100 - 50,
+                masterNode,
+                `Sub-Master ${i + 1}`,
+                'subMaster'
+            );
+
+            // Create topic nodes for each sub-master
+            for (let j = 0; j < 6; j++) {
+                const topic = createNode(
+                    subMaster.x + Math.random() * 40 - 20,
+                    subMaster.y + Math.random() * 40 - 20,
+                    subMaster.z + Math.random() * 40 - 20,
+                    subMaster,
+                    `Topic ${j + 1}`,
+                    'topic'
+                );
+
+                // Create sub-topic nodes for each topic
+                for (let k = 0; k < 3; k++) {
+                    createNode(
+                        topic.x + Math.random() * 20 - 10,
+                        topic.y + Math.random() * 20 - 10,
+                        topic.z + Math.random() * 20 - 10,
+                        topic,
+                        `Sub-Topic ${k + 1}`,
+                        'subTopic'
+                    );
+                }
+            }
+
+            // Create data nodes for each sub-master
+            for (let l = 0; l < 42; l++) {
+                createNode(
+                    subMaster.x + Math.random() * 60 - 30,
+                    subMaster.y + Math.random() * 60 - 30,
+                    subMaster.z + Math.random() * 60 - 30,
+                    subMaster,
+                    `Data Node ${l + 1}`,
+                    'dataNode'
+                );
+            }
+        }
+
+        // Create crypto nodes
+        const cryptoNodes = ['Bitcoin', 'Ethereum', 'Cardano', 'Polkadot', 'Solana'].map((crypto, index) => {
+            return createNode(
+                Math.cos(index * Math.PI * 0.4) * 150,
+                Math.sin(index * Math.PI * 0.4) * 150,
+                0,
+                masterNode,
+                crypto,
+                'crypto'
+            );
+        });
+
+        // Orbital motion update
+        let isRotating = true;
+        function updateOrbitalMotion() {
+            if (!isRotating) return;
+
+            nodes.forEach(node => {
+                if (node.parent) {
+                    const time = Date.now() * 0.001;
+                    const radius = Math.sqrt(Math.pow(node.x - node.parent.x, 2) + Math.pow(node.y - node.parent.y, 2));
+                    const speed = 0.5 / radius;
+                    const angle = time * speed;
+
+                    node.object3D.position.x = node.parent.object3D.position.x + Math.cos(angle) * radius;
+                    node.object3D.position.y = node.parent.object3D.position.y + Math.sin(angle) * radius;
+                    node.object3D.position.z = node.z + Math.sin(time * speed) * 10;
+                }
+            });
+
+            // Update connection lines
+            lines.forEach(({ line, start, end }) => {
+                const positions = line.geometry.attributes.position.array;
+                positions[0] = start.object3D.position.x;
+                positions[1] = start.object3D.position.y;
+                positions[2] = start.object3D.position.z;
+                positions[3] = end.object3D.position.x;
+                positions[4] = end.object3D.position.y;
+                positions[5] = end.object3D.position.z;
+                line.geometry.attributes.position.needsUpdate = true;
+            });
+        }
+
+        // Crypto data update
+        let cryptoData = {};
+        function updateCryptoData() {
+            cryptoNodes.forEach(node => {
+                const price = (Math.random() * 10000).toFixed(2);
+                const change = (Math.random() * 10 - 5).toFixed(2);
+                cryptoData[node.name] = { price, change };
+            });
+
+            let cryptoDataHTML = '<h3>Crypto Training Data</h3>';
+            Object.entries(cryptoData).forEach(([crypto, data]) => {
+                cryptoDataHTML += `<p>${crypto}: $${data.price} (${data.change}%)</p>`;
+            });
+            document.getElementById('cryptoData').innerHTML = cryptoDataHTML;
+        }
+
+        // Data flow animation
+        let isDataFlowing = false;
+        function animateDataFlow() {
+            if (!isDataFlowing) return;
+
+            lines.forEach(({ line }) => {
+                const positions = line.geometry.attributes.position.array;
+                const startPoint = new THREE.Vector3(positions[0], positions[1], positions[2]);
+                const endPoint = new THREE.Vector3(positions[3], positions[4], positions[5]);
+
+                const dataPacket = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.5, 8, 8),
+                    new THREE.MeshBasicMaterial({ color: 0xffffff })
+                );
+
+                scene.add(dataPacket);
+
+                gsap.to(dataPacket.position, {
+                    x: endPoint.x,
+                    y: endPoint.y,
+                    z: endPoint.z,
+                    duration: 2,
+                    ease: "none",
+                    onComplete: () => {
+                        scene.remove(dataPacket);
+                    }
+                });
+            });
+        }
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            updateOrbitalMotion();
+            animateDataFlow();
+            renderer.render(scene, camera);
+        }
+
+        // Initialize
+        updateCryptoData();
+        setInterval(updateCryptoData, 5000);
+        animate();
+
+        // Create legend
+        function createLegend() {
+            const legend = document.getElementById('legend');
+            Object.entries(colorScheme).forEach(([type, color]) => {
+                const item = document.createElement('div');
+                item.className = 'legend-item';
+                const colorBox = document.createElement('div');
+                colorBox.className = 'legend-color';
+                colorBox.style.backgroundColor = `#${color.toString(16).padStart(6, '0')}`;
+                const label = document.createElement('span');
+                label.textContent = type.charAt(0).toUpperCase() + type.slice(1);
+                item.appendChild(colorBox);
+                item.appendChild(label);
+                legend.appendChild(item);
+            });
+        }
+        createLegend();
+
+        // Control functions
+        function toggleRotation() {
+            isRotating = !isRotating;
+        }
+
+        function toggleDataFlow() {
+            isDataFlowing = !isDataFlowing;
+        }
+
+        function downloadProjectCode() {
+            const projectCode = `
+                // Project code here
+                // This is a placeholder for the actual project code
+                console.log("Advanced Neural Network Explorer with Crypto Data");
+            `;
+
+            const blob = new Blob([projectCode], { type: 'text/javascript' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = 'neural_network_explorer.js';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        // Raycaster for node interaction
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        function onMouseMove(event) {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(scene.children);
+
+            if (intersects.length > 0) {
+                const intersectedNode = nodes.find(node => node.object3D === intersects[0].object);
+                if (intersectedNode) {
+                    document.getElementById('info').innerHTML = `<h3>${intersectedNode.name}</h3><p>Type: ${intersectedNode.type}</p>`;
+                }
+            } else {
+                document.getElementById('info').innerHTML = '';
+            }
+        }
+
+        window.addEventListener('mousemove', onMouseMove);
+
+        // Window resize handler
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
