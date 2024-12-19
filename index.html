@@ -1,0 +1,1801 @@
+<html><head><base href=""><style>
+@font-face {
+    font-family: 'LDFComicSans';
+    src: url('/Ldfcomicsans-jj7l.ttf') format('truetype');
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'LDFComicSans', 'Arial Rounded MT Bold', Arial, sans-serif;
+    background: linear-gradient(135deg, #1a0b2e, #2a1b3e);
+    color: #fff;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-container {
+    display: flex;
+    height: 100vh;
+}
+
+.users-panel {
+    width: 250px;
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('/images.jfif');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    padding: 20px;
+    border-right: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.users-panel h2,
+.users-panel h3 {
+    color: #fff;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.user-list {
+    list-style: none;
+    padding: 0;
+}
+
+.user-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 15px;
+    background: rgba(0, 0, 0, 0.6);
+    transition: 0.3s;
+    backdrop-filter: blur(5px);
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+}
+
+.user-info-text {
+    display: flex;
+    flex-direction: column;
+    margin-left: 10px;
+}
+
+.ban-button, .unban-button, .make-admin-button, .remove-admin-button {
+    background: #ff4444;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    color: white;
+    cursor: pointer;
+    margin-left: 10px;
+    display: none;
+}
+
+.make-admin-button {
+    background: #4CAF50;
+}
+
+.remove-admin-button {
+    background: #f44336;
+}
+
+.unban-button {
+    background: #44ff44;
+}
+
+.ban-button:hover {
+    background: #ff0000;
+}
+
+.unban-button:hover {
+    background: #00ff00;
+}
+
+.make-admin-button:hover {
+    background: #2E7D32;
+}
+
+.remove-admin-button:hover {
+    background: #c62828;
+}
+
+.banned {
+    opacity: 0.5;
+    position: relative;
+}
+
+.banned::after {
+    content: '🚫 BANNED';
+    position: absolute;
+    right: 10px;
+    color: #ff4444;
+    font-size: 0.8em;
+}
+
+.chat-area {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('/images.jfif');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.messages {
+    flex-grow: 1;
+    overflow-y: auto;
+    margin-bottom: 20px;
+    padding: 20px;
+}
+
+.message {
+    display: flex;
+    align-items: start;
+    margin-bottom: 20px;
+    animation: slideIn 0.3s ease-out;
+}
+
+.rooms-list {
+    margin-top: 20px;
+    border-top: 2px solid rgba(255, 255, 255, 0.1);
+    padding-top: 20px;
+}
+
+.room-item {
+    display: flex;
+    align-items: center;
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 15px;
+    background: rgba(0, 0, 0, 0.6);
+    cursor: pointer;
+    transition: 0.3s;
+    backdrop-filter: blur(5px);
+}
+
+.room-item.active {
+    background: #8f6ed5;
+}
+
+.room-item:hover {
+    background: rgba(143, 110, 213, 0.5);
+}
+
+.room-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 10px;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.message-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 15px;
+    border: 2px solid #8f6ed5;
+}
+
+.message-content {
+    background: rgba(0, 0, 0, 0.7);
+    padding: 15px;
+    border-radius: 20px;
+    max-width: 70%;
+    backdrop-filter: blur(5px);
+}
+
+.message-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.message-username {
+    color: #8f6ed5;
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.message[data-username="unhingedALIWEN"] .message-username {
+    background: linear-gradient(45deg, #ff6b6b, #ff3a3a);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: bold;
+}
+
+.message-time {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.8em;
+}
+
+.message-text {
+    color: #fff;
+    line-height: 1.4;
+}
+
+.input-area {
+    display: flex;
+    gap: 10px;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 15px;
+    backdrop-filter: blur(5px);
+}
+
+.message-input {
+    flex-grow: 1;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    border-radius: 10px;
+    padding: 15px;
+    color: #fff;
+    font-size: 16px;
+}
+
+.message-input:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.send-button {
+    background: #8f6ed5;
+    border: none;
+    border-radius: 10px;
+    padding: 15px 30px;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.send-button:hover {
+    background: #7c5bc9;
+    transform: scale(1.05);
+}
+
+.current-room {
+    font-size: 1.5em;
+    margin-bottom: 20px;
+    color: #8f6ed5;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.developer-badge {
+    background: linear-gradient(45deg, #ff6b6b, #ff3a3a);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    margin-left: 8px;
+    margin-right: 8px;
+    font-weight: bold;
+    animation: glow 2s infinite alternate;
+}
+
+@keyframes glow {
+    from {
+        box-shadow: 0 0 5px #ff6b6b, 0 0 10px #ff6b6b;
+    }
+    to {
+        box-shadow: 0 0 10px #ff3a3a, 0 0 20px #ff3a3a;
+    }
+}
+
+.admin-badge {
+    background: linear-gradient(45deg, #4CAF50, #2E7D32);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    margin-left: 8px;
+    margin-right: 8px;
+    font-weight: bold;
+    animation: adminGlow 2s infinite alternate;
+}
+
+@keyframes adminGlow {
+    from {
+        box-shadow: 0 0 5px #4CAF50, 0 0 10px #4CAF50;
+    }
+    to {
+        box-shadow: 0 0 10px #2E7D32, 0 0 20px #2E7D32;
+    }
+}
+
+.emoji-picker {
+    position: relative;
+    display: inline-block;
+}
+
+.emoji-button {
+    background: #8f6ed5;
+    border: none;
+    border-radius: 10px;
+    padding: 15px;
+    color: #fff;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.emoji-panel {
+    display: none;
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 10px;
+    z-index: 1000;
+}
+
+.emoji-panel.active {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 5px;
+}
+
+.custom-emoji {
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    border-radius: 5px;
+}
+
+.custom-emoji:hover {
+    transform: scale(1.2);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.message-text img.emoji {
+    width: 24px;
+    height: 24px;
+    vertical-align: middle;
+    margin: 0 2px;
+}
+
+.typing-indicator {
+    color: rgba(255, 255, 255, 0.7);
+    font-style: italic;
+    padding: 5px 15px;
+    font-size: 0.9em;
+    animation: fadeInOut 1s infinite;
+}
+
+@keyframes fadeInOut {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+.games-button {
+    background: #8f6ed5;
+    border: none;
+    border-radius: 15px;
+    padding: 15px 30px;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+    margin: 20px auto;
+    display: none; /* Hidden by default, shown only in games room */
+    text-decoration: none;
+    text-align: center;
+}
+
+.games-button:hover {
+    background: #7c5bc9;
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(143, 110, 213, 0.5);
+}
+
+.minigames-popup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(10px);
+    padding: 20px;
+    border-radius: 15px;
+    z-index: 1000;
+    width: 80%;
+    max-width: 600px;
+}
+
+.minigames-popup.active {
+    display: block;
+    animation: popIn 0.3s ease-out;
+}
+
+.minigames-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.minigame-card {
+    background: rgba(143, 110, 213, 0.2);
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.minigame-card:hover {
+    background: rgba(143, 110, 213, 0.4);
+    transform: scale(1.05);
+}
+
+.close-popup {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+@keyframes popIn {
+    from {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0;
+    }
+    to {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+}
+
+.game-container {
+    display: none;
+    width: 100%;
+    height: 400px;
+    margin-top: 20px;
+}
+
+.game-container.active {
+    display: block;
+}
+
+.welcome-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(10px);
+    padding: 30px;
+    border-radius: 15px;
+    z-index: 1000;
+    text-align: center;
+    animation: welcomePopIn 0.5s ease-out;
+    box-shadow: 0 0 20px rgba(143, 110, 213, 0.3);
+}
+
+.welcome-popup h2 {
+    color: #8f6ed5;
+    margin-bottom: 20px;
+}
+
+.welcome-popup p {
+    color: #fff;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.welcome-close {
+    background: #8f6ed5;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    color: #fff;
+    cursor: pointer;
+    transition: 0.3s;
+    font-family: inherit;
+}
+
+.welcome-close:hover {
+    background: #7c5bc9;
+    transform: scale(1.05);
+}
+
+@keyframes welcomePopIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+/* Add to existing styles */
+.reply-button {
+    background: none;
+    border: none;
+    color: #8f6ed5;
+    cursor: pointer;
+    padding: 5px;
+    font-size: 0.8em;
+    opacity: 0.7;
+    transition: 0.3s;
+}
+
+.reply-button:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.reply-container {
+    background: rgba(143, 110, 213, 0.1);
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+/* Add this CSS to hide the file input */
+.file-input {
+    display: none;
+}
+
+/* Add this CSS to style the upload button nicely */
+.upload-button {
+    background: #8f6ed5;
+    border: none;
+    border-radius: 10px;
+    padding: 15px;
+    color: #fff;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.upload-button:hover {
+    background: #7c5bc9;
+    transform: scale(1.05);
+}
+
+.upload-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Add to existing CSS */
+.soundbar-button {
+    background: #8f6ed5;
+    border: none;
+    border-radius: 10px;
+    padding: 15px;
+    color: #fff;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.soundbar-panel {
+    display: none;
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(10px);
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 10px;
+    z-index: 1000;
+    width: 300px;
+}
+
+.soundbar-panel.active {
+    display: block;
+}
+
+.sound-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    border-radius: 8px;
+    background: rgba(143, 110, 213, 0.2);
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.sound-item:hover {
+    background: rgba(143, 110, 213, 0.4);
+}
+
+.sound-item.playing {
+    background: rgba(143, 110, 213, 0.6);
+}
+
+.sound-item-title {
+    flex-grow: 1;
+    color: #fff;
+    font-size: 0.9em;
+}
+
+.mute-button {
+    background: #8f6ed5;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 15px;
+    color: #fff;
+    cursor: pointer;
+    transition: 0.3s;
+    margin: 10px 0;
+    width: 100%;
+    font-weight: bold;
+}
+
+.mute-button:hover {
+    background: #7c5bc9;
+    transform: scale(1.02);
+}
+
+.mute-button.muted {
+    background: #ff4444;
+    animation: pulseRed 2s infinite;
+}
+
+.mute-button.muted:hover {
+    background: #ff0000;
+}
+
+@keyframes pulseRed {
+    0% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0); }
+}
+
+/* Add CSS for the cosmic tokens button */ 
+.cosmic-tokens-button { 
+    background: linear-gradient(45deg, #8f6ed5, #b392e9);
+    border: none;  
+    border-radius: 10px; /* Reduced from 15px */
+    padding: 8px 15px; /* Reduced from 15px 30px */
+    color: #fff;
+    font-weight: bold;
+    text-decoration: none;
+    display: inline-block;
+    margin: 5px 10px; /* Reduced from 10px 20px */
+    cursor: pointer;
+    transition: 0.3s;
+    animation: tokenGlow 2s infinite alternate;
+    text-align: center;
+    font-size: 0.9em; /* Added to make text smaller */
+}
+
+.store-button {
+    background: linear-gradient(45deg, #8f6ed5, #b392e9);
+    border: none;
+    border-radius: 10px;
+    padding: 8px 15px;
+    color: #fff;
+    font-weight: bold;
+    text-decoration: none;
+    display: inline-block;
+    margin: 5px 10px;
+    cursor: pointer;
+    transition: 0.3s;
+    text-align: center;
+    font-size: 0.9em;
+}
+
+.store-button:hover {
+    transform: scale(1.05);
+    background: linear-gradient(45deg, #7c5bc9, #9f7ee0);
+}
+
+/* Add CSS for store popup */
+.store-popup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    z-index: 1000;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+    min-width: 300px;
+    text-align: center;
+    animation: storePopIn 0.3s ease-out;
+    color: #333;
+}
+
+.store-popup.active {
+    display: block;
+}
+
+.store-popup h2 {
+    color: #8f6ed5;
+    margin-bottom: 20px;
+}
+
+.store-popup-close {
+    background: #8f6ed5;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    color: white;
+    cursor: pointer;
+    transition: 0.3s;
+    font-family: inherit;
+}
+
+.store-popup-close:hover {
+    background: #7c5bc9;
+    transform: scale(1.05);
+}
+
+@keyframes storePopIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+.store-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.gambling-button {
+    background: linear-gradient(45deg, #FFD700, #FFA500);
+    border: none;
+    border-radius: 10px;
+    padding: 15px 30px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    font-size: 1.1em;
+    animation: shimmer 2s infinite;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.gambling-button:hover {
+    transform: scale(1.05);
+    background: linear-gradient(45deg, #FFA500, #FFD700);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+}
+
+@keyframes shimmer {
+    0% { background-position: -100% 0; }
+    100% { background-position: 100% 0; }
+}
+
+.gambling-container {
+    display: none;
+    flex-direction: column;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 15px;
+    margin-bottom: 20px;
+}
+
+.gambling-container.active {
+    display: flex;
+}
+
+.token-display {
+    background: linear-gradient(45deg, #FFD700, #FFA500);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    animation: shimmer 2s infinite;
+}
+
+.gambling-games {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.gambling-game {
+    background: rgba(143, 110, 213, 0.2);
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.gambling-game:hover {
+    background: rgba(143, 110, 213, 0.4);
+    transform: translateY(-5px);
+}
+
+.gambling-game h3 {
+    color: #FFD700;
+    margin: 0 0 10px 0;
+}
+
+.gambling-game p {
+    color: #fff;
+    margin: 0;
+    font-size: 0.9em;
+}
+</style></head><body>
+<div class="chat-container">
+    <div class="users-panel">
+        <h2>SPACEIE CHATT :p</h2>
+        <button id="muteChatButton" class="mute-button">
+            🔊 Chat Sounds On
+        </button>
+        <ul class="user-list" id="userList">
+        </ul>
+        <div class="rooms-list">
+            <h3>Chatrooms</h3>
+            <div class="room-item active" data-room="general">
+                <span class="room-icon">🚀</span>
+                General Space
+            </div>
+            <div class="room-item" data-room="aliens">
+                <span class="room-icon">👽</span>
+                Alien Lounge
+            </div>
+            <div class="room-item" data-room="cosmos">
+                <span class="room-icon">🌌</span>
+                Cosmos Club
+            </div>
+            <div class="room-item" data-room="asteroids">
+                <span class="room-icon">☄️</span>
+                Asteroid Bar
+            </div>
+            <div class="room-item" data-room="gambling">
+                <span class="room-icon">🎰</span>
+                Cosmic Casino
+            </div>
+        </div>
+    </div>
+    <div class="chat-area">
+        <h3 class="current-room" id="currentRoom">🚀 General Space</h3>
+        <a href="https://websim.ai/@Doxlie/free-cosmic-tokens" class="cosmic-tokens-button" target="_blank">
+            🌟 Get Free Cosmic Tokens 🌟
+        </a>
+        <a href="javascript:void(0);" class="store-button">
+            🛍️ Store 🛍️
+        </a>
+        <div id="typingIndicator" class="typing-indicator"></div>
+        <div class="messages" id="messages">
+        </div>
+        <div class="gambling-container">
+            <div class="token-display">
+                <span>🌟 Your Cosmic Tokens: <span id="tokenCount">1000</span></span>
+            </div>
+            <div class="gambling-games">
+                <div class="gambling-game" id="coinFlip">
+                    <h3>🪙 Coin Flip</h3>
+                    <p>Double or nothing! (50 tokens)</p>
+                </div>
+                <div class="gambling-game" id="slotMachine">
+                    <h3>🎰 Slot Machine</h3>
+                    <p>Try your luck! (100 tokens)</p>
+                </div>
+                <div class="gambling-game" id="roulette">
+                    <h3>🎡 Roulette</h3>
+                    <p>Spin to win! (200 tokens)</p>
+                </div>
+            </div>
+        </div>
+        <div class="input-area">
+            <div class="soundbar-picker">
+                <button class="soundbar-button">🔊</button>
+                <div class="soundbar-panel">
+                    <div class="sound-item" data-sound="/undertale-meow.mp3">
+                        <span class="sound-item-title">Meow</span>
+                        <span>🐱</span>
+                    </div>
+                    <div class="sound-item" data-sound="/tuco-get-out_GUkoo8V.mp3">
+                        <span class="sound-item-title">Tuco: Get Out!</span>
+                        <span>😠</span>
+                    </div>
+                    <div class="sound-item" data-sound="/gunshoot.mp3">
+                        <span class="sound-item-title">Gunshot</span>
+                        <span>🔫</span>
+                    </div>
+                    <div class="sound-item" data-sound="/hl2-stalker-scream.mp3">
+                        <span class="sound-item-title">Stalker Scream</span>
+                        <span>😱</span>
+                    </div>
+                    <div class="sound-item" data-sound="/letsgogambling.ogg">
+                        <span class="sound-item-title">Lets Go Gambling</span>
+                        <span>🎰</span>
+                    </div>
+                    <div class="sound-item" data-sound="/Moan (1).mp3">
+                        <span class="sound-item-title">Moan</span>
+                        <span>😳</span>
+                    </div>
+                </div>
+            </div>
+            <div class="emoji-picker">
+                <button class="emoji-button">😊</button>
+                <div class="emoji-panel">
+                    <img src="/NOO.png" class="custom-emoji" data-emoji="noo" title="NOO">
+                    <img src="/huhu.jfif" class="custom-emoji" data-emoji="huhu" title="Huhu">
+                    <img src="/ayobruh.png" class="custom-emoji" data-emoji="ayobruh" title="Ayo bruh">
+                    <img src="/ilavau.png" class="custom-emoji" data-emoji="ilavau" title="I lava u">
+                    <img src="/gnarp.jfif" class="custom-emoji" data-emoji="gnarp" title="Gnarp">
+                    <img src="/download.png" class="custom-emoji" data-emoji="teletubby" title="Teletubby">
+                    <img src="/emoji.jfif" class="custom-emoji" data-emoji="purplehood" title="Purple Hood">
+                </div>
+            </div>
+            <input type="file" id="fileInput" class="file-input" accept="image/png, image/jpeg, image/gif, image/webp">
+            <button class="upload-button" id="uploadButton">📷</button>
+            <input type="text" class="message-input" id="messageInput" placeholder="Send a message to the galaxy...">
+            <button class="send-button" id="sendButton">Send 🚀</button>
+        </div>
+    </div>
+    <div class="store-popup">
+      <h2>🛍️ Cosmic Store</h2>
+      <div class="store-buttons">
+        <button class="gambling-button" id="buyCustomEmoji">🎨 Custom Emoji (5000 Tokens)</button>
+        <button class="gambling-button" id="buyVipStatus">👑 VIP Status (10000 Tokens)</button>
+        <button class="gambling-button" id="buyCustomBadge">🏷️ Custom Badge (7500 Tokens)</button>
+      </div>
+      <button class="store-popup-close">Close Store</button>
+    </div>
+</div>
+<audio id="messageSound" src="/undertale-meow.mp3"></audio>
+<script>
+const roomEmojis = {
+    'general': '🚀',
+    'aliens': '👽', 
+    'cosmos': '🌌',
+    'asteroids': '☄️',
+    'gambling': '🎰'
+};
+const room = new WebsimSocket();
+let playerTokens = 1000; // Default starting amount
+let isSoundsMuted = false; // Main sound muting
+let isChatMuted = false; // Separate from main sound muting
+
+// Function to update tokens in the store
+async function updatePlayerTokens(username, amount) {
+    await room.store.update({
+        id: 'playerTokens',
+        dependencies: { username, amount },
+        updateFunction: (tokens) => {
+            if (!tokens) tokens = {};
+            if (!tokens[username]) tokens[username] = 1000; // Default starting amount
+            tokens[username] += amount;
+            return tokens;
+        }
+    });
+}
+
+// Function to get player tokens
+async function getPlayerTokens(username) {
+    const tokens = await room.store.get('playerTokens');
+    return tokens && tokens[username] ? tokens[username] : 1000;
+}
+
+const messages = document.getElementById('messages');
+const messageInput = document.getElementById('messageInput');
+const sendButton = document.getElementById('sendButton');
+const userList = document.getElementById('userList');
+const currentRoomTitle = document.getElementById('currentRoom');
+let currentRoom = 'general';
+let bannedUsers = new Set();
+let adminUsers = new Set(['unhingedALIWEN']); // Initialize with the developer
+let lastMessageTime = 0;
+const COOLDOWN_DURATION = 3000; // 3 seconds in milliseconds
+let typingTimeout;
+const TYPING_TIMEOUT = 2000; // How long to wait before removing typing status
+let typingUsers = new Set(); // Ensure typingUsers is initialized as a Set
+let lastSoundTime = 0;
+const SOUND_COOLDOWN = 10000; // 10 seconds in milliseconds
+
+const muteChatButton = document.getElementById('muteChatButton'); // Mute button reference
+
+muteChatButton.addEventListener('click', () => {
+    isSoundsMuted = !isSoundsMuted;
+    if (isSoundsMuted) {
+        muteChatButton.textContent = '🔇 All Sounds Off';
+        muteChatButton.classList.add('muted');
+    } else {
+        muteChatButton.textContent = '🔊 All Sounds On';
+        muteChatButton.classList.remove('muted');
+    }
+});
+
+// Function to check for ASCII art
+function containsAsciiArt(text) {
+    const asciiPatterns = [
+        /(\|{2,})/,  // Multiple vertical bars
+        /(-{3,})/,   // Multiple hyphens
+        /(_){3,}/,   // Multiple underscores
+        /([\/\\]{3,})/, // Multiple slashes or backslashes
+        /([.]{4,})/,    // Multiple periods
+        /([*]{3,})/,    // Multiple asterisks
+        /([=]{3,})/,    // Multiple equals signs
+        /([~]{3,})/,    // Multiple tildes
+        /([`]{3,})/,    // Multiple backticks
+        /(░|▒|▓|█){3,}/, // Block characters
+        /([+]{3,})/,    // Multiple plus signs
+        /([<>]{3,})/    // Multiple angle brackets
+    ];
+
+    return asciiPatterns.some(pattern => pattern.test(text));
+}
+
+// Function to check for glitch text
+function containsGlitchText(text) {
+    const glitchPattern = /[\u0300-\u036f\u0483-\u0489\u1dc0-\u1dff\u20d0-\u20ff\ufe20-\ufe2f]{2,}/;
+    const unusualUnicodePattern = /[\u200b-\u200f\u2028-\u202f\u2060-\u206f]/;
+    
+    return glitchPattern.test(text) || unusualUnicodePattern.test(text);
+}
+
+// Room switching
+document.querySelectorAll('.room-item').forEach(roomElement => {
+    roomElement.addEventListener('click', async () => {
+        document.querySelector('.room-item.active').classList.remove('active');
+        roomElement.classList.add('active');
+        currentRoom = roomElement.dataset.room;
+        currentRoomTitle.textContent = `${roomEmojis[currentRoom]} ${roomElement.textContent.trim()}`;
+        messages.innerHTML = '';
+        room.send({
+            type: 'chat-message',
+            room: currentRoom,
+            username: 'System',
+            avatarUrl: 'https://api.dicebear.com/6.x/bottts/svg?seed=system',
+            text: `Welcome to ${roomElement.textContent.trim()}! 🎉`,
+            timestamp: Date.now()
+        });
+
+        const gamblingContainer = document.querySelector('.gambling-container');
+        if (currentRoom === 'gambling') {
+            const username = room.party.client.username;
+            const tokens = await getPlayerTokens(username);
+            const tokenDisplay = document.querySelector('#tokenCount');
+            if (tokenDisplay) {
+                tokenDisplay.textContent = tokens;
+            }
+            gamblingContainer.classList.add('active');
+            room.send({
+                type: 'chat-message',
+                room: currentRoom,
+                username: 'System',
+                avatarUrl: 'https://api.dicebear.com/6.x/bottts/svg?seed=system',
+                text: `Welcome to the Cosmic Casino! 🎰 Play responsibly and good luck!`,
+                timestamp: Date.now()
+            });
+        } else {
+            gamblingContainer.classList.remove('active');
+        }
+    });
+});
+
+room.onPeersChanged = (peers) => {
+    userList.innerHTML = '';
+    Object.entries(peers).forEach(([clientId, {avatarUrl, username}]) => {
+        const li = document.createElement('li');
+        li.className = 'user-item';
+        if (bannedUsers.has(username)) {
+            li.classList.add('banned');
+        }
+
+        const isDeveloper = username === 'unhingedALIWEN';
+        const isAdmin = adminUsers.has(username);
+        const developerBadge = isDeveloper ? '<span class="developer-badge">👨‍💻 Developer</span>' : '';
+        const adminBadge = isAdmin && !isDeveloper ? '<span class="admin-badge">👑 Admin</span>' : '';
+
+        const userInfo = document.createElement('div');
+        userInfo.className = 'user-info';
+        userInfo.innerHTML = `
+            <img src="${avatarUrl}" alt="${username}" class="user-avatar">
+            <div class="user-info-text">
+                <span class="user-name ${isDeveloper ? 'developer-name' : ''}">${username}</span>
+                ${developerBadge}
+                ${adminBadge}
+            </div>
+        `;
+
+        const banButton = document.createElement('button');
+        banButton.className = 'ban-button';
+        banButton.textContent = '🚫 Ban';
+        
+        const unbanButton = document.createElement('button');
+        unbanButton.className = 'unban-button';
+        unbanButton.textContent = '✅ Unban';
+
+        const makeAdminButton = document.createElement('button');
+        makeAdminButton.className = 'make-admin-button';
+        makeAdminButton.textContent = '👑 Make Admin';
+
+        const removeAdminButton = document.createElement('button');
+        removeAdminButton.className = 'remove-admin-button';
+        removeAdminButton.textContent = '❌ Remove Admin';
+        
+        if (room.party.client.username === 'unhingedALIWEN' && !isDeveloper) {
+            if (isAdmin) {
+                removeAdminButton.style.display = 'block';
+                makeAdminButton.style.display = 'none';
+            } else {
+                makeAdminButton.style.display = 'block';
+                removeAdminButton.style.display = 'none';
+            }
+        }
+
+        if (adminUsers.has(room.party.client.username) || room.party.client.username === 'unhingedALIWEN') {
+            if (bannedUsers.has(username)) {
+                unbanButton.style.display = 'block';
+                banButton.style.display = 'none';
+            } else {
+                banButton.style.display = 'block';
+                unbanButton.style.display = 'none';
+            }
+        }
+
+        banButton.onclick = (e) => {
+            e.preventDefault();
+            if (adminUsers.has(room.party.client.username) || room.party.client.username === 'unhingedALIWEN') {
+                // Send the ban event
+                room.send({
+                    type: 'ban-user',
+                    targetUsername: username
+                });
+                
+                // Send system message about the ban
+                room.send({
+                    type: 'chat-message',
+                    room: currentRoom,
+                    username: 'System',
+                    avatarUrl: 'https://api.dicebear.com/6.x/bottts/svg?seed=system',
+                    text: `${username} has been banned by ${room.party.client.username}`,
+                    timestamp: Date.now()
+                });
+            }
+        };
+
+        unbanButton.onclick = (e) => {
+            e.preventDefault();
+            if (adminUsers.has(room.party.client.username) || room.party.client.username === 'unhingedALIWEN') {
+                // Send the unban event
+                room.send({
+                    type: 'unban-user',
+                    targetUsername: username
+                });
+                
+                // Send system message about the unban
+                room.send({
+                    type: 'chat-message',
+                    room: currentRoom,
+                    username: 'System',
+                    avatarUrl: 'https://api.dicebear.com/6.x/bottts/svg?seed=system',
+                    text: `${username} has been unbanned by ${room.party.client.username}`,
+                    timestamp: Date.now()
+                });
+            }
+        };
+
+        makeAdminButton.onclick = (e) => {
+            e.preventDefault(); // Prevent any default behavior
+            if (room.party.client.username === 'unhingedALIWEN') {
+                // Send the make-admin event
+                room.send({
+                    type: 'make-admin',
+                    targetUsername: username
+                });
+            }
+        };
+
+        removeAdminButton.onclick = (e) => {
+            e.preventDefault(); // Prevent any default behavior
+            if (room.party.client.username === 'unhingedALIWEN') {
+                // Send the remove-admin event
+                room.send({
+                    type: 'remove-admin',
+                    targetUsername: username
+                });
+            }
+        };
+
+        li.appendChild(userInfo);
+        li.appendChild(banButton);
+        li.appendChild(unbanButton);
+        li.appendChild(makeAdminButton);
+        li.appendChild(removeAdminButton);
+        userList.appendChild(li);
+    });
+};
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function formatMessage(text, replyTo = null) {
+    let replyHtml = '';
+    if (replyTo) {
+        replyHtml = `
+            <div class="reply-container">
+                <div class="reply-header">Replying to ${escapeHtml(replyTo.username)}</div>
+                <div>${escapeHtml(replyTo.text)}</div>
+            </div>
+        `;
+    }
+    
+    // Only allow HTML for developer account
+    if (room.party.client.username === 'unhingedALIWEN') {
+        // Process emoji codes
+        text = text.replace(/:([\w]+):/g, (match, emojiName) => {
+            if (customEmojis[emojiName]) {
+                return `<img src="${customEmojis[emojiName]}" class="emoji" alt="${emojiName}">`;
+            }
+            return match;
+        });
+        return replyHtml + text;
+    } else {
+        // For non-developer users, escape HTML except for uploaded images
+        if (text.startsWith('<img src="') && text.includes('class="uploaded-image"')) {
+            // Allow uploaded images to pass through
+            return replyHtml + text;
+        } else {
+            // Escape HTML but still process emoji codes
+            text = escapeHtml(text).replace(/:([\w]+):/g, (match, emojiName) => {
+                if (customEmojis[emojiName]) {
+                    return `<img src="${customEmojis[emojiName]}" class="emoji" alt="${emojiName}">`;
+                }
+                return match;
+            });
+            return replyHtml + text;
+        }
+    }
+}
+
+// New typing indicator function
+function updateTypingIndicator(typingUsers) {
+    const typingIndicator = document.getElementById('typingIndicator');
+    // Check if element exists
+    if (!typingIndicator) {
+        console.warn('Typing indicator element not found');
+        return;
+    }
+    
+    const currentUser = room.party.client.username;
+    
+    // Ensure typingUsers is an iterable Set
+    const typingSet = typingUsers instanceof Set ? typingUsers : new Set(typingUsers || []);
+    
+    const otherTypingUsers = Array.from(typingSet).filter(user => user !== currentUser);
+    
+    if (otherTypingUsers.length === 0) {
+        typingIndicator.textContent = '';
+    } else if (otherTypingUsers.length === 1) {
+        typingIndicator.textContent = `${otherTypingUsers[0]} is typing...`;
+    } else if (otherTypingUsers.length === 2) {
+        typingIndicator.textContent = `${otherTypingUsers[0]} and ${otherTypingUsers[1]} are typing...`;
+    } else {
+        typingIndicator.textContent = 'Several people are typing...';
+    }
+}
+
+room.onmessage = (event) => {
+    const data = event.data;
+    if (data.type === 'chat-message' && data.room === currentRoom) {
+        // Only play message sound if not from self and if chat sounds not muted
+        if (data.username !== room.party.client.username && !isChatMuted) {
+            const messageSound = document.getElementById('messageSound');
+            messageSound.currentTime = 0; 
+            messageSound.play()
+            .catch(error => {
+                console.log("Audio playback failed:", error);
+            });
+        }
+
+        if (!bannedUsers.has(data.username)) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message';
+            messageDiv.dataset.messageId = data.timestamp; 
+            const time = new Date(data.timestamp).toLocaleTimeString();
+            const isDeveloper = data.username === 'unhingedALIWEN' ? 
+                '<span class="developer-badge">👨‍💻 Developer</span>' : '';
+            const isAdmin = adminUsers.has(data.username) ? 
+                '<span class="admin-badge">👑 Admin</span>' : '';
+            messageDiv.innerHTML = `
+                <img src="${escapeHtml(data.avatarUrl)}" alt="${escapeHtml(data.username)}" class="message-avatar">
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-username">${escapeHtml(data.username)}</span>
+                        ${isDeveloper}
+                        ${isAdmin}
+                        <span class="message-time">${escapeHtml(time)}</span>
+                    </div>
+                    <div class="message-text">${formatMessage(data.text, data.replyTo)}</div>
+                    <button class="reply-button">↩️ Reply</button>
+                </div>
+            `;
+            
+            const replyButton = messageDiv.querySelector('.reply-button');
+            replyButton.addEventListener('click', () => {
+                const messageInput = document.getElementById('messageInput');
+                messageInput.dataset.replyTo = JSON.stringify({
+                    messageId: data.timestamp,
+                    username: data.username,
+                    text: data.text
+                });
+                messageInput.focus();
+                messageInput.placeholder = `Replying to ${escapeHtml(data.username)}...`;
+            });
+            
+            messages.appendChild(messageDiv);
+            messages.scrollTop = messages.scrollHeight;
+        }
+    } else if (data.type === 'ban-user') {
+        bannedUsers.add(data.targetUsername);
+        if (data.targetUsername === room.party.client.username) {
+            messageInput.disabled = true;
+            messageInput.placeholder = "You have been banned from sending messages";
+            sendButton.disabled = true;
+        }
+        room.onPeersChanged(room.party.peers);
+    } else if (data.type === 'unban-user') {
+        bannedUsers.delete(data.targetUsername);
+        if (data.targetUsername === room.party.client.username) {
+            messageInput.disabled = false;
+            messageInput.placeholder = "Send a message to the galaxy...";
+            sendButton.disabled = false;
+        }
+        room.onPeersChanged(room.party.peers);
+    } else if (data.type === 'make-admin') {
+        // Initialize adminUsers as a Set if it doesn't exist
+        adminUsers = adminUsers || new Set();
+        adminUsers.add(data.targetUsername);
+        // Send a system message
+        room.send({
+            type: 'chat-message',
+            room: currentRoom,
+            username: 'System',
+            avatarUrl: 'https://api.dicebear.com/6.x/bottts/svg?seed=system',
+            text: `${data.targetUsername} has been made an admin! 👑`,
+            timestamp: Date.now()
+        });
+        room.onPeersChanged(room.party.peers);
+    } else if (data.type === 'remove-admin') {
+        adminUsers = adminUsers || new Set();
+        adminUsers.delete(data.targetUsername);
+        // Send a system message
+        room.send({
+            type: 'chat-message',
+            room: currentRoom,
+            username: 'System',
+            avatarUrl: 'https://api.dicebear.com/6.x/bottts/svg?seed=system',
+            text: `${data.targetUsername}'s admin privileges have been removed`,
+            timestamp: Date.now()
+        });
+        room.onPeersChanged(room.party.peers);
+    } else if (data.type === 'typing-status') {
+        if (data.isTyping) {
+            typingUsers.add(data.username);
+        } else {
+            typingUsers.delete(data.username);
+        }
+        updateTypingIndicator(typingUsers); // Pass the Set directly
+    } else if (data.type === 'play-sound') {
+        // Only play sound if not muted and not from self
+        if (data.username !== room.party.client.username && !isSoundsMuted) {
+            const audio = new Audio(data.soundUrl);
+            audio.play()
+                .catch(error => {
+                    console.error('Error playing audio:', error);
+                });
+                
+            // Find and highlight the corresponding sound item
+            document.querySelectorAll('.sound-item').forEach(item => {
+                if (item.dataset.sound === data.soundUrl) {
+                    item.classList.add('playing');
+                    setTimeout(() => item.classList.remove('playing'), 
+                        data.duration || 3000); // Remove highlight after sound duration or 3s default
+                }
+            });
+        }
+    }
+};
+
+// Modify the sendMessage function
+function sendMessage() {
+    const text = messageInput.value.trim();
+    const now = Date.now();
+    
+    if (now - lastMessageTime < COOLDOWN_DURATION) {
+        const remainingTime = Math.ceil((COOLDOWN_DURATION - (now - lastMessageTime)) / 1000);
+        messageInput.placeholder = `Please wait ${remainingTime} seconds before sending another message...`;
+        return;
+    }
+
+    if (!text || bannedUsers.has(room.party.client.username)) return;
+
+    // Remove developer check for ASCII art and glitch text restrictions
+    let replyTo = null;
+    if (messageInput.dataset.replyTo) {
+        replyTo = JSON.parse(messageInput.dataset.replyTo);
+        delete messageInput.dataset.replyTo;
+    }
+
+    room.send({
+        type: 'chat-message',
+        room: currentRoom,
+        text: text,
+        timestamp: now,
+        replyTo: replyTo
+    });
+
+    clearTimeout(typingTimeout);
+    room.send({
+        type: 'typing-status',
+        isTyping: false
+    });
+
+    lastMessageTime = now;
+    
+    messageInput.value = '';
+    
+    messageInput.placeholder = 'Cooling down...';
+    sendButton.disabled = true;
+    
+    setTimeout(() => {
+        messageInput.placeholder = 'Send a message to the galaxy...';
+        sendButton.disabled = false;
+    }, COOLDOWN_DURATION);
+}
+
+// Add handler to clear reply when ESC is pressed
+messageInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && messageInput.dataset.replyTo) {
+        delete messageInput.dataset.replyTo;
+        messageInput.placeholder = 'Send a message to the galaxy...';
+    }
+});
+
+// Add this event listener to reset placeholder when user focuses on input
+messageInput.addEventListener('focus', () => {
+    if (Date.now() - lastMessageTime >= COOLDOWN_DURATION) {
+        messageInput.placeholder = 'Send a message to the galaxy...';
+    }
+});
+
+messageInput.addEventListener('input', () => {
+    if (!bannedUsers.has(room.party.client.username)) {
+        room.send({
+            type: 'typing-status',
+            isTyping: true
+        });
+
+        clearTimeout(typingTimeout);
+
+        typingTimeout = setTimeout(() => {
+            room.send({
+                type: 'typing-status',
+                isTyping: false
+            });
+        }, TYPING_TIMEOUT);
+    }
+});
+
+sendButton.addEventListener('click', sendMessage);
+messageInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') sendMessage();
+});
+
+// Welcome popup
+setTimeout(() => {
+    const welcomePopup = document.createElement('div');
+    welcomePopup.className = 'welcome-popup';
+    welcomePopup.innerHTML = `
+        <h2>👽 Welcome to SPACEIE CHATT!</h2>
+        <p>Get ready to embark on an intergalactic journey of communication! Share your thoughts, make new friends, and explore different chat rooms in this cosmic space.</p>
+        <p>🌟 Join different themed rooms<br>
+           👾 Play mini-games in the Game Zone<br>
+           🚀 Chat with space friends</p>
+        <button class="welcome-close">Start Chatting!</button>
+    `;
+    
+    document.body.appendChild(welcomePopup);
+    
+    welcomePopup.querySelector('.welcome-close').addEventListener('click', () => {
+        welcomePopup.style.animation = 'welcomePopIn 0.5s ease-in reverse';
+        setTimeout(() => welcomePopup.remove(), 500);
+    });
+}, 1000);
+
+// Emoji handling
+const emojiButton = document.querySelector('.emoji-button');
+const emojiPanel = document.querySelector('.emoji-panel');
+const customEmojis = {
+    'noo': '/NOO.png',
+    'huhu': '/huhu.jfif',
+    'ayobruh': '/ayobruh.png',
+    'ilavau': '/ilavau.png',
+    'gnarp': '/gnarp.jfif',
+    'teletubby': '/download.png',
+    'purplehood': '/emoji.jfif'
+};
+
+// Toggle emoji panel
+emojiButton.addEventListener('click', () => {
+    emojiPanel.classList.toggle('active');
+});
+
+// Close emoji panel when clicking outside
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.emoji-picker')) {
+        emojiPanel.classList.remove('active');
+    }
+});
+
+// Handle emoji selection
+document.querySelectorAll('.custom-emoji').forEach(emoji => {
+    emoji.addEventListener('click', () => {
+        const emojiCode = `:${emoji.dataset.emoji}:`;
+        messageInput.value += emojiCode;
+        messageInput.focus();
+    });
+});
+
+// Add image upload handling
+const fileInput = document.getElementById('fileInput');
+const uploadButton = document.getElementById('uploadButton');
+
+uploadButton.addEventListener('click', () => {
+    if (!bannedUsers.has(room.party.client.username)) {
+        fileInput.click();
+    }
+});
+
+fileInput.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+        alert('Only image files are allowed (PNG, JPEG, GIF, WebP)');
+        fileInput.value = '';
+        return;
+    }
+    
+    const MAX_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+    if (file.size > MAX_SIZE) {
+        alert('File size must be less than 5MB');
+        fileInput.value = '';
+        return;
+    }
+
+    try {
+        uploadButton.textContent = '⌛';
+        uploadButton.disabled = true;
+        
+        const imageUrl = await websim.upload(file);
+        
+        // Send image as a specially formatted message that will be allowed through
+        room.send({
+            type: 'chat-message',
+            room: currentRoom,
+            text: `<img src="${imageUrl}" class="uploaded-image" alt="Uploaded image" style="max-width: 100%; max-height: 300px;">`,
+            timestamp: Date.now()
+        });
+        
+        uploadButton.textContent = '📷';
+        uploadButton.disabled = false;
+        fileInput.value = '';
+    } catch (error) {
+        console.error('Error uploading image:', error);
+        uploadButton.textContent = '❌';
+        setTimeout(() => {
+            uploadButton.textContent = '📷';
+            uploadButton.disabled = false;
+        }, 2000);
+    }
+});
+
+// Sound handling
+const soundbarButton = document.querySelector('.soundbar-button');
+const soundbarPanel = document.querySelector('.soundbar-panel');
+let currentlyPlaying = null;
+
+// Toggle soundbar panel
+soundbarButton.addEventListener('click', () => {
+    soundbarPanel.classList.toggle('active');
+});
+
+// Close soundbar panel when clicking outside
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.soundbar-picker')) {
+        soundbarPanel.classList.remove('active');
+    }
+});
+
+// Handle sound selection and playback
+document.querySelectorAll('.sound-item').forEach(item => {
+    const soundUrl = item.dataset.sound;
+    const audio = new Audio(soundUrl);
+
+    item.addEventListener('click', () => {
+        const now = Date.now();
+        
+        // Check if sounds are muted
+        if (isSoundsMuted) {
+            alert('Sounds are currently muted. Unmute to play sounds.');
+            return;
+        }
+        
+        // Check cooldown
+        if (now - lastSoundTime < SOUND_COOLDOWN) {
+            const remainingTime = Math.ceil((SOUND_COOLDOWN - (now - lastSoundTime)) / 1000);
+            alert(`Please wait ${remainingTime} seconds before playing another sound`);
+            return;
+        }
+
+        // Stop currently playing sound if any
+        if (currentlyPlaying) {
+            currentlyPlaying.audio.pause();
+            currentlyPlaying.audio.currentTime = 0;
+            currentlyPlaying.element.classList.remove('playing');
+        }
+
+        // Play new sound locally
+        audio.play()
+            .then(() => {
+                item.classList.add('playing');
+                currentlyPlaying = {
+                    audio: audio,
+                    element: item
+                };
+                lastSoundTime = now;
+
+                // Broadcast the sound to all users
+                if (!bannedUsers.has(room.party.client.username)) {
+                    room.send({
+                        type: 'play-sound',
+                        soundUrl: soundUrl,
+                        duration: audio.duration * 1000, // Convert to milliseconds
+                        timestamp: Date.now()
+                    });
+
+                    // Also send chat message about played sound
+                    room.send({
+                        type: 'chat-message',
+                        room: currentRoom,
+                        text: `🔊 played sound: ${item.querySelector('.sound-item-title').textContent}`,
+                        timestamp: Date.now()
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error playing audio:', error);
+            });
+
+        // Remove playing class when sound ends
+        audio.addEventListener('ended', () => {
+            item.classList.remove('playing');
+            currentlyPlaying = null;
+        });
+    });
+});
+
+// Add this right after the slot machine event listener
+document.getElementById('roulette').addEventListener('click', async () => {
+    const username = room.party.client.username;
+    const currentTokens = await getPlayerTokens(username);
+    
+    if (currentTokens < 200) {
+        room.send({
+            type: 'chat-message',
+            room: currentRoom,
+            text: `❌ Not enough tokens for Roulette! You need 200 tokens.`,
+            timestamp: Date.now()
+        });
+        return;
+    }
+
+    // Roulette numbers: 0-36 + 00 (38 total pockets)
+    const rouletteNumber = Math.floor(Math.random() * 38);
+    const isRed = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36].includes(rouletteNumber);
+    const isBlack = rouletteNumber <= 36 && !isRed;
+    const isGreen = rouletteNumber === 37 || rouletteNumber === 0; // 37 represents '00'
+
+    // Different win scenarios
+    let amount = -200; // Base bet amount loss
+    let resultText = '';
+
+    if (isGreen) {
+        // Hit 0 or 00 - Big win!
+        amount = 1000;
+        resultText = `🎯 Hit ${rouletteNumber === 0 ? '0' : '00'}! HUGE WIN!`;
+    } else if (Math.random() < 0.4) { // 40% chance to guess correct color
+        // Correctly guessed red/black
+        amount = 400;
+        resultText = `✨ Correctly bet on ${isRed ? 'RED' : 'BLACK'}!`;
+    } else {
+        // Lost the bet
+        resultText = `😢 Ball landed on ${isRed ? 'RED' : isBlack ? 'BLACK' : 'GREEN'} ${rouletteNumber}`;
+    }
+
+    await updatePlayerTokens(username, amount);
+    const newTokens = await getPlayerTokens(username);
+    
+    // Play spin sound if not muted
+    if (!isSoundsMuted) {
+        const audio = new Audio('/letsgogambling.ogg');
+        audio.play().catch(error => {
+            console.error('Error playing audio:', error);
+        });
+    }
+
+    // First message - spinning
+    room.send({
+        type: 'chat-message',
+        room: currentRoom,
+        text: `🎡 ${username} spins the roulette wheel...`,
+        timestamp: Date.now()
+    });
+
+    // Add delay for suspense then show result
+    setTimeout(() => {
+        room.send({
+            type: 'chat-message',
+            room: currentRoom,
+            text: `${resultText} ${amount >= 0 ? '+' : ''}${amount} tokens! (Balance: ${newTokens})`,
+            timestamp: Date.now()
+        });
+        
+        document.querySelector('#tokenCount').textContent = newTokens;
+    }, 2000);
+});
+
+// Store popup functionality
+const storeButton = document.querySelector('.store-button');
+const storePopup = document.querySelector('.store-popup');
+const storeClose = document.querySelector('.store-popup-close');
+
+storeButton.addEventListener('click', async () => {
+    storePopup.classList.add('active');
+});
+
+storeClose.addEventListener('click', () => {
+    storePopup.classList.remove('active');
+});
+
+// Removed getTokensBtn event listener section from the JavaScript
+</script>
+</body></html>
