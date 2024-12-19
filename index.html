@@ -1,0 +1,591 @@
+<html><head><base href="https://websimsensation.com/intricate-svg-patterns/Animated?increasecomplexitylevel=4">
+<title>Ultra-Complex Animated SVG Pattern Explorer</title>
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Roboto', sans-serif;
+    background-color: #0f0f0f;
+    color: #fff;
+    overflow: hidden;
+  }
+  #container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  #controls {
+    padding: 15px;
+    background-color: rgba(20, 20, 20, 0.9);
+    z-index: 10;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-around;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+  }
+  #patternContainer {
+    flex-grow: 1;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  button {
+    margin: 5px;
+    padding: 10px 20px;
+    font-size: 14px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  button:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  }
+  input[type="range"] {
+    width: 200px;
+    margin: 0 10px;
+    -webkit-appearance: none;
+    background: transparent;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background: #3498db;
+    cursor: pointer;
+    margin-top: -5px;
+  }
+  input[type="range"]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 6px;
+    cursor: pointer;
+    background: #2c3e50;
+    border-radius: 3px;
+  }
+  select {
+    margin: 5px;
+    padding: 8px 15px;
+    font-size: 14px;
+    background-color: #2c3e50;
+    color: white;
+    border: 1px solid #34495e;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  select:hover {
+    background-color: #34495e;
+  }
+  label {
+    margin-right: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 1px;
+  }
+  .control-group {
+    display: flex;
+    align-items: center;
+    margin: 5px 0;
+  }
+  #info {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    background-color: rgba(20, 20, 20, 0.8);
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    max-width: 300px;
+  }
+</style>
+</head>
+<body>
+<div id="container">
+  <div id="controls">
+    <div class="control-group">
+      <button id="newPattern">Generate New Pattern</button>
+      <button id="toggleAnimation">Pause/Resume Animation</button>
+    </div>
+    <div class="control-group">
+      <label for="complexity">Complexity:</label>
+      <input type="range" id="complexity" min="1" max="50" value="30">
+    </div>
+    <div class="control-group">
+      <label for="colorScheme">Color Scheme:</label>
+      <select id="colorScheme">
+        <option value="random">Random</option>
+        <option value="monochromatic">Monochromatic</option>
+        <option value="complementary">Complementary</option>
+        <option value="triadic">Triadic</option>
+        <option value="analogous">Analogous</option>
+        <option value="neon">Neon</option>
+        <option value="pastel">Pastel</option>
+        <option value="earthy">Earthy</option>
+        <option value="cyberpunk">Cyberpunk</option>
+        <option value="iridescent">Iridescent</option>
+      </select>
+    </div>
+    <div class="control-group">
+      <label for="animationSpeed">Animation Speed:</label>
+      <input type="range" id="animationSpeed" min="0.1" max="10" step="0.1" value="1">
+    </div>
+    <div class="control-group">
+      <label for="layerCount">Layer Count:</label>
+      <input type="range" id="layerCount" min="1" max="10" value="4">
+    </div>
+    <div class="control-group">
+      <label for="blendMode">Blend Mode:</label>
+      <select id="blendMode">
+        <option value="normal">Normal</option>
+        <option value="multiply">Multiply</option>
+        <option value="screen">Screen</option>
+        <option value="overlay">Overlay</option>
+        <option value="darken">Darken</option>
+        <option value="lighten">Lighten</option>
+        <option value="color-dodge">Color Dodge</option>
+        <option value="color-burn">Color Burn</option>
+        <option value="hard-light">Hard Light</option>
+        <option value="soft-light">Soft Light</option>
+        <option value="difference">Difference</option>
+        <option value="exclusion">Exclusion</option>
+        <option value="hue">Hue</option>
+        <option value="saturation">Saturation</option>
+        <option value="color">Color</option>
+        <option value="luminosity">Luminosity</option>
+      </select>
+    </div>
+  </div>
+  <div id="patternContainer"></div>
+  <div id="info">
+    Click or tap anywhere on the pattern to generate a new focal point for the animations.
+  </div>
+</div>
+
+<script>
+const patternContainer = document.getElementById('patternContainer');
+const newPatternBtn = document.getElementById('newPattern');
+const toggleAnimationBtn = document.getElementById('toggleAnimation');
+const complexitySlider = document.getElementById('complexity');
+const colorSchemeSelect = document.getElementById('colorScheme');
+const animationSpeedSlider = document.getElementById('animationSpeed');
+const layerCountSlider = document.getElementById('layerCount');
+const blendModeSelect = document.getElementById('blendMode');
+const svgNS = "http://www.w3.org/2000/svg";
+
+let isAnimationPaused = false;
+let complexity = 30;
+let colorScheme = 'random';
+let animationSpeed = 1;
+let layerCount = 4;
+let blendMode = 'normal';
+let focalPoint = { x: 50, y: 50 };
+
+function generateRandomColor() {
+  return `#${Math.floor(Math.random()*16777215).toString(16).padStart(6, '0')}`;
+}
+
+function generateColorScheme(scheme) {
+  const baseHue = Math.floor(Math.random() * 360);
+  switch(scheme) {
+    case 'monochromatic':
+      return [
+        `hsl(${baseHue}, 70%, 50%)`,
+        `hsl(${baseHue}, 70%, 70%)`,
+        `hsl(${baseHue}, 70%, 30%)`,
+        `hsl(${baseHue}, 70%, 90%)`,
+        `hsl(${baseHue}, 70%, 10%)`,
+      ];
+    case 'complementary':
+      return [
+        `hsl(${baseHue}, 70%, 50%)`,
+        `hsl(${(baseHue + 180) % 360}, 70%, 50%)`,
+        `hsl(${baseHue}, 70%, 70%)`,
+        `hsl(${(baseHue + 180) % 360}, 70%, 70%)`,
+        `hsl(${baseHue}, 70%, 30%)`,
+      ];
+    case 'triadic':
+      return [
+        `hsl(${baseHue}, 70%, 50%)`,
+        `hsl(${(baseHue + 120) % 360}, 70%, 50%)`,
+        `hsl(${(baseHue + 240) % 360}, 70%, 50%)`,
+        `hsl(${baseHue}, 70%, 70%)`,
+        `hsl(${(baseHue + 120) % 360}, 70%, 70%)`,
+      ];
+    case 'analogous':
+      return [
+        `hsl(${baseHue}, 70%, 50%)`,
+        `hsl(${(baseHue + 30) % 360}, 70%, 50%)`,
+        `hsl(${(baseHue + 60) % 360}, 70%, 50%)`,
+        `hsl(${(baseHue - 30 + 360) % 360}, 70%, 50%)`,
+        `hsl(${(baseHue - 60 + 360) % 360}, 70%, 50%)`,
+      ];
+    case 'neon':
+      return [
+        `hsl(${baseHue}, 100%, 50%)`,
+        `hsl(${(baseHue + 90) % 360}, 100%, 50%)`,
+        `hsl(${(baseHue + 180) % 360}, 100%, 50%)`,
+        `hsl(${(baseHue + 270) % 360}, 100%, 50%)`,
+        `hsl(${baseHue}, 100%, 70%)`,
+      ];
+    case 'pastel':
+      return [
+        `hsl(${baseHue}, 70%, 80%)`,
+        `hsl(${(baseHue + 60) % 360}, 70%, 80%)`,
+        `hsl(${(baseHue + 120) % 360}, 70%, 80%)`,
+        `hsl(${(baseHue + 180) % 360}, 70%, 80%)`,
+        `hsl(${(baseHue + 240) % 360}, 70%, 80%)`,
+      ];
+    case 'earthy':
+      return [
+        `hsl(${baseHue}, 30%, 50%)`,
+        `hsl(${(baseHue + 30) % 360}, 40%, 40%)`,
+        `hsl(${(baseHue + 60) % 360}, 50%, 30%)`,
+        `hsl(${(baseHue + 90) % 360}, 60%, 20%)`,
+        `hsl(${(baseHue + 120) % 360}, 70%, 10%)`,
+      ];
+    case 'cyberpunk':
+      return [
+        `hsl(${baseHue}, 100%, 50%)`,
+        `hsl(${(baseHue + 180) % 360}, 100%, 50%)`,
+        `hsl(${(baseHue + 60) % 360}, 100%, 50%)`,
+        `hsl(${(baseHue + 240) % 360}, 100%, 50%)`,
+        `hsl(${(baseHue + 120) % 360}, 100%, 50%)`,
+      ];
+    case 'iridescent':
+      return [
+        `hsl(${baseHue}, 100%, 70%)`,
+        `hsl(${(baseHue + 30) % 360}, 100%, 70%)`,
+        `hsl(${(baseHue + 60) % 360}, 100%, 70%)`,
+        `hsl(${(baseHue + 90) % 360}, 100%, 70%)`,
+        `hsl(${(baseHue + 120) % 360}, 100%, 70%)`,
+      ];
+    default:
+      return [generateRandomColor(), generateRandomColor(), generateRandomColor(), generateRandomColor(), generateRandomColor()];
+  }
+}
+
+function createPattern() {
+  const svg = document.createElementNS(svgNS, "svg");
+  svg.setAttribute("width", "100%");
+  svg.setAttribute("height", "100%");
+  svg.setAttribute("viewBox", "0 0 100 100");
+  svg.setAttribute("preserveAspectRatio", "xMidYMid slice");
+
+  const defs = document.createElementNS(svgNS, "defs");
+  svg.appendChild(defs);
+
+  const colors = generateColorScheme(colorScheme);
+
+  for (let layer = 0; layer < layerCount; layer++) {
+    const pattern = document.createElementNS(svgNS, "pattern");
+    const patternId = `pattern-${Date.now()}-${layer}`;
+    pattern.setAttribute("id", patternId);
+    pattern.setAttribute("patternUnits", "userSpaceOnUse");
+    pattern.setAttribute("width", "100");
+    pattern.setAttribute("height", "100");
+
+    for (let i = 0; i < complexity; i++) {
+      const shapeType = Math.random();
+      let shape;
+      if (shapeType < 0.15) {
+        shape = createPolygon();
+      } else if (shapeType < 0.3) {
+        shape = createPath();
+      } else if (shapeType < 0.45) {
+        shape = createCircle();
+      } else if (shapeType < 0.6) {
+        shape = createStar();
+      } else if (shapeType < 0.75) {
+        shape = createSpiral();
+      } else if (shapeType < 0.9) {
+        shape = createFractal();
+      } else {
+        shape = createWave();
+      }
+      shape.setAttribute("fill", colors[i % colors.length]);
+      shape.setAttribute("stroke", colors[(i + 1) % colors.length]);
+      shape.setAttribute("stroke-width", "0.5");
+      
+      const animation = createAnimation(shape);
+      shape.appendChild(animation);
+      
+      pattern.appendChild(shape);
+    }
+
+    defs.appendChild(pattern);
+
+    const rect = document.createElementNS(svgNS, "rect");
+    rect.setAttribute("x", "0");
+    rect.setAttribute("y", "0");
+    rect.setAttribute("width", "100%");
+    rect.setAttribute("height", "100%");
+    rect.setAttribute("fill", `url(#${patternId})`);
+    rect.setAttribute("opacity", 1 - (layer * 0.1));
+    rect.style.mixBlendMode = blendMode;
+    svg.appendChild(rect);
+  }
+
+  return svg;
+}
+
+function createPolygon() {
+  const polygon = document.createElementNS(svgNS, "polygon");
+  const points = [];
+  for (let i = 0; i < 3 + Math.floor(Math.random() * 7); i++) {
+    points.push(`${Math.random() * 100},${Math.random() * 100}`);
+  }
+  polygon.setAttribute("points", points.join(" "));
+  return polygon;
+}
+
+function createPath() {
+  const path = document.createElementNS(svgNS, "path");
+  let d = `M${Math.random() * 100},${Math.random() * 100}`;
+  for (let i = 0; i < 3 + Math.floor(Math.random() * 5); i++) {
+    const commandType = Math.random();
+    if (commandType < 0.25) {
+      d += ` Q${Math.random() * 100},${Math.random() * 100} ${Math.random() * 100},${Math.random() * 100}`;
+    } else if (commandType < 0.5) {
+      d += ` C${Math.random() * 100},${Math.random() * 100} ${Math.random() * 100},${Math.random() * 100} ${Math.random() * 100},${Math.random() * 100}`;
+    } else if (commandType < 0.75) {
+      d += ` T${Math.random() * 100},${Math.random() * 100}`;
+    } else {
+      d += ` A${Math.random() * 50},${Math.random() * 50} 0 ${Math.random() < 0.5 ? '0' : '1'} ${Math.random() < 0.5 ? '0' : '1'} ${Math.random() * 100},${Math.random() * 100}`;
+    }
+  }
+  d += " Z";
+  path.setAttribute("d", d);
+  return path;
+}
+
+function createCircle() {
+  const circle = document.createElementNS(svgNS, "circle");
+  circle.setAttribute("cx", Math.random() * 100);
+  circle.setAttribute("cy", Math.random() * 100);
+  circle.setAttribute("r", 2 + Math.random() * 18);
+  return circle;
+}
+
+function createStar() {
+  const star = document.createElementNS(svgNS, "polygon");
+  const points = [];
+  const cx = 50 + Math.random() * 50;
+  const cy = 50 + Math.random() * 50;
+  const outerRadius = 10 + Math.random() * 20;
+  const innerRadius = outerRadius * 0.4;
+  const numPoints = 5 + Math.floor(Math.random() * 7);
+
+  for (let i = 0; i < numPoints * 2; i++) {
+    const angle = (i * Math.PI) / numPoints;
+    const radius = i % 2 === 0 ? outerRadius : innerRadius;
+    const x = cx + radius * Math.cos(angle);
+    const y = cy + radius * Math.sin(angle);
+    points.push(`${x},${y}`);
+  }
+
+  star.setAttribute("points", points.join(" "));
+  return star;
+}
+
+function createSpiral() {
+  const path = document.createElementNS(svgNS, "path");
+  let d = `M50,50 `;
+  const turns = 2 + Math.random() * 5;
+  const pointsPerTurn = 30;
+  const totalPoints = turns * pointsPerTurn;
+  
+  for (let i = 0; i < totalPoints; i++) {
+    const angle = (i / pointsPerTurn) * Math.PI * 2;
+    const radius = (i / totalPoints) * 40;
+    const x = 50 + Math.cos(angle) * radius;
+    const y = 50 + Math.sin(angle) * radius;
+    d += `L${x},${y} `;
+  }
+  
+  path.setAttribute("d", d);
+  return path;
+}
+
+function createFractal() {
+  const g = document.createElementNS(svgNS, "g");
+  const depth = 3 + Math.floor(Math.random() * 3);
+  const scale = 20 + Math.random() * 30;
+
+  function drawFractal(x, y, size, depth) {
+    if (depth === 0) return;
+
+    const rect = document.createElementNS(svgNS, "rect");
+    rect.setAttribute("x", x);
+    rect.setAttribute("y", y);
+    rect.setAttribute("width", size);
+    rect.setAttribute("height", size);
+    g.appendChild(rect);
+
+    const newSize = size / 3;
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 3; j++) {
+        if (i === 1 && j === 1) continue;
+        drawFractal(x + i * newSize, y + j * newSize, newSize, depth - 1);
+      }
+    }
+  }
+
+  drawFractal(50 - scale/2, 50 - scale/2, scale, depth);
+  return g;
+}
+
+function createWave() {
+  const path = document.createElementNS(svgNS, "path");
+  let d = `M0,50 `;
+  const amplitude = 10 + Math.random() * 20;
+  const frequency = 1 + Math.random() * 3;
+  const points = 20;
+
+  for (let i = 0; i <= points; i++) {
+    const x = (i / points) * 100;
+    const y = 50 + Math.sin((x / 100) * Math.PI * 2 * frequency) * amplitude;
+    d += `L${x},${y} `;
+  }
+  
+  path.setAttribute("d", d);
+  return path;
+}
+
+function createAnimation(element) {
+  const animate = document.createElementNS(svgNS, "animate");
+  const elementType = element.tagName.toLowerCase();
+  
+  animate.setAttribute("dur", `${(2 + Math.random() * 8) / animationSpeed}s`);
+  animate.setAttribute("repeatCount", "indefinite");
+  animate.setAttribute("calcMode", "spline");
+  animate.setAttribute("keySplines", "0.4 0 0.6 1; 0.4 0 0.6 1");
+
+  switch (elementType) {
+    case 'polygon':
+      animate.setAttribute("attributeName", "points");
+      const startPoints = element.getAttribute("points");
+      const endPoints = startPoints.split(" ").map(point => {
+        const [x, y] = point.split(",");
+        return `${parseFloat(x) + (Math.random() * 20 - 10)},${parseFloat(y) + (Math.random() * 20 - 10)}`;
+      }).join(" ");
+      animate.setAttribute("values", `${startPoints};${endPoints};${startPoints}`);
+      break;
+    case 'path':
+      animate.setAttribute("attributeName", "d");
+      const startD = element.getAttribute("d");
+      const endD = startD.replace(/(-?\d+(\.\d+)?)/g, (match) => {
+        return parseFloat(match) + (Math.random() * 20 - 10);
+      });
+      animate.setAttribute("values", `${startD};${endD};${startD}`);
+      break;
+    case 'circle':
+      animate.setAttribute("attributeName", "r");
+      const startR = parseFloat(element.getAttribute("r"));
+      const endR = startR + (Math.random() * 10 - 5);
+      animate.setAttribute("values", `${startR};${endR};${startR}`);
+      break;
+    case 'g':
+      animate.setAttribute("attributeName", "transform");
+      animate.setAttribute("type", "rotate");
+      const rotation = Math.random() * 360;
+      animate.setAttribute("values", `0 50 50;${rotation} 50 50;0 50 50`);
+      break;
+  }
+
+  return animate;
+}
+
+function updatePattern() {
+  const newPattern = createPattern();
+  patternContainer.innerHTML = '';
+  patternContainer.appendChild(newPattern);
+}
+
+function toggleAnimation() {
+  isAnimationPaused = !isAnimationPaused;
+  const animations = document.querySelectorAll('animate');
+  animations.forEach(anim => {
+    if (isAnimationPaused) {
+      anim.setAttribute('dur', '0s');
+    } else {
+      anim.setAttribute('dur', `${(2 + Math.random() * 8) / animationSpeed}s`);
+    }
+  });
+}
+
+function updateAnimationSpeed() {
+  const animations = document.querySelectorAll('animate');
+  animations.forEach(anim => {
+    if (!isAnimationPaused) {
+      const currentDur = parseFloat(anim.getAttribute('dur'));
+      anim.setAttribute('dur', `${currentDur / animationSpeed}s`);
+    }
+  });
+}
+
+function updateFocalPoint(event) {
+  const rect = patternContainer.getBoundingClientRect();
+  focalPoint.x = ((event.clientX - rect.left) / rect.width) * 100;
+  focalPoint.y = ((event.clientY - rect.top) / rect.height) * 100;
+  updatePattern();
+}
+
+newPatternBtn.addEventListener('click', updatePattern);
+toggleAnimationBtn.addEventListener('click', toggleAnimation);
+complexitySlider.addEventListener('input', (e) => {
+  complexity = parseInt(e.target.value);
+  updatePattern();
+});
+colorSchemeSelect.addEventListener('change', (e) => {
+  colorScheme = e.target.value;
+  updatePattern();
+});
+animationSpeedSlider.addEventListener('input', (e) => {
+  animationSpeed = parseFloat(e.target.value);
+  updateAnimationSpeed();
+});
+layerCountSlider.addEventListener('input', (e) => {
+  layerCount = parseInt(e.target.value);
+  updatePattern();
+});
+blendModeSelect.addEventListener('change', (e) => {
+  blendMode = e.target.value;
+  updatePattern();
+});
+patternContainer.addEventListener('click', updateFocalPoint);
+
+// Initial pattern
+updatePattern();
+
+// Add some extra interactivity
+let mouseX = 0, mouseY = 0;
+patternContainer.addEventListener('mousemove', (e) => {
+  const rect = patternContainer.getBoundingClientRect();
+  mouseX = ((e.clientX - rect.left) / rect.width) * 100;
+  mouseY = ((e.clientY - rect.top) / rect.height) * 100;
+});
+
+function animatePatterns() {
+  const patterns = document.querySelectorAll('pattern');
+  patterns.forEach((pattern, index) => {
+    const translateX = Math.sin(Date.now() * 0.001 + index) * 5;
+    const translateY = Math.cos(Date.now() * 0.001 + index) * 5;
+    const scale = 1 + Math.sin(Date.now() * 0.002 + index) * 0.1;
+    pattern.setAttribute('patternTransform', `translate(${translateX},${translateY}) scale(${scale}) rotate(${mouseX * 0.1},${mouseY * 0.1})`);
+  });
+  requestAnimationFrame(animatePatterns);
+}
+
+animatePatterns();
+</script>
+</body></html>
