@@ -1,0 +1,328 @@
+<html><head><base href="https://editable-realistic-earth.example"><title>Customizable Realistic 3D Earth Maker with Attacks and Population</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js"></script>
+<style>
+  body { margin: 0; overflow: hidden; background-color: #000; }
+  #info {
+    position: absolute;
+    top: 10px;
+    width: 100%;
+    text-align: center;
+    color: white;
+    font-family: Arial, sans-serif;
+  }
+  #attackButtons {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .attackButton {
+    padding: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+  }
+  .attackButton:hover {
+    background-color: #45a049;
+  }
+  #population {
+    position: absolute;
+    top: 50px;
+    width: 100%;
+    text-align: center;
+    color: white;
+    font-family: Arial, sans-serif;
+    font-size: 24px;
+  }
+</style>
+</head>
+<body>
+<div id="info">Customizable Realistic 3D Earth Maker<br>Use the controls to customize your planet and launch attacks!</div>
+<div id="population">Population: 7,800,000,000</div>
+<div id="attackButtons">
+  <button class="attackButton" onclick="launchAttack('bomb')">Launch Bomb</button>
+  <button class="attackButton" onclick="launchAttack('laser')">Fire Laser</button>
+  <button class="attackButton" onclick="launchAttack('missile')">Launch Missile</button>
+</div>
+<script>
+let scene, camera, renderer, earth, clouds, atmosphere, moon;
+let gui;
+let waterColor, landColor;
+let waterLevel = 0.5;
+let attackObjects = [];
+let population = 7800000000;
+let impactHoles = [];
+
+function init() {
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
+
+  // Earth
+  const earthGeometry = new THREE.SphereGeometry(1, 64, 64);
+  const earthTexture = new THREE.TextureLoader().load('https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg');
+  const earthMaterial = new THREE.ShaderMaterial({
+    uniforms: {
+      texture: { value: earthTexture },
+      waterColor: { value: new THREE.Color(0x0077be) },
+      landColor: { value: new THREE.Color(0x228B22) },
+      waterLevel: { value: waterLevel },
+      impactHoles: { value: [] }
+    },
+    vertexShader: `
+      varying vec2 vUv;
+      varying vec3 vNormal;
+      void main() {
+        vUv = uv;
+        vNormal = normalize(normalMatrix * normal);
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `
+      uniform sampler2D texture;
+      uniform vec3 waterColor;
+      uniform vec3 landColor;
+      uniform float waterLevel;
+      uniform vec4 impactHoles[10];
+      varying vec2 vUv;
+      varying vec3 vNormal;
+      void main() {
+        vec4 texColor = texture2D(texture, vUv);
+        float landMask = smoothstep(waterLevel - 0.05, waterLevel + 0.05, texColor.r);
+        vec3 color = mix(waterColor, landColor * texColor.rgb, landMask);
+        
+        // Apply impact holes
+        for (int i = 0; i < 10; i++) {
+          vec4 hole = impactHoles[i];
+          if (hole.w > 0.0) {
+            float dist = distance(vUv, hole.xy);
+            if (dist < hole.z) {
+              color = mix(color, vec3(0.0, 0.0, 0.0), smoothstep(hole.z, hole.z - 0.02, dist));
+            }
+          }
+        }
+        
+        gl_FragColor = vec4(color, 1.0);
+      }
+    `
+  });
+  earth = new THREE.Mesh(earthGeometry, earthMaterial);
+  scene.add(earth);
+
+  // Clouds
+  const cloudGeometry = new THREE.SphereGeometry(1.01, 64, 64);
+  const cloudMaterial = new THREE.MeshPhongMaterial({
+    map: new THREE.TextureLoader().load('https://threejs.org/examples/textures/planets/earth_clouds_1024.png'),
+    transparent: true,
+    opacity: 0.8
+  });
+  clouds = new THREE.Mesh(cloudGeometry, cloudMaterial);
+  scene.add(clouds);
+
+  // Atmosphere
+  const atmosphereGeometry = new THREE.SphereGeometry(1.1, 64, 64);
+  const atmosphereMaterial = new THREE.ShaderMaterial({
+    vertexShader: `
+      varying vec3 vNormal;
+      void main() {
+        vNormal = normalize(normalMatrix * normal);
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `
+      varying vec3 vNormal;
+      void main() {
+        float intensity = pow(0.7 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.0);
+        gl_FragColor = vec4(0.3, 0.6, 1.0, 1.0) * intensity;
+      }
+    `,
+    blending: THREE.AdditiveBlending,
+    side: THREE.BackSide
+  });
+  atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
+  scene.add(atmosphere);
+
+  // Moon
+  const moonGeometry = new THREE.SphereGeometry(0.27, 32, 32);
+  const moonMaterial = new THREE.MeshPhongMaterial({
+    map: new THREE.TextureLoader().load('https://threejs.org/examples/textures/planets/moon_1024.jpg'),
+    bumpMap: new THREE.TextureLoader().load('https://threejs.org/examples/textures/planets/moon_bump_1024.jpg'),
+    bumpScale: 0.002,
+  });
+  moon = new THREE.Mesh(moonGeometry, moonMaterial);
+  moon.position.set(1.5, 0, 0);
+  scene.add(moon);
+
+  // Lighting
+  const sunLight = new THREE.PointLight(0xFFFFFF, 1, 100);
+  sunLight.position.set(5, 3, 5);
+  scene.add(sunLight);
+
+  const ambientLight = new THREE.AmbientLight(0x333333);
+  scene.add(ambientLight);
+
+  camera.position.z = 3;
+
+  setupGUI();
+}
+
+function setupGUI() {
+  gui = new dat.GUI();
+
+  const earthFolder = gui.addFolder('Earth');
+  earthFolder.add(earth.rotation, 'y', 0, Math.PI * 2).name('Rotation');
+  
+  waterColor = { r: 0, g: 119, b: 190 };
+  landColor = { r: 34, g: 139, b: 34 };
+
+  earthFolder.addColor(waterColor, 'r').name('Water R').onChange(updateEarthColors);
+  earthFolder.addColor(waterColor, 'g').name('Water G').onChange(updateEarthColors);
+  earthFolder.addColor(waterColor, 'b').name('Water B').onChange(updateEarthColors);
+
+  earthFolder.addColor(landColor, 'r').name('Land R').onChange(updateEarthColors);
+  earthFolder.addColor(landColor, 'g').name('Land G').onChange(updateEarthColors);
+  earthFolder.addColor(landColor, 'b').name('Land B').onChange(updateEarthColors);
+
+  earthFolder.add({ waterLevel: waterLevel }, 'waterLevel', 0, 1).onChange((value) => {
+    waterLevel = value;
+    earth.material.uniforms.waterLevel.value = waterLevel;
+  });
+
+  const cloudFolder = gui.addFolder('Clouds');
+  cloudFolder.add(clouds.material, 'opacity', 0, 1);
+  cloudFolder.add(clouds.rotation, 'y', 0, Math.PI * 2).name('Cloud Rotation');
+
+  const atmosphereFolder = gui.addFolder('Atmosphere');
+  atmosphereFolder.add(atmosphere.scale, 'x', 1, 1.2).name('Size').onChange((value) => {
+    atmosphere.scale.y = atmosphere.scale.z = value;
+  });
+
+  const moonFolder = gui.addFolder('Moon');
+  moonFolder.add(moon.position, 'x', 1.5, 4);
+  moonFolder.add(moon.rotation, 'y', 0, Math.PI * 2).name('Rotation');
+}
+
+function updateEarthColors() {
+  earth.material.uniforms.waterColor.value.setRGB(waterColor.r / 255, waterColor.g / 255, waterColor.b / 255);
+  earth.material.uniforms.landColor.value.setRGB(landColor.r / 255, landColor.g / 255, landColor.b / 255);
+}
+
+function launchAttack(type) {
+  let geometry, material;
+  switch(type) {
+    case 'bomb':
+      geometry = new THREE.SphereGeometry(0.05, 32, 32);
+      material = new THREE.MeshBasicMaterial({ color: 0xFF0000 });
+      break;
+    case 'laser':
+      geometry = new THREE.CylinderGeometry(0.01, 0.01, 2, 32);
+      material = new THREE.MeshBasicMaterial({ color: 0x00FF00 });
+      break;
+    case 'missile':
+      geometry = new THREE.ConeGeometry(0.05, 0.2, 32);
+      material = new THREE.MeshBasicMaterial({ color: 0x0000FF });
+      break;
+  }
+
+  const attack = new THREE.Mesh(geometry, material);
+  attack.position.set(Math.random() * 2 - 1, Math.random() * 2 - 1, 3);
+  attack.userData.velocity = new THREE.Vector3(0, 0, -0.05);
+  attack.userData.type = type;
+
+  scene.add(attack);
+  attackObjects.push(attack);
+}
+
+function updateAttacks() {
+  for (let i = attackObjects.length - 1; i >= 0; i--) {
+    const attack = attackObjects[i];
+    attack.position.add(attack.userData.velocity);
+
+    if (attack.position.distanceTo(earth.position) <= 1) {
+      scene.remove(attack);
+      attackObjects.splice(i, 1);
+
+      // Create impact hole
+      const impactPoint = attack.position.clone().normalize();
+      const uv = new THREE.Vector2(
+        0.5 + Math.atan2(impactPoint.x, impactPoint.z) / (2 * Math.PI),
+        0.5 - Math.asin(impactPoint.y) / Math.PI
+      );
+      const holeSize = 0.05 + Math.random() * 0.05;
+      impactHoles.push(new THREE.Vector4(uv.x, uv.y, holeSize, 1.0));
+      if (impactHoles.length > 10) impactHoles.shift();
+      earth.material.uniforms.impactHoles.value = impactHoles;
+
+      // Create explosion effect
+      const explosionGeometry = new THREE.SphereGeometry(0.2, 32, 32);
+      const explosionMaterial = new THREE.MeshBasicMaterial({ color: 0xFFFF00, transparent: true });
+      const explosion = new THREE.Mesh(explosionGeometry, explosionMaterial);
+      explosion.position.copy(attack.position);
+      scene.add(explosion);
+
+      // Animate explosion
+      let scale = 1;
+      function animateExplosion() {
+        scale *= 1.05;
+        explosion.scale.set(scale, scale, scale);
+        explosion.material.opacity -= 0.05;
+
+        if (explosion.material.opacity > 0) {
+          requestAnimationFrame(animateExplosion);
+        } else {
+          scene.remove(explosion);
+        }
+      }
+      animateExplosion();
+
+      // Reduce population
+      const populationReduction = Math.floor(Math.random() * 10000000) + 1000000;
+      population -= populationReduction;
+      if (population < 0) population = 0;
+      updatePopulationDisplay();
+    }
+
+    if (attack.position.z < -3) {
+      scene.remove(attack);
+      attackObjects.splice(i, 1);
+    }
+  }
+}
+
+function updatePopulationDisplay() {
+  document.getElementById('population').textContent = `Population: ${population.toLocaleString()}`;
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+
+  earth.rotation.y += 0.0005;
+  clouds.rotation.y += 0.0007;
+  moon.rotation.y += 0.001;
+
+  updateAttacks();
+
+  renderer.render(scene, camera);
+}
+
+init();
+animate();
+
+window.addEventListener('resize', function() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+</body>
+</html>
