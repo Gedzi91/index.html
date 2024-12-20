@@ -1,0 +1,490 @@
+<html><head><base href="https://websimengine.com/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Talking Alien Pal - Interplanetary Adventure</title>
+<style>
+    body, html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow: hidden;
+        font-family: Arial, sans-serif;
+    }
+    #gameContainer {
+        width: 100%;
+        height: 100%;
+    }
+    #uiOverlay {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        color: #fff;
+        font-size: 18px;
+        text-shadow: 2px 2px 2px rgba(0,0,0,0.5);
+    }
+    #speechBubble {
+        position: absolute;
+        bottom: 100px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 20px;
+        padding: 10px 20px;
+        font-size: 16px;
+        display: none;
+        max-width: 300px;
+        text-align: center;
+    }
+    #speechBubble:after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border: 20px solid transparent;
+        border-top-color: rgba(255, 255, 255, 0.8);
+        border-bottom: 0;
+        margin-left: -20px;
+        margin-bottom: -20px;
+    }
+    .button {
+        background: rgba(0, 128, 255, 0.7);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        margin: 5px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+    .button:hover {
+        background: rgba(0, 128, 255, 0.9);
+    }
+    #controls {
+        position: absolute;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    #sorryButton, #notSorryButton {
+        display: none;
+        background: rgba(255, 0, 0, 0.7);
+    }
+    #sorryButton:hover, #notSorryButton:hover {
+        background: rgba(255, 0, 0, 0.9);
+    }
+    #zeroHappyButton {
+        background: rgba(255, 165, 0, 0.7);
+    }
+    #zeroHappyButton:hover {
+        background: rgba(255, 165, 0, 0.9);
+    }
+    #jumpscareOverlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+    }
+    #jumpscareImage {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        max-width: 90%;
+        max-height: 90%;
+    }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
+</head>
+<body>
+<div id="gameContainer"></div>
+<div id="uiOverlay">
+    <div>Happiness: <span id="happiness">100</span></div>
+    <div>Energy: <span id="energy">100</span></div>
+    <div>Evolution Stage: <span id="evolutionStage">1</span></div>
+    <div>Current Planet: <span id="currentPlanet">Mars</span></div>
+</div>
+<div id="speechBubble"></div>
+<div id="controls">
+    <button class="button" id="feedButton">Feed</button>
+    <button class="button" id="playButton">Play</button>
+    <button class="button" id="exploreButton">Explore</button>
+    <button class="button" id="learnButton">Learn Language</button>
+    <button class="button" id="sorryButton">Say Sorry</button>
+    <button class="button" id="notSorryButton">Not Sorry</button>
+    <button class="button" id="zeroHappyButton">Zero Happiness</button>
+</div>
+<div id="jumpscareOverlay">
+    <img id="jumpscareImage" src="https://websimengine.com/alien-jumpscareface.png" alt="Jumpscare alien face">
+</div>
+
+<script>
+let scene, camera, renderer, alien, currentPlanet;
+let happiness = 100;
+let energy = 100;
+let evolutionStage = 1;
+let languageProgress = 0;
+let planets = ['Mars', 'Venus', 'Jupiter', 'Saturn', 'Neptune'];
+let currentPlanetIndex = 0;
+let isAngry = false;
+
+function init() {
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.getElementById('gameContainer').appendChild(renderer.domElement);
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    directionalLight.position.set(0, 1, 1);
+    scene.add(directionalLight);
+
+    createAlien();
+    createPlanet();
+    camera.position.z = 5;
+    addStars();
+
+    window.addEventListener('resize', onWindowResize, false);
+    document.getElementById('feedButton').addEventListener('click', feedAlien);
+    document.getElementById('playButton').addEventListener('click', playWithAlien);
+    document.getElementById('exploreButton').addEventListener('click', exploreWithAlien);
+    document.getElementById('learnButton').addEventListener('click', learnLanguage);
+    document.getElementById('sorryButton').addEventListener('click', apologize);
+    document.getElementById('notSorryButton').addEventListener('click', notSorry);
+    document.getElementById('zeroHappyButton').addEventListener('click', zeroHappiness);
+    renderer.domElement.addEventListener('click', onAlienClick, false);
+
+    setInterval(decreaseStats, 30000); // Decrease stats every 30 seconds
+
+    animate();
+}
+
+function createAlien() {
+    if (alien) scene.remove(alien);
+
+    const bodyGeometry = new THREE.SphereGeometry(0.5, 32, 32);
+    const bodyMaterial = new THREE.MeshPhongMaterial({ color: isAngry ? 0xff0000 : 0x00ff00 });
+    alien = new THREE.Group();
+    const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+    alien.add(body);
+
+    const eyeGeometry = new THREE.SphereGeometry(0.15, 32, 32);
+    const eyeMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
+    const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+    leftEye.position.set(-0.2, 0.25, 0.4);
+    alien.add(leftEye);
+    const rightEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+    rightEye.position.set(0.2, 0.25, 0.4);
+    alien.add(rightEye);
+
+    const pupilGeometry = new THREE.SphereGeometry(0.12, 32, 32);
+    const pupilMaterial = new THREE.MeshPhongMaterial({ color: 0x000000 });
+    const leftPupil = new THREE.Mesh(pupilGeometry, pupilMaterial);
+    leftPupil.position.set(-0.2, 0.25, 0.5);
+    alien.add(leftPupil);
+    const rightPupil = new THREE.Mesh(pupilGeometry, pupilMaterial);
+    rightPupil.position.set(0.2, 0.25, 0.5);
+    alien.add(rightPupil);
+
+    const earGeometry = new THREE.ConeGeometry(0.1, 0.2, 32);
+    const earMaterial = new THREE.MeshPhongMaterial({ color: isAngry ? 0xdd0000 : 0x00dd00 });
+    const leftEar = new THREE.Mesh(earGeometry, earMaterial);
+    leftEar.position.set(-0.3, 0.4, 0);
+    leftEar.rotation.z = Math.PI / 4;
+    alien.add(leftEar);
+    const rightEar = new THREE.Mesh(earGeometry, earMaterial);
+    rightEar.position.set(0.3, 0.4, 0);
+    rightEar.rotation.z = -Math.PI / 4;
+    alien.add(rightEar);
+
+    if (evolutionStage >= 2) {
+        const antennaGeometry = new THREE.CylinderGeometry(0.02, 0.02, 0.2);
+        const antennaMaterial = new THREE.MeshPhongMaterial({ color: isAngry ? 0xff0000 : 0x00ff00 });
+        const leftAntenna = new THREE.Mesh(antennaGeometry, antennaMaterial);
+        leftAntenna.position.set(-0.1, 0.6, 0);
+        leftAntenna.rotation.z = Math.PI / 12;
+        alien.add(leftAntenna);
+        const rightAntenna = new THREE.Mesh(antennaGeometry, antennaMaterial);
+        rightAntenna.position.set(0.1, 0.6, 0);
+        rightAntenna.rotation.z = -Math.PI / 12;
+        alien.add(rightAntenna);
+    }
+
+    if (evolutionStage >= 3) {
+        const armGeometry = new THREE.CylinderGeometry(0.05, 0.05, 0.3);
+        const armMaterial = new THREE.MeshPhongMaterial({ color: isAngry ? 0xdd0000 : 0x00dd00 });
+        const leftArm = new THREE.Mesh(armGeometry, armMaterial);
+        leftArm.position.set(-0.35, 0, 0);
+        leftArm.rotation.z = Math.PI / 2;
+        alien.add(leftArm);
+        const rightArm = new THREE.Mesh(armGeometry, armMaterial);
+        rightArm.position.set(0.35, 0, 0);
+        rightArm.rotation.z = -Math.PI / 2;
+        alien.add(rightArm);
+    }
+
+    alien.position.y = 0.5;
+    scene.add(alien);
+}
+
+function createPlanet() {
+    if (currentPlanet) scene.remove(currentPlanet);
+
+    let planetColor, planetSize;
+    switch(planets[currentPlanetIndex]) {
+        case 'Mars':
+            planetColor = 0xff4500;
+            planetSize = 3;
+            break;
+        case 'Venus':
+            planetColor = 0xffd700;
+            planetSize = 2.8;
+            break;
+        case 'Jupiter':
+            planetColor = 0xffa500;
+            planetSize = 4;
+            break;
+        case 'Saturn':
+            planetColor = 0xffd700;
+            planetSize = 3.5;
+            break;
+        case 'Neptune':
+            planetColor = 0x4169e1;
+            planetSize = 3.2;
+            break;
+    }
+
+    const planetGeometry = new THREE.SphereGeometry(planetSize, 32, 32);
+    const planetMaterial = new THREE.MeshPhongMaterial({ color: planetColor });
+    currentPlanet = new THREE.Mesh(planetGeometry, planetMaterial);
+    currentPlanet.position.set(0, -planetSize, 0);
+    scene.add(currentPlanet);
+
+    document.getElementById('currentPlanet').textContent = planets[currentPlanetIndex];
+}
+
+function addStars() {
+    const starGeometry = new THREE.BufferGeometry();
+    const starMaterial = new THREE.PointsMaterial({ color: 0xffffff });
+
+    const starVertices = [];
+    for (let i = 0; i < 10000; i++) {
+        const x = (Math.random() - 0.5) * 2000;
+        const y = (Math.random() - 0.5) * 2000;
+        const z = -Math.random() * 2000;
+        starVertices.push(x, y, z);
+    }
+
+    starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
+    const stars = new THREE.Points(starGeometry, starMaterial);
+    scene.add(stars);
+}
+
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    TWEEN.update();
+    currentPlanet.rotation.y += 0.001;
+    renderer.render(scene, camera);
+}
+
+function updateUI() {
+    document.getElementById('happiness').textContent = happiness;
+    document.getElementById('energy').textContent = energy;
+    document.getElementById('evolutionStage').textContent = evolutionStage;
+    document.getElementById('sorryButton').style.display = isAngry ? 'inline-block' : 'none';
+    document.getElementById('notSorryButton').style.display = isAngry ? 'inline-block' : 'none';
+}
+
+function showSpeechBubble(text) {
+    const speechBubble = document.getElementById('speechBubble');
+    speechBubble.textContent = text;
+    speechBubble.style.display = 'block';
+    
+    try {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.pitch = 1.5;
+        utterance.rate = 1.2;
+        speechSynthesis.speak(utterance);
+    } catch (error) {
+        console.log('Speech synthesis not available:', error);
+    }
+
+    setTimeout(() => {
+        speechBubble.style.display = 'none';
+    }, 5000);
+}
+
+function feedAlien() {
+    if (energy < 100) {
+        energy = Math.min(100, energy + 10);
+        happiness = Math.min(100, happiness + 5);
+        new TWEEN.Tween(alien.scale).to({ x: 1.2, y: 1.2, z: 1.2 }, 300)
+            .easing(TWEEN.Easing.Elastic.Out)
+            .yoyo(true)
+            .repeat(1)
+            .start();
+        showSpeechBubble("Yum yum! " + planets[currentPlanetIndex] + " food is out of this world!");
+    } else {
+        showSpeechBubble("I'm stuffed like a black hole! Let's play instead!");
+    }
+    updateUI();
+    checkEvolution();
+    checkHappiness();
+}
+
+function playWithAlien() {
+    if (energy > 20) {
+        happiness = Math.min(100, happiness + 10);
+        energy = Math.max(0, energy - 15);
+        new TWEEN.Tween(alien.position).to({ y: '+0.5' }, 300)
+            .easing(TWEEN.Easing.Quadratic.Out)
+            .yoyo(true)
+            .repeat(3)
+            .start();
+        showSpeechBubble("Wheee! " + planets[currentPlanetIndex] + "'s gravity makes playtime extra fun!");
+    } else {
+        showSpeechBubble("I'm too tired to play. Can I have some space snacks?");
+    }
+    updateUI();
+    checkEvolution();
+    checkHappiness();
+}
+
+function exploreWithAlien() {
+    if (energy > 30) {
+        happiness = Math.min(100, happiness + 15);
+        energy = Math.max(0, energy - 25);
+        currentPlanetIndex = (currentPlanetIndex + 1) % planets.length;
+        createPlanet();
+        new TWEEN.Tween(camera.position).to({ x: Math.random() * 2 - 1, y: Math.random() * 2 - 1, z: camera.position.z }, 1000)
+            .easing(TWEEN.Easing.Quadratic.InOut)
+            .start();
+        showSpeechBubble("Wow! We've landed on " + planets[currentPlanetIndex] + "! What a stellar view!");
+    } else {
+        showSpeechBubble("I'm too sleepy to explore. Maybe after a power nap in a crater?");
+    }
+    updateUI();
+    checkEvolution();
+    checkHappiness();
+}
+
+function learnLanguage() {
+    if (energy > 10) {
+        languageProgress += 5;
+        energy = Math.max(0, energy - 15);
+        showSpeechBubble("Bleep bloop! I'm decoding " + planets[currentPlanetIndex] + "'s ancient alien texts!");
+        if (languageProgress >= 100) {
+            showSpeechBubble("Eureka! I've cracked the cosmic code! Let's chat in " + planets[currentPlanetIndex] + "-ese!");
+            languageProgress = 0;
+            evolutionStage++;
+            createAlien();
+        }
+    } else {
+        showSpeechBubble("Brain... too... tired... Need... space... coffee...");
+    }
+    updateUI();
+    checkHappiness();
+}
+
+function checkEvolution() {
+    if (happiness >= 90 && energy >= 90 && evolutionStage < 3) {
+        evolutionStage++;
+        createAlien();
+        showSpeechBubble("Great galaxies! I'm evolving faster than a supernova!");
+    }
+}
+
+function checkHappiness() {
+    if (happiness <= 0 && !isAngry) {
+        isAngry = true;
+        createAlien();
+        showSpeechBubble("I'm as mad as a meteor shower! You better apologize!");
+    }
+    updateUI();
+}
+
+function onAlienClick(event) {
+    event.preventDefault();
+
+    const mouse = new THREE.Vector2();
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    const raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera(mouse, camera);
+
+    const intersects = raycaster.intersectObject(alien, true);
+
+    if (intersects.length > 0) {
+        hitAlien();
+    }
+}
+
+function hitAlien() {
+    happiness = Math.max(0, happiness - 10);
+    new TWEEN.Tween(alien.position).to({ x: '+0.2' }, 100)
+        .easing(TWEEN.Easing.Quadratic.Out)
+        .yoyo(true)
+        .repeat(1)
+        .start();
+    showSpeechBubble("Ouch! Hey, that's not cool! I'm not a space pinata!");
+    updateUI();
+    checkHappiness();
+}
+
+function apologize() {
+    if (isAngry) {
+        isAngry = false;
+        happiness = 50;
+        createAlien();
+        showSpeechBubble("Apology accepted! Let's be cosmic friends again!");
+    }
+    updateUI();
+}
+
+function notSorry() {
+    if (isAngry) {
+        showJumpscare();
+    }
+}
+
+function showJumpscare() {
+    const jumpscareOverlay = document.getElementById('jumpscareOverlay');
+    jumpscareOverlay.style.display = 'block';
+    
+    setTimeout(() => {
+        jumpscareOverlay.style.display = 'none';
+    }, 3000);
+}
+
+function zeroHappiness() {
+    happiness = 0;
+    showSpeechBubble("Oh no! My happiness meter just crashed harder than a malfunctioning satellite!");
+    updateUI();
+    checkHappiness();
+}
+
+function decreaseStats() {
+    energy = Math.max(0, energy - 1);
+    happiness = Math.max(0, happiness - 1);
+    updateUI();
+    checkHappiness();
+}
+
+init();
+</script>
+</body></html>
