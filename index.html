@@ -1,0 +1,1283 @@
+<html><head><base href="/" /><style>
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: #000;
+    font-family: 'Creepster', cursive;
+    color: #b30000;
+    cursor: url("data:image/svg+xml,%3Csvg width='24' height='24' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='12' cy='12' r='10' fill='red'/%3E%3C/svg%3E"), auto;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .desktop {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    grid-gap: 20px;
+    padding: 20px;
+    background: repeating-linear-gradient(
+      45deg,
+      #1a0000 0px,
+      #1a0000 10px,
+      #0d0000 10px,
+      #0d0000 20px
+    );
+    overflow: hidden;
+    position: relative;
+    height: calc(100vh - 40px);
+    width: 100vw;
+  }
+
+  .window {
+    position: absolute;
+    background: rgba(20, 0, 0, 0.9);
+    border: 2px solid #500;
+    border-radius: 5px;
+    min-width: 200px;
+    min-height: 150px;
+    display: none;
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.2);
+  }
+
+  .resizable {
+    resize: both;
+    overflow: auto;
+  }
+
+  #tracker-window {
+    width: 600px !important; 
+    height: 450px !important; 
+    position: absolute;
+    background: rgba(20, 0, 0, 0.9);
+    border: 2px solid #500;
+    resize: both;
+    overflow: auto;
+  }
+
+  .fullscreen-btn {
+    background: #300;
+    border: none;
+    color: #f00;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    border-radius: 3px;
+    margin-right: 5px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .fullscreen-btn:hover {
+    background: #500;
+  }
+
+  .window-header {
+    background: #300;
+    padding: 5px;
+    cursor: move;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .close-btn {
+    background: #f00;
+    border: none;
+    color: #000;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    border-radius: 50%;
+  }
+
+  .icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    margin: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .icon[onclick="openWindow('tracker')"] {
+    transform: scale(2);
+    grid-column: 5 / span 2;
+    grid-row: 3 / span 2;
+    z-index: 2;
+  }
+
+  .icon:hover {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 10px #f00);
+  }
+
+  .icon img {
+    width: 48px;
+    height: 48px;
+    transition: all 0.3s;
+  }
+
+  .icon[onclick="openWindow('tracker')"] img {
+    width: 64px !important;
+    height: 64px !important;
+  }
+
+  .icon[onclick="openWindow('tracker')"] .icon-text {
+    font-size: 16px !important;
+    margin-top: 10px;
+  }
+
+  .icon[onclick="openWindow('tracker')"]:hover {
+    transform: scale(2.2);
+  }
+
+  .icon:hover img {
+    animation: creepyHover 0.5s infinite;
+  }
+
+  @keyframes creepyHover {
+    0% { transform: scale(1) rotate(0deg); }
+    25% { transform: scale(1.2) rotate(5deg); }
+    75% { transform: scale(0.9) rotate(-5deg); }
+    100% { transform: scale(1) rotate(0deg); }
+  }
+
+  .icon-text {
+    font-size: 12px;
+    color: #ff0000;
+    text-shadow: 0 0 5px #000;
+  }
+
+  .taskbar {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 40px;
+    background: rgba(40, 0, 0, 0.9);
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+  }
+
+  .start-button {
+    background: #300;
+    border: 2px solid #500;
+    color: #ff0000;
+    padding: 5px 15px;
+    height: 30px;
+    margin: 5px;
+    cursor: pointer;
+    font-family: 'Creepster', cursive;
+    transition: all 0.3s;
+  }
+
+  .start-button:hover {
+    background: #500;
+    box-shadow: 0 0 10px #ff0000;
+  }
+
+  .start-menu {
+    position: fixed;
+    bottom: 40px;
+    left: 0;
+    background: rgba(20, 0, 0, 0.95);
+    border: 2px solid #500;
+    width: 250px;
+    display: none;
+    padding: 10px;
+  }
+
+  .menu-item {
+    color: #ff0000;
+    padding: 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .menu-item:hover {
+    background: #300;
+  }
+
+  #art-portrait {
+    position: fixed;
+    right: 20px;
+    top: 20px;
+    width: 200px;
+    height: 200px;
+    opacity: 0.3;
+    animation: flicker 5s infinite;
+  }
+
+  @keyframes flicker {
+    0% { opacity: 0.3; }
+    50% { opacity: 0.1; }
+    52% { opacity: 0.3; }
+    54% { opacity: 0.1; }
+    56% { opacity: 0.3; }
+    100% { opacity: 0.3; }
+  }
+
+  .blood-drip {
+    position: absolute;
+    width: 2px;
+    height: 20px;
+    background: #f00;
+    animation: drip 3s infinite;
+  }
+
+  @keyframes drip {
+    0% { height: 0; transform: translateY(0); opacity: 1; }
+    100% { height: 100px; transform: translateY(100px); opacity: 0; }
+  }
+
+  .hidden-knife {
+    position: fixed;
+    width: 20px;
+    height: 20px;
+    opacity: 0.1;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .hidden-knife:hover {
+    opacity: 1;
+    transform: rotate(180deg);
+  }
+
+  .window-content {
+    padding: 15px;
+    color: #ff0000;
+    font-family: 'Creepster', cursive;
+    background: rgba(20, 0, 0, 0.95);
+  }
+
+  .window-content ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .window-content li {
+    padding: 8px;
+    border-bottom: 1px solid #500;
+    cursor: pointer;
+  }
+
+  .window-content li:hover {
+    background: #300;
+  }
+
+  .journal-entry {
+    border-bottom: 1px solid #500;
+    padding: 10px;
+    margin: 10px 0;
+  }
+
+  #journal-text {
+    width: 100%;
+    height: 100px;
+    background: #200;
+    color: #f00;
+    border: 1px solid #500;
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+
+  .torture-item {
+    border: 1px solid #500;
+    padding: 10px;
+    margin: 10px 0;
+    cursor: pointer;
+  }
+
+  .torture-details {
+    display: none;
+    padding: 10px;
+    background: #200;
+  }
+
+  .progress-bar {
+    height: 5px;
+    background: #f00;
+    width: 0;
+    animation: progress 3s infinite;
+  }
+
+  @keyframes progress {
+    0% { width: 0; }
+    100% { width: 100%; }
+  }
+
+  .jumpscare {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    animation: jumpscareAnim 0.5s forwards;
+  }
+
+  @keyframes jumpscareAnim {
+    0% { transform: scale(0); opacity: 0; }
+    50% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(0); opacity: 0; }
+  }
+
+  .target {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #f00;
+    cursor: crosshair;
+    transition: all 0.3s;
+    position: relative;
+  }
+
+  .target::after {
+    content: attr(data-name);
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    color: #f00;
+    font-size: 12px;
+    text-shadow: 1px 1px 2px #000;
+    margin-top: 5px;
+  }
+
+  #map-container {
+    cursor: crosshair;
+    position: relative;
+    width: 100% !important;
+    height: 400px !important;
+    border: 1px solid #500;
+    background: #200 !important;
+    overflow: hidden;
+  }
+
+  .crosshair {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    pointer-events: none;
+    z-index: 1000;
+    transform: translate(-50%, -50%);
+    mix-blend-mode: difference;
+  }
+
+  .crosshair::before,
+  .crosshair::after {
+    content: '';
+    position: absolute;
+    background: #ff0000;
+  }
+
+  .crosshair::before {
+    left: 50%;
+    top: 0;
+    width: 2px;
+    height: 100%;
+    transform: translateX(-50%);
+  }
+
+  .crosshair::after {
+    top: 50%;
+    left: 0;
+    height: 2px;
+    width: 100%;
+    transform: translateY(-50%);
+  }
+
+  .kill-flash {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: #f00;
+    opacity: 0;
+    pointer-events: none;
+    animation: flash 0.3s forwards;
+  }
+
+  @keyframes flash {
+    0% { opacity: 0.5; }
+    100% { opacity: 0; }
+  }
+
+  #killhistory-window {
+    width: 300px !important;
+    height: 400px !important;
+    font-size: 14px;
+  }
+
+  #killhistory-window .window-content {
+    height: calc(100% - 40px);
+    overflow-y: auto;
+    padding: 10px;
+  }
+
+  #kill-history {
+    max-height: 250px;
+    overflow-y: auto;
+    padding: 8px;
+    border: 1px solid #500;
+    margin-top: 10px;
+  }
+
+  #active-targets {
+    max-height: 150px;
+    overflow-y: auto;
+    padding: 8px;
+    border: 1px solid #500;
+    margin-top: 10px;
+  }
+
+  .kill-search {
+    width: calc(100% - 20px);
+    margin: 10px 0;
+    padding: 8px;
+    background: #300;
+    border: 1px solid #500;
+    color: #f00;
+    font-family: 'Creepster', cursive;
+    font-size: 14px;
+  }
+
+  .icon[onclick="openWindow('sounds')"] {
+    grid-column: 9 / span 2;  /* Position in bottom right area */
+    grid-row: 5 / span 2;     /* Position in bottom right area */
+    z-index: 2;
+  }
+
+  .icon[onclick="openWindow('schedule')"] {
+    grid-column: 7 / span 2;  /* Position just before sounds icon */
+    grid-row: 5 / span 2;     /* Same row as sounds icon */
+    z-index: 2;
+  }
+
+  .location-cell {
+    background: rgba(30, 0, 0, 0.9);
+    padding: 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 1px solid #500;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    height: 150px;
+  }
+
+  .location-cell svg {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 10px;
+  }
+
+  .location-cell.active {
+    background: rgba(60, 0, 0, 0.9);
+    box-shadow: 0 0 20px #f00;
+  }
+
+  .location-cell.active svg path,
+  .location-cell.active svg rect,
+  .location-cell.active svg circle {
+    stroke: #f00;
+    stroke-width: 3;
+  }
+
+  .art-location-indicator {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: #ff0000;
+    border-radius: 50%;
+    z-index: 10;
+    box-shadow: 0 0 10px #ff0000;
+    animation: pulse 2s infinite;
+    transition: all 2s ease-in-out;
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.5); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  /* Update terminal window styles */
+  #terminal-window {
+    max-height: calc(100vh - 100px) !important; /* Leave room for icons at top */
+    min-height: 300px !important; /* Reasonable minimum height */
+    width: 600px !important; /* Fixed width */
+  }
+
+  #terminal-window .window-content {
+    background: #000080; /* Classic Windows 95 blue */
+    font-family: "DOS", "Courier New", monospace;
+    padding: 10px;
+    height: calc(100% - 40px); /* Subtract header height */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Prevent outer scroll */
+  }
+
+  #terminal-output {
+    flex-grow: 1;
+    overflow-y: auto; /* Enable vertical scrolling */
+    margin-bottom: 10px;
+    color: #00ff00; /* Classic green text */
+    font-size: 14px;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    height: calc(100% - 30px); /* Leave space for input */
+    padding-right: 10px; /* Add padding for scrollbar */
+    scroll-behavior: smooth; /* Add smooth scrolling */
+    font-family: "DOS", "Courier New", monospace;
+    text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+    background: #000; /* Terminal background */
+  }
+
+  #terminal-input {
+    background: #000;
+    border: 1px solid #00ff00;
+    color: #00ff00;
+    font-family: "DOS", "Courier New", monospace;
+    font-size: 14px;
+    padding: 5px;
+    width: calc(100% - 12px);
+    outline: none;
+  }
+
+  #terminal-input:focus {
+    border-color: #00ff00;
+    box-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+  }
+
+  #terminal-window .window-header {
+    background: linear-gradient(to right, #000080, #1084d0);
+    color: #fff;
+    font-family: "Arial", sans-serif;
+    font-weight: bold;
+    border-bottom: 1px solid #fff;
+    padding: 2px 5px;
+  }
+
+  /* Add DOS font face */
+  @font-face {
+    font-family: 'DOS';
+    src: local('Perfect DOS VGA 437'), local('Perfect DOS VGA 437 Win');
+    font-display: swap;
+  }
+
+  /* Add scanline effect */
+  #terminal-output::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.1),
+      rgba(0, 0, 0, 0.1) 1px,
+      transparent 1px,
+      transparent 2px
+    );
+    pointer-events: none;
+  }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="desktop" id="desktop">
+  <img id="art-portrait" src="download (37).jpeg" alt="Art the Clown portrait, black and white, sinister expression" width="200" height="200">
+  
+  <!-- Icons -->
+  <div class="icon" onclick="openWindow('victims')">
+    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>
+      <path fill='#ff0000' d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'>
+        <animate attributeName='d' 
+          dur='3s'
+          repeatCount='indefinite'
+          values='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z;
+          M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c2 0 3.5 1.34 3.5 3s-1.5 4-3.5 4-3.5-2.34-3.5-4 1.5-3 3.5-3zm0 14.2c-3 0-5.71-1.28-7-3.22.03-1.99 4-3.08 7-4.08 2 0 6.97 2.09 7 4.08-1.29 1.94-4 3.22-7 3.22z'
+        />
+      </path>
+    </svg>
+    <div class="icon-text">Victim Database</div>
+  </div>
+
+  <div class="icon" onclick="openWindow('weapons')">
+    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>
+      <path fill='#ff0000' d='M7 5h10v2h2V3H5v4h2V5zm10 16H7v-2H5v4h14v-4h-2v2z'>
+        <animate attributeName='d'
+          dur='2s'
+          repeatCount='indefinite' 
+          values='M7 5h10v2h2V3H5v4h2V5zm10 16H7v-2H5v4h14v-4h-2v2z;
+          M6 4h12v3h3V2H3v5h3V4zm12 17H6v-3H3v5h18v-5h-3v3z'
+        />
+      </path>
+      <path fill='#ff0000' d='M12 8L8 12l4 4 4-4z'>
+        <animate attributeName='d'
+          dur='1s'
+          repeatCount='indefinite'
+          values='M12 8L8 12l4 4 4-4z;M12 7L7 12l5 5 5-5z' 
+        />
+      </path>
+    </svg>
+    <div class="icon-text">Weapon Collection</div>
+  </div>
+
+  <div class="icon" onclick="openWindow('locations')">
+    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>
+      <path fill='#ff0000' d='M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 3.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z'>
+        <animate attributeName='d'
+          dur='3s' 
+          repeatCount='indefinite'
+          values='M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 3.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z;
+          M12 1C7.13 1 3 5.13 3 9c0 7.25 9 15 9 15s9-7.75 9-15c0-3.87-4.13-8-9-8z'
+        />
+      </path>
+      <circle fill='#ff0000' cx='12' cy='9' r='2.5'>
+        <animate attributeName='r'
+          values='2.5;3;2.5'
+          dur='2s'
+          repeatCount='indefinite'
+        />
+      </circle>
+    </svg>
+    <div class="icon-text">Hunting Grounds</div>
+  </div>
+
+  <div class="icon" onclick="openWindow('circus')">
+    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23ffffff' d='M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 2h2v2h-2V5zm0 4h2v2h-2V9zm-4-4h2v2H8V5zm0 4h2v2H8V9zm8 8H8v-2h8v2zm0-4H8v-2h8v2z'/%3E%3C/svg%3E">
+    <div class="icon-text">Circus Archives</div>
+  </div>
+
+  <div class="icon" onclick="openWindow('paint')">
+    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>
+      <path fill='#ff0000' d='M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8z'/>
+    </svg>
+    <div class="icon-text">Face Paint Studio</div>
+  </div>
+
+  <div class="icon" onclick="openWindow('sounds')">
+    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23ffffff' d='M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z'/%3E%3C/svg%3E">
+    <div class="icon-text">Sinister Sounds</div>
+  </div>
+
+  <div class="icon" onclick="openWindow('schedule')">
+    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23ffffff' d='M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z'/%3E%3C/svg%3E">
+    <div class="icon-text">Murder Schedule</div>
+  </div>
+
+  <div class="icon" onclick="openWindow('gallery')">
+    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23ffffff' d='M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z'/%3E%3C/svg%3E">
+    <div class="icon-text">Victim Gallery</div>
+  </div>
+
+  <div class="icon" onclick="openWindow('nightmares')">
+    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>
+      <path fill='#ff0000' d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8 0-4.42 3.58-8 8-8 4.42 0 8 3.58 8 8 0 4.42-3.58 8-8 8z'>
+        <animate attributeName='d' dur='3s' repeatCount='indefinite' values='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8 0-4.42 3.58-8 8-8 4.42 0 8 3.58 8 8 0 4.42-3.58 8-8 8z;M15 2C6.48 2 2 6.48 2 15s4.48 13 13 13 13-4.48 13-13S23.52 2 15 2zm0 23c-4.42 0-8-3.58-8-8 0-4.42 3.58-8 8-8 4.42 0 8 3.58 8 8 0 4.42-3.58 8-8 8z'/>
+      </path>
+    </svg>
+    <div class="icon-text">Nightmare Log</div>
+  </div>
+
+  <div class="icon" onclick="openWindow('rituals')">
+    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>
+      <path fill='#ff0000' d='M12 2L1 21h22L12 2zm0 3.99L19.53 19H4.47L12 5.99z'>
+        <animate attributeName='d' dur='2s' repeatCount='indefinite' values='M12 2L1 21h22L12 2zm0 3.99L19.53 19H4.47L12 5.99z;M12 2L2 22h20L12 2zm0 5L17 19H7L12 7z'/>
+      </path>
+    </svg>
+    <div class="icon-text">Dark Rituals</div>
+  </div>
+
+  <div class="icon" onclick="openWindow('tracker')">
+    <img src="/th.jfif" alt="Kill tracker icon showing a sinister clown face" width="48" height="48">
+    <div class="icon-text">Send Clone to Kill</div>
+  </div>
+
+  <div class="icon" onclick="openWindow('killhistory')">
+    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>
+      <path fill='#ff0000' d='M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1z'>
+        <animate attributeName='d' 
+          dur='3s'
+          repeatCount='indefinite'
+          values='M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1z;
+          M20 3h-5.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-8 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1z'
+        />
+      </path>
+    </svg>
+    <div class="icon-text">Kill History</div>
+  </div>
+
+  <div class="hidden-knife" onclick="knifeClick()" style="top: 42%; left: 66%;">
+    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23ff0000' d='M19,6L19,6l-2-4H7L5,6l0,0C3.9,6,3,6.9,3,8v12c0,1.1,0.9,2,2,2h14c1.1,0,2-0.9,2-2V8C21,6.9,20.1,6,19,6z'/%3E%3C/svg%3E">
+  </div>
+
+  <!-- Windows -->
+  <div id="victims-window" class="window">
+    <div class="window-header">
+      <span>Victim Database</span>
+      <button class="close-btn" onclick="closeWindow('victims')">×</button>
+    </div>
+    <div class="window-content">
+      <ul id="victim-list">
+        <!-- Populated by JavaScript -->
+      </ul>
+    </div>
+  </div>
+
+  <div id="weapons-window" class="window">
+    <div class="window-header">
+      <span>Weapon Collection</span>
+      <button class="close-btn" onclick="closeWindow('weapons')">×</button>
+    </div>
+    <div class="window-content">
+      <ul>
+        <li>Rusty Hammer</li>
+        <li>Giant Mallet</li>
+        <li>Switchblade Collection</li>
+        <li>Razor-Sharp Playing Cards</li>
+        <li>Modified Power Tools</li>
+      </ul>
+    </div>
+  </div>
+
+  <div id="locations-window" class="window">
+    <div class="window-header">
+      <span>Hunting Grounds</span>
+      <button class="close-btn" onclick="closeWindow('locations')">×</button>
+    </div>
+    <div class="window-content">
+      <ul>
+        <li>Abandoned Carnival</li>
+        <li>Old Theater</li>
+        <li>Deserted Subway Station</li>
+        <li>Empty Parking Garage</li>
+        <li>Warehouse District</li>
+      </ul>
+    </div>
+  </div>
+  
+  <div id="circus-window" class="window">
+    <div class="window-header">
+      <span>Circus Archives</span>
+      <button class="close-btn" onclick="closeWindow('circus')">×</button>
+    </div>
+    <div class="window-content">
+      <p>Historical records of circus incidents and mysterious disappearances...</p>
+    </div>
+  </div>
+
+  <div id="paint-window" class="window">
+    <div class="window-header">
+      <span>Face Paint Studio</span>
+      <button class="close-btn" onclick="closeWindow('paint')">×</button>
+    </div>
+    <div class="window-content">
+      <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+        <div style="background: #fff; width: 50px; height: 50px; cursor: pointer"></div>
+        <div style="background: #000; width: 50px; height: 50px; cursor: pointer"></div>
+        <div style="background: #f00; width: 50px; height: 50px; cursor: pointer"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="sounds-window" class="window">
+    <div class="window-header">
+      <span>Sinister Sounds</span>
+      <button class="close-btn" onclick="closeWindow('sounds')">×</button>
+    </div>
+    <div class="window-content">
+      <ul>
+        <li>Carnival Music (Distorted)</li>
+        <li>Children's Laughter</li>
+        <li>Circus Theme (Reversed)</li>
+        <li>Creepy Music Box</li>
+      </ul>
+    </div>
+  </div>
+
+  <div id="schedule-window" class="window">
+    <div class="window-header">
+      <span>Murder Schedule</span>
+      <button class="close-btn" onclick="closeWindow('schedule')">×</button>
+    </div>
+    <div class="window-content">
+      <ul>
+        <li>12:00 AM - Hunt Begins</li>
+        <li>3:00 AM - Peak Terror Hour</li>
+        <li>5:00 AM - Clean Up Time</li>
+      </ul>
+    </div>
+  </div>
+
+  <div id="nightmares-window" class="window">
+    <div class="window-header">
+      <span>Nightmare Log</span>
+      <button class="close-btn" onclick="closeWindow('nightmares')">×</button>
+    </div>
+    <div class="window-content">
+      <ul>
+        <li>Endless Carnival</li>
+        <li>Mirror Maze</li>
+        <li>Dancing Shadows</li>
+      </ul>
+    </div>
+  </div>
+
+  <div id="rituals-window" class="window">
+    <div class="window-header">
+      <span>Dark Rituals</span>
+      <button class="close-btn" onclick="closeWindow('rituals')">×</button>
+    </div>
+    <div class="window-content">
+      <ul>
+        <li>Midnight Performance</li>
+        <li>Last Laugh</li>
+        <li>Eternal Smile</li>
+      </ul>
+    </div>
+  </div>
+
+  <div id="tracker-window" class="window resizable">
+    <div class="window-header">
+      <span>Send Clone to Kill</span>
+      <div style="display: flex; align-items: center;">
+        <button class="fullscreen-btn" onclick="toggleFullscreen('tracker-window')">⤢</button>
+        <button class="close-btn" onclick="closeWindow('tracker')">×</button>
+      </div>
+    </div>
+    <div class="window-content">
+      <div id="tracker-stats">
+        <h3>Total Kills: <span id="kill-count">0</span></h3>
+      </div>
+      <div id="map-container" style="position: relative; width: 100% !important; height: 400px !important; border: 1px solid #500; background: #200; overflow: hidden;">
+        <div style="position: absolute; width: 100%; height: 100%; display: grid; grid-template-columns: repeat(2, 1fr); gap: 2px; padding: 5px;">
+          <div style="background: #300; padding: 10px; font-size: 12px;">Old Cinema</div>
+          <div style="background: #300; padding: 10px; font-size: 12px;">Abandoned Carnival</div>
+          <div style="background: #300; padding: 10px; font-size: 12px;">Dark Forest</div>
+          <div style="background: #300; padding: 10px; font-size: 12px;">Derelict Hospital</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="killhistory-window" class="window resizable">
+    <div class="window-header">
+      <span>Kill History</span>
+      <div style="display: flex; align-items: center;">
+        <button class="fullscreen-btn" onclick="toggleFullscreen('killhistory-window')">⤢</button>
+        <button class="close-btn" onclick="closeWindow('killhistory')">×</button>
+      </div>
+    </div>
+    <div class="window-content">
+      <input type="text" id="kill-search" class="kill-search" placeholder="Search kills..." 
+             onkeyup="updateKillHistory()">
+      <h3>Active Targets</h3>
+      <div id="active-targets"></div>
+      <hr style="border-color: #500;">
+      <h3>Kill History</h3>
+      <div id="kill-history"></div>
+    </div>
+  </div>
+
+  <div id="torture-window" class="window">
+    <div class="window-header">
+      <span>Torture Methods</span>
+      <button class="close-btn" onclick="closeWindow('torture')">×</button>
+    </div>
+    <div class="window-content">
+      <div id="torture-list">
+        <div class="torture-item" onclick="toggleTortureDetails(1)">
+          <h3>Psychological Terror</h3>
+          <div class="torture-details" id="torture-1">
+            <p>Silent stalking techniques...</p>
+            <div class="progress-bar"></div>
+          </div>
+        </div>
+        <!-- Add more torture items -->
+      </div>
+    </div>
+  </div>
+
+  <div id="journal-window" class="window">
+    <div class="window-header">
+      <span>Clown's Journal</span>
+      <button class="close-btn" onclick="closeWindow('journal')">×</button>
+    </div>
+    <div class="window-content">
+      <textarea id="journal-text" placeholder="Write your dark thoughts..."></textarea>
+      <button onclick="saveJournalEntry()">Save Entry</button>
+      <div id="journal-entries"></div>
+    </div>
+  </div>
+
+  <div id="arttracker-window" class="window resizable">
+    <div class="window-header">
+      <span>Art the Clown Tracker</span>
+      <div style="display: flex; align-items: center;">
+        <button class="fullscreen-btn" onclick="toggleFullscreen('arttracker-window')">⤢</button>
+        <button class="close-btn" onclick="closeWindow('arttracker')">×</button>
+      </div>
+    </div>
+    <div class="window-content">
+      <div id="arttracker-map" style="width: 100%; height: 400px; border: 1px solid #500; background: #200; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 10px;">
+        <div class="location-cell" data-location="Abandoned Carnival">
+          <svg viewBox="0 0 100 100" style="width: 100%; height: 100%;">
+            <path d="M20,20 L80,20 L90,50 L80,80 L20,80 L10,50 Z" fill="none" stroke="#500" stroke-width="2"/>
+            <circle cx="50" cy="50" r="20" fill="none" stroke="#500" stroke-width="2"/>
+            <path d="M30,20 L40,50 L30,80" fill="none" stroke="#500" stroke-width="1"/>
+            <path d="M70,20 L60,50 L70,80" fill="none" stroke="#500" stroke-width="1"/>
+          </svg>
+          Abandoned Carnival
+        </div>
+        
+        <div class="location-cell" data-location="Old Theater">
+          <svg viewBox="0 0 100 100" style="width: 100%; height: 100%;">
+            <rect x="10" y="10" width="80" height="80" fill="none" stroke="#500" stroke-width="2"/>
+            <path d="M10,30 L90,30" stroke="#500" stroke-width="1"/>
+            <path d="M30,30 C30,70 70,70 70,30" fill="none" stroke="#500" stroke-width="1"/>
+            <path d="M20,40 L80,40 M20,50 L80,50 M20,60 L80,60" stroke="#500" stroke-width="1"/>
+          </svg>
+          Old Theater
+        </div>
+        
+        <div class="location-cell" data-location="Deserted Subway">
+          <svg viewBox="0 0 100 100" style="width: 100%; height: 100%;">
+            <path d="M10,20 L90,20 L90,80 L10,80 Z" fill="none" stroke="#500" stroke-width="2"/>
+            <rect x="20" y="30" width="20" height="40" fill="none" stroke="#500" stroke-width="1"/>
+            <rect x="60" y="30" width="20" height="40" fill="none" stroke="#500" stroke-width="1"/>
+            <path d="M0,50 L100,50" stroke="#500" stroke-width="2"/>
+          </svg>
+          Deserted Subway
+        </div>
+        
+        <div class="location-cell" data-location="Empty Parking Garage">
+          <svg viewBox="0 0 100 100" style="width: 100%; height: 100%;">
+            <rect x="10" y="10" width="80" height="80" fill="none" stroke="#500" stroke-width="2"/>
+            <path d="M10,30 L90,30 M10,50 L90,50 M10,70 L90,70" stroke="#500" stroke-width="1"/>
+            <path d="M30,10 L30,90 M50,10 L50,90 M70,10 L70,90" stroke="#500" stroke-width="1"/>
+          </svg>
+          Empty Parking Garage
+        </div>
+        
+        <div class="location-cell" data-location="Warehouse District">
+          <svg viewBox="0 0 100 100" style="width: 100%; height: 100%;">
+            <rect x="10" y="10" width="80" height="80" fill="none" stroke="#500" stroke-width="2"/>
+            <rect x="20" y="20" width="20" height="20" fill="none" stroke="#500" stroke-width="1"/>
+            <rect x="60" y="20" width="20" height="20" fill="none" stroke="#500" stroke-width="1"/>
+            <rect x="20" y="60" width="20" height="20" fill="none" stroke="#500" stroke-width="1"/>
+            <rect x="60" y="60" width="20" height="20" fill="none" stroke="#500" stroke-width="1"/>
+            <path d="M10,50 L90,50 M50,10 L50,90" stroke="#500" stroke-width="1"/>
+          </svg>
+          Warehouse District
+        </div>
+      </div>
+      <div id="current-location" style="margin-top: 15px; padding: 10px; background: #300; text-align: center;">
+        Current Location: Unknown
+      </div>
+    </div>
+  </div>
+
+  <!-- Add terminal window -->
+  <div id="terminal-window" class="window resizable">
+    <div class="window-header">
+      <span>Terminal</span>
+      <div style="display: flex; align-items: center;">
+        <button class="fullscreen-btn" onclick="toggleFullscreen('terminal-window')">⤢</button>
+        <button class="close-btn" onclick="closeWindow('terminal')">×</button>
+      </div>
+    </div>
+    <div class="window-content">
+      <div id="terminal-output">Welcome to Art's Terminal v1.0
+Type 'help' for available commands.</div>
+      <input type="text" id="terminal-input" placeholder="Enter command..." onkeypress="handleTerminalInput(event)">
+    </div>
+  </div>
+
+  <!-- Add system log window -->
+  <div id="log-window" class="window resizable">
+    <div class="window-header">
+      <span>System Log</span>
+      <div style="display: flex; align-items: center;">
+        <button class="fullscreen-btn" onclick="toggleFullscreen('log-window')">⤢</button>
+        <button class="close-btn" onclick="closeWindow('log')">×</button>
+      </div>
+    </div>
+    <div class="window-content">
+      <div id="log-entries"></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="taskbar">
+  <button class="start-button" onclick="toggleStartMenu()">START</button>
+</div>
+
+<div class="start-menu" id="start-menu">
+  <div class="menu-item" onclick="openWindow('victims')">Victim Database</div>
+  <div class="menu-item" onclick="openWindow('weapons')">Weapon Collection</div>
+  <div class="menu-item" onclick="openWindow('locations')">Hunting Grounds</div>
+  <div class="menu-item" onclick="openWindow('circus')">Circus Archives</div>
+  <div class="menu-item" onclick="openWindow('paint')">Face Paint Studio</div>
+  <div class="menu-item" onclick="openWindow('torture')">Torture Methods</div>
+  <div class="menu-item" onclick="openWindow('journal')">Clown's Journal</div>
+  <div class="menu-item" onclick="openWindow('nightmares')">Nightmare Log</div>
+  <div class="menu-item" onclick="openWindow('rituals')">Dark Rituals</div>
+  <div class="menu-item" onclick="openWindow('tracker')">Send Clone to Kill</div>
+  <div class="menu-item" onclick="openWindow('killhistory')">Kill History</div>
+  <div class="menu-item" onclick="openWindow('arttracker')">Art Tracker</div>
+  <div class="menu-item" onclick="openWindow('terminal')">Terminal</div>
+  <div class="menu-item" onclick="promptPassword()">System Log</div>
+  <div class="menu-item" onclick="systemShutdown()">Shutdown</div>
+</div>
+
+<script>
+let zIndex = 1000;
+const MAX_TARGETS = 7;
+
+const names = [
+  "John Doe", "Jane Smith", "Mike Johnson", "Sarah Wilson", "Tom Brown",
+  "Emily Davis", "James Miller", "Lisa Moore", "David Garcia", "Mary Taylor",
+  "Robert Wilson", "Patricia Lee", "Michael White", "Linda Anderson", "William Turner",
+  "Barbara Martin", "Richard Clark", "Susan Lewis", "Joseph Hall", "Jennifer Young"
+];
+
+let usedNames = []; // Track which names are currently in use
+let killHistory = [];
+
+// Add this function to create blood drips
+function createBloodDrips() {
+  const desktop = document.getElementById('desktop');
+  const bloodCount = Math.floor(Math.random() * 3) + 1; // 1-3 blood drips
+  
+  for (let i = 0; i < bloodCount; i++) {
+    const drip = document.createElement('div');
+    drip.className = 'blood-drip';
+    drip.style.left = Math.random() * window.innerWidth + 'px';
+    drip.style.top = '0';
+    desktop.appendChild(drip);
+    
+    // Remove the drip after animation completes
+    setTimeout(() => {
+      drip.remove();
+    }, 3000);
+  }
+}
+
+// Fix close button functionality by adding a closeWindow function
+function closeWindow(id) {
+  const window = document.getElementById(id + '-window');
+  if (window) {
+    window.style.display = 'none';
+    logSystemEvent(`Closed window: ${id}`);
+  }
+}
+
+// Add this function to make windows draggable
+function makeDraggable(windowEl) {
+  const header = windowEl.querySelector('.window-header');
+  let isDragging = false;
+  let currentX;
+  let currentY;
+  let initialX;
+  let initialY;
+
+  header.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    initialX = e.clientX - windowEl.offsetLeft;
+    initialY = e.clientY - windowEl.offsetTop;
+    
+    windowEl.style.zIndex = ++zIndex;
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+
+    e.preventDefault();
+    currentX = e.clientX - initialX;
+    currentY = e.clientY - initialY;
+
+    // Boundary checking
+    const desktop = document.getElementById('desktop');
+    const maxX = desktop.offsetWidth - windowEl.offsetWidth;
+    const maxY = desktop.offsetHeight - windowEl.offsetHeight;
+    
+    currentX = Math.min(Math.max(0, currentX), maxX);
+    currentY = Math.min(Math.max(0, currentY), maxY);
+
+    windowEl.style.left = currentX + 'px';
+    windowEl.style.top = currentY + 'px';
+  });
+
+  document.addEventListener('mouseup', () => {
+    isDragging = false;
+  });
+}
+
+// Modify the openWindow function to allow multiple windows to be open simultaneously
+function openWindow(id) {
+  const window = document.getElementById(id + '-window');
+  if (!window) return;
+
+  if (id === 'terminal') {
+    const output = document.getElementById('terminal-output');
+    output.innerHTML = `
+MS-DOS Version 6.22
+Copyright (C) Microsoft Corp 1981-1994
+
+C:\\EVIL> EVIL.EXE /init
+Loading evil protocols...
+Initializing murder sequences...
+Accessing victim database...
+System ready.
+
+Type 'help' for available commands.
+C:\\EVIL>`;
+  }
+
+  window.style.display = 'block';
+  window.style.zIndex = ++zIndex;
+
+  // Special positioning for terminal window
+  if (id === 'terminal') {
+    const desktop = document.getElementById('desktop');
+    const maxY = desktop.offsetHeight - window.offsetHeight - 40; // 40px for taskbar
+    window.style.left = '20px'; // Fixed left position
+    window.style.top = Math.min(200, maxY) + 'px'; // Start below icons
+    
+    // Ensure terminal stays within bounds
+    if (window.offsetHeight > (desktop.offsetHeight - 100)) {
+      window.style.height = (desktop.offsetHeight - 140) + 'px';
+    }
+  } else if (!window.style.left) {
+    // Original positioning for other windows...
+    const desktop = document.getElementById('desktop');
+    const maxX = desktop.offsetWidth - window.offsetWidth;
+    const maxY = desktop.offsetHeight - window.offsetHeight - 40;
+    window.style.left = Math.min(Math.random() * maxX, maxX) + 'px';
+    window.style.top = Math.min(Math.random() * maxY, maxY) + 'px';
+  }
+
+  // Rest of the original openWindow code...
+  createBloodDrips();
+
+  // Close start menu
+  const startMenu = document.getElementById('start-menu');
+  if (startMenu) {
+    startMenu.style.display = 'none';
+  }
+}
+
+// Updated terminal input handler for simpler, more direct evil responses
+async function handleTerminalInput(event) {
+  if (event.key !== 'Enter') return;
+  
+  const input = document.getElementById('terminal-input');
+  const output = document.getElementById('terminal-output');
+  const command = input.value.trim().toLowerCase();
+  
+  // Add command to output with DOS-style prompt
+  output.innerHTML += `\nC:\\EVIL> ${command}`;
+  
+  // Process specific commands
+  let response = '';
+  
+  try {
+    if (command === 'clear') {
+      output.innerHTML = 'C:\\EVIL>';
+    } else if (command === 'help') {
+      response = `
+Available commands:
+  help     - Show this help menu
+  kill     - Start a new murder sequence
+  victims  - List current victim database
+  status   - Show system status
+  clear    - Clear terminal screen`;
+    } else if (command === 'kill') {
+      response = await getAIResponse('kill');
+    } else if (command === 'victims') {
+      response = await getAIResponse('victims');
+    } else if (command === 'status') {
+      response = await getAIResponse('status');
+    } else {
+      response = 'Invalid command. Type "help" for available commands.';
+    }
+    
+    // Add loading effect
+    output.innerHTML += '\n[Processing command...]';
+    
+    // Simulate processing delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Remove loading text and add response
+    output.innerHTML = output.innerHTML.replace('[Processing command...]', '\n' + response);
+    
+  } catch (error) {
+    console.error('Error processing command:', error);
+    output.innerHTML += '\nERROR: Command processing failed.';
+  }
+  
+  input.value = '';
+  
+  // Scroll to bottom
+  requestAnimationFrame(() => {
+    output.scrollTop = output.scrollHeight;
+  });
+}
+
+// Add helper function for AI responses
+async function getAIResponse(command) {
+  try {
+    const response = await fetch('/api/ai_completion', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        prompt: `Generate an evil, sinister response for the terminal command "${command}".
+        
+        <typescript-interface>
+        interface Response {
+          message: string;
+        }
+        </typescript-interface>
+        
+        <example>
+        {
+          "message": "Initiating kill sequence...\nTarget acquired...\nDispatch unit deployed...\nMurder protocol activated."
+        }
+        </example>`,
+        data: command
+      }),
+    });
+    
+    const data = await response.json();
+    return data.message;
+    
+  } catch (error) {
+    console.error('Error getting AI response:', error);
+    return 'System malfunction. Evil processes temporarily unavailable.';
+  }
+}
+</script>
+</body></html>
