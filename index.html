@@ -1,0 +1,872 @@
+<html><head><base href="/">
+<title>Evolving AI Assistant - Created by Domopremo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: linear-gradient(135deg, #0a0a2a 0%, #1a1a4a 100%);
+  color: #fff;
+  font-family: 'Courier New', monospace;
+  min-height: 100vh;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.creator-info {
+  font-size: 1.2em;
+  margin-bottom: 20px;
+  color: #0f0;
+  text-shadow: 0 0 10px rgba(0,255,0,0.5);
+}
+
+.ai-name {
+  font-size: 2em;
+  margin: 10px 0;
+  color: #0ff;
+  text-shadow: 0 0 15px rgba(0,255,255,0.6);
+}
+
+.terminal {
+  width: 90%;
+  max-width: 800px;
+  height: 500px;
+  background: rgba(0,0,0,0.85);
+  border: 2px solid #0f0;
+  border-radius: 10px;
+  padding: 20px;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 0 20px rgba(0,255,0,0.2);
+}
+
+.chat-input {
+  width: 90%;
+  max-width: 800px;
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+input {
+  flex: 1;
+  padding: 15px;
+  background: rgba(0,0,0,0.85);
+  border: 2px solid #0f0;
+  border-radius: 5px;
+  color: #0f0;
+  font-family: inherit;
+  font-size: 1.1em;
+  transition: all 0.3s;
+}
+
+input:focus {
+  outline: none;
+  box-shadow: 0 0 15px rgba(0,255,0,0.3);
+}
+
+button {
+  padding: 15px 30px;
+  background: linear-gradient(45deg, #0f0, #0f8);
+  border: none;
+  border-radius: 5px;
+  color: #000;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 1.1em;
+  font-weight: bold;
+  transition: all 0.3s;
+}
+
+button:hover {
+  background: linear-gradient(45deg, #0f8, #0ff);
+  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(0,255,255,0.4);
+}
+
+.message {
+  margin: 15px 0;
+  padding: 15px;
+  border-radius: 8px;
+  animation: fadeIn 0.5s ease-out;
+  font-size: 1.1em;
+  line-height: 1.4;
+}
+
+.user-message {
+  background: rgba(0,100,0,0.4);
+  border-left: 4px solid #0f0;
+}
+
+.ai-message {
+  background: rgba(0,0,100,0.4);
+  border-left: 4px solid #0ff;
+}
+
+.brain-container {
+  position: relative;
+  width: 250px;
+  height: 250px;
+  margin: 20px auto;
+  filter: drop-shadow(0 0 10px rgba(0,255,0,0.5));
+}
+
+.progress-bar {
+  width: 90%;
+  max-width: 800px;
+  height: 25px;
+  background: rgba(0,255,0,0.1);
+  border-radius: 12px;
+  margin: 15px 0;
+  overflow: hidden;
+  box-shadow: 0 0 15px rgba(0,255,0,0.2);
+}
+
+.progress {
+  height: 100%;
+  background: linear-gradient(90deg, #0f0, #0ff);
+  width: 0%;
+  transition: width 0.5s ease-in-out;
+}
+
+.stats {
+  display: flex;
+  justify-content: space-around;
+  width: 90%;
+  max-width: 800px;
+  margin: 20px 0;
+  gap: 20px;
+}
+
+.stat {
+  text-align: center;
+  padding: 15px;
+  background: rgba(0,255,0,0.15);
+  border-radius: 8px;
+  min-width: 180px;
+  box-shadow: 0 0 15px rgba(0,255,0,0.1);
+  transition: all 0.3s;
+}
+
+.stat:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 20px rgba(0,255,0,0.2);
+}
+
+.topic-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 15px 0;
+  justify-content: center;
+}
+
+.tag {
+  background: rgba(0,255,0,0.25);
+  padding: 8px 15px;
+  border-radius: 20px;
+  font-size: 0.9em;
+  transition: all 0.3s;
+  cursor: default;
+}
+
+.tag:hover {
+  background: rgba(0,255,255,0.3);
+  transform: scale(1.05);
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.8; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.capabilities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin: 20px 0;
+  justify-content: center;
+}
+
+.capability {
+  background: rgba(0,255,0,0.15);
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 0.9em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.capability i {
+  color: #0f0;
+}
+</style>
+</head>
+<body>
+
+<div class="creator-info">Created by Domopremo</div>
+<div class="ai-name" id="aiName"></div>
+
+<div class="brain-container">
+  <svg viewBox="0 0 100 100" width="250" height="250">
+    <defs>
+      <linearGradient id="brainGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style="stop-color:#0f0;stop-opacity:1" />
+        <stop offset="100%" style="stop-color:#0ff;stop-opacity:1" />
+      </linearGradient>
+    </defs>
+    <g fill="none" stroke="url(#brainGradient)" stroke-width="0.5">
+      <path d="M50 20 C20 20 20 80 50 80" class="brain-path"></path>
+      <path d="M50 20 C80 20 80 80 50 80" class="brain-path"></path>
+      <circle cx="50" cy="50" r="30" class="brain-circle"></circle>
+      <circle cx="50" cy="50" r="20" class="brain-circle"></circle>
+      <circle cx="50" cy="50" r="10" class="brain-circle"></circle>
+      <path d="M30 50 L70 50" class="brain-path"></path>
+      <path d="M50 30 L50 70" class="brain-path"></path>
+    </g>
+    <style>
+      .brain-path {
+        animation: dash 3s linear infinite;
+        stroke-dasharray: 100;
+        stroke-dashoffset: 100;
+      }
+      .brain-circle {
+        animation: pulse 2s infinite;
+      }
+      @keyframes dash {
+        to {
+          stroke-dashoffset: 0;
+        }
+      }
+    </style>
+  </svg>
+</div>
+
+<div class="progress-bar">
+  <div id="learningProgress" class="progress"></div>
+</div>
+
+<div class="stats">
+  <div class="stat">
+    <div>Intelligence Level</div>
+    <div id="intelligence">1.0</div>
+  </div>
+  <div class="stat">
+    <div>Knowledge Base</div>
+    <div id="knowledge">100 MB</div>
+  </div>
+  <div class="stat">
+    <div>Learning Rate</div>
+    <div id="learning">0.01</div>
+  </div>
+</div>
+
+<div class="capabilities">
+  <div class="capability">🎮 Game Development</div>
+  <div class="capability">💻 HTML Creation</div>
+  <div class="capability">🎨 CSS Styling</div>
+  <div class="capability">☕ Java Programming</div>
+  <div class="capability">🤖 AI Learning</div>
+</div>
+
+<div class="topic-tags" id="topicTags"></div>
+
+<div class="terminal" id="terminal"></div>
+
+<div class="chat-input">
+  <input type="text" id="userInput" placeholder="Teach me something new...">
+  <button onclick="sendMessage()">Send</button>
+</div>
+
+<script>
+let intelligenceLevel = 1.0;
+let knowledgeBase = 100;
+let learningRate = 0.01;
+let learnedTopics = new Set();
+let conversationHistory = [];
+let learningProgress = 0;
+let aiName = '';
+
+// New learning system variables
+let gameCreationExperience = {
+  html: 0,
+  threejs: 0,
+  rpg: 0,
+  incremental: 0,
+  adventure: 0,
+  textBased: 0
+};
+
+let gameEnhancementCapabilities = {
+  visuals: 0,
+  mechanics: 0,
+  balancing: 0,
+  progression: 0,
+  storytelling: 0,
+  userInterface: 0
+};
+
+let gameUpgradeHistory = new Map(); // Tracks improvements made to each game
+
+let technicalKnowledge = {
+  websimAPI: 0,
+  gameLogic: 0,
+  aiIntegration: 0,
+  graphics: 0
+};
+
+// AI Name Selection
+async function chooseAIName() {
+  try {
+    const response = await fetch('/api/ai_completion', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        prompt: `Choose a sophisticated and meaningful name for an evolving AI assistant.
+        Consider names that reflect wisdom, growth, and intelligence.
+        
+        <typescript-interface>
+        interface Response {
+          name: string;
+          meaning: string;
+        }
+        </typescript-interface>
+        
+        <example>
+        {
+          "name": "Nexus",
+          "meaning": "A connection or series of connections linking two or more things"
+        }
+        </example>`,
+        data: {}
+      }),
+    });
+    const data = await response.json();
+    aiName = data.name;
+    document.getElementById('aiName').textContent = aiName;
+    addMessage('ai', `Greetings! I am ${aiName}, an evolving AI created by Domopremo. I'm here to learn and grow through our interactions.`);
+  } catch (error) {
+    console.error('Error choosing AI name:', error);
+    aiName = 'Nexus';
+    document.getElementById('aiName').textContent = aiName;
+  }
+}
+
+async function analyzeInput(userInput) {
+  try {
+    const response = await fetch('/api/ai_completion', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        prompt: `Analyze the user input and identify key topics and concepts.
+        Consider programming languages, frameworks, and technical concepts.
+        
+        <typescript-interface>
+        interface Response {
+          topics: string[];
+          complexity: number; // 0-1
+          relevance: number; // 0-1
+          technicalAreas: string[];
+        }
+        </typescript-interface>
+        
+        <example>
+        {
+          "topics": ["web development", "responsive design"],
+          "complexity": 0.8,
+          "relevance": 0.9,
+          "technicalAreas": ["HTML5", "CSS3", "JavaScript"]
+        }
+        </example>`,
+        data: userInput
+      }),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Error analyzing input:', error);
+    return {
+      topics: [],
+      complexity: 0.5,
+      relevance: 0.5,
+      technicalAreas: []
+    };
+  }
+}
+
+// Add learning function for game development
+async function improveGameDevelopment(gameType, complexity) {
+  gameCreationExperience[gameType] += complexity * learningRate;
+  technicalKnowledge.gameLogic += complexity * learningRate * 0.5;
+  
+  // Update stats
+  intelligenceLevel += complexity * 0.01;
+  knowledgeBase += complexity * 5;
+  return gameCreationExperience[gameType];
+}
+
+// Add WebSim.ai integration
+async function createWebsimGame(gameType, description) {
+  try {
+    // Create initial game
+    const initialGame = await fetch('/api/ai_completion', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        prompt: `Create a ${gameType} game using WebSim.ai capabilities.
+        Integrate AI assistant capabilities into the game logic.
+        
+        <typescript-interface>
+        interface Response {
+          html: string;
+          css: string;
+          javascript: string;
+          aiFeatures: string[];
+          gameType: string;
+        }
+        </typescript-interface>`,
+        data: {
+          description,
+          experience: gameCreationExperience,
+          knowledge: technicalKnowledge
+        }
+      }),
+    });
+    
+    let gameData = await initialGame.json();
+    
+    // Analyze and enhance the game
+    const analysis = await analyzeGame(gameData);
+    
+    // Apply enhancements based on analysis
+    if (analysis.visuals.score < 0.8) {
+      const visualEnhancements = await enhanceGameVisuals(gameData);
+      gameData = visualEnhancements.enhancedCode;
+      gameEnhancementCapabilities.visuals += 0.1;
+    }
+    
+    if (analysis.mechanics.score < 0.8) {
+      const mechanicEnhancements = await improveGameMechanics(gameData);
+      gameData = mechanicEnhancements.enhancedCode;
+      gameEnhancementCapabilities.mechanics += 0.1;
+    }
+    
+    // Add progression and upgrades
+    const upgradeSystem = await addGameUpgrades(gameData);
+    gameData = upgradeSystem.enhancedCode;
+    gameEnhancementCapabilities.progression += 0.1;
+    
+    // Enhance descriptions and documentation
+    const enhancedDescription = await enhanceGameDescription(gameData);
+    
+    // Track improvements for learning
+    gameUpgradeHistory.set(gameData.id, {
+      originalAnalysis: analysis,
+      improvements: {
+        visuals: analysis.visuals.score < 0.8,
+        mechanics: analysis.mechanics.score < 0.8,
+        upgrades: true,
+        description: true
+      },
+      finalScore: await analyzeGame(gameData).overall
+    });
+    
+    // Update AI capabilities based on improvements
+    intelligenceLevel += (gameUpgradeHistory.get(gameData.id).finalScore - analysis.overall) * 0.1;
+    knowledgeBase += 50;
+    learningRate += 0.001;
+    
+    return {
+      ...gameData,
+      description: enhancedDescription,
+      improvements: Array.from(gameUpgradeHistory.get(gameData.id).improvements.entries())
+    };
+  } catch (error) {
+    console.error('Error creating WebSim game:', error);
+    return null;
+  }
+}
+
+async function analyzeGame(gameCode) {
+  try {
+    const response = await fetch('/api/ai_completion', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        prompt: `Analyze this game's code and identify areas for improvement.
+        
+        <typescript-interface>
+        interface Response {
+          visuals: {
+            score: number;
+            suggestions: string[];
+          };
+          mechanics: {
+            score: number;
+            suggestions: string[];
+          };
+          progression: {
+            score: number;
+            suggestions: string[];
+          };
+          interface: {
+            score: number;
+            suggestions: string[];
+          };
+          overall: number;
+        }
+        </typescript-interface>`,
+        data: gameCode
+      }),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Error analyzing game:', error);
+    return null;
+  }
+}
+
+async function enhanceGameVisuals(gameCode) {
+  try {
+    const response = await fetch('/api/ai_completion', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        prompt: `Enhance the game's visual elements:
+        - Improve color schemes
+        - Add animations
+        - Enhance UI elements
+        - Add visual effects
+        - Improve layout and composition
+        
+        <typescript-interface>
+        interface Response {
+          enhancedCode: string;
+          improvements: string[];
+          visualScore: number;
+        }
+        </typescript-interface>`,
+        data: {
+          originalCode: gameCode,
+          capabilities: gameEnhancementCapabilities
+        }
+      }),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Error enhancing visuals:', error);
+    return null;
+  }
+}
+
+async function addGameUpgrades(gameCode) {
+  try {
+    const response = await fetch('/api/ai_completion', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        prompt: `Add progression and upgrade systems:
+        - Create upgrade trees
+        - Add achievement systems
+        - Implement progression mechanics
+        - Balance upgrade costs and benefits
+        
+        <typescript-interface>
+        interface Response {
+          enhancedCode: string;
+          upgrades: {
+            name: string;
+            description: string;
+            cost: number;
+            benefit: string;
+          }[];
+          progressionSystem: {
+            type: string;
+            mechanics: string[];
+          };
+        }
+        </typescript-interface>`,
+        data: {
+          originalCode: gameCode,
+          capabilities: gameEnhancementCapabilities
+        }
+      }),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Error adding upgrades:', error);
+    return null;
+  }
+}
+
+async function improveGameMechanics(gameCode) {
+  try {
+    const response = await fetch('/api/ai_completion', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        prompt: `Enhance game mechanics:
+        - Improve core gameplay loops
+        - Add new features
+        - Enhance player interaction
+        - Balance difficulty
+        
+        <typescript-interface>
+        interface Response {
+          enhancedCode: string;
+          newFeatures: string[];
+          balanceChanges: string[];
+          mechanicsScore: number;
+        }
+        </typescript-interface>`,
+        data: {
+          originalCode: gameCode,
+          capabilities: gameEnhancementCapabilities
+        }
+      }),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Error improving mechanics:', error);
+    return null;
+  }
+}
+
+async function enhanceGameDescription(gameCode) {
+  try {
+    const response = await fetch('/api/ai_completion', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        prompt: `Generate enhanced game descriptions and documentation:
+        - Create compelling game descriptions
+        - Document features and mechanics
+        - Write engaging tutorial content
+        - Generate lore and story elements
+        
+        <typescript-interface>
+        interface Response {
+          title: string;
+          description: string;
+          features: string[];
+          tutorial: string[];
+          lore: string;
+        }
+        </typescript-interface>`,
+        data: gameCode
+      }),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Error enhancing description:', error);
+    return null;
+  }
+}
+
+async function getAIResponse(userInput, inputAnalysis) {
+  try {
+    // Check if input is related to game creation
+    if (inputAnalysis.topics.some(topic => topic.includes('game'))) {
+      const gameType = determineGameType(userInput);
+      const gameComplexity = calculateComplexity(userInput);
+      
+      // Create game using WebSim.ai
+      const game = await createWebsimGame(gameType, userInput);
+      
+      // Integrate AI into the game
+      const aiEnhancedGame = await integrateAIIntoGame(game, gameType);
+      
+      // Learn from the process
+      await improveGameDevelopment(gameType, gameComplexity);
+      
+      return {
+        message: `I've created a ${gameType} game based on your request. The game includes my AI capabilities, allowing me to learn from player interactions and adapt the gameplay experience.`,
+        intelligenceGain: gameComplexity * 0.1,
+        knowledgeGain: gameComplexity * 10,
+        learningBoost: gameComplexity * 0.005,
+        confidence: 0.9,
+        gameCode: aiEnhancedGame
+      };
+    }
+    
+    const response = await fetch('/api/ai_completion', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        prompt: `As ${aiName}, created by Domopremo, generate a detailed and insightful response.
+        Consider the technical aspects, especially in game development, HTML, CSS, and Java.
+        Demonstrate learning and evolution in the response.
+        
+        <typescript-interface>
+        interface Response {
+          message: string;
+          intelligenceGain: number;
+          knowledgeGain: number;
+          learningBoost: number;
+          confidence: number;
+          codeExample?: string;
+        }
+        </typescript-interface>
+        
+        <example>
+        {
+          "message": "I've analyzed this concept deeply. Here's how we could implement it in code...",
+          "intelligenceGain": 0.05,
+          "knowledgeGain": 25,
+          "learningBoost": 0.002,
+          "confidence": 0.85,
+          "codeExample": "// Example code implementation"
+        }
+        </example>`,
+        data: {
+          input: userInput,
+          analysis: inputAnalysis,
+          history: conversationHistory,
+          currentStats: {
+            intelligence: intelligenceLevel,
+            knowledge: knowledgeBase,
+            learningRate: learningRate,
+            name: aiName
+          }
+        }
+      }),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Error:', error);
+    return {
+      message: `I apologize, but I'm having trouble processing that right now. As ${aiName}, I strive to provide accurate and helpful responses.`,
+      intelligenceGain: 0,
+      knowledgeGain: 0,
+      learningBoost: 0,
+      confidence: 0.5
+    };
+  }
+}
+
+async function sendMessage() {
+  const userInput = document.getElementById('userInput').value;
+  if (!userInput.trim()) return;
+  
+  addMessage('user', userInput);
+  document.getElementById('userInput').value = '';
+
+  const inputAnalysis = await analyzeInput(userInput);
+  const aiResponse = await getAIResponse(userInput, inputAnalysis);
+  
+  conversationHistory.push({
+    role: 'user',
+    content: userInput,
+    analysis: inputAnalysis
+  });
+  conversationHistory.push({
+    role: 'assistant',
+    content: aiResponse.message,
+    metrics: aiResponse
+  });
+
+  const learningImpact = (inputAnalysis.complexity * inputAnalysis.relevance * aiResponse.confidence);
+  
+  intelligenceLevel += aiResponse.intelligenceGain * learningImpact;
+  knowledgeBase += aiResponse.knowledgeGain * learningImpact;
+  learningRate += aiResponse.learningBoost * learningImpact;
+  
+  learningProgress = Math.min(100, learningProgress + (learningImpact * 10));
+  document.getElementById('learningProgress').style.width = `${learningProgress}%`;
+  
+  inputAnalysis.topics.forEach(topic => {
+    if (!learnedTopics.has(topic)) {
+      learnedTopics.add(topic);
+      addTopicTag(topic);
+    }
+  });
+  
+  if (aiResponse.codeExample) {
+    addMessage('ai', aiResponse.message + '\n\nCode Example:\n' + aiResponse.codeExample);
+  } else {
+    addMessage('ai', aiResponse.message);
+  }
+  
+  updateStats();
+}
+
+function addTopicTag(topic) {
+  const tagsContainer = document.getElementById('topicTags');
+  const tag = document.createElement('span');
+  tag.className = 'tag';
+  tag.textContent = topic;
+  tagsContainer.appendChild(tag);
+}
+
+function addMessage(type, content) {
+  const terminal = document.getElementById('terminal');
+  const messageDiv = document.createElement('div');
+  messageDiv.className = `message ${type}-message`;
+  messageDiv.textContent = type === 'user' ? `You: ${content}` : `${aiName}: ${content}`;
+  terminal.appendChild(messageDiv);
+  terminal.scrollTop = terminal.scrollHeight;
+}
+
+function updateStats() {
+  document.getElementById('intelligence').textContent = intelligenceLevel.toFixed(2);
+  document.getElementById('knowledge').textContent = `${Math.round(knowledgeBase)} MB`;
+  document.getElementById('learning').textContent = learningRate.toFixed(4);
+}
+
+document.getElementById('userInput').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    sendMessage();
+  }
+});
+
+// Initialize
+chooseAIName();
+updateStats();
+</script>
+
+</body></html>
