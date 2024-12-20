@@ -1,0 +1,240 @@
+<html><head><base href="." /><title>Disease Database Terminal</title><style>
+    body {
+        background-color: #000;
+        color: #0066ff; /* Brightened from #00f */
+        font-family: "Courier New", monospace;
+        margin: 0;
+        padding: 20px;
+        line-height: 1.6;
+    }
+
+    .terminal {
+        max-width: 800px;
+        margin: 0 auto;
+        background: rgba(0, 0, 20, 0.9);
+        padding: 20px;
+        border: 1px solid #0066ff;
+        box-shadow: 0 0 20px rgba(0, 102, 255, 0.3); /* Brightened shadow */
+    }
+
+    .header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .logo {
+        stroke: #0066ff;
+        fill: none;
+        stroke-width: 2;
+        margin-bottom: 20px;
+    }
+
+    input {
+        width: 100%;
+        background: #000;
+        border: 1px solid #0066ff;
+        color: #0066ff;
+        padding: 10px;
+        font-family: "Courier New", monospace;
+        margin-bottom: 20px;
+    }
+
+    .report {
+        border: 1px solid #0066ff;
+        padding: 20px;
+        margin-top: 20px;
+        display: none;
+    }
+
+    .blink {
+        animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+        50% { opacity: 0; }
+    }
+
+    .loading {
+        display: none;
+        margin: 20px 0;
+    }
+
+    .section {
+        margin: 15px 0;
+        padding-left: 20px;
+    }
+
+    .label {
+        color: #1a8cff; /* Brightened label color */
+        font-weight: bold;
+    }
+
+    .lethality-meter {
+        margin: 10px 0;
+        height: 20px;
+        border: 1px solid #0066ff;
+    }
+
+    .lethality-fill {
+        height: 100%;
+        background: #0066ff;
+        width: 0%;
+        transition: width 1s ease-in-out;
+    }
+</style></head><body>
+    <div class="terminal">
+        <div class="header">
+            <svg class="logo" width="200" height="100" viewBox="0 0 200 100">
+                <path d="M20,50 Q100,20 180,50 Q100,80 20,50" />
+                <circle cx="100" cy="50" r="30" />
+                <path d="M85,50 L115,50 M100,35 L100,65" />
+            </svg>
+            <h1>MEDICAL DATABASE TERMINAL</h1>
+            <p class="blink">ENTER DISEASE PARAMETERS >_</p>
+        </div>
+
+        <input type="text" id="diseaseInput" placeholder="Enter disease/virus/disorder description..." />
+        
+        <div class="loading" id="loading">
+            Processing medical data... <span class="blink">|</span>
+        </div>
+
+        <div class="report" id="report">
+            <div class="section">
+                <span class="label">PATIENT ID:</span>
+                <span id="patientId"></span>
+            </div>
+            <div class="section">
+                <span class="label">ILLNESS CLASSIFICATION:</span>
+                <span id="illnessName"></span>
+            </div>
+            <div class="section">
+                <span class="label">PATIENT DESCRIPTION:</span>
+                <div id="patientDesc"></div>
+            </div>
+            <div class="section">
+                <span class="label">SYMPTOMS:</span>
+                <div id="symptoms"></div>
+            </div>
+            <div class="section">
+                <span class="label">CAUSES:</span>
+                <div id="causes"></div>
+            </div>
+            <div class="section">
+                <span class="label">LETHALITY ASSESSMENT:</span>
+                <div id="lethality"></div>
+                <div class="lethality-meter">
+                    <div class="lethality-fill" id="lethalityMeter"></div>
+                </div>
+            </div>
+            <div class="section">
+                <span class="label">TREATMENT PROTOCOL:</span>
+                <div id="treatment"></div>
+            </div>
+            <div class="section">
+                <span class="label">ORIGIN:</span>
+                <div id="origin"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function generateMedicalReport(prompt) {
+            try {
+                // Check for Skibidi Toilet easter egg
+                if (prompt.toLowerCase().includes('skibidi toilet')) {
+                    return {
+                        patientId: "SKIBIDI TOILET",
+                        illnessName: "SKIBIDI TOILET",
+                        patientDescription: "SKIBIDI TOILET",
+                        symptoms: ["SKIBIDI TOILET", "SKIBIDI TOILET", "SKIBIDI TOILET"],
+                        causes: ["SKIBIDI TOILET", "SKIBIDI TOILET"],
+                        lethality: {
+                            rating: "SKIBIDI TOILET",
+                            percentage: 100
+                        },
+                        treatment: "SKIBIDI TOILET",
+                        origin: "SKIBIDI TOILET"
+                    };
+                }
+
+                const response = await fetch('/api/ai_completion', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        prompt: `Generate a detailed medical report based on the following disease prompt: "${prompt}".
+                        
+                        <typescript-interface>
+                        interface MedicalReport {
+                            patientId: string;
+                            illnessName: string;
+                            patientDescription: string;
+                            symptoms: string[];
+                            causes: string[];
+                            lethality: {
+                                rating: string;
+                                percentage: number;
+                            };
+                            treatment: string;
+                            origin: string;
+                        }
+                        </typescript-interface>
+                        
+                        <example>
+                        {
+                            "patientId": "P-2023-0451",
+                            "illnessName": "Chronic Digital Resonance Syndrome",
+                            "patientDescription": "Male, 34, software developer with unusual electromagnetic sensitivity",
+                            "symptoms": ["Persistent tingling in fingertips", "Screen-induced migraines", "Code hallucinations"],
+                            "causes": ["Prolonged exposure to electromagnetic fields", "Genetic predisposition to EM sensitivity"],
+                            "lethality": {
+                                "rating": "Unlikely",
+                                "percentage": 15
+                            },
+                            "treatment": "Regular digital detox periods, specialized EMF-blocking therapy",
+                            "origin": "Silicon Valley Tech Campus, Building 7"
+                        }
+                        </example>`,
+                        data: prompt
+                    }),
+                });
+
+                return await response.json();
+            } catch (error) {
+                console.error('Error:', error);
+                return null;
+            }
+        }
+
+        document.getElementById('diseaseInput').addEventListener('keypress', async function(e) {
+            if (e.key === 'Enter') {
+                const prompt = this.value;
+                const loading = document.getElementById('loading');
+                const report = document.getElementById('report');
+                
+                loading.style.display = 'block';
+                report.style.display = 'none';
+
+                const medicalReport = await generateMedicalReport(prompt);
+                
+                if (medicalReport) {
+                    document.getElementById('patientId').textContent = medicalReport.patientId;
+                    document.getElementById('illnessName').textContent = medicalReport.illnessName;
+                    document.getElementById('patientDesc').textContent = medicalReport.patientDescription;
+                    document.getElementById('symptoms').innerHTML = medicalReport.symptoms.map(s => `• ${s}`).join('<br>');
+                    document.getElementById('causes').innerHTML = medicalReport.causes.map(c => `• ${c}`).join('<br>');
+                    document.getElementById('lethality').textContent = medicalReport.lethality.rating;
+                    document.getElementById('lethalityMeter').style.width = `${medicalReport.lethality.percentage}%`;
+                    document.getElementById('treatment').textContent = medicalReport.treatment;
+                    document.getElementById('origin').textContent = medicalReport.origin;
+
+                    loading.style.display = 'none';
+                    report.style.display = 'block';
+                }
+            }
+        });
+    </script>
+</body></html>
