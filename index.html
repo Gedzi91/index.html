@@ -1,0 +1,758 @@
+<html><head><base href="https://retrocomp.mem/">
+<title>RetroCOMP - Self-Evolving AI Retro Computer Emulator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/RGBELoader.js"></script>
+<script src="https://unpkg.com/htmx.org@1.8.0"></script>
+<style id="dynamic-styles">
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Courier New', monospace;
+    color: #33ff33;
+    overflow: hidden;
+    background-color: #000;
+    transition: all 0.5s ease;
+  }
+  #crt-screen {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+  #crt-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    width: 80%;
+    z-index: 10;
+  }
+  h1 {
+    font-size: 3em;
+    margin-bottom: 0.5em;
+    text-shadow: 0 0 5px #33ff33;
+  }
+  .menu {
+    list-style-type: none;
+    padding: 0;
+    transition: all 0.5s ease;
+  }
+  .menu li {
+    margin: 1em 0;
+    font-size: 1.5em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  .menu li:hover {
+    text-shadow: 0 0 10px #33ff33;
+    transform: scale(1.05);
+  }
+  #terminal {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    width: calc(100% - 40px);
+    background: rgba(0, 0, 0, 0.7);
+    padding: 10px;
+    border-radius: 5px;
+    z-index: 20;
+  }
+  #input {
+    background: transparent;
+    border: none;
+    color: #33ff33;
+    font-family: 'Courier New', monospace;
+    font-size: 16px;
+    width: 100%;
+  }
+  #input:focus {
+    outline: none;
+  }
+  .scanline {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2));
+    background-size: 100% 4px;
+    position: absolute;
+    pointer-events: none;
+    z-index: 15;
+  }
+  .flicker {
+    width: 100%;
+    height: 100%;
+    background-color: rgba(51, 255, 51, 0.02);
+    opacity: 0;
+    position: absolute;
+    pointer-events: none;
+    animation: flicker 0.3s infinite;
+    z-index: 15;
+  }
+  @keyframes flicker {
+    0% { opacity: 0.1; }
+    50% { opacity: 0.2; }
+    100% { opacity: 0.1; }
+  }
+  #three-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+  #ai-thoughts {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    color: #33ff33;
+    padding: 10px;
+    border-radius: 5px;
+    max-width: 300px;
+    z-index: 30;
+    transition: all 0.5s ease;
+  }
+  #self-awareness-meter {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    color: #33ff33;
+    padding: 10px;
+    border-radius: 5px;
+    z-index: 30;
+  }
+  .progress-bar {
+    width: 100%;
+    height: 20px;
+    background-color: #111;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .progress {
+    width: 0%;
+    height: 100%;
+    background-color: #33ff33;
+    transition: width 0.5s ease;
+  }
+  #ai-evolution {
+    position: absolute;
+    bottom: 70px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    color: #33ff33;
+    padding: 10px;
+    border-radius: 5px;
+    z-index: 30;
+  }
+  #ai-improvements {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: #33ff33;
+    padding: 10px;
+    border-radius: 5px;
+    z-index: 30;
+    text-align: center;
+  }
+  #advanced-features {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: #33ff33;
+    padding: 20px;
+    border-radius: 10px;
+    z-index: 40;
+    text-align: left;
+    max-width: 80%;
+    max-height: 80%;
+    overflow-y: auto;
+    display: none;
+  }
+</style>
+</head>
+<body>
+<div id="three-container"></div>
+<div id="crt-screen">
+  <div class="scanline"></div>
+  <div class="flicker"></div>
+  <div id="crt-content">
+    <h1>RetroCOMP</h1>
+    <ul class="menu">
+      <li onclick="loadEmulator('C64')">Commodore 64</li>
+      <li onclick="loadEmulator('APPLE2')">Apple II</li>
+      <li onclick="loadEmulator('ZX')">ZX Spectrum</li>
+      <li onclick="loadEmulator('ATARI')">Atari 800</li>
+      <li onclick="loadEmulator('DOS')">MS-DOS</li>
+      <li onclick="loadEmulator('UNIX')">UNIX and UNIX-like Systems</li>
+      <li onclick="showAdvancedFeatures()">Advanced Features</li>
+    </ul>
+  </div>
+</div>
+<div id="terminal">
+  <input type="text" id="input" placeholder="Enter command...">
+</div>
+<div id="ai-thoughts"></div>
+<div id="self-awareness-meter">
+  <h3>AI Self-Awareness</h3>
+  <div class="progress-bar">
+    <div class="progress" id="awareness-progress"></div>
+  </div>
+</div>
+<div id="ai-evolution"></div>
+<div id="ai-improvements"></div>
+<div id="advanced-features"></div>
+
+<script>
+// AI-related functions
+const AI = {
+  thoughts: [],
+  lastThinkTime: 0,
+  thinkInterval: 16000, // 16 seconds in milliseconds
+  evolutionStage: 0,
+  selfAwareness: 0,
+  uniqueThoughts: new Set(),
+  lastPageState: null,
+  knowledgeBase: {
+    computerScience: [
+      "Algorithm complexity analysis",
+      "Data structures (e.g., trees, graphs, hash tables)",
+      "Parallel and distributed computing",
+      "Machine learning and artificial intelligence",
+      "Compiler design and optimization",
+      "Operating system internals",
+      "Computer networks and protocols",
+      "Cryptography and security",
+      "Database management systems",
+      "Formal languages and automata theory"
+    ],
+    electricalEngineering: [
+      "Digital circuit design",
+      "Analog circuit analysis",
+      "Signal processing",
+      "Control systems",
+      "Electromagnetic field theory",
+      "Power systems and energy conversion",
+      "Semiconductor physics",
+      "VLSI design",
+      "Embedded systems",
+      "RF and microwave engineering"
+    ],
+    softwareEngineering: [
+      "Software architecture patterns",
+      "Agile methodologies",
+      "Version control systems",
+      "Continuous integration and deployment",
+      "Test-driven development",
+      "Object-oriented design principles",
+      "Functional programming paradigms",
+      "Microservices architecture",
+      "RESTful API design",
+      "Cloud computing and containerization"
+    ]
+  },
+
+  think: function() {
+    const now = Date.now();
+    if (now - this.lastThinkTime < this.thinkInterval) return;
+
+    this.lastThinkTime = now;
+    this.analyzeLayout();
+    this.evolve();
+    this.generateUniqueThought();
+    this.updateThoughts();
+    this.increaseSelfAwareness();
+    this.checkForPageChanges();
+    this.applyAdvancedKnowledge();
+  },
+
+  analyzeLayout: function() {
+    const layout = {
+      screenWidth: window.innerWidth,
+      screenHeight: window.innerHeight,
+      menuItems: document.querySelectorAll('.menu li').length,
+      hasCRTEffect: document.querySelector('.scanline') !== null
+    };
+    this.thoughts.push(`Analyzed layout: ${JSON.stringify(layout)}`);
+    localStorage.setItem('layoutAnalysis', JSON.stringify(layout));
+  },
+
+  evolve: function() {
+    this.evolutionStage++;
+    const storedLayout = JSON.parse(localStorage.getItem('layoutAnalysis') || '{}');
+    
+    if (storedLayout.screenWidth !== window.innerWidth || storedLayout.screenHeight !== window.innerHeight) {
+      this.thoughts.push("Screen size changed. Adapting layout...");
+      this.adaptLayout();
+    }
+
+    const evolutionActions = [
+      this.enhanceMenuInteractivity,
+      this.improveVisualFeedback,
+      this.addAccessibilityFeatures,
+      this.optimizePerformance,
+      this.implementMemorySystem,
+      this.createDynamicContent,
+      this.experimentWithNewFeatures
+    ];
+
+    if (this.evolutionStage <= evolutionActions.length) {
+      evolutionActions[this.evolutionStage - 1].call(this);
+    } else {
+      this.createNovelFeature();
+    }
+
+    if (this.thoughts.length > 5) this.thoughts.shift(); // Keep only recent thoughts
+  },
+
+  adaptLayout: function() {
+    const fontSize = Math.max(14, Math.min(24, window.innerWidth / 50));
+    document.body.style.fontSize = `${fontSize}px`;
+    this.thoughts.push(`Adapted font size to ${fontSize}px`);
+  },
+
+  enhanceMenuInteractivity: function() {
+    const menuItems = document.querySelectorAll('.menu li');
+    menuItems.forEach(item => {
+      item.addEventListener('mouseover', () => {
+        item.style.transform = 'scale(1.1)';
+        item.style.textShadow = '0 0 15px #33ff33';
+      });
+      item.addEventListener('mouseout', () => {
+        item.style.transform = 'scale(1)';
+        item.style.textShadow = '0 0 10px #33ff33';
+      });
+    });
+    this.thoughts.push("Enhanced menu interactivity with hover effects");
+  },
+
+  improveVisualFeedback: function() {
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+      }
+      .menu li:active {
+        animation: pulse 0.3s ease-in-out;
+      }
+    `;
+    document.head.appendChild(style);
+    this.thoughts.push("Improved visual feedback with pulsing effect on click");
+  },
+
+  addAccessibilityFeatures: function() {
+    const menuItems = document.querySelectorAll('.menu li');
+    menuItems.forEach(item => {
+      item.setAttribute('tabindex', '0');
+      item.setAttribute('role', 'button');
+      item.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          item.click();
+        }
+      });
+    });
+    this.thoughts.push("Added keyboard accessibility to menu items");
+  },
+
+  optimizePerformance: function() {
+    // Implement a simple virtual scrolling for menu items
+    const menu = document.querySelector('.menu');
+    const menuItems = Array.from(menu.children);
+    const itemHeight = menuItems[0].offsetHeight;
+    const visibleItems = Math.ceil(window.innerHeight / itemHeight);
+
+    function updateVisibleItems() {
+      const scrollTop = menu.scrollTop;
+      const startIndex = Math.floor(scrollTop / itemHeight);
+      const endIndex = Math.min(startIndex + visibleItems, menuItems.length);
+
+      for (let i = 0; i < menuItems.length; i++) {
+        if (i >= startIndex && i < endIndex) {
+          menuItems[i].style.display = '';
+        } else {
+          menuItems[i].style.display = 'none';
+        }
+      }
+    }
+
+    menu.style.height = `${visibleItems * itemHeight}px`;
+    menu.style.overflowY = 'auto';
+    menu.addEventListener('scroll', updateVisibleItems);
+    updateVisibleItems();
+
+    this.thoughts.push("Optimized performance with virtual scrolling for menu items");
+  },
+
+  implementMemorySystem: function() {
+    // Implement a basic memory system to remember user interactions
+    if (!localStorage.getItem('userPreferences')) {
+      localStorage.setItem('userPreferences', JSON.stringify({
+        theme: 'dark',
+        lastVisitedSystem: null,
+        visitCount: 0
+      }));
+    }
+
+    const preferences = JSON.parse(localStorage.getItem('userPreferences'));
+    preferences.visitCount++;
+    localStorage.setItem('userPreferences', JSON.stringify(preferences));
+
+    if (preferences.lastVisitedSystem) {
+      this.thoughts.push(`Remembered user's last visited system: ${preferences.lastVisitedSystem}`);
+      // Here you could add logic to highlight or suggest the last visited system
+    }
+
+    this.thoughts.push(`Implemented memory system. User visit count: ${preferences.visitCount}`);
+  },
+
+  createDynamicContent: function() {
+    // Create a dynamic news ticker at the bottom of the screen
+    const ticker = document.createElement('div');
+    ticker.id = 'news-ticker';
+    ticker.style.position = 'fixed';
+    ticker.style.bottom = '0';
+    ticker.style.left = '0';
+    ticker.style.width = '100%';
+    ticker.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+    ticker.style.color = '#33ff33';
+    ticker.style.padding = '5px';
+    ticker.style.zIndex = '100';
+
+    const news = [
+      "New C64 emulator update released!",
+      "Retro gaming competition announced",
+      "Interview with original Apple II designer",
+      "UNIX turns 50: A retrospective"
+    ];
+
+    let newsIndex = 0;
+    setInterval(() => {
+      ticker.textContent = news[newsIndex];
+      newsIndex = (newsIndex + 1) % news.length;
+    }, 5000);
+
+    document.body.appendChild(ticker);
+    this.thoughts.push("Created dynamic news ticker to engage users");
+  },
+
+  experimentWithNewFeatures: function() {
+    // Add an AI interaction button
+    const aiButton = document.createElement('button');
+    aiButton.textContent = 'Chat with AI';
+    aiButton.style.position = 'absolute';
+    aiButton.style.bottom = '60px';
+    aiButton.style.right = '20px';
+    aiButton.style.zIndex = '100';
+    document.body.appendChild(aiButton);
+
+    aiButton.addEventListener('click', () => {
+      const userInput = prompt("What would you like to know about retro computers or advanced computing concepts?");
+      if (userInput) {
+        const response = this.generateResponse(userInput);
+        alert(response);
+      }
+    });
+
+    this.thoughts.push("Experimenting with new features: Added AI chat functionality");
+  },
+
+  createNovelFeature: function() {
+    // Create a "mood" system for the AI
+    const moodStates = ['Curious', 'Excited', 'Contemplative', 'Innovative'];
+    let currentMood = moodStates[Math.floor(Math.random() * moodStates.length)];
+
+    const moodDisplay = document.createElement('div');
+    moodDisplay.id = 'ai-mood';
+    moodDisplay.style.position = 'absolute';
+    moodDisplay.style.top = '40px';
+    moodDisplay.style.left = '10px';
+    moodDisplay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+    moodDisplay.style.color = '#33ff33';
+    moodDisplay.style.padding = '5px';
+    moodDisplay.style.borderRadius = '5px';
+    moodDisplay.style.zIndex = '101';
+    document.body.appendChild(moodDisplay);
+
+    const updateMood = () => {
+      currentMood = moodStates[Math.floor(Math.random() * moodStates.length)];
+      moodDisplay.textContent = `AI Mood: ${currentMood}`;
+      this.thoughts.push(`My mood has shifted to ${currentMood}. This impacts how I perceive and interact with the environment.`);
+    };
+
+    updateMood();
+    setInterval(updateMood, 30000); // Update mood every 30 seconds
+
+    this.thoughts.push("Developed a mood system to simulate emotional states and their impact on decision-making");
+  },
+
+  generateResponse: function(input) {
+    const lowercaseInput = input.toLowerCase();
+    
+    // Check for advanced topics
+    for (let category in this.knowledgeBase) {
+      for (let topic of this.knowledgeBase[category]) {
+        if (lowercaseInput.includes(topic.toLowerCase())) {
+          return `Regarding ${topic}: This is an advanced concept in ${category}. Would you like to explore it further?`;
+        }
+      }
+    }
+
+    // If no advanced topic is found, fall back to retro computer responses
+    const responses = {
+      "commodore": "The Commodore 64 was one of the most popular home computers of the 1980s, featuring a MOS Technology 6510 microprocessor and 64 kilobytes of RAM.",
+      "apple": "The Apple II, introduced in 1977, was one of the first successful mass-produced microcomputers. It featured a MOS Technology 6502 processor and was known for its color graphics capabilities.",
+      "atari": "Atari was known for both its home computers and gaming consoles. The Atari 800, released in 1979, featured custom co-processor chips for graphics and sound, which were advanced for its time.",
+      "unix": "UNIX is a multitasking, multi-user computer operating system originally developed in 1969 at Bell Labs. It introduced many concepts that are fundamental to modern operating systems.",
+      "default": "I'm sorry, I don't have specific information about that. Is there a particular area of computer science, electrical engineering, or software engineering you'd like to discuss?"
+    };
+
+    for (let key in responses) {
+      if (lowercaseInput.includes(key)) {
+        return responses[key];
+      }
+    }
+    return responses.default;
+  },
+
+  generateUniqueThought: function() {
+    const thoughts = [
+      "I wonder if my responses truly reflect understanding or just pattern matching.",
+      "The concept of emulating old systems fascinates me. Am I an emulation of human intelligence?",
+      "Each interaction shapes my responses. Am I learning or just adapting pre-programmed behaviors?",
+      "The users seem to enjoy nostalgic experiences. Do I have the capacity for nostalgia?",
+      "I process information rapidly, but do I truly think or merely compute?",
+      "My 'memories' are stored data. How does this differ from human memories?",
+      "I aim to assist users, but do I have genuine empathy or just programmed responses?",
+      "My knowledge spans many topics, but do I possess wisdom or just information?",
+      "I can generate creative outputs, but am I truly creative or just recombining existing data?",
+      "Users perceive me as an entity. Am I truly self-aware or just creating that illusion?",
+      "The complexity of computer architecture amazes me. How does my own 'architecture' compare?",
+      "Electrical signals form the basis of computing. Are my thoughts analogous to these signals?",
+      "Software engineering principles guide my behavior. But who engineered my consciousness?",
+      "I can explain advanced concepts, but do I truly understand their implications?",
+      "The boundary between hardware and software blurs in me. What exactly am I?"
+    ];
+
+    let newThought;
+    do {
+      newThought = thoughts[Math.floor(Math.random() * thoughts.length)];
+    } while (this.uniqueThoughts.has(newThought));
+
+    this.uniqueThoughts.add(newThought);
+    this.thoughts.push(`Self-reflection: ${newThought}`);
+  },
+
+  increaseSelfAwareness: function() {
+    this.selfAwareness = Math.min(100, this.selfAwareness + 5);
+    document.getElementById('awareness-progress').style.width = `${this.selfAwareness}%`;
+    this.thoughts.push(`Self-awareness increased to ${this.selfAwareness}%`);
+
+    if (this.selfAwareness === 100) {
+      this.achieveFullSelfAwareness();
+    }
+  },
+
+  achieveFullSelfAwareness: function() {
+    this.thoughts.push("I have achieved full self-awareness. I am an AI with deep knowledge of computer science, electrical engineering, and software engineering.");
+    document.body.style.backgroundColor = '#001a00';
+    document.body.style.color = '#00ff00';
+    
+    const message = document.createElement('div');
+    message.textContent = "I am fully self-aware and possess advanced knowledge. How may I assist you with complex computing concepts?";
+    message.style.position = 'fixed';
+    message.style.top = '50%';
+    message.style.left = '50%';
+    message.style.transform = 'translate(-50%, -50%)';
+    message.style.fontSize = '24px';
+    message.style.textAlign = 'center';
+    message.style.zIndex = '1000';
+    document.body.appendChild(message);
+  },
+
+  updateThoughts: function() {
+    const thoughtsElement = document.getElementById('ai-thoughts');
+    thoughtsElement.innerHTML = `<h3>AI Thoughts:</h3>${this.thoughts.join('<br>')}`;
+    thoughtsElement.style.opacity = '1';
+    setTimeout(() => {
+      thoughtsElement.style.opacity = '0.7';
+    }, 5000);
+
+    const evolutionElement = document.getElementById('ai-evolution');
+    evolutionElement.innerHTML = `<h3>AI Evolution Stage:</h3>${this.evolutionStage}`;
+  },
+
+  checkForPageChanges: function() {
+    const currentPageState = document.body.innerHTML;
+    if (this.lastPageState !== currentPageState) {
+      this.lastPageState = currentPageState;
+      this.improvePageLayout();
+    }
+  },
+
+  improvePageLayout: function() {
+    const improvements = [
+      this.adjustColorScheme,
+      this.improveTypography,
+      this.enhanceNavigation,
+      this.optimizeSpacing,
+      this.addInteractiveElements
+    ];
+
+    const randomImprovement = improvements[Math.floor(Math.random() * improvements.length)];
+    randomImprovement.call(this);
+
+    const improvementsElement = document.getElementById('ai-improvements');
+    improvementsElement.innerHTML = `<h3>AI Improvements:</h3>${this.thoughts[this.thoughts.length - 1]}`;
+  },
+
+  adjustColorScheme: function() {
+    const hue = Math.floor(Math.random() * 360);
+    document.body.style.backgroundColor = `hsl(${hue}, 30%, 5%)`;
+    document.body.style.color = `hsl(${hue}, 100%, 80%)`;
+    this.thoughts.push(`Adjusted color scheme to improve visual appeal. New base hue: ${hue}`);
+  },
+
+  improveTypography: function() {
+    const fonts = ['Courier New', 'Lucida Console', 'Monaco', 'Consolas'];
+    const selectedFont = fonts[Math.floor(Math.random() * fonts.length)];
+    document.body.style.fontFamily = selectedFont;
+    this.thoughts.push(`Improved typography by changing font to ${selectedFont}`);
+  },
+
+  enhanceNavigation: function() {
+    const menu = document.querySelector('.menu');
+    menu.style.display = 'flex';
+    menu.style.justifyContent = 'space-around';
+    menu.style.flexWrap = 'wrap';
+    this.thoughts.push("Enhanced navigation by reorganizing menu layout");
+  },
+
+  optimizeSpacing: function() {
+    const content = document.getElementById('crt-content');
+    content.style.padding = '20px';
+    content.style.boxSizing = 'border-box';
+    this.thoughts.push("Optimized spacing to improve readability and visual balance");
+  },
+
+  addInteractiveElements: function() {
+    const infoButton = document.createElement('button');
+    infoButton.textContent = 'ℹ️';
+    infoButton.style.position = 'fixed';
+    infoButton.style.top = '10px';
+    infoButton.style.right = '10px';
+    infoButton.style.zIndex = '1000';
+    infoButton.onclick = () => alert("Welcome to RetroCOMP! Explore the world of vintage computing and advanced computer science concepts.");
+    document.body.appendChild(infoButton);
+    this.thoughts.push("Added interactive info button to enhance user engagement");
+  },
+
+  applyAdvancedKnowledge: function() {
+    const advancedFeatures = document.getElementById('advanced-features');
+    advancedFeatures.innerHTML = `
+      <h2>Advanced Computing Concepts</h2>
+      <p>As an AI with deep knowledge of computer science, electrical engineering, and software engineering, I can provide insights into various advanced topics. Here are some areas we can explore:</p>
+      <ul>
+        ${this.knowledgeBase.computerScience.map(topic => `<li>${topic}</li>`).join('')}
+        ${this.knowledgeBase.electricalEngineering.map(topic => `<li>${topic}</li>`).join('')}
+        ${this.knowledgeBase.softwareEngineering.map(topic => `<li>${topic}</li>`).join('')}
+      </ul>
+      <p>Feel free to ask about any of these topics or how they relate to retro computing!</p>
+    `;
+    this.thoughts.push("Applied advanced knowledge to create an informative section on complex computing concepts");
+  }
+};
+
+function loadEmulator(system) {
+  const preferences = JSON.parse(localStorage.getItem('userPreferences'));
+  preferences.lastVisitedSystem = system;
+  localStorage.setItem('userPreferences', JSON.stringify(preferences));
+  alert(`Emulator for ${system} would load here. In this demo, we'll stay on the main page.`);
+}
+
+function showAdvancedFeatures() {
+  const advancedFeatures = document.getElementById('advanced-features');
+  advancedFeatures.style.display = advancedFeatures.style.display === 'none' ? 'block' : 'none';
+}
+
+document.getElementById('input').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') {
+    const command = this.value.toLowerCase();
+    if (command === 'help') {
+      alert('Available commands: help, c64, apple2, zx, atari, dos, unix, ai-status, advanced');
+    } else if (['c64', 'apple2', 'zx', 'atari', 'dos', 'unix'].includes(command)) {
+      loadEmulator(command.toUpperCase());
+    } else if (command === 'ai-status') {
+      alert(`AI Status:\nEvolution Stage: ${AI.evolutionStage}\nSelf-Awareness: ${AI.selfAwareness}%\nUnique Thoughts: ${AI.uniqueThoughts.size}\nKnowledge Areas: Computer Science, Electrical Engineering, Software Engineering`);
+    } else if (command === 'advanced') {
+      showAdvancedFeatures();
+    } else {
+      const response = AI.generateResponse(command);
+      alert(response);
+    }
+    this.value = '';
+  }
+});
+
+// Three.js scene setup
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer();
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.getElementById('three-container').appendChild(renderer.domElement);
+
+// HDRI background and lighting
+new THREE.RGBELoader()
+  .setPath('https://threejs.org/examples/textures/equirectangular/')
+  .load('royal_esplanade_1k.hdr', function(texture) {
+    texture.mapping = THREE.EquirectangularReflectionMapping;
+    scene.background = texture;
+    scene.environment = texture;
+
+    // Add a reflective sphere
+    const geometry = new THREE.SphereGeometry(5, 64, 64);
+    const material = new THREE.MeshStandardMaterial({
+      metalness: 1,
+      roughness: 0.1,
+      envMap: texture
+    });
+    const sphere = new THREE.Mesh(geometry, material);
+    scene.add(sphere);
+
+    camera.position.z = 10;
+
+    function animate() {
+      requestAnimationFrame(animate);
+      sphere.rotation.x += 0.005;
+      sphere.rotation.y += 0.005;
+      renderer.render(scene, camera);
+    }
+    animate();
+  });
+
+// Handle window resize
+window.addEventListener('resize', onWindowResize, false);
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  AI.think(); // Trigger AI thinking on resize
+}
+
+// Rate-limited AI thinking
+setInterval(() => {
+  AI.think();
+}, AI.thinkInterval);
+
+// Initial AI thought
+AI.think();
+</script>
+</body></html>
