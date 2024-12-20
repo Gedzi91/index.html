@@ -1,0 +1,413 @@
+<html><head><base href="https://websim.ai/">
+<title>Einstein's Space - 3D Spacetime Simulator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+
+  body {
+    margin: 0;
+    overflow: hidden;
+    background-color: #0a0e17;
+    font-family: 'Roboto', sans-serif;
+    color: #e0e0e0;
+  }
+  canvas {
+    display: block;
+  }
+  #header {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: flex;
+    align-items: center;
+    z-index: 100;
+  }
+  #logo {
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+  }
+  #title {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-shadow: 0 0 10px rgba(255,255,255,0.5);
+  }
+  #controls {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(20, 30, 48, 0.8);
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 14px;
+  }
+  #massSlider {
+    width: 150px;
+    margin: 0 10px;
+  }
+  #massValue {
+    font-weight: 700;
+    min-width: 40px;
+    text-align: right;
+  }
+  label {
+    font-weight: 300;
+  }
+  input[type="range"] {
+    -webkit-appearance: none;
+    background: transparent;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 15px;
+    width: 15px;
+    border-radius: 50%;
+    background: #4a90e2;
+    cursor: pointer;
+    margin-top: -6px;
+  }
+  input[type="range"]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 3px;
+    cursor: pointer;
+    background: #2c3e50;
+    border-radius: 1.5px;
+  }
+  #objectType {
+    font-size: 12px;
+    margin-bottom: 5px;
+    color: #63b3ed;
+  }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+<div id="header">
+  <svg id="logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style="stop-color:#4a90e2;stop-opacity:1"></stop>
+        <stop offset="100%" style="stop-color:#63b3ed;stop-opacity:1"></stop>
+      </linearGradient>
+    </defs>
+    <circle cx="50" cy="50" r="45" fill="none" stroke="url(#grad)" stroke-width="2"></circle>
+    <path d="M50 5 A45 45 0 0 1 95 50" fill="none" stroke="url(#grad)" stroke-width="2"></path>
+    <path d="M50 95 A45 45 0 0 1 5 50" fill="none" stroke="url(#grad)" stroke-width="2"></path>
+    <circle cx="50" cy="50" r="5" fill="url(#grad)"></circle>
+  </svg>
+  <div id="title">Einstein's Space 3D</div>
+</div>
+<div id="controls">
+  <div id="objectType">planet, star</div>
+  <div style="display: flex; align-items: center;">
+    <label for="massSlider">Mass:</label>
+    <input type="range" id="massSlider" min="1000" max="50000" value="5000">
+    <span id="massValue">5000</span>
+  </div>
+</div>
+
+<script>
+let scene, camera, renderer, grid, celestialObject, raycaster, plane, eventHorizon, blackHoleGlow;
+const gridSize = 30;
+const gridDivisions = 10;
+const blackHoleThreshold = 30000;
+
+function init() {
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  camera.position.set(0, 30, 30);
+  camera.lookAt(0, 0, 0);
+
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
+
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+  scene.add(ambientLight);
+
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+  directionalLight.position.set(1, 1, 1);
+  scene.add(directionalLight);
+
+  raycaster = new THREE.Raycaster();
+  plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+
+  createGrid();
+  createCelestialObject();
+  createStars();
+  createEventHorizon();
+  createBlackHoleGlow();
+
+  window.addEventListener('resize', onWindowResize, false);
+}
+
+function createGrid() {
+  const gridGeometry = new THREE.BufferGeometry();
+  const positions = [];
+
+  for (let i = 0; i <= gridDivisions; i++) {
+    const x = (i / gridDivisions - 0.5) * gridSize;
+    for (let j = 0; j <= gridDivisions; j++) {
+      const y = 0;
+      const z = (j / gridDivisions - 0.5) * gridSize;
+      positions.push(x, y, z);
+    }
+  }
+
+  gridGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+
+  const material = new THREE.LineBasicMaterial({ color: 0x4a90e2, opacity: 0.3, transparent: true });
+
+  for (let i = 0; i <= gridDivisions; i++) {
+    const line1 = new THREE.Line(gridGeometry, material);
+    line1.rotation.x = Math.PI / 2;
+    line1.position.y = (i / gridDivisions - 0.5) * gridSize;
+    scene.add(line1);
+
+    const line2 = new THREE.Line(gridGeometry, material);
+    line2.rotation.z = Math.PI / 2;
+    line2.position.x = (i / gridDivisions - 0.5) * gridSize;
+    scene.add(line2);
+
+    const line3 = new THREE.Line(gridGeometry, material);
+    line3.position.z = (i / gridDivisions - 0.5) * gridSize;
+    scene.add(line3);
+  }
+}
+
+function createCelestialObject() {
+  const geometry = new THREE.SphereGeometry(1, 32, 32);
+  const material = new THREE.MeshPhongMaterial({ color: 0x63b3ed });
+  celestialObject = new THREE.Mesh(geometry, material);
+  scene.add(celestialObject);
+}
+
+function createStars() {
+  const starsGeometry = new THREE.BufferGeometry();
+  const starsMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.1 });
+
+  const starsVertices = [];
+  for (let i = 0; i < 1000; i++) {
+    const x = THREE.MathUtils.randFloatSpread(100);
+    const y = THREE.MathUtils.randFloatSpread(100);
+    const z = THREE.MathUtils.randFloatSpread(100);
+    starsVertices.push(x, y, z);
+  }
+
+  starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starsVertices, 3));
+  const stars = new THREE.Points(starsGeometry, starsMaterial);
+  scene.add(stars);
+}
+
+function createEventHorizon() {
+  const geometry = new THREE.SphereGeometry(1, 64, 64);
+  const material = new THREE.ShaderMaterial({
+    uniforms: {
+      time: { value: 0 }
+    },
+    vertexShader: `
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `
+      uniform float time;
+      varying vec2 vUv;
+      void main() {
+        vec2 center = vec2(0.5, 0.5);
+        float dist = distance(vUv, center);
+        float angle = atan(vUv.y - center.y, vUv.x - center.x);
+        float intensity = sin(dist * 30.0 - time * 3.0) * 0.5 + 0.5;
+        vec3 color = mix(vec3(0.0, 0.0, 0.0), vec3(0.5, 0.0, 1.0), intensity);
+        gl_FragColor = vec4(color, 1.0 - pow(dist, 0.5));
+      }
+    `,
+    transparent: true,
+    side: THREE.DoubleSide
+  });
+  eventHorizon = new THREE.Mesh(geometry, material);
+  eventHorizon.visible = false;
+  scene.add(eventHorizon);
+}
+
+function createBlackHoleGlow() {
+  const geometry = new THREE.SphereGeometry(1.2, 64, 64);
+  const material = new THREE.ShaderMaterial({
+    uniforms: {
+      time: { value: 0 }
+    },
+    vertexShader: `
+      varying vec3 vNormal;
+      void main() {
+        vNormal = normalize(normalMatrix * normal);
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `
+      uniform float time;
+      varying vec3 vNormal;
+      void main() {
+        float intensity = pow(0.8 - dot(vNormal, vec3(0, 0, 1.0)), 2.0);
+        vec3 color = mix(vec3(0.5, 0.0, 1.0), vec3(1.0, 0.5, 0.0), intensity);
+        gl_FragColor = vec4(color, intensity * 0.5);
+      }
+    `,
+    transparent: true,
+    side: THREE.BackSide,
+    blending: THREE.AdditiveBlending
+  });
+  blackHoleGlow = new THREE.Mesh(geometry, material);
+  blackHoleGlow.visible = false;
+  scene.add(blackHoleGlow);
+}
+
+function updateGrid() {
+  const positions = [];
+  const mass = parseFloat(document.getElementById('massSlider').value);
+  const influenceRadius = 15;
+
+  for (let i = 0; i <= gridDivisions; i++) {
+    for (let j = 0; j <= gridDivisions; j++) {
+      for (let k = 0; k <= gridDivisions; k++) {
+        const x = (i / gridDivisions - 0.5) * gridSize;
+        const y = (j / gridDivisions - 0.5) * gridSize;
+        const z = (k / gridDivisions - 0.5) * gridSize;
+
+        const dx = x - celestialObject.position.x;
+        const dy = y - celestialObject.position.y;
+        const dz = z - celestialObject.position.z;
+        const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+        if (distance < influenceRadius) {
+          const force = (1 - distance / influenceRadius) * mass / 1000;
+          const angle = Math.atan2(Math.sqrt(dx * dx + dz * dz), dy);
+          const phi = Math.atan2(dz, dx);
+
+          positions.push(
+            x - Math.sin(angle) * Math.cos(phi) * force,
+            y - Math.cos(angle) * force,
+            z - Math.sin(angle) * Math.sin(phi) * force
+          );
+        } else {
+          positions.push(x, y, z);
+        }
+      }
+    }
+  }
+
+  scene.children.forEach(child => {
+    if (child instanceof THREE.Line) {
+      child.geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+      child.geometry.attributes.position.needsUpdate = true;
+    }
+  });
+}
+
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  updateGrid();
+  
+  if (eventHorizon.visible) {
+    eventHorizon.material.uniforms.time.value += 0.05;
+    blackHoleGlow.material.uniforms.time.value += 0.05;
+  }
+  
+  renderer.render(scene, camera);
+}
+
+init();
+animate();
+
+// Mass slider
+const massSlider = document.getElementById('massSlider');
+const massValue = document.getElementById('massValue');
+const objectType = document.getElementById('objectType');
+
+massSlider.addEventListener('input', function() {
+  const mass = parseInt(this.value);
+  massValue.textContent = mass;
+  
+  if (mass >= blackHoleThreshold) {
+    celestialObject.visible = false;
+    eventHorizon.visible = true;
+    blackHoleGlow.visible = true;
+    const scale = mass / 5000;
+    eventHorizon.scale.setScalar(scale);
+    blackHoleGlow.scale.setScalar(scale * 1.2);
+    objectType.textContent = "black hole";
+  } else {
+    celestialObject.visible = true;
+    eventHorizon.visible = false;
+    blackHoleGlow.visible = false;
+    celestialObject.scale.setScalar(mass / 5000);
+    celestialObject.material.color.setHex(0x63b3ed);
+    celestialObject.material.emissive.setHex(0x000000);
+    objectType.textContent = "planet, star";
+  }
+});
+
+// Touch and mouse interaction
+let isDragging = false;
+let previousTouch;
+
+renderer.domElement.addEventListener('mousedown', onPointerDown, false);
+renderer.domElement.addEventListener('mousemove', onPointerMove, false);
+renderer.domElement.addEventListener('mouseup', onPointerUp, false);
+renderer.domElement.addEventListener('touchstart', onPointerDown, false);
+renderer.domElement.addEventListener('touchmove', onPointerMove, false);
+renderer.domElement.addEventListener('touchend', onPointerUp, false);
+
+function onPointerDown(event) {
+  event.preventDefault();
+  isDragging = true;
+  if (event.type === 'touchstart') {
+    previousTouch = event.touches[0];
+  }
+}
+
+function onPointerMove(event) {
+  event.preventDefault();
+  if (!isDragging) return;
+
+  let clientX, clientY;
+  if (event.type === 'touchmove') {
+    const touch = event.touches[0];
+    clientX = touch.clientX;
+    clientY = touch.clientY;
+  } else {
+    clientX = event.clientX;
+    clientY = event.clientY;
+  }
+
+  const rect = renderer.domElement.getBoundingClientRect();
+  const x = ((clientX - rect.left) / rect.width) * 2 - 1;
+  const y = -((clientY - rect.top) / rect.height) * 2 + 1;
+
+  raycaster.setFromCamera(new THREE.Vector2(x, y), camera);
+  const intersects = new THREE.Vector3();
+  raycaster.ray.intersectPlane(plane, intersects);
+  
+  celestialObject.position.copy(intersects);
+  eventHorizon.position.copy(intersects);
+  blackHoleGlow.position.copy(intersects);
+}
+
+function onPointerUp(event) {
+  event.preventDefault();
+  isDragging = false;
+}
+</script>
+</body></html>
