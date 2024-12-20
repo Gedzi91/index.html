@@ -1,0 +1,314 @@
+<html><head><base href="https://Character.%E2%88%9E/?Character=Just%2520a%2520squirrel%2520with%2520a%2520gun%252C%2520thats%2520it">
+<title>Nutkin - The Armed Acorn Avenger</title>
+<style>
+body {
+  font-family: 'Comic Sans MS', cursive;
+  background-color: #a5d6a7;
+  color: #3e2723;
+  margin: 0;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+}
+.character-sheet {
+  background-color: rgba(255, 248, 225, 0.9);
+  border-radius: 15px;
+  box-shadow: 0 0 20px rgba(121, 85, 72, 0.5);
+  padding: 30px;
+  width: 100%;
+  max-width: 800px;
+  border: 3px solid #795548;
+}
+h1 {
+  color: #4caf50;
+  text-align: center;
+  font-size: 2.5em;
+  margin-bottom: 20px;
+  text-shadow: 2px 2px 4px rgba(76, 175, 80, 0.3);
+}
+.section {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: rgba(255, 248, 225, 0.7);
+  border-radius: 10px;
+  border: 2px solid #8d6e63;
+}
+h2 {
+  color: #33691e;
+  margin-bottom: 10px;
+  border-bottom: 2px dashed #8d6e63;
+  padding-bottom: 5px;
+}
+p {
+  margin-bottom: 10px;
+  line-height: 1.6;
+}
+.stats {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+}
+.stat {
+  text-align: center;
+  margin: 10px;
+  background-color: #c8e6c9;
+  padding: 10px;
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+}
+.stat-value {
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #33691e;
+}
+.resources {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 20px;
+}
+.resource {
+  text-align: center;
+  background-color: #c8e6c9;
+  padding: 10px;
+  border-radius: 10px;
+  min-width: 100px;
+  box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+}
+.resource-value {
+  font-size: 1.8em;
+  font-weight: bold;
+  color: #33691e;
+}
+.list-section {
+  margin-bottom: 15px;
+}
+.list-title {
+  font-weight: bold;
+  color: #33691e;
+  margin-bottom: 5px;
+}
+ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+li {
+  margin-bottom: 5px;
+  padding: 5px;
+  background-color: rgba(200, 230, 201, 0.5);
+  border-radius: 5px;
+}
+.spell, .ability {
+  background-color: rgba(165, 214, 167, 0.3);
+  border-radius: 5px;
+  padding: 8px;
+  margin-bottom: 8px;
+  border: 1px solid #81c784;
+}
+.two-column {
+  display: flex;
+  justify-content: space-between;
+}
+.column {
+  width: 48%;
+}
+.basic-info {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  font-size: 1.2em;
+}
+.basic-info-item {
+  margin-right: 15px;
+  margin-bottom: 10px;
+}
+.basic-info-value {
+  font-weight: bold;
+  color: #33691e;
+}
+.backstory {
+  text-align: left;
+  padding: 15px;
+  background-color: rgba(200, 230, 201, 0.2);
+  border-radius: 10px;
+  border: 2px dashed #81c784;
+  margin-top: 20px;
+  font-size: 1.1em;
+  line-height: 1.8;
+}
+.backstory p {
+  margin-bottom: 15px;
+}
+a {
+  color: #1b5e20;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+a:hover {
+  color: #4caf50;
+  text-decoration: underline;
+}
+.character-image {
+  width: 300px;
+  height: 300px;
+  margin: 0 auto 20px;
+  display: block;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 5px solid #795548;
+  box-shadow: 0 0 20px rgba(121, 85, 72, 0.5);
+}
+</style>
+</head>
+<body>
+<div class="character-sheet">
+  <h1>Nutkin, the Armed Acorn Avenger</h1>
+  
+  <svg class="character-image" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="100" cy="100" r="95" fill="#795548"/>
+    <ellipse cx="100" cy="140" rx="60" ry="50" fill="#8d6e63"/>
+    <circle cx="70" cy="80" r="15" fill="white"/>
+    <circle cx="130" cy="80" r="15" fill="white"/>
+    <circle cx="70" cy="80" r="7" fill="black"/>
+    <circle cx="130" cy="80" r="7" fill="black"/>
+    <path d="M90 110 Q100 120 110 110" stroke="white" stroke-width="3" fill="none"/>
+    <path d="M60 40 Q80 20 100 40 Q120 20 140 40" fill="#8d6e63"/>
+    <rect x="85" y="130" width="30" height="20" fill="#4e342e"/>
+    <rect x="140" y="110" width="40" height="15" fill="#607d8b" transform="rotate(30 160 117.5)"/>
+  </svg>
+
+  <div class="section">
+    <h2>Basic Info</h2>
+    <div class="basic-info">
+      <div class="basic-info-item">Level: <span class="basic-info-value" id="level">5</span></div>
+      <div class="basic-info-item">Race: <span class="basic-info-value"><a href="https://Character.∞/races/squirrel">Squirrel</a></span></div>
+      <div class="basic-info-item">Class: <span class="basic-info-value"><a href="https://Character.∞/classes/gunslinger">Gunslinger</a></span></div>
+      <div class="basic-info-item">Alignment: <span class="basic-info-value"><a href="https://Character.∞/alignments/chaotic-neutral">Chaotic Neutral</a></span></div>
+      <div class="basic-info-item">Deity: <span class="basic-info-value"><a href="https://Character.∞/deities/nuttia">Nuttia, Goddess of Acorns</a></span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Stats</h2>
+    <div class="stats">
+      <div class="stat"><div>STR</div><div class="stat-value" id="str">8</div></div>
+      <div class="stat"><div>DEX</div><div class="stat-value" id="dex">18</div></div>
+      <div class="stat"><div>CON</div><div class="stat-value" id="con">12</div></div>
+      <div class="stat"><div>INT</div><div class="stat-value" id="int">10</div></div>
+      <div class="stat"><div>WIS</div><div class="stat-value" id="wis">14</div></div>
+      <div class="stat"><div>CHR</div><div class="stat-value" id="chr">13</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Resources</h2>
+    <div class="resources">
+      <div class="resource">
+        <div>HP</div>
+        <div class="resource-value" id="hp">30/30</div>
+      </div>
+      <div class="resource">
+        <div>Ammo</div>
+        <div class="resource-value" id="ammo">12/12</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Backstory</h2>
+    <div class="backstory" id="backstory">
+      <p>Once a simple tree-dwelling rodent, Nutkin's life changed forever when he discovered an abandoned miniature firearm near his oak. Fascinated by its power, he taught himself to use it, becoming an unlikely sharpshooter. Now, Nutkin roams the forest, protecting his furry friends from predators and occasionally causing mischief for unsuspecting hikers.</p>
+    </div>
+  </div>
+
+  <div class="two-column">
+    <div class="column">
+      <div class="section">
+        <h2>Equipment</h2>
+        <div class="list-section">
+          <div class="list-title">Weapon:</div>
+          <ul><li><a href="https://Character.∞/items/nutcrackers-revenge">Nutcracker's Revenge</a> (Custom miniature revolver, +2 to hit)</li></ul>
+        </div>
+        <div class="list-section">
+          <div class="list-title">Armor:</div>
+          <ul><li><a href="https://Character.∞/items/acorn-cap-helmet">Acorn Cap Helmet</a> (AC +1)</li></ul>
+        </div>
+        <div class="list-section">
+          <div class="list-title">Accessories:</div>
+          <ul>
+            <li><a href="https://Character.∞/items/bandolier-of-holding">Bandolier of Holding</a> (Stores extra ammo)</li>
+            <li><a href="https://Character.∞/items/lucky-golden-acorn">Lucky Golden Acorn</a> (+1 to saving throws)</li>
+          </ul>
+        </div>
+      </div>
+      <div class="section">
+        <h2>Inventory</h2>
+        <ul id="inventory">
+          <li><a href="https://Character.∞/items/acorn-bombs">Acorn Bombs</a> x3</li>
+          <li><a href="https://Character.∞/items/squirrel-treats">Squirrel Treats</a> (restores 1d4 HP) x5</li>
+          <li><a href="https://Character.∞/items/tiny-grappling-hook">Tiny Grappling Hook</a></li>
+          <li><a href="https://Character.∞/items/nutshell-lockpick-set">Nutshell Lockpick Set</a></li>
+          <li><a href="https://Character.∞/items/bark-camouflage-cloak">Bark Camouflage Cloak</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="column">
+      <div class="section">
+        <h2>Abilities</h2>
+        <div id="abilities"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const abilities = [
+  {name: "Quick Draw", description: "Can draw and fire weapon as a bonus action.", link: "https://Character.∞/abilities/quick-draw"},
+  {name: "Treetop Acrobat", description: "Advantage on Dexterity (Acrobatics) checks when in trees.", link: "https://Character.∞/abilities/treetop-acrobat"},
+  {name: "Nutty Sense", description: "Can sense the presence of nuts within 30 feet.", link: "https://Character.∞/abilities/nutty-sense"},
+  {name: "Ricochet Shot", description: "Once per short rest, can make a shot that bounces off surfaces to hit hidden targets.", link: "https://Character.∞/abilities/ricochet-shot"},
+  {name: "Gather Acorns", description: "Can forage for acorns to use as improvised ammunition or distractions.", link: "https://Character.∞/abilities/gather-acorns"}
+];
+
+function populateAbilities() {
+  const abilitiesDiv = document.getElementById("abilities");
+  abilities.forEach(ability => {
+    const abilityDiv = document.createElement("div");
+    abilityDiv.className = "ability";
+    abilityDiv.innerHTML = `<a href="${ability.link}">${ability.name}</a>: ${ability.description}`;
+    abilitiesDiv.appendChild(abilityDiv);
+  });
+}
+
+function randomizeStat(statId, min, max) {
+  const value = Math.floor(Math.random() * (max - min + 1)) + min;
+  document.getElementById(statId).textContent = value;
+}
+
+function randomizeStats() {
+  randomizeStat("str", 6, 10);
+  randomizeStat("dex", 16, 20);
+  randomizeStat("con", 10, 14);
+  randomizeStat("int", 8, 12);
+  randomizeStat("wis", 12, 16);
+  randomizeStat("chr", 11, 15);
+}
+
+function updateResources() {
+  const level = parseInt(document.getElementById("level").textContent);
+  const hp = 20 + (level * 2);
+  const ammo = 10 + level;
+  document.getElementById("hp").textContent = `${hp}/${hp}`;
+  document.getElementById("ammo").textContent = `${ammo}/${ammo}`;
+}
+
+randomizeStats();
+updateResources();
+populateAbilities();
+</script>
+</body></html>
