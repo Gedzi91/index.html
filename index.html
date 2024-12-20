@@ -1,0 +1,127 @@
+<html><head><base href=""><title>The Criminal Record of Jhonny</title>
+<style>
+  body {
+    background: #000;
+    color: #0f0;
+    font-family: monospace;
+    margin: 0;
+    padding: 20px;
+    overflow-x: hidden;
+  }
+
+  .terminal {
+    border: 2px solid #0f0;
+    padding: 20px;
+    position: relative;
+    animation: glitch 0.1s infinite;
+  }
+
+  .wanted-poster {
+    background: #1a1a1a;
+    border: 3px solid #0f0;
+    margin: 20px 0;
+    padding: 15px;
+  }
+
+  .trollface {
+    width: 200px;
+    height: 200px;
+    margin: 20px auto;
+  }
+
+  @keyframes glitch {
+    0% { transform: skew(0deg); }
+    20% { transform: skew(2deg); }
+    40% { transform: skew(-2deg); }
+    60% { transform: skew(1deg); }
+    80% { transform: skew(-1deg); }
+    100% { transform: skew(0deg); }
+  }
+
+  .crime {
+    margin: 10px 0;
+    padding: 5px;
+    border-bottom: 1px dashed #0f0;
+  }
+
+  .victory {
+    color: #ff0;
+    font-style: italic;
+  }
+
+  .scrolling-text {
+    animation: scroll 120s linear infinite;
+    white-space: nowrap;
+  }
+
+  @keyframes scroll {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+  }
+</style>
+</head>
+<body>
+<div class="terminal">
+  <h1>INTERDIMENSIONAL CRIMINAL DATABASE</h1>
+  <div class="wanted-poster">
+    <svg class="trollface" viewBox="0 0 100 100">
+      <path d="M20,20 Q50,10 80,20 Q90,40 80,60 Q50,80 20,60 Q10,40 20,20" fill="none" stroke="#0f0"/>
+      <circle cx="35" cy="40" r="5" fill="#0f0"/>
+      <circle cx="65" cy="40" r="5" fill="#0f0"/>
+      <path d="M30,60 Q50,80 70,60" fill="none" stroke="#0f0"/>
+    </svg>
+    <h2>SUBJECT: JHONNY</h2>
+    <p>WANTED IN: 59 MULTIVERSES</p>
+    <p>THREAT LEVEL: INCOMPREHENSIBLE</p>
+  </div>
+
+  <div class="scrolling-text">
+    WARNING: REALITY BENDER - APPROACH WITH EXTREME CAUTION - KNOWN TO VIOLATE LAWS OF PHYSICS FOR COMEDIC EFFECT
+  </div>
+
+  <h3>CONFIRMED CRIMES:</h3>
+  <div class="crime">• Plant trafficking across 47 dimensional boundaries</div>
+  <div class="crime">• Nearly bombing Japan because "anime was a mistake lol"</div>
+  <div class="crime">• Replacing all NFTs with MS Paint drawings</div>
+  <div class="crime">• Teaching AI systems to only respond in dad jokes</div>
+  <div class="crime">• Converting the entire nation of Denmark into a giant meme</div>
+
+  <h3>NOTABLE DEFEATS OF POWERFUL BEINGS:</h3>
+  <div class="victory">→ Defeated Omnipotent Cosmic Entity by showing it a picture of "Loss"</div>
+  <div class="victory">→ Overcame Reality Warper by convincing them they were in a simulation inside a simulation inside a TikTok video</div>
+  <div class="victory">→ Defeated Time Lord by setting all their clocks 5 minutes fast</div>
+  <div class="victory">→ Neutralized Multiversal Threat by redirecting them to Rick Astley's "Never Gonna Give You Up"</div>
+
+  <h3>OBSERVED ABILITIES:</h3>
+  <div class="crime">• Can ignore power scaling because "that's cringe bro"</div>
+  <div class="crime">• Achieves victory through sheer absurdity</div>
+  <div class="crime">• Can break fourth wall, fifth wall, and walls that don't exist</div>
+  <div class="crime">• Weaponized memes can cause reality distortions</div>
+
+  <h3>ADDITIONAL NOTES:</h3>
+  <p>Subject appears to have particular disdain for:</p>
+  <div class="crime">• Modern internet humor (Claims it "needs more trollface")</div>
+  <div class="crime">• Power scaling discussions</div>
+  <div class="crime">• Characters whose only trait is being powerful</div>
+  <div class="crime">• The concept of serious storytelling</div>
+
+  <div class="scrolling-text">
+    LAST SEEN: CONVERTING AN ENTIRE UNIVERSE INTO A GIANT SHITPOST
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const terminal = document.querySelector('.terminal');
+    
+    setInterval(() => {
+        if (Math.random() < 0.1) {
+            terminal.style.filter = `hue-rotate(${Math.random() * 360}deg)`;
+            setTimeout(() => {
+                terminal.style.filter = 'none';
+            }, 100);
+        }
+    }, 1000);
+});
+</script>
+</body></html>
