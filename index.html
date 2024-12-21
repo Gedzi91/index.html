@@ -1,0 +1,508 @@
+<html><head><base href="https://websim-creation-engine.io/mathematical-curves-collection/">
+<title>Mathematical Curves Collection - Full Frame Animation with Improved Light/Dark Mode</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    transition: background-color 0.3s ease;
+  }
+  #controls {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    padding: 15px;
+    border-radius: 10px;
+    z-index: 10;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  button {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  button:hover {
+    background-color: #45a049;
+  }
+  #info {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    padding: 15px;
+    border-radius: 10px;
+    z-index: 10;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  select, input {
+    font-size: 16px;
+    padding: 5px;
+    margin: 4px 2px;
+  }
+  label {
+    font-size: 14px;
+    margin-right: 10px;
+  }
+  .light-mode {
+    background-color: #ffffff;
+    color: #000000;
+  }
+  .dark-mode {
+    background-color: #1a1a1a;
+    color: #ffffff;
+  }
+  .light-mode #controls, .light-mode #info {
+    background-color: rgba(255, 255, 255, 0.8);
+  }
+  .dark-mode #controls, .dark-mode #info {
+    background-color: rgba(26, 26, 26, 0.8);
+  }
+</style>
+</head>
+<body class="light-mode">
+<div id="controls">
+  <select id="curveType" onchange="changeCurveType()">
+    <option value="hypocycloid">Hypocycloid</option>
+    <option value="epicycloid">Epicycloid</option>
+    <option value="spirograph">Spirograph</option>
+    <option value="lissajous">Lissajous Curve</option>
+    <option value="rose">Rose Curve</option>
+    <option value="fourier">Fourier Series</option>
+    <option value="phyllotaxis">Phyllotaxis</option>
+    <option value="moire">Moiré Pattern</option>
+    <option value="inversion">Circle Inversion</option>
+  </select>
+  <button onclick="randomizeCurve()">Randomize Curve</button>
+  <br>
+  <label for="speedControl">Animation Speed:</label>
+  <input type="range" id="speedControl" min="0.01" max="0.5" step="0.01" value="0.1" oninput="updateSpeed()">
+  <span id="speedValue">0.10</span>
+  <br>
+  <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
+</div>
+<div id="info"></div>
+
+<script>
+let currentCurve;
+let t = 0;
+let speed = 0.1;
+let isDarkMode = false;
+let colors = {
+  light: [
+    '#1A237E', '#311B92', '#4A148C', '#880E4F', '#3E2723', '#1B5E20',
+    '#006064', '#0D47A1', '#1A237E', '#311B92', '#4A148C', '#880E4F'
+  ],
+  dark: [
+    '#8C9EFF', '#B388FF', '#EA80FC', '#FF80AB', '#FFAB91', '#CCFF90',
+    '#A7FFEB', '#82B1FF', '#8C9EFF', '#B388FF', '#EA80FC', '#FF80AB'
+  ]
+};
+
+function setup() {
+  createCanvas(windowWidth, windowHeight);
+  currentCurve = new Hypocycloid();
+}
+
+function draw() {
+  background(isDarkMode ? 26 : 240);
+  currentCurve.display();
+  t += speed;
+  updateInfo();
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+  currentCurve.randomize();
+}
+
+function randomizeCurve() {
+  currentCurve.randomize();
+  t = 0;
+}
+
+function changeCurveType() {
+  let type = document.getElementById('curveType').value;
+  switch(type) {
+    case 'hypocycloid': currentCurve = new Hypocycloid(); break;
+    case 'epicycloid': currentCurve = new Epicycloid(); break;
+    case 'spirograph': currentCurve = new Spirograph(); break;
+    case 'lissajous': currentCurve = new LissajousCurve(); break;
+    case 'rose': currentCurve = new RoseCurve(); break;
+    case 'fourier': currentCurve = new FourierSeries(); break;
+    case 'phyllotaxis': currentCurve = new Phyllotaxis(); break;
+    case 'moire': currentCurve = new MoirePattern(); break;
+    case 'inversion': currentCurve = new CircleInversion(); break;
+  }
+  randomizeCurve();
+}
+
+function updateSpeed() {
+  speed = parseFloat(document.getElementById('speedControl').value);
+  document.getElementById('speedValue').textContent = speed.toFixed(2);
+}
+
+function updateInfo() {
+  let infoDiv = document.getElementById('info');
+  infoDiv.innerHTML = currentCurve.getInfo();
+}
+
+function toggleDarkMode() {
+  isDarkMode = !isDarkMode;
+  document.body.classList.toggle('dark-mode');
+  document.body.classList.toggle('light-mode');
+  currentCurve.randomize();
+}
+
+function getRandomColor() {
+  let palette = isDarkMode ? colors.dark : colors.light;
+  return color(random(palette));
+}
+
+class Hypocycloid {
+  constructor() {
+    this.randomize();
+  }
+
+  randomize() {
+    this.R = random(width/6, width/4);
+    this.r = random(20, this.R / 2);
+    this.d = random(this.r / 2, this.r);
+    this.color = getRandomColor();
+  }
+
+  display() {
+    translate(width / 2, height / 2);
+    stroke(this.color);
+    strokeWeight(2);
+    noFill();
+    beginShape();
+    for (let theta = 0; theta <= t; theta += 0.01) {
+      let k = this.R - this.r;
+      let x = k * cos(theta) - this.d * cos(k / this.r * theta);
+      let y = k * sin(theta) - this.d * sin(k / this.r * theta);
+      vertex(x, y);
+    }
+    endShape();
+  }
+
+  getInfo() {
+    return `
+      <strong>Hypocycloid</strong><br>
+      Fixed Circle Radius (R): ${this.R.toFixed(2)}<br>
+      Rolling Circle Radius (r): ${this.r.toFixed(2)}<br>
+      Distance from center (d): ${this.d.toFixed(2)}
+    `;
+  }
+}
+
+class Epicycloid {
+  constructor() {
+    this.randomize();
+  }
+
+  randomize() {
+    this.R = random(width/6, width/4);
+    this.r = random(20, this.R / 2);
+    this.d = random(this.r / 2, this.r);
+    this.color = getRandomColor();
+  }
+
+  display() {
+    translate(width / 2, height / 2);
+    stroke(this.color);
+    strokeWeight(2);
+    noFill();
+    beginShape();
+    for (let theta = 0; theta <= t; theta += 0.01) {
+      let k = this.R + this.r;
+      let x = k * cos(theta) - this.d * cos(k / this.r * theta);
+      let y = k * sin(theta) - this.d * sin(k / this.r * theta);
+      vertex(x, y);
+    }
+    endShape();
+  }
+
+  getInfo() {
+    return `
+      <strong>Epicycloid</strong><br>
+      Fixed Circle Radius (R): ${this.R.toFixed(2)}<br>
+      Rolling Circle Radius (r): ${this.r.toFixed(2)}<br>
+      Distance from center (d): ${this.d.toFixed(2)}
+    `;
+  }
+}
+
+class Spirograph {
+  constructor() {
+    this.randomize();
+  }
+
+  randomize() {
+    this.R = random(width/6, width/4);
+    this.r = random(10, this.R / 2);
+    this.d = random(0, this.r);
+    this.color = getRandomColor();
+  }
+
+  display() {
+    translate(width / 2, height / 2);
+    stroke(this.color);
+    strokeWeight(2);
+    noFill();
+    beginShape();
+    for (let theta = 0; theta <= t; theta += 0.01) {
+      let x = (this.R - this.r) * cos(theta) + this.d * cos((this.R - this.r) / this.r * theta);
+      let y = (this.R - this.r) * sin(theta) - this.d * sin((this.R - this.r) / this.r * theta);
+      vertex(x, y);
+    }
+    endShape();
+  }
+
+  getInfo() {
+    return `
+      <strong>Spirograph</strong><br>
+      Outer Circle Radius (R): ${this.R.toFixed(2)}<br>
+      Inner Circle Radius (r): ${this.r.toFixed(2)}<br>
+      Pen Distance (d): ${this.d.toFixed(2)}
+    `;
+  }
+}
+
+class LissajousCurve {
+  constructor() {
+    this.randomize();
+  }
+
+  randomize() {
+    this.a = random(1, 5);
+    this.b = random(1, 5);
+    this.delta = random(TWO_PI);
+    this.scale = min(width, height) / 3;
+    this.color = getRandomColor();
+  }
+
+  display() {
+    translate(width / 2, height / 2);
+    stroke(this.color);
+    strokeWeight(2);
+    noFill();
+    beginShape();
+    for (let theta = 0; theta <= t; theta += 0.01) {
+      let x = this.scale * sin(this.a * theta + this.delta);
+      let y = this.scale * sin(this.b * theta);
+      vertex(x, y);
+    }
+    endShape();
+  }
+
+  getInfo() {
+    return `
+      <strong>Lissajous Curve</strong><br>
+      a: ${this.a.toFixed(2)}<br>
+      b: ${this.b.toFixed(2)}<br>
+      δ: ${this.delta.toFixed(2)}
+    `;
+  }
+}
+
+class RoseCurve {
+  constructor() {
+    this.randomize();
+  }
+
+  randomize() {
+    this.n = floor(random(1, 8));
+    this.d = floor(random(1, 8));
+    this.k = this.n / this.d;
+    this.scale = min(width, height) / 3;
+    this.color = getRandomColor();
+  }
+
+  display() {
+    translate(width / 2, height / 2);
+    stroke(this.color);
+    strokeWeight(2);
+    noFill();
+    beginShape();
+    for (let theta = 0; theta <= t; theta += 0.01) {
+      let r = this.scale * cos(this.k * theta);
+      let x = r * cos(theta);
+      let y = r * sin(theta);
+      vertex(x, y);
+    }
+    endShape();
+  }
+
+  getInfo() {
+    return `
+      <strong>Rose Curve (Rhodonea)</strong><br>
+      n: ${this.n}<br>
+      d: ${this.d}<br>
+      k (n/d): ${this.k.toFixed(2)}
+    `;
+  }
+}
+
+class FourierSeries {
+  constructor() {
+    this.randomize();
+  }
+
+  randomize() {
+    this.terms = floor(random(1, 10));
+    this.coefficients = [];
+    for (let i = 0; i < this.terms; i++) {
+      this.coefficients.push(random(-1, 1));
+    }
+    this.scale = height / 6;
+    this.color = getRandomColor();
+  }
+
+  display() {
+    translate(0, height / 2);
+    stroke(this.color);
+    strokeWeight(2);
+    noFill();
+    beginShape();
+    for (let x = 0; x <= min(t * 100, width); x += 1) {
+      let y = 0;
+      for (let n = 0; n < this.terms; n++) {
+        y += this.coefficients[n] * sin((n + 1) * (x / 100));
+      }
+      vertex(x, this.scale * y);
+    }
+    endShape();
+  }
+
+  getInfo() {
+    return `
+      <strong>Fourier Series</strong><br>
+      Number of terms: ${this.terms}<br>
+      Coefficients: ${this.coefficients.map(c => c.toFixed(2)).join(', ')}
+    `;
+  }
+}
+
+class Phyllotaxis {
+  constructor() {
+    this.randomize();
+  }
+
+  randomize() {
+    this.c = random(2, 10);
+    this.scale = min(width, height) / 300;
+    this.color = getRandomColor();
+  }
+
+  display() {
+    translate(width / 2, height / 2);
+    noStroke();
+    fill(this.color);
+    for (let i = 0; i < min(t * 50, 1000); i++) {
+      let a = i * 137.5;
+      let r = this.scale * this.c * sqrt(i);
+      let x = r * cos(a);
+      let y = r * sin(a);
+      ellipse(x, y, 5, 5);
+    }
+  }
+
+  getInfo() {
+    return `
+      <strong>Phyllotaxis</strong><br>
+      Divergence angle: 137.5°<br>
+      Scaling factor (c): ${this.c.toFixed(2)}
+    `;
+  }
+}
+
+class MoirePattern {
+  constructor() {
+    this.randomize();
+  }
+
+  randomize() {
+    this.angle = random(TWO_PI);
+    this.spacing = random(5, 20);
+    this.color = getRandomColor();
+  }
+
+  display() {
+    stroke(this.color);
+    strokeWeight(1);
+    for (let i = 0; i < width; i += this.spacing) {
+      line(i, 0, i, height);
+    }
+    push();
+    translate(width / 2, height / 2);
+    rotate(this.angle + t / 10);
+    for (let i = -width; i < width; i += this.spacing) {
+      line(i, -height, i, height);
+    }
+    pop();
+  }
+
+  getInfo() {
+    return `
+      <strong>Moiré Pattern</strong><br>
+      Angle: ${this.angle.toFixed(2)}<br>
+      Line spacing: ${this.spacing.toFixed(2)}
+    `;
+  }
+}
+
+class CircleInversion {
+  constructor() {
+    this.randomize();
+  }
+
+  randomize() {
+    this.centerX = width / 2;
+    this.centerY = height / 2;
+    this.radius = min(width, height) / 3;
+    this.color = getRandomColor();
+    this.points = [];
+    for (let i = 0; i < 1000; i++) {
+      this.points.push(createVector(random(width), random(height)));
+    }
+  }
+
+  display() {
+    noFill();
+    stroke(isDarkMode ? 200 : 100);
+    strokeWeight(1);
+    ellipse(this.centerX, this.centerY, this.radius * 2);
+    
+    stroke(this.color);
+    strokeWeight(2);
+    for (let i = 0; i < min(t * 50, this.points.length); i++) {
+      let p = this.points[i];
+      let dx = p.x - this.centerX;
+      let dy = p.y - this.centerY;
+      let d = sqrt(dx * dx + dy * dy);
+      let r = this.radius * this.radius / d;
+      let angle = atan2(dy, dx);
+      let x = this.centerX + r * cos(angle);
+      let y = this.centerY + r * sin(angle);
+      point(x, y);
+    }
+  }
+
+  getInfo() {
+    return `
+      <strong>Circle Inversion</strong><br>
+      Center: (${this.centerX.toFixed(0)}, ${this.centerY.toFixed(0)})<br>
+      Radius: ${this.radius.toFixed(2)}
+    `;
+  }
+}
+</script>
+</body></html>
