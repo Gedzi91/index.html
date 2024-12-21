@@ -1,0 +1,1421 @@
+<html><head><base href=".">
+<meta charset="UTF-8">
+<title>UNDERNET - Monster Social Media</title>
+<style>
+:root {
+  --main-bg: #000;
+  --text: #fff;
+  --accent: #1edafd;  /* Changed from yellow to cyan */
+  --post-bg: #111;
+  --link: #6eeeff;    /* Adjusted to match cyan theme */
+}
+
+body {
+  background: var(--main-bg);
+  color: var(--text);
+  font-family: 'Determination Mono', monospace;
+  margin: 0;
+  padding: 20px;
+}
+
+.header {
+  text-align: center;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.header h1 {
+  font-size: 3em;
+  color: var(--accent);
+  text-shadow: 2px 2px 4px rgba(30, 218, 253, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.soul-heart {
+  width: 40px;
+  height: 40px;
+  animation: float 2s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.banner {
+  width: 100%;
+  max-width: 800px;
+  height: auto;
+  margin: 0 auto 20px;
+  display: block;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.banner:hover {
+  transform: scale(1.01);
+  box-shadow: 0 6px 12px rgba(30, 218, 253, 0.3);
+}
+
+.nav-bar {
+  background: #111;
+  padding: 10px 0;
+  border-bottom: 2px solid var(--accent);
+  margin-bottom: 20px;
+}
+
+.nav-links {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.nav-link {
+  color: var(--accent);
+  text-decoration: none;
+  padding: 5px 10px;
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+  background: var(--accent);
+  color: var(--main-bg);
+}
+
+.main-content-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  display: flex;
+  gap: 20px;
+}
+
+.undernet-container {
+  flex: 1;
+  margin-right: 0; /* Remove previous margin */
+}
+
+.new-post-container {
+  max-width: 800px;
+  margin: 0 auto 20px auto; /* Center the container horizontally */
+  background: var(--post-bg);
+  border: 2px solid var(--accent);
+  padding: 15px;
+  border-radius: 5px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.new-post-input {
+  width: 100%;
+  min-height: 100px;
+  background: #222;
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  color: var(--text);
+  padding: 10px;
+  margin-bottom: 10px;
+  resize: vertical;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.new-post-btn {
+  background: var(--accent);
+  color: var(--main-bg);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.3s ease;
+}
+
+.new-post-btn:hover {
+  opacity: 0.9;
+  transform: scale(1.05);
+}
+
+.posts {
+  max-width: 800px;
+  margin: 0 auto 20px;
+}
+
+.trending-bar {
+  position: static;
+  width: 200px;
+  background: #111;
+  border-radius: 8px;
+  border: 1px solid var(--accent);
+}
+
+.trending-header {
+  background: var(--accent);
+  color: var(--main-bg);
+  padding: 10px 15px;
+  border-radius: 8px 8px 0 0;
+  font-weight: bold;
+}
+
+.trending-topics {
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.topic {
+  display: flex;
+  align-items: flex-start; /* Change from center to allow text wrapping */
+  gap: 8px;
+  color: var(--text);
+  text-decoration: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+  word-break: break-word; /* Allow text wrapping */
+  flex-direction: column; /* Stack elements vertically */
+}
+
+.topic:hover {
+  border-color: var(--accent);
+  background: rgba(30, 218, 253, 0.1);
+}
+
+.topic-count {
+  color: var(--accent);
+  font-size: 0.9em;
+  margin-top: 2px;
+}
+
+.spamton-ad {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: linear-gradient(45deg, #ffcc00, #ff66ff);
+  border: 2px solid #333;
+  padding: 15px;
+  font-size: 0.9em;
+  z-index: 100;
+  width: 300px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  display: flex;
+  flex-direction: column;
+  border-radius: 3px;
+  animation: spamtonFloat 2s infinite;
+}
+
+.spamton-header {
+  background: linear-gradient(to bottom, #333, #222);
+  color: white;
+  padding: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: -15px -15px 10px -15px;
+  border-bottom: 1px solid #444;
+}
+
+.spamton-title {
+  font-size: 12px;
+  font-weight: bold;
+  margin-left: 5px;
+}
+
+.spamton-controls {
+  display: flex;
+  gap: 5px;
+}
+
+.control-btn {
+  width: 16px;
+  height: 16px;
+  border: 1px solid #666;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  cursor: pointer;
+  background: linear-gradient(to bottom, #444, #333);
+  color: white;
+}
+
+.control-btn:hover {
+  background: linear-gradient(to bottom, #555, #444);
+}
+
+.spamton-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.spamton-ad img {
+  width: 50px;
+  height: 50px;
+  border-radius: 3px;
+}
+
+@keyframes appearEffect {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.comments {
+  margin-top: 10px;
+  padding: 10px;
+  border-top: 1px solid #333;
+  width: 100%;
+  max-width: 780px; /* Keep the comments width consistent */
+  box-sizing: border-box;
+}
+
+.quick-comments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.quick-comment-btn {
+  background: var(--post-bg);
+  border: 1px solid var(--accent);
+  color: var(--text);
+  padding: 5px 10px;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.quick-comment-btn:hover {
+  background: var(--accent);
+  color: var(--post-bg);
+}
+
+.comment {
+  background: #1a1a1a;
+  padding: 8px;
+  border-radius: 5px;
+  margin: 5px 0;
+  font-size: 0.9em;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.comment .username {
+  font-size: 0.8em;
+  color: var(--accent);
+}
+
+.post {
+  background: var(--post-bg);
+  border: 2px solid var(--accent);
+  margin-bottom: 20px;
+  padding: 15px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(30, 218, 253, 0.2);
+  animation: appearEffect 0.5s ease-out;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto 20px;
+}
+
+.post.deltarune {
+  border-color: #9b4dff;
+  box-shadow: 0 0 10px rgba(155, 77, 255, 0.2);
+  position: relative;
+  --accent: #9b4dff;  /* Override accent color for deltarune posts */
+}
+
+.deltarune .interaction-btn:hover {
+  color: #9b4dff;
+}
+
+.deltarune .username {
+  color: #b47fff;
+}
+
+.deltanet-badge {
+  position: absolute;
+  top: 5px;
+  left: 50%;  /* Changed to center */
+  transform: translateX(-50%); /* Centers the badge */
+  background: #9b4dff;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.8em;
+}
+
+.post-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.username {
+  color: var(--link);
+  font-weight: bold;
+  margin-left: 0;
+}
+
+.timestamp {
+  color: #666;
+  font-size: 0.8em;
+  margin-left: auto;
+}
+
+.post-content {
+  line-height: 1.4;
+}
+
+.interactions {
+  margin-top: 10px;
+  border-top: 1px solid #333;
+  padding-top: 10px;
+  display: flex;
+  gap: 20px;
+}
+
+.interaction-btn {
+  background: none;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.interaction-btn:hover {
+  color: var(--accent);
+}
+
+@keyframes spamtonFloat {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-10px) rotate(2deg); }
+}
+
+@keyframes spamtonSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spamton-mode {
+  --main-bg: #1a0f2e;
+  --text: #ffeb3b;
+  --accent: #ff00ff;
+  --post-bg: #2d1b4d;
+  --link: #00ffff;
+}
+
+.spamton-mode .post {
+  border-color: #ff00ff;
+  box-shadow: 0 0 15px rgba(255, 0, 255, 0.3);
+  animation: spamtonShake 0.5s infinite;
+}
+
+@keyframes spamtonShake {
+  0%, 100% { transform: rotate(-1deg); }
+  50% { transform: rotate(1deg); }
+}
+
+.spamton-mode .header h1 {
+  color: #ff00ff;
+  text-shadow: 2px 2px 4px rgba(255, 0, 255, 0.5);
+}
+
+.spamton-mode .banner {
+  content: url('/2976-spamton-cd.gif');
+  animation: spamtonFloat 2s infinite;
+}
+
+.spamton-mode .trending-bar {
+  border-color: #ff00ff;
+  background: rgba(26, 15, 46, 0.9);
+  animation: glitchEffect 0.5s infinite;
+}
+
+.spamton-mode .trending-header {
+  background: #ff00ff;
+  animation: glitchText 0.3s infinite;
+}
+
+.spamton-mode .topic {
+  border-color: rgba(255, 0, 255, 0.3);
+  color: #ffeb3b;
+}
+
+@keyframes glitchEffect {
+  0% { transform: translate(0) }
+  20% { transform: translate(-2px, 2px) }
+  40% { transform: translate(2px, -2px) }
+  60% { transform: translate(-2px, -2px) }
+  80% { transform: translate(2px, 2px) }
+  100% { transform: translate(0) }
+}
+
+@keyframes glitchText {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+.search-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.search-input {
+  background: var(--post-bg);
+  border: 2px solid var(--accent);
+  border-radius: 20px;
+  padding: 8px 16px;
+  color: var(--text);
+  font-family: inherit;
+  width: 300px;
+  font-size: 16px;
+}
+
+.search-btn {
+  background: var(--accent);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--main-bg);
+  transition: all 0.3s ease;
+}
+
+.search-btn:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid var(--post-bg);
+  border-top: 5px solid var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 20px auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-container {
+  text-align: center;
+  padding: 40px;
+  color: var(--accent);
+}
+</style>
+</head>
+<body>
+
+<img src="/undertale banner.jpeg" alt="Undertale banner" class="banner">
+
+<div class="header">
+  <div class="header-content">
+    <h1>
+      UNDERNET
+      <svg class="soul-heart" viewBox="0 0 40 40">
+        <path d="M20 10 L30 0 L40 10 L20 35 L0 10 L10 0 Z" fill="#ff0000"></path>
+      </svg>
+    </h1>
+    <div class="search-container">
+      <input type="text" class="search-input" placeholder="Search posts...">
+      <button class="search-btn">
+        <svg viewBox="0 0 24 24" width="20" height="20">
+          <path fill="currentColor" d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<nav class="nav-bar">
+  <div class="nav-links">
+    <a href="https://undernet.com" class="nav-link">Home</a>
+    <a href="https://undernet.com/profile" class="nav-link">Profile</a>
+    <a href="https://undernet.com/friends" class="nav-link">Friends</a>
+    <a href="https://undernet.com/forum" class="nav-link">Monster Forum</a>
+    <a href="https://undernet.com/posts" class="nav-link">Latest Posts</a>
+    <a href="https://undernet.com/about" class="nav-link">About</a>
+  </div>
+</nav>
+
+<div class="main-content-wrapper">
+  <div class="undernet-container">
+    <div class="new-post-container">
+      <textarea class="new-post-input" placeholder="What's on your mind?"></textarea>
+      <button class="new-post-btn">Post</button>
+    </div>
+
+    <div class="posts">
+      <div class="post">
+        <div class="post-header">
+          <span class="username">Toriel_Dreemurr</span>
+          <span class="timestamp">1 minute ago</span>
+        </div>
+        <div class="post-content">
+          Good morning everyone! I just baked a fresh butterscotch-cinnamon pie. Who would like a slice? 🥧
+        </div>
+        <div class="interactions">
+          <button class="interaction-btn">♥ Like (42)</button>
+          <button class="interaction-btn">↩ Share (15)</button>
+        </div>
+        <div class="comments">
+          <div class="quick-comments">
+            <button class="quick-comment-btn">Looks delicious!</button>
+            <button class="quick-comment-btn">Can I have the recipe?</button>
+            <button class="quick-comment-btn">I love butterscotch!</button>
+            <button class="quick-comment-btn">* The pie looks deadly...</button>
+          </div>
+          <div class="comment">
+            <span class="username">Frisk</span>
+            <div>Can I have two slices? 💕</div>
+          </div>
+          <div class="comment">
+            <span class="username">Asgore</span>
+            <div>Your baking is as wonderful as ever, Tori... er, Toriel.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="post">
+        <div class="post-header">
+          <span class="username">CoolSkeleton95</span>
+          <span class="timestamp">5 minutes ago</span>
+        </div>
+        <div class="post-content">
+          WOWIE! MY FOLLOWER COUNT JUST REACHED DOUBLE DIGITS! THANK YOU ALL FOR BELIEVING IN THE GREAT PAPYRUS! NYEH HEH HEH!!!
+        </div>
+        <div class="interactions">
+          <button class="interaction-btn">♥ Like (32)</button>
+          <button class="interaction-btn">↩ Share (14)</button>
+        </div>
+        <div class="comments">
+          <div class="quick-comments">
+            <button class="quick-comment-btn">CONGRATULATIONS!</button>
+            <button class="quick-comment-btn">You deserve it!</button>
+            <button class="quick-comment-btn">Make spaghetti to celebrate!</button>
+            <button class="quick-comment-btn">* Your bones look fragile...</button>
+          </div>
+          <div class="comment">
+            <span class="username">sans_official</span>
+            <div>proud of you bro. you're really numbering up in the world</div>
+          </div>
+          <div class="comment">
+            <span class="username">Undyne</span>
+            <div>YEAH!!! YOU GO PAPYRUS!! NGAHHHH!!!</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="post">
+        <div class="post-header">
+          <span class="username">NAPSTABLOOK22</span>
+          <span class="timestamp">1 hour ago</span>
+        </div>
+        <div class="post-content">
+          i made a new mix tape... you probably won't like it... but that's ok...................
+        </div>
+        <div class="interactions">
+          <button class="interaction-btn">♥ Like (45)</button>
+          <button class="interaction-btn">↩ Share (20)</button>
+        </div>
+        <div class="comments">
+          <div class="quick-comments">
+            <button class="quick-comment-btn">I'd love to hear it</button>
+            <button class="quick-comment-btn">Your music is great</button>
+            <button class="quick-comment-btn">Share the link!</button>
+            <button class="quick-comment-btn">* Music to die for...</button>
+          </div>
+          <div class="comment">
+            <span class="username">Mettaton</span>
+            <div>Blooky darling, your music adds such DRAMA to my shows! ✨</div>
+          </div>
+          <div class="comment">
+            <span class="username">Shyren</span>
+            <div>🎵 ....(supportive humming)..... 🎵</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="post">
+        <div class="post-header">
+          <span class="username">sans_official</span>
+          <span class="timestamp">30 minutes ago</span>
+        </div>
+        <div class="post-content">
+          knock knock. who's there? dishes. dishes who? dishes a very bad joke. 💀
+        </div>
+        <div class="interactions">
+          <button class="interaction-btn">♥ Like (156)</button>
+          <button class="interaction-btn">↩ Share (88)</button>
+        </div>
+        <div class="comments">
+          <div class="quick-comments">
+            <button class="quick-comment-btn">heh good one</button>
+            <button class="quick-comment-btn">I don't get it</button>
+            <button class="quick-comment-btn">Got any more?</button>
+            <button class="quick-comment-btn">* Knock knock. Who's there? Death.</button>
+          </div>
+          <div class="comment">
+            <span class="username">CoolSkeleton95</span>
+            <div>SANS!! YOUR PUNS ARE GETTING WORSE BY THE DAY!</div>
+          </div>
+          <div class="comment">
+            <span class="username">Grillby</span>
+            <div>...</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="post deltarune">
+        <div class="deltanet-badge">from DELTANET</div>
+        <div class="post-header">
+          <span class="username">Ralsei_Official</span>
+          <span class="timestamp">2 hours ago</span>
+        </div>
+        <div class="post-content">
+          Hello everyone! I just finished baking a cake for all my wonderful friends! Would anyone like to join me for tea? 🍰
+        </div>
+        <div class="interactions">
+          <button class="interaction-btn">♥ Like (89)</button>
+          <button class="interaction-btn">↩ Share (34)</button>
+        </div>
+        <div class="comments">
+          <div class="quick-comments">
+            <button class="quick-comment-btn">That sounds lovely!</button>
+            <button class="quick-comment-btn">Save me a slice!</button>
+            <button class="quick-comment-btn">Tea party time!</button>
+            <button class="quick-comment-btn">* Perfect time for poisoned tea...</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="post deltarune">
+        <div class="deltanet-badge">from DELTANET</div>
+        <div class="post-header">
+          <span class="username">Kris_Time</span>
+          <span class="timestamp">3 hours ago</span>
+        </div>
+        <div class="post-content">
+          ...
+        </div>
+        <div class="interactions">
+          <button class="interaction-btn">♥ Like (45)</button>
+          <button class="interaction-btn">↩ Share (12)</button>
+        </div>
+        <div class="comments">
+          <div class="quick-comments">
+            <button class="quick-comment-btn">Very insightful</button>
+            <button class="quick-comment-btn">Say more!</button>
+            <button class="quick-comment-btn">...</button>
+            <button class="quick-comment-btn">* Let me take control...</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="trending-bar">
+    <div class="trending-header">
+      Trending in Underground
+    </div>
+    <div class="trending-topics">
+      <button class="topic" data-tag="MTTShow">
+        #MTTShow
+        <span class="topic-count">2.5K posts</span>
+      </button>
+      <button class="topic" data-tag="UndergroundCooking">
+        #UndergroundCooking
+        <span class="topic-count">1.8K posts</span>
+      </button>
+      <button class="topic" data-tag="PuzzleMaking">
+        #PuzzleMaking
+        <span class="topic-count">956 posts</span>
+      </button>
+      <button class="topic" data-tag="AnimeNight">
+        #AnimeNight
+        <span class="topic-count">834 posts</span>
+      </button>
+      <button class="topic" data-tag="TemShop">
+        #TemShop
+        <span class="topic-count">721 posts</span>
+      </button>
+      <button class="topic" data-tag="SpaghettiRecipes">
+        #SpaghettiRecipes
+        <span class="topic-count">687 posts</span>
+      </button>
+      <button class="topic" data-tag="HotlandTours">
+        #HotlandTours
+        <span class="topic-count">534 posts</span>
+      </button>
+      <button class="topic" data-tag="SnailFacts">
+        #SnailFacts
+        <span class="topic-count">482 posts</span>
+      </button>
+      <button class="topic" data-tag="RoyalGuard">
+        #RoyalGuard
+        <span class="topic-count">445 posts</span>
+      </button>
+      <button class="topic" data-tag="WaterfallConcerts">
+        #WaterfallConcerts
+        <span class="topic-count">389 posts</span>
+      </button>
+      <button class="topic" data-tag="GarbageDump">
+        #GarbageDump
+        <span class="topic-count">367 posts</span>
+      </button>
+      <button class="topic" data-tag="CoreEvents">
+        #CoreEvents
+        <span class="topic-count">298 posts</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="spamton-ad">
+  <div class="spamton-header">
+    <div class="spamton-title">HOT DEALS!! [Click Now]</div>
+    <div class="spamton-controls">
+      <button class="control-btn minimize">_</button>
+      <button class="control-btn close">×</button>
+    </div>
+  </div>
+  <div class="spamton-content">
+    <img src="/spamtonpfp.jpg" alt="Spamton">
+    <div>
+      HEY THERE [Valued Customer]! WANT SOME [Specil Deals]? CLICK NOW FOR [Free Kromer]!!!
+    </div>
+  </div>
+</div>
+
+<script>
+async function startGeneratingResponses(postElement) {
+  const possibleResponders = [
+    "Toriel_Dreemurr",
+    "CoolSkeleton95",
+    "NAPSTABLOOK22",
+    "Undyne",
+    "Alphys",
+    "Mettaton",
+    "Asgore",
+    "Queen_Official",
+    "Ralsei_Official"
+  ];
+  
+  let responseCount = 0;
+  const maxResponses = 3; // Maximum number of automatic responses
+  
+  const generateResponse = async () => {
+    if (responseCount >= maxResponses) {
+      return; // Stop after max responses
+    }
+    
+    const randomResponder = possibleResponders[Math.floor(Math.random() * possibleResponders.length)];
+    const postContent = postElement.querySelector('.post-content').textContent;
+    
+    try {
+      const aiResponse = await fetch('/api/ai_completion', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt: `Generate a short, in-character response as ${randomResponder} replying to "${postContent}". Keep the response brief and match the character's personality.
+          
+          <typescript-interface>
+          interface Response {
+            text: string;
+          }
+          </typescript-interface>
+          
+          <example>
+          {
+            "text": "WOWIE! THAT'S SUCH A NICE THING TO SAY!"
+          }
+          </example>`,
+          data: postContent
+        })
+      });
+      
+      const data = await aiResponse.json();
+      
+      const commentElement = document.createElement('div');
+      commentElement.className = 'comment';
+      commentElement.innerHTML = `
+        <span class="username">${randomResponder}</span>
+        <div>${data.text}</div>
+      `;
+      
+      const commentsSection = postElement.querySelector('.comments');
+      commentsSection.appendChild(commentElement);
+      
+      responseCount++;
+      
+      // Schedule next response if we haven't reached the limit
+      if (responseCount < maxResponses) {
+        setTimeout(generateResponse, 5000);
+      }
+      
+    } catch (error) {
+      console.error('Error generating AI response:', error);
+    }
+  };
+  
+  // Start the response generation process
+  setTimeout(generateResponse, 5000);
+}
+
+const postQuickReplies = {
+  'AlphysOfficial': ['So cool!', 'Love your work!', 'More anime!', '* Delete the evidence...'],
+  'MTT_Official': ['Fabulous!', 'You\'re amazing!', 'Best show ever!', '* Time for your final show...'],
+  'StrongFish91': ['YEAH!!', 'So intense!', 'Train me!', '* Your strength will be mine...'],
+  'W_D_Gaster': ['Fascinating...', '⚐︎♒︎📪︎ ♓︎■︎⧫︎♏︎❒︎♏︎⬧︎⧫︎♓︎■︎♑︎📬︎📬︎📬︎', 'The void calls...', '* Lost in the void forever...'],
+  'Queen_Official': ['Potassium!', 'Got The Banana', 'Cool Face', '* System.Corrupt()'],
+  'Berdly_Gamer': ['Gamer moment!', 'Epic skills!', 'New record!', '* Time to freeze...'],
+  'Toriel_Dreemurr': ['Looks delicious!', 'Can I have the recipe?', 'I love butterscotch!', '* The pie looks deadly...'],
+  'CoolSkeleton95': ['CONGRATULATIONS!', 'You deserve it!', 'Make spaghetti to celebrate!', '* Your bones look fragile...'],
+  'NAPSTABLOOK22': ['I\'d love to hear it', 'Your music is great', 'Share the link!', '* Music to die for...'],
+  'Ralsei_Official': ['That sounds lovely!', 'Save me a slice!', 'Tea party time!', '* Perfect time for poisoned tea...'],
+  'Kris_Time': ['Very insightful', 'Say more!', '...', '* Let me take control...']
+};
+
+const characterResponses = {
+  'Toriel_Dreemurr': {
+    'Looks delicious!': 'Thank you my child! Would you like me to save you a slice?',
+    'Can I have the recipe?': 'Of course! The secret is adding an extra pinch of cinnamon...',
+    'I love butterscotch!': 'Oh wonderful! I always make extra for my special friends.',
+    '* The pie looks deadly...': 'Oh dear... are you feeling alright, my child?'
+  },
+  'CoolSkeleton95': {
+    'CONGRATULATIONS!': 'WOWIE!! YOUR SUPPORT MEANS SO MUCH TO THE GREAT PAPYRUS!',
+    'You deserve it!': 'NATURALLY! MY PUZZLES AND SPAGHETTI HAVE EARNED ME MANY FANS!',
+    'Make spaghetti to celebrate!': 'NYEH HEH HEH! ALREADY COOKING A CELEBRATORY BATCH!',
+    '* Your bones look fragile...': 'NYEH...? THAT\'S... A RATHER ODD THING TO SAY...'
+  },
+  'NAPSTABLOOK22': {
+    'I\'d love to hear it': 'oh... really...? that makes me feel a little better...',
+    'Your music is great': 'oh no... i wouldn\'t say that... but thank you...',
+    'Share the link!': 'oh... here it is... hope it doesn\'t waste your time...',
+    '* Music to die for...': 'oh no... i\'m already dead... but thanks...'
+  },
+  'Ralsei_Official': {
+    'That sounds lovely!': 'Thank you! I’d be happy to share some!',
+    'Save me a slice!': 'Of course! I’ll save you the biggest slice!',
+    'Tea party time!': 'Yes! Let’s have a delightful tea party together!',
+    '* Perfect time for poisoned tea...': 'Oh dear, I assure you, it’s safe tea!'
+  },
+  'Queen_Official': {
+    'Potassium!': 'Yes Kris Very Good. You Are Learning The Ways Of Proper Nutrition',
+    'Got The Banana': 'Excellent Work Kris. Your Potassium Levels Will Be Optimal',
+    'Cool Face': 'Thank You. My Face Is Indeed What The Kids Call Cool',
+    '* System.Corrupt()': 'Error: Unauthorized Access Attempt Detected. Nice Try Silly'
+  },
+  'Berdly_Gamer': {
+    'Gamer moment!': 'Indeed! Only a fellow intellectual could appreciate the complexity of my gaming prowess!',
+    'Epic skills!': 'Naturally. Years of studying the blade- I mean, controller have led to this moment.',
+    'New record!': 'As expected of someone of my caliber. Perhaps I could teach you sometime?',
+    '* Time to freeze...': 'H-hey now, let\'s not bring that up... *nervous laughter*'
+  }
+};
+
+// Update the createNewPost function to have simpler quick replies
+function createNewPost(content) {
+  const postElement = document.createElement('div');
+  postElement.className = 'post';
+  
+  postElement.innerHTML = `
+    <div class="post-header">
+      <span class="username">Frisk</span>
+      <span class="timestamp">Just now</span>
+    </div>
+    <div class="post-content">${content}</div>
+    <div class="interactions">
+      <button class="interaction-btn">♥ Like (0)</button>
+      <button class="interaction-btn">↩ Share (0)</button>
+    </div>
+    <div class="comments">
+    </div>
+  `;
+
+  // Add the post to the top of the posts list
+  document.querySelector('.posts').prepend(postElement);
+  addCommentHandlers(postElement);
+  
+  // Start generating AI responses
+  startGeneratingResponses(postElement);
+}
+
+// Modify the addCommentHandlers function to use AI-generated responses when needed
+function addCommentHandlers(post) {
+  post.querySelectorAll('.quick-comment-btn').forEach(btn => {
+    btn.addEventListener('click', async function() {
+      const comment = document.createElement('div');
+      comment.className = 'comment';
+      
+      const username = this.textContent.startsWith('*') ? 'Chara' : 'Frisk';
+      
+      comment.innerHTML = `
+        <span class="username">${username}</span>
+        <div>${this.textContent}</div>
+      `;
+      
+      const commentsSection = post.querySelector('.comments');
+      commentsSection.appendChild(comment);
+      
+      // Get the post author's username
+      const postUsername = post.querySelector('.post-header .username').textContent;
+      const responses = characterResponses[postUsername];
+      
+      // If we have a predefined response, use it
+      if (responses && responses[this.textContent]) {
+        setTimeout(() => {
+          const characterResponse = document.createElement('div');
+          characterResponse.className = 'comment';
+          characterResponse.innerHTML = `
+            <span class="username">${postUsername}</span>
+            <div>${responses[this.textContent]}</div>
+          `;
+          commentsSection.appendChild(characterResponse);
+        }, 1000);
+      } else {
+        // Generate AI response if no predefined response exists
+        try {
+          const aiResponse = await fetch('/api/ai_completion', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              prompt: `Generate a short, in-character response as ${postUsername} replying to "${this.textContent}". Keep the response brief and match the character's personality.
+              
+              <typescript-interface>
+              interface Response {
+                text: string;
+              }
+              </typescript-interface>
+              
+              <example>
+              {
+                "text": "WOWIE! THAT'S SUCH A NICE THING TO SAY!"
+              }
+              </example>`,
+              data: this.textContent
+            })
+          });
+          
+          const data = await aiResponse.json();
+          
+          setTimeout(() => {
+            const characterResponse = document.createElement('div');
+            characterResponse.className = 'comment';
+            characterResponse.innerHTML = `
+              <span class="username">${postUsername}</span>
+              <div>${data.text}</div>
+            `;
+            commentsSection.appendChild(characterResponse);
+          }, 1000);
+        } catch (error) {
+          console.error('Error generating AI response:', error);
+        }
+      }
+    });
+  });
+
+  // Rest of the addCommentHandlers function remains the same
+  post.querySelectorAll('.interaction-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      let currentText = this.textContent;
+      let currentNumber = parseInt(currentText.match(/\d+/)[0]);
+      this.textContent = currentText.replace(currentNumber, currentNumber + 1);
+      
+      this.style.color = 'var(--accent)';
+      setTimeout(() => {
+        this.style.color = 'var(--text)';
+      }, 300);
+    });
+  });
+}
+
+// Add the event listener for the post button
+document.querySelector('.new-post-btn').addEventListener('click', () => {
+  const content = document.querySelector('.new-post-input').value;
+  if (content.trim()) {
+    createNewPost(content);
+    document.querySelector('.new-post-input').value = '';
+  }
+});
+
+// Add this line at the end of the script to handle existing posts
+document.querySelectorAll('.post').forEach(post => addCommentHandlers(post));
+
+// Modify the interval that creates new posts to add handlers:
+setInterval(() => {
+  const posts = [
+    {
+      username: "AlphysOfficial",
+      content: "OMG!!! J-just finished installing the new human history database! (It's definitely not just anime >w<)",
+      likes: 15,
+      shares: 3
+    },
+    {
+      username: "MTT_Official",
+      content: "BREAKING NEWS, BEAUTIES! My latest performance had 120% viewer rating! That's 20% more than possible! DRAMA! ROMANCE! BLOODSHED!",
+      likes: 99,
+      shares: 45
+    },
+    {
+      username: "StrongFish91",
+      content: "IMPROVISED WORKOUT OF THE DAY: \n1. SUPLEX A LARGE BOULDER\n2. RUN THROUGH FIRE\n3. BENCH PRESS YOUR HOPES AND DREAMS\nNGAHHHHH!!!",
+      likes: 67,
+      shares: 23
+    },
+    {
+      username: "W_D_Gaster",
+      content: "✋︎ ⬧︎♏︎♏︎ ⍓︎□︎◆︎ ♋︎●︎●︎📬︎📬︎📬︎",
+      likes: 0,
+      shares: 0
+    },
+    {
+      username: "Queen_Official",
+      content: "Kris Get The Banana. Potassium 🍌",
+      likes: 420,
+      shares: 69,
+      isDeltarune: true
+    },
+    {
+      username: "Berdly_Gamer",
+      content: "Just achieved a new speedrun record in Dragon Blazers III! As expected from someone of my intellectual caliber 🎮",
+      likes: 12,
+      shares: 3,
+      isDeltarune: true
+    }
+  ];
+  
+  const randomPost = posts[Math.floor(Math.random() * posts.length)];
+  const quickReplies = postQuickReplies[randomPost.username] || ['Amazing!', 'Cool!', 'Wow!'];
+  const quickCommentsHtml = quickReplies.map(reply => 
+    `<button class="quick-comment-btn">${reply}</button>`
+  ).join('');
+
+  const postElement = document.createElement('div');
+  postElement.className = 'post' + (randomPost.isDeltarune ? ' deltarune' : '');
+  postElement.innerHTML = `
+    ${randomPost.isDeltarune ? '<div class="deltanet-badge">from DELTANET</div>' : ''}
+    <div class="post-header">
+      <span class="username">${randomPost.username}</span>
+      <span class="timestamp">Just now</span>
+    </div>
+    <div class="post-content">${randomPost.content}</div>
+    <div class="interactions">
+      <button class="interaction-btn">♥ Like (${randomPost.likes})</button>
+      <button class="interaction-btn">↩ Share (${randomPost.shares})</button>
+    </div>
+    <div class="comments">
+      <div class="quick-comments">${quickCommentsHtml}</div>
+    </div>
+  `;
+  
+  addCommentHandlers(postElement);
+  document.querySelector('.posts').prepend(postElement);
+}, 30000);
+
+// Add array of all characters
+const allCharacters = [
+  // Main Characters
+  "Flowey", "Toriel", "Frisk", "Papyrus", "Monster Kid", "Undyne", "Alphys", 
+  "Mettaton", "Asgore Dreemurr", "Asriel Dreemurr", "Chara",
+  
+  // Minibosses
+  "Napstablook", "Doggo", "Dogamy", "Dogaressa", "Greater Dog", "Mad Dummy", 
+  "Royal Guards", "Muffet", "Amalgamates", "So Sorry", "Glyde", "Mad Mew Mew",
+  
+  // NPCs
+  "Faun", "Snowman", "Rabbit Kid", "Gift Bear", "Politics Bear", "Scarf Mouse",
+  "Nacarat Jester", "Dad Slime", "Ice Wolf", "Grillby", "Big Mouth", "Drunk Bun",
+  "Ugly Fish", "Red Bird", "Punk Hamster", "Echo Flower Explainer", "Loren", "Ferry",
+  "Onionsan", "Clam Girl", "Small Bird", "Bob", "Ragel", "Elder Puzzler", "Clam Guy",
+  "Fuku Fire", "Heats Flamesman", "Diamond Boys", "Diamond Receptionist", "Sad Dragon",
+  "Business Manticore", "Charles", "Oni", "Nice Cream Guy", "Gerson", "Tem Shop",
+  "Bratty", "Catty", "Burgerpants"
+];
+
+async function showLoadingSpinner() {
+  const posts = document.querySelector('.posts');
+  posts.innerHTML = `
+    <div class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>Loading posts...</p>
+    </div>
+  `;
+}
+
+async function generateSearchResults(searchTerm) {
+  showLoadingSpinner();
+  
+  try {
+    const aiResponse = await fetch('/api/ai_completion', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        prompt: `Generate 5 Undertale-themed posts related to "${searchTerm}" from random characters who might discuss this topic. Each post should be in-character and reflect their personality. DO NOT generate posts from Sans.
+
+        <typescript-interface>
+        interface SearchPost {
+          username: string;
+          content: string;
+          timestamp: string;
+          likes: number;
+          shares: number;
+          isDeltarune?: boolean;
+        }
+        
+        interface Response {
+          posts: SearchPost[];
+        }
+        </typescript-interface>`,
+        data: searchTerm
+      })
+    });
+    
+    const data = await aiResponse.json();
+    const posts = document.querySelector('.posts');
+    posts.innerHTML = ''; // Clear loading spinner
+    
+    data.posts.forEach(post => {
+      const postElement = document.createElement('div');
+      postElement.className = 'post' + (post.isDeltarune ? ' deltarune' : '');
+      
+      postElement.innerHTML = `
+        ${post.isDeltarune ? '<div class="deltanet-badge">from DELTANET</div>' : ''}
+        <div class="post-header">
+          <span class="username">${post.username}</span>
+          <span class="timestamp">${post.timestamp}</span>
+        </div>
+        <div class="post-content">${post.content}</div>
+        <div class="interactions">
+          <button class="interaction-btn">♥ Like (${post.likes})</button>
+          <button class="interaction-btn">↩ Share (${post.shares})</button>
+        </div>
+        <div class="comments">
+          <div class="quick-comments">
+            ${post.username in postQuickReplies ? 
+              postQuickReplies[post.username].map(reply => 
+                `<button class="quick-comment-btn">${reply}</button>`
+              ).join('') : ''
+            }
+          </div>
+        </div>
+      `;
+      
+      posts.prepend(postElement);
+      addCommentHandlers(postElement);
+    });
+    
+  } catch (error) {
+    console.error('Error generating search results:', error);
+    document.querySelector('.posts').innerHTML = `
+      <div class="loading-container">
+        <p>Error loading posts. Please try again.</p>
+      </div>
+    `;
+  }
+}
+
+// Add event listener for tag clicks
+document.querySelectorAll('.topic').forEach(topic => {
+  topic.addEventListener('click', (e) => {
+    e.preventDefault();
+    const tag = topic.getAttribute('data-tag');
+    if (tag) {
+      document.querySelector('.search-input').value = tag;
+      generateSearchResults(tag);
+    }
+  });
+});
+
+// Update the style of the topic elements to look clickable
+document.querySelector('style').textContent += `
+  .topic {
+    background: none;
+    border: 1px solid transparent;
+    width: 100%;
+    text-align: left;
+    color: var(--text);
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    font-family: inherit;
+    font-size: inherit;
+  }
+  
+  .topic:hover {
+    border-color: var(--accent);
+    background: rgba(30, 218, 253, 0.1);
+  }
+`;
+
+// Add event listeners for search
+document.querySelector('.search-btn').addEventListener('click', () => {
+  const searchTerm = document.querySelector('.search-input').value.trim();
+  if (searchTerm) {
+    generateSearchResults(searchTerm);
+  }
+});
+
+document.querySelector('.search-input').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    const searchTerm = e.target.value.trim();
+    if (searchTerm) {
+      generateSearchResults(searchTerm);
+    }
+  }
+});
+
+// Initialize Spamton Ad
+function initSpamtonAd() {
+  const spamtonAd = document.querySelector('.spamton-ad');
+  
+  if (!spamtonAd) return; // Exit if element doesn't exist
+  
+  // Random position every few seconds
+  setInterval(() => {
+    const maxX = window.innerWidth - spamtonAd.offsetWidth - 40;
+    const maxY = window.innerHeight - spamtonAd.offsetHeight - 40;
+    
+    const newX = Math.random() * maxX + 20;
+    const newY = Math.random() * maxY + 20;
+    
+    spamtonAd.style.transition = 'all 0.5s ease';
+    spamtonAd.style.right = `${window.innerWidth - newX - spamtonAd.offsetWidth}px`;
+    spamtonAd.style.bottom = `${window.innerHeight - newY - spamtonAd.offsetHeight}px`;
+  }, 5000);
+  
+  // Handle close button
+  const closeBtn = spamtonAd.querySelector('.control-btn.close');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      spamtonAd.style.display = 'none';
+      // Reappear after random time between 10-30 seconds
+      setTimeout(() => {
+        spamtonAd.style.display = 'flex';
+      }, Math.random() * 20000 + 10000);
+    });
+  }
+  
+  // Handle minimize button
+  const minimizeBtn = spamtonAd.querySelector('.control-btn.minimize');
+  if (minimizeBtn) {
+    minimizeBtn.addEventListener('click', () => {
+      const content = spamtonAd.querySelector('.spamton-content');
+      if (content) {
+        content.style.display = content.style.display === 'none' ? 'flex' : 'none';
+      }
+    });
+  }
+  
+  // Make it draggable
+  let isDragging = false;
+  let currentX;
+  let currentY;
+  let initialX;
+  let initialY;
+  
+  spamtonAd.querySelector('.spamton-header').addEventListener('mousedown', dragStart);
+  document.addEventListener('mousemove', drag);
+  document.addEventListener('mouseup', dragEnd);
+  
+  function dragStart(e) {
+    initialX = e.clientX - spamtonAd.offsetLeft;
+    initialY = e.clientY - spamtonAd.offsetTop;
+    
+    if (e.target === spamtonAd.querySelector('.spamton-header')) {
+      isDragging = true;
+    }
+  }
+  
+  function drag(e) {
+    if (isDragging) {
+      e.preventDefault();
+      
+      currentX = e.clientX - initialX;
+      currentY = e.clientY - initialY;
+      
+      spamtonAd.style.transition = 'none';
+      spamtonAd.style.left = `${currentX}px`;
+      spamtonAd.style.top = `${currentY}px`;
+      spamtonAd.style.right = 'auto';
+      spamtonAd.style.bottom = 'auto';
+    }
+  }
+  
+  function dragEnd() {
+    initialX = currentX;
+    initialY = currentY;
+    isDragging = false;
+  }
+}
+
+// Call the initialization function when the page loads
+document.addEventListener('DOMContentLoaded', initSpamtonAd);
+</script>
+<script>
+// Add click handler for the banner
+document.querySelector('.banner').addEventListener('click', function() {
+  // Add a subtle animation when clicked
+  this.style.transform = 'scale(0.98)';
+  setTimeout(() => {
+    this.style.transform = 'scale(1)';
+  }, 200);
+});
+</script>
+</body></html>
