@@ -1,0 +1,1375 @@
+<html><head><base href="."><meta charset="utf-8">
+<title>I&apos;M IN YOUR HEAD</title>
+<style>
+@font-face {
+  font-family: 'VCR OSD Mono';
+  src: url('/Virtual Boy.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Super Mario Bros NES';
+  src: url('/super-mario-bros-nes.ttf') format('truetype');
+}
+
+body {
+  margin: 0;
+  background: #111;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+  color: white;
+  font-family: 'VCR OSD Mono', monospace; /* Changed from Arial */
+}
+
+#game-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('/Paranoia_Background.webp');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: -1;
+  opacity: 0.7;
+}
+
+#loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: black;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+#loading-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  margin-bottom: 0;
+}
+
+#loading-bar-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 20px;
+  background: #333;
+  border-radius: 0;
+  overflow: hidden;
+}
+
+#loading-bar {
+  width: 0%;
+  height: 100%;
+  background: #8c3dd1; /* Purple color */
+  transition: width 0.3s ease-out;
+}
+
+#game-container {
+  width: 400px;
+  height: 600px;
+  position: relative;
+  border: 2px solid #333;
+  overflow: hidden;
+}
+
+.arrow-lane {
+  position: absolute;
+  width: 80px;
+  height: 100%;
+  border-left: 1px solid #333;
+  border-right: 1px solid #333;
+}
+
+.target-arrow {
+  position: absolute;
+  bottom: 50px;
+  width: 60px;
+  height: 60px;
+  opacity: 0.5;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.target-arrow.lane-0 {
+  background-image: url('https://file.garden/Zx3u9a1Z7kthgAAO/purple0000.png');
+}
+
+.target-arrow.lane-1 {
+  background-image: url('https://file.garden/Zx3u9a1Z7kthgAAO/blue0000.png');
+}
+
+.target-arrow.lane-2 {
+  background-image: url('https://file.garden/Zx3u9a1Z7kthgAAO/green0000.png');
+}
+
+.target-arrow.lane-3 {
+  background-image: url('https://file.garden/Zx3u9a1Z7kthgAAO/red0000.png');
+}
+
+.target-zone {
+  position: absolute;
+  bottom: 30px;
+  width: 100px;
+  height: 100px;
+  border: 2px solid #666;
+  border-radius: 10px;
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.perfect-window {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  border: 2px solid #00ff00;
+  border-radius: 10px;
+  opacity: 0.2;
+  bottom: 130px;
+}
+
+.good-window {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  border: 2px solid #ffff00;
+  border-radius: 10px;
+  opacity: 0.2;
+  bottom: 30px;
+}
+
+.miss-window {
+  display: none;
+}
+
+.falling-arrow {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  transition: opacity 0.2s;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.falling-arrow.lane-0 {
+  background-image: url('https://file.garden/Zx3u9a1Z7kthgAAO/purple0000.png');
+}
+
+.falling-arrow.lane-1 {
+  background-image: url('https://file.garden/Zx3u9a1Z7kthgAAO/blue0000.png');
+}
+
+.falling-arrow.lane-2 {
+  background-image: url('https://file.garden/Zx3u9a1Z7kthgAAO/green0000.png');
+}
+
+.falling-arrow.lane-3 {
+  background-image: url('https://file.garden/Zx3u9a1Z7kthgAAO/red0000.png');
+}
+
+#score {
+  font-size: 28px; /* Updated font size */
+  margin: 20px;
+}
+
+#combo {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  font-size: 24px;
+  color: #ff0000; /* Add this line to make combo text red */
+}
+
+.feedback {
+  position: absolute;
+  bottom: 150px;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.2s;
+  width: 200px;
+  height: 100px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.perfect { 
+  background-image: url('https://file.garden/Zx3u9a1Z7kthgAAO/sick.png');
+}
+.good { 
+  background-image: url('https://file.garden/Zx3u9a1Z7kthgAAO/good.png');
+}
+.miss { 
+  display: none;  
+}
+
+#leaderboard-container {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+}
+
+#leaderboard {
+  width: 100%;
+  height: 100%;
+  background-image: url('https://file.garden/Zx3u9a1Z7kthgAAO/leaderboard.png');
+  background-size: cover;
+  background-position: center;
+  padding: 0;
+  position: relative;
+}
+
+.leaderboard-scores {
+  position: absolute;
+  top: 200px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  color: white;
+  font-size: 24px; /* Updated font size */
+  font-family: 'VCR OSD Mono', monospace; /* Added font-family */
+}
+
+.score-entry {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.score-entry img {
+  width: 50px;
+  height: 50px;
+  border-radius: 25px;
+  margin-right: 15px;
+}
+
+.score-entry .user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.score-entry .username {
+  font-weight: bold;
+  color: #fff;
+  font-size: 22px; /* Updated font size */
+}
+
+.score-entry .score {
+  color: #ddd;
+  font-size: 20px; /* Updated font size */
+}
+
+#characters {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  pointer-events: none;
+}
+
+#opponent {
+  width: 500px;  
+  height: auto;
+  position: absolute;
+  left: 100px; 
+  bottom: 15%; 
+  transition: width 0.3s ease; 
+}
+
+#player {
+  width: 300px;
+  height: auto;
+  position: absolute;
+  right: 20%;
+  bottom: 20%;
+}
+
+#options-menu {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.9);
+  padding: 20px;
+  border-radius: 10px;
+  color: white;
+  display: none;
+  z-index: 1001;
+}
+
+.options-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.option-label {
+  font-size: 22px; /* Updated font size */
+  font-family: 'VCR OSD Mono', monospace; /* Added font-family */
+}
+
+.option-button {
+  padding: 10px 20px;
+  background: #333;
+  border: 1px solid #666;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: 'VCR OSD Mono', monospace; /* Added font-family */
+  font-size: 18px; /* Updated font size */
+}
+
+.option-button:hover {
+  background: #444;
+}
+
+.option-button.active {
+  background: #666;
+}
+
+#start-options {
+  display: flex;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.start-button {
+  padding: 10px 20px;
+  background: #0a0;
+  border: none;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: 'VCR OSD Mono', monospace; /* Added font-family */
+  font-size: 18px; /* Updated font size */
+}
+
+.settings-button {
+  padding: 5px 15px;
+  background: #333;
+  border: none;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: 'VCR OSD Mono', monospace; /* Added font-family */
+  font-size: 18px; /* Updated font size */
+}
+
+#botplay-warning {
+  color: #ff0000;
+  text-align: center;
+  margin: 20px;
+  display: none; /* Initially hidden */
+  font-family: 'VCR OSD Mono', monospace; /* Added font-family */
+}
+
+#bottom-right-image {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 150px; /* Adjust size as needed */
+  height: auto;
+  pointer-events: none; /* So it doesn't interfere with gameplay */
+  z-index: 100; /* Above game elements but below menus */
+}
+
+#song-credits {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%); 
+  display: none;
+  text-align: center;
+  z-index: 1000;
+}
+
+#song-title {
+  font-family: 'Super Mario Bros NES', monospace;
+  font-size: 35px;
+  color: black;
+  -webkit-text-stroke: 2px #FF0000;
+  margin-bottom: 10px;
+}
+
+#song-creators {
+  font-family: 'Super Mario Bros NES', monospace;
+  font-size: 35px;
+  color: black;
+  -webkit-text-stroke: 2px #FF0000;
+}
+
+.credits-line {
+  width: 100%;
+  height: 6px;
+  background: #FF0000;
+  margin: 5px 0;
+}
+
+/* Add new credits menu styles */
+#credits-menu {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.9);
+  padding: 20px;
+  border-radius: 10px;
+  color: white;
+  display: none;
+  z-index: 1001;
+  width: 500px;
+}
+
+.credits-entry {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 10px;
+}
+
+.credits-entry img {
+  width: 64px;
+  height: 64px;
+  margin-right: 20px;
+}
+
+.credits-text {
+  font-size: 20px; /* Updated font size */
+  font-family: 'VCR OSD Mono', monospace; /* Added font-family */
+}
+
+.websim-credit {
+  text-align: center;
+  margin-top: 40px;
+}
+
+.websim-credit img {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 10px;
+}
+
+.close-credits {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background: #0a0;
+  border: none;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.black-screen-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('/colorblack.jpg');
+  background-size: cover;
+  z-index: 9999;
+  display: none;
+}
+
+#websim-iframe-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  display: none;
+}
+
+#websim-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+@keyframes shake {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-5px, 5px); }
+  50% { transform: translate(5px, -5px); }
+  75% { transform: translate(-5px, -5px); }
+  100% { transform: translate(0, 0); }
+}
+
+.screen-flash {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 0, 0, 0.3);
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.1s ease-out;
+}
+
+.shake {
+  animation: shake 0.2s ease-out;
+}
+</style>
+</head>
+<body>
+
+<div class="black-screen-overlay"></div>
+
+<div id="game-background"></div>
+
+<div id="loading-screen">
+  <img id="loading-image" src="https://file.garden/Zx3u9a1Z7kthgAAO/funkay.png" alt="Loading...">
+  <div id="loading-bar-container">
+    <div id="loading-bar"></div>
+  </div>
+</div>
+
+<h1 style="text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff0000; color: #ff0000;">I &apos; M I N Y O U R H E A D</h1>
+<div id="score" style="color: #ff0000;">Score: 0</div>
+<div id="combo">Combo: 0</div>
+<div id="start-options">
+  <button class="start-button" onclick="startGame()" style="background-color: #ff0000; color: black;">Start Game (EPILEPSY WARNING)</button>
+  <button class="settings-button" onclick="showOptions()" style="background-color: #ff0000; color: black;">Settings</button>
+  <button class="settings-button" onclick="showCredits()" style="background-color: #ff0000; color: black;">Credits</button>
+</div>
+<div id="game-container">
+  <div class="feedback"></div>
+  <div id="botplay-warning">Warning: Botplay is enabled. Proceed with caution!</div>
+</div>
+
+<div id="options-menu">
+  <h2>Game Options</h2>
+  <div class="options-grid">
+    <div>
+      <div class="option-label">Scroll Direction</div>
+      <button class="option-button active" onclick="setScrollDirection(&apos;down&apos;)">Downscroll</button>
+      <button class="option-button" onclick="setScrollDirection(&apos;up&apos;)">Upscroll</button>
+    </div>
+    <div>
+      <div class="option-label">Controls</div>
+      <button class="option-button active" onclick="setControls(&apos;arrows&apos;)">Arrow Keys</button>
+      <button class="option-button" onclick="setControls(&apos;wasd&apos;)">WASD</button>
+      <button class="option-button" onclick="setControls(&apos;dfjk&apos;)">DFJK</button>
+    </div>
+    <div>
+      <div class="option-label">Note Fade</div>
+      <button class="option-button" onclick="setNoteFade(true)">Enabled</button>
+      <button class="option-button active" onclick="setNoteFade(false)">Disabled</button>
+    </div>
+    <div>
+      <div class="option-label">Hit Sounds</div>
+      <button class="option-button active" onclick="setHitSounds(true)">Enabled</button>
+      <button class="option-button" onclick="setHitSounds(false)">Disabled</button>
+    </div>
+    <div>
+      <div class="option-label">Cool Events</div>
+      <button class="option-button active" onclick="setFullscreenEvents(true)">Enabled</button>
+      <button class="option-button" onclick="setFullscreenEvents(false)">Disabled</button>
+    </div>
+  </div>
+  <button class="start-button" onclick="closeOptions()" style="background-color: #ff0000; color: black;">Save &amp; Close</button>
+</div>
+
+<div id="credits-menu">
+  <h2>Credits</h2>
+  <div class="credits-entry">
+    <img src="/icon64.png" alt="MM Team">
+    <div class="credits-text">The MM Team - Sprites, Music</div>
+  </div>
+  <div class="credits-entry">
+    <img src="https://file.garden/Zx3u9a1Z7kthgAAO/leblock.png" alt="leblock">
+    <div class="credits-text">leblock69 - Animator, Sprite Artist, Composer</div>
+  </div>
+  <div class="websim-credit">
+    <img src="https://file.garden/Zx3u9a1Z7kthgAAO/websimicon.png" alt="WebSim">
+    <div class="credits-text">The WebSim Crew - literally everything</div>
+    <div class="credits-text">hi kat!!! :D</div>
+  </div>
+  <button class="close-credits" onclick="closeCredits()" style="background-color: #ff0000; color: black; font-family: &apos;VCR OSD Mono&apos;, monospace;">Close</button>
+</div>
+
+<div id="song-credits">
+  <div id="song-title">PARANOIA</div>
+  <div class="credits-line"></div>
+  <div id="song-creators">SANDI ft. IKENNY</div>
+</div>
+
+<div id="characters">
+  <img id="opponent" src="/MMVirtualIdle.webp" alt="Opponent">
+  <img id="player" src="/bfidle.webp" alt="Player">
+</div>
+
+<div id="leaderboard-container">
+  <div id="leaderboard">
+    <div class="leaderboard-scores"></div>
+  </div>
+</div>
+
+<div id="websim-iframe-container">
+  <iframe id="websim-iframe" src="https://websim.ai" title="WebSim AI"></iframe>
+</div>
+
+<img id="bottom-right-image" src="/mrsoggy.png" alt="Soggy Cat">
+
+<div style="position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); color: #ff0000; font-family: &apos;VCR OSD Mono&apos;, monospace; font-size: 24px; text-align: center; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); z-index: 1000;">
+  RECOMMENDED TO PLAY FULL SONG I DID SOME COOL STUFF!!!
+</div>
+
+<div id="screen-flash" class="screen-flash"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script>
+const controlSchemes = {
+  arrows: ['ArrowLeft', 'ArrowDown', 'ArrowUp', 'ArrowRight'],
+  wasd: ['A', 'S', 'W', 'D'],
+  dfjk: ['D', 'F', 'J', 'K']
+};
+let keys = controlSchemes.arrows;
+let songUrls = '/Paranoia.mp3';
+let currentUser = null;
+let scrollDirection = 'down';
+let activeArrows = [];
+let hitSoundBuffer;
+let fadeNotes = false;
+let hitSoundsEnabled = true;
+let fullscreenEventsEnabled = true;
+let defaultChart = null;
+const fullscreenEvents = [{
+  time: 33100,
+  action: 'enter'
+}, {
+  time: 33510,
+  action: 'exit'
+}, {
+  time: 33930,
+  action: 'enter'
+}, {
+  time: 34340,
+  action: 'exit'
+}, {
+  time: 34750,
+  action: 'enter'
+}, {
+  time: 39720,
+  action: 'exit'
+}, {
+  time: 40550,
+  action: 'enter'
+}, {
+  time: 41370,
+  action: 'exit'
+}, {
+  time: 44690,
+  action: 'enter'
+}, {
+  time: 45100,
+  action: 'exit'
+}, {
+  time: 45510,
+  action: 'enter'
+}, {
+  time: 45930,
+  action: 'exit'
+}, {
+  time: 46340,
+  action: 'enter'
+}, {
+  time: 134006,
+  action: 'exit'
+}];
+let pendingFullscreenEvents = [];
+const customVisualEvents = [{
+  time: 99031,
+  action: 'spriteChange',
+  sprite: '/MMVirtualDialogue.webp',
+  size: 700,
+  handled: false
+}, {
+  time: 107058,
+  action: 'spriteChange',
+  sprite: '/MMVirtualAltIdle.webp',
+  size: 300,
+  handled: false
+}, {
+  time: 45931,
+  action: 'screenBlack',
+  handled: false
+}, {
+  time: 47581,
+  action: 'screenRestore',
+  handled: false
+}, {
+  time: 107958,
+  action: 'showWebsimIframe',
+  handled: false
+}, {
+  time: 134006,
+  action: 'changeBackground',
+  sprite: '/Toolatebmp.webp',
+  handled: false
+}, {
+  time: 139086,
+  action: 'spriteChange',
+  sprite: '/MMVirtualTransformation.webp',
+  size: 500,
+  handled: false
+}, {
+  time: 140069,
+  action: 'spriteChange',
+  sprite: '/MMVirtualIdle.webp',
+  size: 500,
+  handled: false
+}, {
+  time: 105093,
+  action: 'blackScreen',
+  show: true,
+  handled: false
+}, {
+  time: 107058,
+  action: 'blackScreen',
+  show: false,
+  handled: false
+}];
+let flashInterval = null;
+let isShaking = false;
+function changeBackground(newBackground) {
+  const gameBackground = document.getElementById('game-background');
+  gameBackground.style.backgroundImage = `url('${newBackground}')`;
+}
+async function loadAssets() {
+  try {
+    const chartResponse = await fetch('/Paranoia.json');
+    defaultChart = await chartResponse.json();
+    updateLoadingProgress();
+    const imageUrls = ['https://file.garden/Zx3u9a1Z7kthgAAO/soggycat.webp', 'https://file.garden/Zx3u9a1Z7kthgAAO/funkay.png', 'https://file.garden/Zx3u9a1Z7kthgAAO/sick.png', 'https://file.garden/Zx3u9a1Z7kthgAAO/good.png', 'https://file.garden/Zx3u9a1Z7kthgAAO/shit.png', 'https://file.garden/Zx3u9a1Z7kthgAAO/purple0000.png', 'https://file.garden/Zx3u9a1Z7kthgAAO/blue0000.png', 'https://file.garden/Zx3u9a1Z7kthgAAO/green0000.png', 'https://file.garden/Zx3u9a1Z7kthgAAO/red0000.png', '/dad.gif', '/bfidle.webp', '/stageweek1.jpg', '/bfleft.webp', '/bfdown.webp', '/bfup.webp', '/bfright.webp', '/Paranoia.mp3'];
+    await Promise.all([...imageUrls.map(url => preloadImage(url)), loadAudio(songUrls)]);
+  } catch (error) {
+    console.error('Error loading assets:', error);
+  }
+}
+window.addEventListener('load', () => {
+  loadAssets();
+});
+async function getCurrentUser() {
+  try {
+    const user = await window.websim.getCreatedBy();
+    if (user) {
+      return {
+        username: user.username,
+        profilePic: `https://images.websim.ai/avatar/${user.username}`
+      };
+    }
+  } catch (err) {
+    console.error('Error getting user:', err);
+  }
+  return {
+    username: "Guest",
+    profilePic: "https://file.garden/Zx3u9a1Z7kthgAAO/default-avatar.png"
+  };
+}
+const loadingScreen = document.getElementById('loading-screen');
+const loadingBar = document.getElementById('loading-bar');
+let audioContext;
+let songBuffer;
+let songSource;
+let assetsLoaded = 0;
+const totalAssets = 10;
+let highScores = new Map();
+function updateLoadingProgress() {
+  assetsLoaded++;
+  const progress = assetsLoaded / totalAssets * 100;
+  loadingBar.style.width = `${progress}%`;
+  if (assetsLoaded === totalAssets) {
+    setTimeout(() => {
+      loadingScreen.style.display = 'none';
+    }, 500);
+  }
+}
+function preloadImage(url) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      updateLoadingProgress();
+      resolve();
+    };
+    img.onerror = reject;
+    img.src = url;
+  });
+}
+async function loadAudio(url) {
+  try {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const response = await fetch(songUrls);
+    const arrayBuffer = await response.arrayBuffer();
+    songBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    const hitSoundResponse = await fetch('https://file.garden/Zx3u9a1Z7kthgAAO/hitsound.ogg');
+    const hitSoundArrayBuffer = await hitSoundResponse.arrayBuffer();
+    hitSoundBuffer = await audioContext.decodeAudioData(hitSoundArrayBuffer);
+    updateLoadingProgress();
+  } catch (error) {
+    console.error('Error loading audio:', error);
+  }
+}
+const gameContainer = document.getElementById('game-container');
+const scoreElement = document.getElementById('score');
+const comboElement = document.getElementById('combo');
+const feedbackElement = document.querySelector('.feedback');
+const startPrompt = document.getElementById('start-options');
+let score = 0;
+let combo = 0;
+let songData = null;
+let startTime = null;
+let scheduledNotes = [];
+let gameStarted = false;
+const lanes = 4;
+const laneWidth = gameContainer.clientWidth / lanes;
+function findSimultaneousNotes(currentArrow) {
+  const timeThreshold = 10;
+  return activeArrows.filter(arrow => Math.abs(arrow.time - currentArrow.time) < timeThreshold);
+}
+const scrollTime = 1400;
+for (let i = 0; i < lanes; i++) {
+  const lane = document.createElement('div');
+  lane.className = 'arrow-lane';
+  lane.style.left = `${i * laneWidth}px`;
+  const target = document.createElement('div');
+  target.className = `target-arrow lane-${i}`;
+  target.style.left = `${(laneWidth - 60) / 2}px`;
+  const targetZone = document.createElement('div');
+  targetZone.className = 'target-zone';
+  targetZone.style.left = `${i * laneWidth + (laneWidth - 100) / 2}px`;
+  lane.appendChild(target);
+  gameContainer.appendChild(lane);
+  gameContainer.appendChild(targetZone);
+  const perfectWindowEl = document.createElement('div');
+  perfectWindowEl.className = 'perfect-window';
+  perfectWindowEl.style.left = `${i * laneWidth + (laneWidth - 100) / 2}px`;
+  const goodWindowEl = document.createElement('div');
+  goodWindowEl.className = 'good-window';
+  goodWindowEl.style.left = `${i * laneWidth + (laneWidth - 100) / 2}px`;
+  const missWindowEl = document.createElement('div');
+  missWindowEl.className = 'miss-window';
+  missWindowEl.style.left = `${i * laneWidth + (laneWidth - 100) / 2}px`;
+  gameContainer.appendChild(perfectWindowEl);
+  gameContainer.appendChild(goodWindowEl);
+  gameContainer.appendChild(missWindowEl);
+}
+function showOptions() {
+  document.getElementById('options-menu').style.display = 'block';
+}
+function closeOptions() {
+  document.getElementById('options-menu').style.display = 'none';
+}
+function showCredits() {
+  document.getElementById('credits-menu').style.display = 'block';
+}
+function closeCredits() {
+  document.getElementById('credits-menu').style.display = 'none';
+}
+function setScrollDirection(direction) {
+  scrollDirection = direction;
+  document.querySelectorAll('#options-menu .option-button').forEach(btn => {
+    btn.classList.remove('active');
+    if (btn.textContent.toLowerCase().includes(direction)) {
+      btn.classList.add('active');
+    }
+  });
+  const arrows = document.querySelectorAll('.target-arrow');
+  const perfectWindows = document.querySelectorAll('.perfect-window');
+  const goodWindows = document.querySelectorAll('.good-window');
+  const missWindows = document.querySelectorAll('.miss-window');
+  if (direction === 'up') {
+    arrows.forEach(arrow => {
+      arrow.style.top = '50px';
+      arrow.style.bottom = 'auto';
+    });
+    perfectWindows.forEach(window => {
+      window.style.top = '130px';
+      window.style.bottom = 'auto';
+    });
+    goodWindows.forEach(window => {
+      window.style.top = '30px';
+      window.style.bottom = 'auto';
+    });
+    missWindows.forEach(window => {
+      window.style.top = '-70px';
+      window.style.bottom = 'auto';
+    });
+  } else {
+    arrows.forEach(arrow => {
+      arrow.style.bottom = '50px';
+      arrow.style.top = 'auto';
+    });
+    perfectWindows.forEach(window => {
+      window.style.bottom = '130px';
+      window.style.top = 'auto';
+    });
+    goodWindows.forEach(window => {
+      window.style.bottom = '30px';
+      window.style.top = 'auto';
+    });
+    missWindows.forEach(window => {
+      window.style.bottom = '-70px';
+      window.style.top = 'auto';
+    });
+  }
+}
+function setControls(scheme) {
+  controlScheme = scheme;
+  keys = controlSchemes[scheme];
+  document.querySelectorAll('#options-menu .option-button').forEach(btn => {
+    btn.classList.remove('active');
+    if (btn.textContent.toLowerCase().includes(scheme)) {
+      btn.classList.add('active');
+    }
+  });
+}
+function setNoteFade(enabled) {
+  fadeNotes = enabled;
+  document.querySelectorAll('.option-label').forEach(label => {
+    if (label.textContent === 'Note Fade') {
+      const buttons = label.parentElement.querySelectorAll('.option-button');
+      buttons.forEach(btn => {
+        btn.classList.remove('active');
+        if (enabled && btn.textContent === 'Enabled' || !enabled && btn.textContent === 'Disabled') {
+          btn.classList.add('active');
+        }
+      });
+    }
+  });
+}
+function setHitSounds(enabled) {
+  hitSoundsEnabled = enabled;
+  document.querySelectorAll('.option-label').forEach(label => {
+    if (label.textContent === 'Hit Sounds') {
+      const buttons = label.parentElement.querySelectorAll('.option-button');
+      buttons.forEach(btn => {
+        btn.classList.remove('active');
+        if (enabled && btn.textContent === 'Enabled' || !enabled && btn.textContent === 'Disabled') {
+          btn.classList.add('active');
+        }
+      });
+    }
+  });
+}
+function setFullscreenEvents(enabled) {
+  fullscreenEventsEnabled = enabled;
+  document.querySelectorAll('[onclick*="setFullscreenEvents"]').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('onclick').includes(String(enabled)));
+  });
+}
+function playHitSound() {
+  if (!hitSoundsEnabled || !hitSoundBuffer || !audioContext) return;
+  const hitSound = audioContext.createBufferSource();
+  hitSound.buffer = hitSoundBuffer;
+  hitSound.connect(audioContext.destination);
+  hitSound.start();
+}
+function enterFullscreen() {
+  const elem = document.documentElement;
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen();
+  } else if (elem.webkitRequestFullscreen) {
+    elem.webkitRequestFullscreen();
+  } else if (elem.msRequestFullscreen) {
+    elem.msRequestFullscreen();
+  }
+}
+function exitFullscreen() {
+  if (document.exitFullscreen) {
+    document.exitFullscreen();
+  } else if (document.webkitExitFullscreen) {
+    document.webkitExitFullscreen();
+  } else if (document.msExitFullscreen) {
+    elem.msRequestFullscreen();
+  }
+}
+function createArrow(lane, time, duration) {
+  const arrow = document.createElement('div');
+  arrow.className = `falling-arrow lane-${lane}`;
+  arrow.style.left = `${lane * laneWidth + (laneWidth - 60) / 2}px`;
+  gameContainer.appendChild(arrow);
+  const arrowData = {
+    element: arrow,
+    lane: lane,
+    time: time,
+    duration: duration,
+    active: true
+  };
+  activeArrows.push(arrowData);
+  const startY = scrollDirection === 'up' ? gameContainer.clientHeight + 60 : -60;
+  const targetY = scrollDirection === 'up' ? -60 : gameContainer.clientHeight - 110;
+  gsap.fromTo(arrow, {
+    y: startY
+  }, {
+    y: targetY,
+    duration: scrollTime / 1000,
+    ease: "none",
+    onComplete: () => {
+      arrow.remove();
+      activeArrows = activeArrows.filter(a => a !== arrowData);
+    }
+  });
+}
+function showFeedback(text, className) {
+  feedbackElement.textContent = '';
+  feedbackElement.className = `feedback ${className}`;
+  feedbackElement.style.opacity = 1;
+  setTimeout(() => {
+    feedbackElement.style.opacity = 0;
+  }, 500);
+}
+function updateScore(points) {
+  score += points;
+  scoreElement.textContent = `Score: ${score}`;
+}
+function updateCombo() {
+  comboElement.textContent = `Combo: ${combo}`;
+}
+function addHitEffect(lane) {
+  const hitEffect = document.createElement('div');
+  hitEffect.className = 'hit-effect';
+  hitEffect.style.position = 'absolute';
+  hitEffect.style.left = `${lane * laneWidth + (laneWidth - 60) / 2}px`;
+  hitEffect.style.bottom = '100px';
+  hitEffect.style.width = '80px';
+  hitEffect.style.height = '80px';
+  hitEffect.style.background = 'rgba(255, 255, 255, 0.7)';
+  hitEffect.style.borderRadius = '50%';
+  hitEffect.style.pointerEvents = 'none';
+  gameContainer.appendChild(hitEffect);
+  gsap.to(hitEffect, {
+    scale: 1.5,
+    opacity: 0,
+    duration: 0.5,
+    onComplete: () => {
+      hitEffect.remove();
+    }
+  });
+}
+async function startGame() {
+  if (gameStarted) return;
+  customVisualEvents.forEach(event => {
+    event.handled = false;
+  });
+  if (flashInterval) {
+    clearInterval(flashInterval);
+    flashInterval = null;
+  }
+  const flashElement = document.getElementById('screen-flash');
+  flashElement.style.opacity = '0';
+  document.body.classList.remove('shake');
+  isShaking = false;
+  changeBackground('/Paranoia_Background.webp');
+  if (songBuffer && audioContext) {
+    await loadAudio(songUrls);
+  }
+  currentUser = await getCurrentUser();
+  gameStarted = true;
+  startPrompt.style.display = 'none';
+  songData = defaultChart;
+  startTime = Date.now();
+  score = 0;
+  combo = 0;
+  updateScore(0);
+  updateCombo();
+  activeArrows.forEach(arrow => {
+    arrow.element.remove();
+    gsap.killTweensOf(arrow.element);
+  });
+  activeArrows = [];
+  if (songSource) {
+    songSource.stop();
+  }
+  if (songBuffer && audioContext) {
+    songSource = audioContext.createBufferSource();
+    songSource.buffer = songBuffer;
+    songSource.connect(audioContext.destination);
+    songSource.start();
+  }
+  scheduledNotes = [];
+  const notes = songData.song.notes;
+  notes.forEach(section => {
+    section.sectionNotes.forEach(note => {
+      if (note[1] < 4) {
+        scheduledNotes.push({
+          time: note[0],
+          lane: note[1],
+          duration: note[2]
+        });
+      }
+    });
+  });
+  pendingFullscreenEvents = [...fullscreenEvents];
+  requestAnimationFrame(updateGame);
+}
+function updateGame() {
+  if (!songData) return;
+  const currentTime = Date.now() - startTime;
+  if (fullscreenEventsEnabled) {
+    while (pendingFullscreenEvents.length > 0 && currentTime >= pendingFullscreenEvents[0].time) {
+      const event = pendingFullscreenEvents.shift();
+      if (event.action === 'enter') {
+        enterFullscreen();
+      } else if (event.action === 'exit') {
+        exitFullscreen();
+      }
+    }
+  }
+  customVisualEvents.forEach(event => {
+    if (!event.handled && currentTime >= event.time) {
+      switch (event.action) {
+        case 'spriteChange':
+          const opponent = document.getElementById('opponent');
+          opponent.src = event.sprite;
+          if (event.size) {
+            opponent.style.width = `${event.size}px`;
+          }
+          break;
+        case 'screenBlack':
+          document.body.style.backgroundColor = 'black';
+          break;
+        case 'screenRestore':
+          document.body.style.backgroundColor = '';
+          break;
+        case 'showWebsimIframe':
+          document.getElementById('game-background').style.display = 'none';
+          const websimIframe = document.getElementById('websim-iframe');
+          if (currentUser && currentUser.username) {
+            websimIframe.src = `https://websim.ai/@${currentUser.username}`;
+          } else {
+            websimIframe.src = 'https://websim.ai';
+          }
+          document.getElementById('websim-iframe-container').style.display = 'block';
+          break;
+        case 'changeBackground':
+          document.getElementById('websim-iframe-container').style.display = 'none';
+          document.getElementById('game-background').style.display = 'block';
+          document.getElementById('game-background').style.backgroundImage = `url('${event.sprite}')`;
+          break;
+        case 'blackScreen':
+          const overlay = document.querySelector('.black-screen-overlay');
+          overlay.style.display = event.show ? 'block' : 'none';
+          break;
+      }
+      event.handled = true;
+    }
+  });
+  if (currentTime >= 19000 && currentTime < 19100) {
+    showSongCredits();
+  }
+  while (scheduledNotes.length > 0 && scheduledNotes[0].time <= currentTime + scrollTime) {
+    const note = scheduledNotes.shift();
+    createArrow(note.lane, note.time, note.duration);
+  }
+  if (songSource && songSource.buffer) {
+    const songDuration = songSource.buffer.duration * 1000;
+    if (currentTime < songDuration) {
+      if (currentTime >= 182006 && currentTime <= 208055) {
+        if (!flashInterval) {
+          flashInterval = setInterval(() => {
+            const flashElement = document.getElementById('screen-flash');
+            flashElement.style.opacity = '1';
+            if (!isShaking) {
+              isShaking = true;
+              document.body.classList.add('shake');
+            }
+            setTimeout(() => {
+              flashElement.style.opacity = '0';
+              document.body.classList.remove('shake');
+              isShaking = false;
+            }, 207);
+          }, 414);
+        }
+      } else if (currentTime > 208055) {
+        if (flashInterval) {
+          clearInterval(flashInterval);
+          flashInterval = null;
+          const flashElement = document.getElementById('screen-flash');
+          flashElement.style.opacity = '0';
+          document.body.classList.remove('shake');
+          isShaking = false;
+        }
+      }
+      requestAnimationFrame(updateGame);
+    } else {
+      gameStarted = false;
+      showLeaderboard();
+    }
+  } else {
+    if (currentTime >= 182006 && currentTime <= 208055) {
+      if (!flashInterval) {
+        flashInterval = setInterval(() => {
+          const flashElement = document.getElementById('screen-flash');
+          flashElement.style.opacity = '1';
+          if (!isShaking) {
+            isShaking = true;
+            document.body.classList.add('shake');
+          }
+          setTimeout(() => {
+            flashElement.style.opacity = '0';
+            document.body.classList.remove('shake');
+            isShaking = false;
+          }, 207);
+        }, 414);
+      }
+    } else if (currentTime > 208055) {
+      if (flashInterval) {
+        clearInterval(flashInterval);
+        flashInterval = null;
+        const flashElement = document.getElementById('screen-flash');
+        flashElement.style.opacity = '0';
+        document.body.classList.remove('shake');
+        isShaking = false;
+      }
+    }
+    requestAnimationFrame(updateGame);
+  }
+}
+function showSongCredits() {
+  const credits = document.getElementById('song-credits');
+  credits.style.display = 'block';
+  gsap.fromTo(credits, {
+    y: -50,
+    opacity: 0
+  }, {
+    y: 0,
+    opacity: 1,
+    duration: 1,
+    ease: "expo.out",
+    onComplete: () => {
+      setTimeout(() => {
+        gsap.to(credits, {
+          opacity: 0,
+          duration: 1,
+          ease: "expo.in",
+          onComplete: () => {
+            credits.style.display = 'none';
+          }
+        });
+      }, 3000);
+    }
+  });
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    if (audioContext && audioContext.state === 'suspended') {
+      audioContext.resume();
+    }
+    return;
+  }
+  const keyIndex = keys.map(k => k.toLowerCase()).indexOf(e.key.toLowerCase());
+  if (keyIndex === -1) return;
+  const arrowsInLane = activeArrows.filter(a => a.lane === keyIndex && a.active);
+  if (arrowsInLane.length === 0) return;
+  const targetArrow = arrowsInLane.reduce((closest, current) => {
+    const currentY = scrollDirection === 'up' ? 50 : gameContainer.clientHeight - 110;
+    const arrowRect = current.element.getBoundingClientRect();
+    const currentDistance = Math.abs(arrowRect.top - currentY);
+    if (!closest) return current;
+    const closestRect = closest.element.getBoundingClientRect();
+    const closestDistance = Math.abs(closestRect.top - currentY);
+    return currentDistance < closestDistance ? current : closest;
+  }, null);
+  if (!targetArrow) return;
+  const arrowRect = targetArrow.element.getBoundingClientRect();
+  const targetY = scrollDirection === 'up' ? 50 : gameContainer.clientHeight - 110;
+  const distance = Math.abs(arrowRect.top - targetY);
+  targetArrow.active = false;
+  if (fadeNotes) {
+    targetArrow.element.style.opacity = 0;
+  }
+  const simultaneousNotes = findSimultaneousNotes(targetArrow);
+  const multiplier = simultaneousNotes.length > 1 ? simultaneousNotes.length : 1;
+  playHitSound();
+  if (distance < 30) {
+    showFeedback('', 'perfect');
+    updateScore(350 * multiplier);
+    combo++;
+  } else if (distance < 60) {
+    showFeedback('', 'good');
+    updateScore(200 * multiplier);
+    combo++;
+  } else {
+    showFeedback('', 'miss');
+    combo = 0;
+  }
+  updateCombo();
+  addHitEffect(keyIndex);
+  const playerGif = document.getElementById('player');
+  if (keyIndex === 0) {
+    playerGif.src = '/bfleft.webp';
+  } else if (keyIndex === 1) {
+    playerGif.src = '/bfdown.webp';
+  } else if (keyIndex === 2) {
+    playerGif.src = '/bfup.webp';
+  } else if (keyIndex === 3) {
+    playerGif.src = '/bfright.webp';
+  }
+});
+function showLeaderboard() {
+  const leaderboardContainer = document.getElementById('leaderboard-container');
+  const leaderboardScores = document.querySelector('.leaderboard-scores');
+  if (currentUser) {
+    const existingScore = highScores.get(currentUser.username);
+    if (!existingScore || score > existingScore.score) {
+      highScores.set(currentUser.username, {
+        score: score,
+        username: currentUser.username,
+        profilePic: currentUser.profilePic,
+        timestamp: Date.now()
+      });
+    }
+  }
+  const sortedScores = Array.from(highScores.values()).sort((a, b) => b.score - a.score).slice(0, 10);
+  leaderboardScores.innerHTML = '';
+  sortedScores.forEach((scoreData, index) => {
+    const entry = document.createElement('div');
+    entry.className = 'score-entry';
+    entry.innerHTML = `
+      <img src="${scoreData.profilePic}" alt="${scoreData.username}'s Profile Picture">
+      <div class="user-info">
+        <span class="username">@${scoreData.username}</span>
+        <span class="score">#${index + 1}: ${scoreData.score}</span>
+      </div>
+    `;
+    leaderboardScores.appendChild(entry);
+  });
+  leaderboardContainer.style.display = 'flex';
+}
+document.getElementById('leaderboard-container').addEventListener('click', () => {
+  document.getElementById('leaderboard-container').style.display = 'none';
+  startPrompt.style.display = 'block';
+});
+</script>
+
+</body></html>
