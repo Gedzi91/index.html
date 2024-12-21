@@ -1,0 +1,424 @@
+<html><head><base href="https://godparticles.io"><title>God Particles - Elemental Reactions</title><style>body{font-family:Arial,sans-serif;margin:0;padding:0;background:#111;color:#fff;user-select:none}#game-container{width:100vw;height:100vh;position:relative;overflow:hidden}#canvas{width:100%;height:100%}#controls{position:absolute;top:10px;left:10px;background:rgba(0,0,0,0.7);padding:10px;border-radius:5px}select,input,button{background:#333;color:#fff;border:none;padding:5px;margin:5px 0;cursor:pointer}h1{text-align:center;margin-top:0}#fullscreen-btn{position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.7);color:#fff;border:none;padding:10px;border-radius:5px;cursor:pointer;font-size:20px}label{display:block;margin-top:10px}#cleanup-btn{background:#ff0000;padding:5px 10px;border-radius:3px;font-size:14px}#material-controls{display:flex;align-items:center;gap:10px}#confirmation-modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background-color:rgba(0,0,0,0.5)}#confirmation-content{background-color:#333;margin:15% auto;padding:20px;border:1px solid #888;width:300px;text-align:center;border-radius:5px}#confirm-cleanup,#cancel-cleanup{margin:10px;padding:5px 10px;border:none;cursor:pointer;border-radius:3px}#confirm-cleanup{background-color:#ff0000;color:#fff}#cancel-cleanup{background-color:#444;color:#fff}</style></head><body><div id="game-container"><canvas id="canvas"></canvas><div id="controls"><h1 style="font-family: 'Copperplate Gothic', 'Luminari', fantasy; text-shadow: 2px 2px 4px rgba(255,255,255,0.5); letter-spacing: 3px; background: linear-gradient(45deg, #FFD700, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 18px; margin-bottom: 0;">God Particles</h1><p style="color: white; font-size: 12px; text-align: center; margin-top: 5px;">a game by Greenskull</p><div id="material-controls"><select id="material"><option value="sand">Sand</option><option value="water">Water</option><option value="lava">Lava</option><option value="snow">Snow</option><option value="oil">Oil</option><option value="plant">Plant</option><option value="acid">Acid</option><option value="ice">Ice</option><option value="obsidian">Obsidian</option><option value="steam">Steam</option></select><button id="cleanup-btn">Cleanup</button></div><label for="particle-amount">Particle Amount:</label><input type="range" id="particle-amount" min="1" max="10" value="1"></div><button id="fullscreen-btn">⛶</button></div><div id="confirmation-modal"><div id="confirmation-content"><p>Are you sure you want to clean up?</p><button id="confirm-cleanup">Yes</button><button id="cancel-cleanup">No</button></div></div><script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const materialSelect = document.getElementById('material');
+const particleAmountSlider = document.getElementById('particle-amount');
+const fullscreenBtn = document.getElementById('fullscreen-btn');
+const cleanupBtn = document.getElementById('cleanup-btn');
+const confirmationModal = document.getElementById('confirmation-modal');
+const confirmCleanupBtn = document.getElementById('confirm-cleanup');
+const cancelCleanupBtn = document.getElementById('cancel-cleanup');
+
+let canvasRect = canvas.getBoundingClientRect();
+
+function updateCanvasRect() {
+    canvasRect = canvas.getBoundingClientRect();
+}
+
+window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    updateCanvasRect();
+});
+
+window.addEventListener('orientationchange', () => {
+    setTimeout(() => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        updateCanvasRect();
+    }, 100);
+});
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+updateCanvasRect();
+
+const particleSize = 4;
+let gridWidth = Math.floor(canvas.width / particleSize);
+let gridHeight = Math.floor(canvas.height / particleSize);
+let grid = new Array(gridWidth).fill(null).map(() => new Array(gridHeight).fill(null));
+
+const materials = {
+    sand: { color: '#c2b280', viscosity: 0.8, spread: 1, sinks: true },
+    water: { color: '#4ab3ff', viscosity: 0.3, spread: 3 },
+    lava: { color: '#ff4500', viscosity: 0.6, spread: 2 },
+    snow: { color: '#ffffff', viscosity: 0.7, spread: 1 },
+    oil: { color: '#3d3d3d', viscosity: 0.4, spread: 2, floats: true },
+    fire: { color: '#ff6600', viscosity: 0.1, spread: 4, lifetime: 100 },
+    steam: { color: '#e6e6e6', viscosity: 0.1, spread: 5, lifetime: 300, rise: true },
+    plant: { color: '#2ecc71', viscosity: 0.9, spread: 1, growth: 0.05 },
+    acid: { color: '#ffff00', viscosity: 0.5, spread: 2, glow: true },
+    ice: { color: '#A5F2F3', viscosity: 1, spread: 0 },
+    obsidian: { color: '#6A0DAD', viscosity: 1, spread: 0 }
+};
+
+function Particle(x, y, material) {
+    this.x = x;
+    this.y = y;
+    this.material = material;
+    this.lifetime = materials[material].lifetime || Infinity;
+    if (material === 'steam') {
+        this.size = Math.random() * 3 + 2;
+        this.opacity = Math.random() * 0.5 + 0.5;
+        this.speedX = (Math.random() - 0.5) * 0.2;
+        this.speedY = -Math.random() * 0.2 - 0.1;
+    }
+    if (material === 'plant') {
+        this.growth = 0;
+        this.direction = Math.random() < 0.5 ? -1 : 1;
+    }
+    if (material === 'acid') {
+        this.potency = 1;
+    }
+}
+
+let activePointers = new Map();
+
+function update() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    for (let x = 0; x < gridWidth; x++) {
+        for (let y = gridHeight - 1; y >= 0; y--) {
+            if (grid[x][y]) {
+                const p = grid[x][y];
+                const material = materials[p.material];
+                
+                handleElementInteractions(x, y, p);
+                handleMovementAndSpread(x, y, p, material);
+                renderParticle(x, y, p, material);
+            }
+        }
+    }
+    
+    for (let pointer of activePointers.values()) {
+        addParticles(pointer.x, pointer.y);
+    }
+    
+    requestAnimationFrame(update);
+}
+
+function handleElementInteractions(x, y, p) {
+    const neighbors = getNeighbors(x, y);
+    
+    if (p.material === 'lava') {
+        for (let neighbor of neighbors) {
+            if (neighbor && neighbor.material === 'water') {
+                if (Math.random() < 0.25) {  // 1/4 chance of creating obsidian
+                    grid[x][y] = new Particle(x, y, 'obsidian');
+                    grid[neighbor.x][neighbor.y] = null;
+                } else {
+                    // The other 3/4 of the time, lava and water remain unchanged
+                    grid[x][y] = new Particle(x, y, 'lava');
+                    grid[neighbor.x][neighbor.y] = new Particle(neighbor.x, neighbor.y, 'water');
+                }
+                // Create steam regardless of obsidian formation
+                createSteam(x, y);
+            } else if (neighbor && neighbor.material === 'oil') {
+                grid[neighbor.x][neighbor.y] = new Particle(neighbor.x, neighbor.y, 'fire');
+            } else if (neighbor && neighbor.material === 'snow') {
+                grid[neighbor.x][neighbor.y] = new Particle(neighbor.x, neighbor.y, 'water');
+            } else if (neighbor && neighbor.material === 'plant') {
+                grid[neighbor.x][neighbor.y] = new Particle(neighbor.x, neighbor.y, 'fire');
+            } else if (neighbor && neighbor.material === 'ice') {
+                grid[neighbor.x][neighbor.y] = new Particle(neighbor.x, neighbor.y, 'water');
+            }
+        }
+    } else if (p.material === 'water') {
+        for (let neighbor of neighbors) {
+            if (neighbor && neighbor.material === 'fire') {
+                grid[neighbor.x][neighbor.y] = new Particle(neighbor.x, neighbor.y, 'steam');
+            } else if (neighbor && neighbor.material === 'snow') {
+                grid[x][y] = new Particle(x, y, 'ice');
+                grid[neighbor.x][neighbor.y] = null;
+            } else if (neighbor && neighbor.material === 'lava') {
+                if (Math.random() < 0.25) {  // 1/4 chance of creating obsidian
+                    grid[x][y] = new Particle(x, y, 'obsidian');
+                    grid[neighbor.x][neighbor.y] = null;
+                } else {
+                    // The other 3/4 of the time, water and lava remain unchanged
+                    grid[x][y] = new Particle(x, y, 'water');
+                    grid[neighbor.x][neighbor.y] = new Particle(neighbor.x, neighbor.y, 'lava');
+                }
+                // Create steam regardless of obsidian formation
+                createSteam(x, y);
+            }
+        }
+    } else if (p.material === 'acid') {
+        for (let neighbor of neighbors) {
+            if (neighbor && neighbor.material !== 'acid') {
+                if (Math.random() < 0.1 * p.potency) {
+                    grid[neighbor.x][neighbor.y] = null;
+                }
+            }
+        }
+        p.potency *= 0.999;
+        if (p.potency < 0.1 || y === gridHeight - 1) {
+            grid[x][y] = null;
+        }
+    } else if (p.material === 'fire') {
+        p.lifetime--;
+        if (p.lifetime <= 0) {
+            grid[x][y] = null;
+        } else {
+            for (let neighbor of neighbors) {
+                if (neighbor && (neighbor.material === 'oil' || neighbor.material === 'plant') && Math.random() < 0.1) {
+                    grid[neighbor.x][neighbor.y] = new Particle(neighbor.x, neighbor.y, 'fire');
+                }
+            }
+        }
+    } else if (p.material === 'plant') {
+        let waterFound = neighbors.some(neighbor => neighbor && neighbor.material === 'water');
+        if (waterFound) {
+            p.growth += materials.plant.growth;
+            if (p.growth >= 1) {
+                p.growth = 0;
+                let growDirections = [
+                    {dx: 0, dy: -1},  // up
+                    {dx: p.direction, dy: 0},  // left or right
+                    {dx: p.direction, dy: -1}  // diagonal up-left or up-right
+                ];
+                for (let dir of growDirections) {
+                    let newX = x + dir.dx;
+                    let newY = y + dir.dy;
+                    if (newX >= 0 && newX < gridWidth && newY >= 0 && newY < gridHeight) {
+                        if (!grid[newX][newY]) {
+                            grid[newX][newY] = new Particle(newX, newY, 'plant');
+                            grid[newX][newY].direction = p.direction;
+                            break;
+                        } else if (grid[newX][newY].material !== 'plant') {
+                            // Push the existing particle away
+                            let pushX = newX + dir.dx;
+                            let pushY = newY + dir.dy;
+                            if (pushX >= 0 && pushX < gridWidth && pushY >= 0 && pushY < gridHeight && !grid[pushX][pushY]) {
+                                grid[pushX][pushY] = grid[newX][newY];
+                                grid[newX][newY] = new Particle(newX, newY, 'plant');
+                                grid[newX][newY].direction = p.direction;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (Math.random() < 0.1) {
+                    p.direction *= -1;
+                }
+            }
+        }
+    } else if (p.material === 'oil') {
+        for (let neighbor of neighbors) {
+            if (neighbor && neighbor.material === 'water') {
+                if (neighbor.y < y) {
+                    // Swap oil and water
+                    grid[x][y] = new Particle(x, y, 'water');
+                    grid[neighbor.x][neighbor.y] = new Particle(neighbor.x, neighbor.y, 'oil');
+                }
+            }
+        }
+    } else if (p.material === 'sand') {
+        for (let neighbor of neighbors) {
+            if (neighbor && neighbor.material === 'water') {
+                if (neighbor.y > y) {
+                    // Swap sand and water
+                    grid[x][y] = new Particle(x, y, 'water');
+                    grid[neighbor.x][neighbor.y] = new Particle(neighbor.x, neighbor.y, 'sand');
+                }
+            }
+        }
+    }
+}
+
+function createSteam(x, y) {
+    const steamDirections = [
+        {dx: -1, dy: -1}, {dx: 0, dy: -1}, {dx: 1, dy: -1},
+        {dx: -1, dy: 0}, {dx: 1, dy: 0},
+        {dx: -1, dy: 1}, {dx: 0, dy: 1}, {dx: 1, dy: 1}
+    ];
+    
+    for (let dir of steamDirections) {
+        let newX = x + dir.dx;
+        let newY = y + dir.dy;
+        if (newX >= 0 && newX < gridWidth && newY >= 0 && newY < gridHeight && !grid[newX][newY]) {
+            grid[newX][newY] = new Particle(newX, newY, 'steam');
+            break;
+        }
+    }
+}
+
+function handleMovementAndSpread(x, y, p, material) {
+    if (p.material === 'steam') {
+        p.x += p.speedX;
+        p.y += p.speedY;
+        if (p.x < 0 || p.x >= gridWidth || p.y < 0 || p.y >= gridHeight) {
+            grid[x][y] = null;
+            return;}
+        const newX = Math.floor(p.x);
+        const newY = Math.floor(p.y);
+        if (newX !== x || newY !== y) {
+            if (!grid[newX][newY]) {
+                grid[newX][newY] = p;
+                grid[x][y] = null;
+            } else {
+                p.x = x;
+                p.y = y;
+            }
+        }
+        p.lifetime--;
+        if (p.lifetime <= 0) {
+            grid[x][y] = null;
+        }
+    } else if (material.rise && y > 0 && !grid[x][y - 1]) {
+        grid[x][y - 1] = p;
+        grid[x][y] = null;
+    } else if (y < gridHeight - 1 && !grid[x][y + 1]) {
+        if (material.floats && grid[x][y + 1] && grid[x][y + 1].material === 'water') {
+            // Oil floats on water
+            return;
+        }
+        grid[x][y + 1] = p;
+        grid[x][y] = null;
+    } else if (material.spread > 0) {
+        let spreadDirection = Math.random() < 0.5 ? -1 : 1;
+        for (let i = 1; i <= material.spread; i++) {
+            if (x + spreadDirection * i >= 0 && x + spreadDirection * i < gridWidth &&
+                y + 1 < gridHeight && !grid[x + spreadDirection * i][y + 1]) {
+                grid[x + spreadDirection * i][y + 1] = p;
+                grid[x][y] = null;
+                break;
+            }
+        }
+    }
+    
+    // Additional logic for sinking particles (like sand)
+    if (material.sinks && y < gridHeight - 1 && grid[x][y + 1] && grid[x][y + 1].material === 'water') {
+        // Swap sand and water
+        grid[x][y] = grid[x][y + 1];
+        grid[x][y + 1] = p;
+    }
+}
+
+function renderParticle(x, y, p, material) {
+    if (p.material === 'steam') {
+        ctx.beginPath();
+        ctx.arc(p.x * particleSize, p.y * particleSize, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(230, 230, 230, ${p.opacity * (p.lifetime / materials.steam.lifetime)})`;
+        ctx.fill();
+    } else {
+        ctx.fillStyle = material.color;
+        if (p.material === 'fire') {
+            ctx.globalAlpha = p.lifetime / materials.fire.lifetime;
+        } else if (p.material === 'plant') {
+            ctx.fillStyle = `rgb(46, ${204 + Math.floor(p.growth * 51)}, 113)`;
+        } else if (p.material === 'acid') {
+            ctx.fillStyle = `rgba(255, 255, 0, ${p.potency})`;
+            if (material.glow) {
+                ctx.shadowColor = material.color;
+                ctx.shadowBlur = 10;
+            }
+        }
+        ctx.fillRect(x * particleSize, y * particleSize, particleSize, particleSize);
+        ctx.globalAlpha = 1;
+        ctx.shadowBlur = 0;
+    }
+}
+
+function getNeighbors(x, y) {
+    const neighbors = [];
+    const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+    for (let [dx, dy] of directions) {
+        if (x + dx >= 0 && x + dx < gridWidth && y + dy >= 0 && y + dy < gridHeight) {
+            if (grid[x + dx][y + dy]) {
+                neighbors.push({...grid[x + dx][y + dy], x: x + dx, y: y + dy});
+            }
+        }
+    }
+    return neighbors;
+}
+
+function addParticles(clientX, clientY) {
+    const amount = parseInt(particleAmountSlider.value);
+    for (let i = 0; i < amount; i++) {
+        const offsetX = (Math.random() - 0.5) * 10;
+        const offsetY = (Math.random() - 0.5) * 10;
+        const x = clientX - canvasRect.left;
+        const y = clientY - canvasRect.top;
+        const gridX = Math.floor((x + offsetX) / particleSize);
+        const gridY = Math.floor((y + offsetY) / particleSize);
+        if (gridX >= 0 && gridX < gridWidth && gridY >= 0 && gridY < gridHeight && !grid[gridX][gridY]){
+            grid[gridX][gridY] = new Particle(gridX, gridY, materialSelect.value);
+        }
+    }
+}
+
+function handlePointerDown(e) {
+    for (let touch of e.changedTouches) {
+        activePointers.set(touch.identifier, { x: touch.clientX, y: touch.clientY });
+    }
+}
+
+function handlePointerMove(e) {
+    for (let touch of e.changedTouches) {
+        if (activePointers.has(touch.identifier)) {
+            activePointers.set(touch.identifier, { x: touch.clientX, y: touch.clientY });
+        }
+    }
+}
+
+function handlePointerUp(e) {
+    for (let touch of e.changedTouches) {
+        activePointers.delete(touch.identifier);
+    }
+}
+
+canvas.addEventListener('touchstart', handlePointerDown);
+canvas.addEventListener('touchmove', handlePointerMove);
+canvas.addEventListener('touchend', handlePointerUp);
+canvas.addEventListener('touchcancel', handlePointerUp);
+
+canvas.addEventListener('mousedown', (e) => {
+    activePointers.set('mouse', { x: e.clientX, y: e.clientY });
+});
+
+canvas.addEventListener('mousemove', (e) => {
+    if (activePointers.has('mouse')) {
+        activePointers.set('mouse', { x: e.clientX, y: e.clientY });
+    }
+});
+
+canvas.addEventListener('mouseup', () => {
+    activePointers.delete('mouse');
+});
+
+fullscreenBtn.addEventListener('click', () => {
+    if (!document.fullscreenElement) {
+        if (canvas.requestFullscreen) {
+            canvas.requestFullscreen();
+        } else if (canvas.webkitRequestFullscreen) { // iOS Safari
+            canvas.webkitRequestFullscreen();
+        }
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) { // iOS Safari
+            document.webkitExitFullscreen();
+        }
+    }
+});
+
+document.addEventListener('fullscreenchange', updateCanvasRect);
+document.addEventListener('webkitfullscreenchange', updateCanvasRect);
+
+cleanupBtn.addEventListener('click', () => {
+    confirmationModal.style.display = 'block';
+});
+
+confirmCleanupBtn.addEventListener('click', () => {
+    grid = new Array(gridWidth).fill(null).map(() => new Array(gridHeight).fill(null));
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    activePointers.clear();
+    confirmationModal.style.display = 'none';
+});
+
+cancelCleanupBtn.addEventListener('click', () => {
+    confirmationModal.style.display = 'none';
+});
+
+update();</script></body></html>
