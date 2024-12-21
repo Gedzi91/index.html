@@ -1,0 +1,847 @@
+<html><head><base href="https://shadertoy.com/"><title>Coastal Landscape Shader with Enhanced Audio Reactivity Controls</title><style>
+  body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #1a1a1a; color: #ffffff; font-family: Arial, sans-serif; }
+  canvas { width: 100%; height: 100%; }
+  #controls { position: absolute; top: 10px; left: 10px; z-index: 10; background-color: rgba(0,0,0,0.7); padding: 10px; border-radius: 5px; transition: all 0.3s ease; }
+  #controls.hidden { transform: translateX(-100%); }
+  #toggleControls { position: absolute; top: 10px; left: 10px; z-index: 11; background-color: rgba(0,0,0,0.7); color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
+  input[type="file"] { display: none; }
+  label, button { background-color: #3498db; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; margin-right: 10px; }
+  label:hover, button:hover { background-color: #2980b9; }
+  select, input[type="range"] { margin: 5px 0; padding: 5px; }
+  .control-group { margin-bottom: 10px; }
+</style></head><body>
+<button id="toggleControls">Toggle Controls</button>
+<div id="controls">
+  <label for="audioUpload">Upload Audio</label>
+  <input type="file" id="audioUpload" accept="audio/*">
+  <button id="playPause">Play/Pause</button>
+  <div class="control-group">
+    <label>Sun: </label>
+    <select id="sunControl">
+      <option value="bass">Bass</option>
+      <option value="mid">Mids</option>
+      <option value="treble">Treble</option>
+    </select>
+    <input type="range" id="sunSensitivity" min="0" max="100" value="50">
+  </div>
+  <div class="control-group">
+    <label>Tree: </label>
+    <select id="treeControl">
+      <option value="bass">Bass</option>
+      <option value="mid" selected>Mids</option>
+      <option value="treble">Treble</option>
+    </select>
+    <input type="range" id="treeSensitivity" min="0" max="100" value="50">
+  </div>
+  <div class="control-group">
+    <label>Sky: </label>
+    <select id="skyControl">
+      <option value="bass">Bass</option>
+      <option value="mid">Mids</option>
+      <option value="treble" selected>Treble</option>
+    </select>
+    <input type="range" id="skySensitivity" min="0" max="100" value="50">
+  </div>
+  <div class="control-group">
+    <label>Waves: </label>
+    <select id="wavesControl">
+      <option value="bass" selected>Bass</option>
+      <option value="mid">Mids</option>
+      <option value="treble">Treble</option>
+    </select>
+    <input type="range" id="wavesSensitivity" min="0" max="100" value="50">
+  </div>
+  <div class="control-group">
+    <label>Time of Day: </label>
+    <input type="range" id="timeOfDay" min="0" max="24" value="12" step="0.1">
+    <span id="timeOfDayValue">12:00</span>
+  </div>
+  <div class="control-group">
+    <label>Color Scheme: </label>
+    <select id="colorSchemeControl">
+      <option value="0">Default</option>
+      <option value="1">Sunset</option>
+      <option value="2">Nighttime</option>
+      <option value="3">Pastel</option>
+      <option value="4">Neon</option>
+      <option value="5">Mystic Forest</option>
+      <option value="6">Ethereal Twilight</option>
+      <option value="7">Crystal Cavern</option>
+      <option value="8">Fiery Dawn</option>
+      <option value="9">Aurora Dream</option>
+      <option value="10">Galaxy View</option>
+      <option value="11">Underwater Realm</option>
+      <option value="12">Volcanic Night</option>
+      <option value="13">Celestial Glow</option>
+    </select>
+  </div>
+  <div class="control-group">
+    <label>Weather Theme: </label>
+    <select id="weatherThemeControl">
+      <option value="0">Clear</option>
+      <option value="1">Cloudy</option>
+      <option value="2">Rainy</option>
+      <option value="3">Stormy</option>
+      <option value="4">Snowy</option>
+      <option value="5">Foggy</option>
+    </select>
+  </div>
+</div>
+<canvas id="glCanvas"></canvas>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"></script>
+<script id="vs" type="x-shader/x-vertex">
+  attribute vec4 a_position;
+  void main() {
+    gl_Position = a_position;
+  }
+</script>
+<script id="fs" type="x-shader/x-fragment">
+  precision highp float;
+  uniform vec2 iResolution;
+  uniform float iTime;
+  uniform float iAudioLow;
+  uniform float iAudioMid;
+  uniform float iAudioHigh;
+  uniform int iSunControl;
+  uniform int iTreeControl;
+  uniform int iSkyControl;
+  uniform int iWavesControl;
+  uniform float iSunSensitivity;
+  uniform float iTreeSensitivity;
+  uniform float iSkySensitivity;
+  uniform float iWavesSensitivity;
+  uniform vec3 iColorShift;
+  uniform float iOffsetX;
+  uniform float iTimeOfDay;
+  uniform vec3 iDaySkyColor; // New uniform
+  uniform vec3 iNightSkyColor; // New uniform
+  uniform vec3 iSunColor; // New uniform
+  uniform vec3 iTreeColor; // New uniform
+  uniform vec3 iWaveColor; // New uniform
+  uniform int iWeatherTheme; // New uniform
+  uniform float iAnimationSpeed;       // Controls overall animation speed
+  uniform float iCloudSpeed;           // Controls cloud movement speed
+  uniform float iRainIntensity;        // Controls rain intensity
+  uniform float iSnowSpeed;            // Controls snow falling speed
+  uniform float iFogDensity;           // Controls fog density
+  uniform float iLightningFrequency;   // Controls lightning frequency
+
+  #define p(t, a, b, c, d) ( a + b*cos( 6.28318*(c*t+d) ) )
+  #define sp(t) p(t,vec3(.26,.76,.77),vec3(1,.3,1),vec3(.8,.4,.7),vec3(0,.12,.54))
+  #define hue(v) ( .6 + .76 * cos(6.3*(v) + vec4(0,23,21,0) ) )
+
+  float hash12(vec2 p) {
+    vec3 p3  = fract(vec3(p.xyx) * .1031);
+    p3 += dot(p3, p3.yzx + 33.33);
+    return fract((p3.x + p3.y) * p3.z);
+  }
+
+  vec2 hash22(vec2 p) {
+    vec3 p3 = fract(vec3(p.xyx) * vec3(.1031, .1030, .0973));
+    p3 += dot(p3, p3.yzx+33.33);
+    return fract((p3.xx+p3.yz)*p3.zy);
+  }
+
+  vec2 rotate2D(vec2 st, float a) {
+    return mat2(cos(a),-sin(a),sin(a),cos(a))*st;
+  }
+
+  float st(float a, float b, float s) {
+    return smoothstep(a-s, a+s, b);
+  }
+
+  float noise(in vec2 p) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    vec2 u = f*f*(3.-2.*f);
+    return mix(mix(dot(hash22(i+vec2(0,0)), f-vec2(0,0)),
+                   dot(hash22(i+vec2(1,0)), f-vec2(1,0)), u.x),
+               mix(dot(hash22(i+vec2(0,1)), f-vec2(0,1)),
+                   dot(hash22(i+vec2(1,1)), f-vec2(1,1)), u.x), u.y);
+  }
+
+  float getAudioValue(int control) {
+    if (control == 0) return iAudioLow;
+    if (control == 1) return iAudioMid;
+    return iAudioHigh;
+  }
+
+  void mainImage(out vec4 O, in vec2 g) {
+    vec2 r = iResolution.xy
+      ,uv = (g+g-r)/r.y
+      ,sun_pos = vec2(r.x/r.y*.42,-.53)
+      ,tree_pos = vec2(-r.x/r.y*.42,-.2)
+      ,sh, u, id, lc, t;
+
+    uv.x += iOffsetX; 
+
+    vec3 f, c;
+    float xd, yd, h, a, l;
+    vec4 C;
+    
+    float sm = 3./r.y;
+
+    // Enhanced audio reactive modifications
+    sun_pos.y += getAudioValue(iSunControl) * 0.2 * iSunSensitivity;
+    tree_pos.x += getAudioValue(iTreeControl) * 0.1 * iTreeSensitivity;
+
+    // Compute a day/night factor based on iTimeOfDay
+    float dayFactor = smoothstep(6.0, 18.0, iTimeOfDay); 
+    vec3 daySkyColor = iDaySkyColor; 
+    vec3 nightSkyColor = iNightSkyColor; 
+    vec3 skyColor = mix(nightSkyColor, daySkyColor, dayFactor);
+    f = skyColor;
+
+    // Adjust sun position based on time of day
+    float sunAngle = (iTimeOfDay / 24.0) * 3.14159 * 2.0; 
+    sun_pos = vec2(r.x/r.y * cos(sunAngle), sin(sunAngle));
+
+    sh = rotate2D(sun_pos, noise(uv+iTime*iAnimationSpeed*.25)*.3);
+     
+    if (uv.y > -.4) {
+      u = uv + sh;
+      yd = 60. + getAudioValue(iSkyControl) * 40. * iSkySensitivity;
+      id =  vec2((length(u)+.01)*yd,0);
+      xd = floor(id.x)*.09;
+      h = (hash12(floor(id.xx))*.5+.25)*(iTime+10.)*.25;
+      t = rotate2D(u,h);
+  
+      id.y = atan(t.y,t.x)*xd;
+      lc = fract(id);
+      id -= lc;
+  
+      t = vec2(cos((id.y+.5)/xd)*(id.x+.5)/yd,sin((id.y+.5)/xd)*(id.x+.5)/yd); 
+      t = rotate2D(t,-h) - sh;
+  
+      h = noise(t*vec2(.5,1)-vec2(iTime*iAnimationSpeed*.2,0))
+        * step(-.25,t.y);
+      h = smoothstep(.052,.055, h);
+      
+      lc += (noise(lc*vec2(1,4)+id))*vec2(.7,.2);
+      
+      f = mix(sp(sin(length(u)-.1))*.35,
+              mix(sp(sin(length(u)-.1)+(hash12(id)-.5)*.15),iSunColor,h),
+              st(abs(lc.x-.5),.4,sm*yd)*st(abs(lc.y-.5),.48,sm*xd));
+      
+      f += vec3(iAudioLow, iAudioMid, iAudioHigh) * 0.2 * iSkySensitivity;
+    }
+
+    if (uv.y < -.35) {
+      float cld = noise(-sh*vec2(.5,1) - vec2(iTime*iCloudSpeed*.2,0));
+      cld = 1.- smoothstep(.0,.15,cld)*.5;
+
+      u = uv*vec2(1,15);
+      id = floor(u);
+
+      for (float i = 1.; i > -1.; i--) {
+        if (id.y+i < -5.) {
+          lc = fract(u)-.5;
+          lc.y = (lc.y+(sin(uv.x*12.-iTime*iCloudSpeed*3.+id.y+i))*.25-i)*4.;
+          h = hash12(vec2(id.y+i,floor(lc.y)));
+          
+          xd = 6.+h*4.;
+          yd = 30.;
+          lc.x = uv.x*xd+sh.x*9.;
+          lc.x += sin(iTime * (.5 + h*2.))*.5;
+          h = .8*smoothstep(5.,.0,abs(floor(lc.x)))*cld+.1;
+          f = mix(f,mix(iWaveColor,vec3(.35,.35,0),h),st(lc.y,0.,sm*yd));
+          lc += noise(lc*vec2(3,.5))*vec2(.1,.6);
+          
+          f = mix(f,
+            mix(hue(hash12(floor(lc))*.1+.56).rgb*(1.2+floor(lc.y)*.17),vec3(1,1,0),h)
+            ,st(lc.y,0.,sm*xd)
+            *st(abs(fract(lc.x)-.5),.48,sm*xd)*st(abs(fract(lc.y)-.5),.3,sm*yd)
+            );
+        }
+      }
+      
+      float waveIntensity = getAudioValue(iWavesControl) * 0.4 * iWavesSensitivity;
+      f += iWaveColor * waveIntensity * step(uv.y, -0.4 + sin(uv.x * 20.0 + iTime * (1.0 + waveIntensity)) * (0.05 + waveIntensity * 0.05));
+    }
+    
+    O = vec4(f,1);
+
+    a = 0.;
+    u = uv+noise(uv*2.)*.1 + vec2(0,sin(uv.x*1.+3.)*.4+.8);
+    
+    f = mix(vec3(.7,.6,.2),vec3(0,1,0),sin(iTime*.2)*.5+.5);
+    O = mix(O,vec4(f*.4,1),step(u.y,.0));
+
+    xd = 60.;
+    u = u*vec2(xd,xd/3.5); 
+    
+    if (u.y < 1.2) {
+      for (float y = 0.; y > -3.; y--) {
+        for (float x = -2.; x <3.; x++) {
+          id = floor(u) + vec2(x,y);
+          lc = (fract(u) + vec2(1.-x,-y))/vec2(5,3);
+          h = (hash12(id)-.5)*.25+.5;
+
+          lc-= vec2(.3,.5-h*.4);
+          lc.x += sin(((iTime*1.7+h*2.-id.x*.05-id.y*.05)*1.1+id.y*.5)*2.)*(lc.y+.5)*.5;
+          t = abs(lc)-vec2(.02,.5-h*.5);
+          l =  length(max(t,0.)) + min(max(t.x,t.y),0.);
+
+          l -= noise(lc*7.+id)*.1;
+          C = vec4(f*.25,st(l,.1,sm*xd*.09));
+          C = mix(C,vec4(f
+                      *(1.2+lc.y*2.)
+                      *(1.8-h*2.5),1.)
+                      ,st(l,.04,sm*xd*.09));
+          
+          O = mix(O,C,C.a*step(id.y,-1.));
+          a = max(a, C.a*step(id.y,-5.));
+        }
+      }
+    }
+
+    float T = sin(iTime*.5 + getAudioValue(iTreeControl) * 10.0 * iTreeSensitivity);
+ 
+    if (abs(uv.x+tree_pos.x-.1-T*.1) < .6) {
+      u = uv + tree_pos;
+      u.x -= sin(u.y+1.)*.2*(T+.75);
+      u += noise(u*4.5-7.)*.25;
+      
+      xd = 10., yd = 60.; 
+      t = u * vec2(1,yd);
+      h = hash12(floor(t.yy));
+      t.x += h*.01;
+      t.x *= xd;
+      
+      lc = fract(t);
+      
+      float m = st(abs(t.x-.5),.5,sm*xd)*step(abs(t.y+20.),45.);
+      C = mix(vec4(.07)
+              ,vec4(iTreeColor,1)*(.4+h*.4)
+              ,st(abs(lc.y-.5),.4,sm*yd)*st(abs(lc.x-.5),.45,sm*xd));
+      C.a = m;
+      
+      xd = 30., yd = 15.;
+      
+      for (float xs =0.;xs<4.;xs++) {
+        u = uv + tree_pos + vec2(xs/xd*.5 -(T +.75)*.15,-.7);
+        u += noise(u*vec2(2,1)+vec2(-iTime+xs*.05,0))*vec2(-.25,.1)*smoothstep(.5,-1.,u.y+.7)*.75;
+  
+        t = u * vec2(xd,1.);
+        h = hash12(floor(t.xx)+xs*1.4);
+        
+        yd = 5.+ h*7.;
+        t.y *= yd;
+  
+        sh = t;
+        lc = fract(t);
+        h = hash12(t-lc);
+  
+        t = (t-lc)/vec2(xd,yd)+vec2(0,.7);
+        
+        m = (step(0.,t.y)*step(length(t),.45)
+            + step(t.y,0.)*step(-0.7+sin((floor(u.x)+xs*.5)*15.)*.2,t.y))
+            *step(abs(t.x),.5)
+            *st(abs(lc.x-.5),.35,sm*xd*.5); 
+  
+        lc += noise((sh)*vec2(1.,3.))*vec2(.3,.3);
+        
+        f = hue((h+(sin(iTime*.2)*.5+.5))*.2).rgb-t.x;
+  
+        C = mix(C,
+                vec4(mix(f*.15,f*.6*(.7+xs*.2),
+                    st(abs(lc.y-.5),.47,sm*yd)*st(abs(lc.x-.5),.2,sm*xd)),m)
+                ,m);
+      }
+
+      O = mix(O,C,C.a*(1.-a));
+    }
+    
+    O.rgb += vec3(iAudioLow, iAudioMid, iAudioHigh) * 0.1;
+    O.rgb += iColorShift * 0.2;
+
+    // Weather effects
+    if (iWeatherTheme == 1 || iWeatherTheme == 3) {
+        // Cloudy or Stormy weather: add more clouds
+        float cloudDensity = (iWeatherTheme == 3) ? 0.8 : 0.5;
+        vec2 cloudPos = uv * vec2(1.0, 1.0);
+        float cloudNoise = noise(cloudPos * 3.0 + vec2(iTime * iCloudSpeed, 0.0));
+        float cloud = smoothstep(cloudDensity - 0.1, cloudDensity + 0.1, cloudNoise);
+        f = mix(f, vec3(1.0), cloud * 0.5);
+    }
+
+    if (iWeatherTheme == 2 || iWeatherTheme == 3) {
+        // Rainy or Stormy weather: add rain effect
+        vec2 rainPos = uv * vec2(30.0, 50.0) + vec2(0, iTime * iRainIntensity * 10.0);
+        float rain = fract(sin(dot(rainPos, vec2(12.9898,78.233))) * 43758.5453);
+        rain = step(1.0 - iRainIntensity, rain);
+        f = mix(f, vec3(0.6, 0.6, 0.7), rain * 0.5);
+    }
+
+    if (iWeatherTheme == 3) {
+        // Stormy weather: add lightning flashes
+        float lightning = step(0.98, fract(sin(iTime * iLightningFrequency) * 43758.5453));
+        f = mix(f, vec3(1.0), lightning * 0.7);
+    }
+
+    if (iWeatherTheme == 4) {
+        // Snowy weather: add snowflakes
+        float snowDensity = 0.5; // Adjust between 0.0 (dense snow) to 1.0 (no snow)
+        vec2 snowPos = uv * vec2(30.0, 50.0) + vec2(iTime * 0.2, iTime * iSnowSpeed * 5.0);
+        
+        // Generate random snow pattern
+        float noiseValue = fract(sin(dot(snowPos, vec2(12.9898,78.233))) * 43758.5453);
+        float snow = step(1.0 - snowDensity, noiseValue);
+        
+        // Create varying snowflake sizes for a natural effect
+        float sizeFactor = fract(sin(dot(snowPos, vec2(93.9898,67.345))) * 24680.2468);
+        sizeFactor = smoothstep(0.0, 0.5, sizeFactor);
+        snow *= sizeFactor;
+        
+        // Apply snow color and intensity
+        f = mix(f, vec3(1.0), snow * 0.7);
+    }
+
+    if (iWeatherTheme == 5) {
+        // Foggy weather: add fog effect
+        float fogAmount = smoothstep(0.0, iFogDensity, uv.y + 0.5);
+        f = mix(f, vec3(0.8, 0.8, 0.8), fogAmount * 0.5);
+    }
+  }
+
+  void main() {
+    vec4 color = vec4(0.0, 0.0, 0.0, 1.0);
+    mainImage(color, gl_FragCoord.xy);
+    gl_FragColor = color;
+  }
+</script>
+<script>
+  function createShader(gl, type, source) {
+    const shader = gl.createShader(type);
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+
+    // Check for compile errors
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      console.error('An error occurred compiling the shader: ' + gl.getShaderInfoLog(shader));
+      gl.deleteShader(shader);
+      return null;
+    }
+    return shader;
+  }
+
+  function createProgram(gl, vertexShader, fragmentShader) {
+    const program = gl.createProgram();
+    gl.attachShader(program, vertexShader);
+    gl.attachShader(program, fragmentShader);
+    gl.linkProgram(program);
+
+    // Check for linking errors
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      console.error('Unable to initialize the shader program: ' + gl.getProgramInfoLog(program));
+      gl.deleteProgram(program);
+      return null;
+    }
+    return program;
+  }
+
+  const canvas = document.getElementById('glCanvas');
+  const gl = canvas.getContext('webgl');
+
+  if (!gl) {
+    console.error('WebGL not supported');
+    throw new Error('WebGL not supported');
+  }
+
+  const vsSource = document.getElementById('vs').text;
+  const fsSource = document.getElementById('fs').text;
+
+  let colorShift = [0.0, 0.0, 0.0]; 
+
+  const colorShifts = [
+    [0.0, 0.0, 0.0], 
+    [0.5, 0.0, 0.0], 
+    [0.0, 0.5, 0.0], 
+    [0.0, 0.0, 0.5], 
+    [0.5, 0.5, 0.0], 
+    [0.0, 0.5, 0.5], 
+    [0.5, 0.0, 0.5], 
+  ];
+
+  const colorSchemes = [
+    {
+      name: 'Default',
+      skyColors: [[0.5, 0.8, 1.0], [0.0, 0.0, 0.1]], // [daySkyColor, nightSkyColor]
+      sunColor: [1.0, 0.9, 0.6],
+      treeColor: [0.0, 0.5, 0.0],
+      waveColor: [0.0, 0.3, 0.6]
+    },
+    {
+      name: 'Sunset',
+      skyColors: [[1.0, 0.5, 0.0], [0.2, 0.0, 0.2]],
+      sunColor: [1.0, 0.7, 0.0],
+      treeColor: [0.4, 0.2, 0.0],
+      waveColor: [0.1, 0.0, 0.3]
+    },
+    {
+      name: 'Nighttime',
+      skyColors: [[0.0, 0.0, 0.1], [0.0, 0.0, 0.3]],
+      sunColor: [0.9, 0.9, 1.0],
+      treeColor: [0.0, 0.1, 0.0],
+      waveColor: [0.0, 0.0, 0.2]
+    },
+    {
+      name: 'Pastel',
+      skyColors: [[0.8, 0.8, 1.0], [1.0, 0.9, 0.9]],
+      sunColor: [1.0, 0.8, 1.0],
+      treeColor: [0.7, 0.9, 0.7],
+      waveColor: [0.7, 0.8, 1.0]
+    },
+    {
+      name: 'Neon',
+      skyColors: [[0.0, 1.0, 0.5], [0.0, 0.0, 0.0]],
+      sunColor: [1.0, 0.0, 1.0],
+      treeColor: [0.0, 1.0, 0.0],
+      waveColor: [0.0, 1.0, 1.0]
+    },
+    {
+      name: 'Mystic Forest',
+      skyColors: [[0.1, 0.5, 0.2], [0.0, 0.1, 0.0]],
+      sunColor: [1.0, 0.8, 0.5],
+      treeColor: [0.0, 0.3, 0.1],
+      waveColor: [0.0, 0.4, 0.3]
+    },
+    {
+      name: 'Ethereal Twilight',
+      skyColors: [[0.6, 0.3, 0.8], [0.1, 0.0, 0.2]],
+      sunColor: [0.9, 0.6, 1.0],
+      treeColor: [0.5, 0.0, 0.5],
+      waveColor: [0.3, 0.0, 0.5]
+    },
+    {
+      name: 'Crystal Cavern',
+      skyColors: [[0.2, 0.7, 1.0], [0.0, 0.3, 0.5]],
+      sunColor: [0.8, 0.9, 1.0],
+      treeColor: [0.0, 0.6, 0.7],
+      waveColor: [0.0, 0.8, 0.9]
+    },
+    {
+      name: 'Fiery Dawn',
+      skyColors: [[1.0, 0.4, 0.0], [0.3, 0.0, 0.1]],
+      sunColor: [1.0, 0.8, 0.0],
+      treeColor: [0.5, 0.2, 0.0],
+      waveColor: [0.7, 0.1, 0.0]
+    },
+    {
+      name: 'Aurora Dream',
+      skyColors: [[0.0, 0.6, 0.7], [0.0, 0.0, 0.1]],
+      sunColor: [0.7, 1.0, 0.9],
+      treeColor: [0.0, 0.4, 0.3],
+      waveColor: [0.0, 0.5, 0.6]
+    },
+    {
+      name: 'Galaxy View',
+      skyColors: [[0.1, 0.0, 0.2], [0.2, 0.0, 0.5]],
+      sunColor: [1.0, 1.0, 0.8],
+      treeColor: [0.2, 0.0, 0.3],
+      waveColor: [0.1, 0.0, 0.5]
+    },
+    {
+      name: 'Underwater Realm',
+      skyColors: [[0.0, 0.4, 0.6], [0.0, 0.2, 0.4]],
+      sunColor: [0.5, 0.7, 0.9],
+      treeColor: [0.0, 0.3, 0.4],
+      waveColor: [0.0, 0.5, 0.7]
+    },
+    {
+      name: 'Volcanic Night',
+      skyColors: [[0.3, 0.0, 0.0], [0.5, 0.0, 0.1]],
+      sunColor: [1.0, 0.2, 0.0],
+      treeColor: [0.4, 0.0, 0.0],
+      waveColor: [0.5, 0.0, 0.1]
+    },
+    {
+      name: 'Celestial Glow',
+      skyColors: [[0.8, 0.7, 0.9], [0.2, 0.1, 0.3]],
+      sunColor: [1.0, 0.9, 0.8],
+      treeColor: [0.6, 0.5, 0.7],
+      waveColor: [0.5, 0.4, 0.6]
+    }
+  ];
+
+  let colorShiftIndex = 0;
+
+  document.addEventListener('keydown', function(event) {
+    if (event.key === 'c' || event.key === 'C') {
+      colorShiftIndex = (colorShiftIndex + 1) % colorShifts.length;
+      colorShift = colorShifts[colorShiftIndex];
+    }
+  });
+
+  const colorSchemeControl = document.getElementById('colorSchemeControl');
+  const weatherThemeControl = document.getElementById('weatherThemeControl'); // New control
+
+  // Create shaders using the helper function
+  const vertexShader = createShader(gl, gl.VERTEX_SHADER, vsSource);
+  const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fsSource);
+
+  // Create the shader program using the helper function
+  const program = createProgram(gl, vertexShader, fragmentShader);
+
+  const daySkyColorUniformLocation = gl.getUniformLocation(program, 'iDaySkyColor');
+  const nightSkyColorUniformLocation = gl.getUniformLocation(program, 'iNightSkyColor');
+  const sunColorUniformLocation = gl.getUniformLocation(program, 'iSunColor');
+  const treeColorUniformLocation = gl.getUniformLocation(program, 'iTreeColor');
+  const waveColorUniformLocation = gl.getUniformLocation(program, 'iWaveColor');
+  const weatherThemeUniformLocation = gl.getUniformLocation(program, 'iWeatherTheme'); // New uniform location
+  
+  const animationSpeedUniformLocation = gl.getUniformLocation(program, 'iAnimationSpeed');
+  const cloudSpeedUniformLocation = gl.getUniformLocation(program, 'iCloudSpeed');
+  const rainIntensityUniformLocation = gl.getUniformLocation(program, 'iRainIntensity');
+  const snowSpeedUniformLocation = gl.getUniformLocation(program, 'iSnowSpeed');
+  const fogDensityUniformLocation = gl.getUniformLocation(program, 'iFogDensity');
+  const lightningFrequencyUniformLocation = gl.getUniformLocation(program, 'iLightningFrequency');
+
+  const positionBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+  const positions = [-1, -1, 1, -1, -1, 1, 1, 1];
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+
+  const positionAttributeLocation = gl.getAttribLocation(program, 'a_position');
+  gl.enableVertexAttribArray(positionAttributeLocation);
+  gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
+
+  const resolutionUniformLocation = gl.getUniformLocation(program, 'iResolution');
+  const timeUniformLocation = gl.getUniformLocation(program, 'iTime');
+  const audioLowUniformLocation = gl.getUniformLocation(program, 'iAudioLow');
+  const audioMidUniformLocation = gl.getUniformLocation(program, 'iAudioMid');
+  const audioHighUniformLocation = gl.getUniformLocation(program, 'iAudioHigh');
+  const sunControlUniformLocation = gl.getUniformLocation(program, 'iSunControl');
+  const treeControlUniformLocation = gl.getUniformLocation(program, 'iTreeControl');
+  const skyControlUniformLocation = gl.getUniformLocation(program, 'iSkyControl');
+  const wavesControlUniformLocation = gl.getUniformLocation(program, 'iWavesControl');
+  const sunSensitivityUniformLocation = gl.getUniformLocation(program, 'iSunSensitivity');
+  const treeSensitivityUniformLocation = gl.getUniformLocation(program, 'iTreeSensitivity');
+  const skySensitivityUniformLocation = gl.getUniformLocation(program, 'iSkySensitivity');
+  const wavesSensitivityUniformLocation = gl.getUniformLocation(program, 'iWavesSensitivity');
+  const colorShiftUniformLocation = gl.getUniformLocation(program, 'iColorShift');
+  const offsetXUniformLocation = gl.getUniformLocation(program, 'iOffsetX'); 
+  const timeOfDayUniformLocation = gl.getUniformLocation(program, 'iTimeOfDay'); // New uniform location
+
+  let isDragging = false;
+  let previousMousePosition = { x: 0, y: 0 };
+  let iOffsetX = 0.0; 
+
+  function resizeCanvasToDisplaySize(canvas) {
+    const displayWidth  = canvas.clientWidth;
+    const displayHeight = canvas.clientHeight;
+    if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
+      canvas.width  = displayWidth;
+      canvas.height = displayHeight;
+      gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+    }
+  }
+
+  let audioContext, analyser, audioSource;
+  const audioUpload = document.getElementById('audioUpload');
+  const playPauseButton = document.getElementById('playPause');
+  let audioElement;
+
+  audioUpload.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      setupAudio(e.target.result);
+    };
+    reader.readAsDataURL(file);
+  });
+
+  playPauseButton.addEventListener('click', function() {
+    if (audioElement) {
+      if (audioElement.paused) {
+        audioElement.play();
+      } else {
+        audioElement.pause();
+      }
+    }
+  });
+
+  function setupAudio(url) {
+    if (audioContext) audioContext.close();
+    
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = audioContext.createAnalyser();
+    analyser.fftSize = 256;
+
+    audioElement = new Audio(url);
+    audioElement.loop = true; 
+    audioSource = audioContext.createMediaElementSource(audioElement);
+    audioSource.connect(analyser);
+    analyser.connect(audioContext.destination);
+
+    audioElement.play();
+  }
+
+  function getAudioData() {
+    if (!analyser) return { low: 0, mid: 0, high: 0 };
+
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+    analyser.getByteFrequencyData(dataArray);
+
+    const bass = dataArray.slice(0, 8);
+    const mid = dataArray.slice(8, 24);
+    const treble = dataArray.slice(24, 64);
+
+    return {
+      low: bass.reduce((a, b) => a + b) / bass.length / 255,
+      mid: mid.reduce((a, b) => a + b) / mid.length / 255,
+      high: treble.reduce((a, b) => a + b) / treble.length / 255
+    };
+  }
+
+  const sunControl = document.getElementById('sunControl');
+  const treeControl = document.getElementById('treeControl');
+  const skyControl = document.getElementById('skyControl');
+  const wavesControl = document.getElementById('wavesControl');
+  const sunSensitivity = document.getElementById('sunSensitivity');
+  const treeSensitivity = document.getElementById('treeSensitivity');
+  const skySensitivity = document.getElementById('skySensitivity');
+  const wavesSensitivity = document.getElementById('wavesSensitivity');
+  const timeOfDay = document.getElementById('timeOfDay');
+  const timeOfDayValue = document.getElementById('timeOfDayValue');
+
+  function getControlValue(control) {
+    switch(control.value) {
+      case 'bass': return 0;
+      case 'mid': return 1;
+      case 'treble': return 2;
+      default: return 0;
+    }
+  }
+
+  timeOfDay.addEventListener('input', function() {
+    const hours = Math.floor(timeOfDay.value);
+    const minutes = Math.floor((timeOfDay.value - hours) * 60);
+    timeOfDayValue.textContent = hours + ':' + (minutes < 10 ? '0' : '') + minutes;
+  });
+
+  document.addEventListener('mousedown', function(event) {
+    isDragging = true;
+    previousMousePosition = { x: event.clientX, y: event.clientY };
+  });
+
+  document.addEventListener('mouseup', function(event) {
+    isDragging = false;
+  });
+
+  document.addEventListener('mousemove', function(event) {
+    if (isDragging) {
+      let deltaX = event.clientX - previousMousePosition.x;
+      iOffsetX += deltaX / canvas.width * 2; 
+      previousMousePosition = { x: event.clientX, y: event.clientY };
+    }
+  });
+
+  function render(time) {
+    time *= 0.001;  
+
+    resizeCanvasToDisplaySize(gl.canvas);
+
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+
+    gl.useProgram(program);
+    gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
+    gl.uniform1f(timeUniformLocation, time);
+
+    const audioData = getAudioData();
+    gl.uniform1f(audioLowUniformLocation, audioData.low);
+    gl.uniform1f(audioMidUniformLocation, audioData.mid);
+    gl.uniform1f(audioHighUniformLocation, audioData.high);
+
+    gl.uniform1i(sunControlUniformLocation, getControlValue(sunControl));
+    gl.uniform1i(treeControlUniformLocation, getControlValue(treeControl));
+    gl.uniform1i(skyControlUniformLocation, getControlValue(skyControl));
+    gl.uniform1i(wavesControlUniformLocation, getControlValue(wavesControl));
+    const weatherThemeIndex = parseInt(weatherThemeControl.value); // Get weather theme control value
+    gl.uniform1i(weatherThemeUniformLocation, weatherThemeIndex); // Pass weather theme uniform
+
+    let animationSpeed = 1.0;
+    let cloudSpeed = 1.0;
+    let rainIntensity = 0.0;
+    let snowSpeed = 1.0;
+    let fogDensity = 0.7;
+    let lightningFrequency = 0.0;
+
+    switch (weatherThemeIndex) {
+      case 0: // Clear
+        animationSpeed = 0.5; // Reduced from 1.0 to make the animation slower and softer
+        cloudSpeed = 0.0;
+        break;
+      case 1: // Cloudy
+        animationSpeed = 0.8;
+        cloudSpeed = 0.5;
+        break;
+      case 2: // Rainy
+        animationSpeed = 1.0;
+        cloudSpeed = 0.7;
+        rainIntensity = 0.5;
+        break;
+      case 3: // Stormy
+        animationSpeed = 1.2;
+        cloudSpeed = 1.0;
+        rainIntensity = 0.8;
+        lightningFrequency = 100.0;
+        break;
+      case 4: // Snowy
+        animationSpeed = 0.6;
+        cloudSpeed = 0.3;
+        snowSpeed = 0.5;
+        break;
+      case 5: // Foggy
+        animationSpeed = 0.5;
+        cloudSpeed = 0.2;
+        fogDensity = 0.9;
+        break;
+    }
+
+    gl.uniform1f(animationSpeedUniformLocation, animationSpeed);
+    gl.uniform1f(cloudSpeedUniformLocation, cloudSpeed);
+    gl.uniform1f(rainIntensityUniformLocation, rainIntensity);
+    gl.uniform1f(snowSpeedUniformLocation, snowSpeed);
+    gl.uniform1f(fogDensityUniformLocation, fogDensity);
+    gl.uniform1f(lightningFrequencyUniformLocation, lightningFrequency);
+
+    gl.uniform1f(sunSensitivityUniformLocation, sunSensitivity.value / 100);
+    gl.uniform1f(treeSensitivityUniformLocation, treeSensitivity.value / 100);
+    gl.uniform1f(skySensitivityUniformLocation, skySensitivity.value / 100);
+    gl.uniform1f(wavesSensitivityUniformLocation, wavesSensitivity.value / 100);
+
+    gl.uniform3fv(colorShiftUniformLocation, colorShift);
+    gl.uniform1f(offsetXUniformLocation, iOffsetX); 
+    gl.uniform1f(timeOfDayUniformLocation, parseFloat(timeOfDay.value)); // Pass time of day to shader
+
+    const selectedSchemeIndex = parseInt(colorSchemeControl.value);
+    const selectedScheme = colorSchemes[selectedSchemeIndex];
+
+    gl.uniform3fv(daySkyColorUniformLocation, selectedScheme.skyColors[0]);
+    gl.uniform3fv(nightSkyColorUniformLocation, selectedScheme.skyColors[1]);
+    gl.uniform3fv(sunColorUniformLocation, selectedScheme.sunColor);
+    gl.uniform3fv(treeColorUniformLocation, selectedScheme.treeColor);
+    gl.uniform3fv(waveColorUniformLocation, selectedScheme.waveColor);
+
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+    requestAnimationFrame(render);
+  }
+
+  requestAnimationFrame(render);
+
+  const toggleControlsButton = document.getElementById('toggleControls');
+  const controlsPanel = document.getElementById('controls');
+
+  toggleControlsButton.addEventListener('click', function() {
+    controlsPanel.classList.toggle('hidden');
+    if (controlsPanel.classList.contains('hidden')) {
+      toggleControlsButton.textContent = 'Show Controls';
+    } else {
+      toggleControlsButton.textContent = 'Hide Controls';
+    }
+  });
+</script>
+</body></html>
