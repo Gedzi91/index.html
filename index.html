@@ -1,0 +1,217 @@
+<html><head><base href="https://interdimensional-cable.tv/make-it-so-most-of-the-videos-are-music-themed-please/make-it-so-it-still-plays-endless-youtube-videos-just-exclusive-to-music/Fix-up-the-song-titles-correctly-corresponding-with-what-is-played-also-make-the-site-aesthethic-a-purple-theme-please/refashion%20the%20site%20to%20instead%20pull%20random%20very%20old%20youtube%20videos%20from%20the%20early%20days"><title>YouTube Time Machine - Early Internet Nostalgia</title>
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'VT323', monospace;
+    background-color: #000;
+    color: #00ff00;
+    overflow: hidden;
+  }
+  .container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  .header {
+    text-align: center;
+    padding: 20px;
+    background-color: rgba(0, 255, 0, 0.1);
+    border-bottom: 2px solid #00ff00;
+  }
+  h1 {
+    margin: 0;
+    font-size: 2.5em;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    animation: glitch 1s linear infinite;
+  }
+  @keyframes glitch {
+    2%, 64% {
+      transform: translate(2px,0) skew(0deg);
+    }
+    4%, 60% {
+      transform: translate(-2px,0) skew(0deg);
+    }
+    62% {
+      transform: translate(0,0) skew(5deg); 
+    }
+  }
+  .tv-screen {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    border: 10px solid #333;
+    border-radius: 20px;
+    box-shadow: inset 0 0 10px #00ff00;
+  }
+  #currentVideo {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 1.2em;
+    z-index: 10;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #00ff00;
+  }
+  iframe {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    transform: translate(-50%, -50%);
+  }
+  .controls {
+    display: flex;
+    justify-content: space-around;
+    padding: 20px;
+    background-color: rgba(0, 255, 0, 0.1);
+    border-top: 2px solid #00ff00;
+  }
+  button {
+    background-color: #000;
+    color: #00ff00;
+    border: 2px solid #00ff00;
+    padding: 10px 20px;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'VT323', monospace;
+  }
+  button:hover {
+    background-color: #00ff00;
+    color: #000;
+    box-shadow: 0 0 10px #00ff00;
+  }
+  .static {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+      repeating-radial-gradient(#000 0 0.0001%, #0f0 0 0.0002%) 50% 0/2500px 2500px,
+      repeating-conic-gradient(#000 0 0.0001%, #0f0 0 0.0002%) 50% 50%/2500px 2500px;
+    background-blend-mode: difference;
+    opacity: 0.05;
+    pointer-events: none;
+  }
+  #videoInfo {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    font-size: 1.2em;
+    z-index: 10;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #00ff00;
+  }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>YouTube Time Machine</h1>
+  </div>
+  
+  <div class="tv-screen">
+    <div id="currentVideo">Video #1</div>
+    <div id="videoInfo">Loading...</div>
+    <iframe id="videoFrame" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    <div class="static"></div>
+  </div>
+  
+  <div class="controls">
+    <button onclick="changeVideo('prev')">Previous Video</button>
+    <button onclick="changeVideo('random')">Random Video</button>
+    <button onclick="changeVideo('next')">Next Video</button>
+  </div>
+</div>
+
+<script>
+  const oldYouTubeVideos = [
+    { id: 'jNQXAC9IVRw', title: "Me at the zoo", uploader: "jawed", date: "Apr 23, 2005" },
+    { id: 'dMH0bHeiRNg', title: "Evolution of Dance", uploader: "judsonlaipply", date: "Apr 6, 2006" },
+    { id: 'qRuNxHqwazs', title: "POWERTHIRST", uploader: "picnicface", date: "May 29, 2007" },
+    { id: 'dQw4w9WgXcQ', title: "Rick Astley - Never Gonna Give You Up", uploader: "RickAstleyVEVO", date: "Oct 25, 2009" },
+    { id: 'eBGIQ7ZuuiU', title: "Charlie bit my finger - again!", uploader: "HDCYT", date: "May 22, 2007" },
+    { id: '_OBlgSz8sSM', title: "Charlie the Unicorn", uploader: "FilmCow", date: "Jan 10, 2008" },
+    { id: 'EwTZ2xpQwpA', title: "Chocolate Rain", uploader: "TayZonday", date: "Apr 22, 2007" },
+    { id: 'QH2-TGUlwu4', title: "Nyan Cat [original]", uploader: "saraj00n", date: "Apr 5, 2011" },
+    { id: 'kfVsfOSbJY0', title: "Rebecca Black - Friday", uploader: "rebecca", date: "Sep 16, 2011" },
+    { id: 'KmtzQCSh6xk', title: "Numa Numa", uploader: "newgrounds", date: "Dec 12, 2006" },
+    { id: 'ZZ5LpwO-An4', title: "HEYYEYAAEYAAAEYAEYAA", uploader: "ProtoOfSnagem", date: "Jan 28, 2010" },
+    { id: 'MtN1YnoL46Q', title: "The Duck Song", uploader: "forrestfire101", date: "Mar 23, 2009" },
+    { id: 'xP1-oquwoL8', title: "Potter Puppet Pals: The Mysterious Ticking Noise", uploader: "Neil Cicierega", date: "Mar 23, 2007" },
+    { id: 'Tx1XIm6q4r4', title: "Leeroy Jenkins", uploader: "J!nx", date: "Aug 6, 2006" },
+    { id: 'sdUUx5FdySs', title: "Kiwi!", uploader: "Madyeti47", date: "Jun 24, 2006" },
+    { id: 'CsGYh8AacgY', title: "Caramelldansen (Swedish original)", uploader: "supergman88", date: "Nov 1, 2008" },
+    { id: 'hGlyFc79BUE', title: "Ultimate Dog Tease", uploader: "klaatu42", date: "May 3, 2011" },
+    { id: 'J---aiyznGQ', title: "Keyboard Cat", uploader: "charlieapple69", date: "Jun 7, 2007" },
+    { id: 'YersIyzsOpc', title: "Greatest freakout ever", uploader: "wafflepwn", date: "May 4, 2009" },
+    { id: 'oHg5SJYRHA0', title: "RickRoll'D", uploader: "cotter548", date: "May 15, 2007" }
+  ];
+
+  let currentVideoIndex = 0;
+
+  function changeVideo(direction) {
+    const videoDisplay = document.getElementById('currentVideo');
+    const videoFrame = document.getElementById('videoFrame');
+    const videoInfoDisplay = document.getElementById('videoInfo');
+
+    if (direction === 'next') {
+      currentVideoIndex = (currentVideoIndex + 1) % oldYouTubeVideos.length;
+    } else if (direction === 'prev') {
+      currentVideoIndex = (currentVideoIndex - 1 + oldYouTubeVideos.length) % oldYouTubeVideos.length;
+    } else if (direction === 'random') {
+      currentVideoIndex = Math.floor(Math.random() * oldYouTubeVideos.length);
+    }
+
+    const video = oldYouTubeVideos[currentVideoIndex];
+    videoDisplay.textContent = `Video #${currentVideoIndex + 1}`;
+    
+    // Show static effect
+    videoFrame.style.opacity = 0;
+    setTimeout(() => {
+      videoFrame.src = `https://www.youtube.com/embed/${video.id}?autoplay=1&controls=1&showinfo=0&rel=0`;
+      videoInfoDisplay.innerHTML = `<strong>${video.title}</strong><br>Uploaded by: ${video.uploader}<br>Date: ${video.date}`;
+      videoFrame.style.opacity = 1;
+    }, 500);
+  }
+
+  // Initial video load
+  changeVideo('random');
+
+  // Easter egg: Konami Code
+  let konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+  let konamiIndex = 0;
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === konamiCode[konamiIndex]) {
+      konamiIndex++;
+      if (konamiIndex === konamiCode.length) {
+        alert('Konami Code activated! Unlocking secret time warp...');
+        document.body.style.animation = 'timewarp 5s linear infinite';
+        konamiIndex = 0;
+      }
+    } else {
+      konamiIndex = 0;
+    }
+  });
+</script>
+
+<style>
+@keyframes timewarp {
+  0% { filter: hue-rotate(0deg) blur(0px); }
+  50% { filter: hue-rotate(180deg) blur(5px); }
+  100% { filter: hue-rotate(360deg) blur(0px); }
+}
+</style>
+
+</body></html>
