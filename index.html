@@ -1,0 +1,526 @@
+<html><head><base href=".">
+<link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&amp;display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+
+<style>
+    @keyframes flicker {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.8; }
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+
+    @keyframes flyAround {
+        0% { transform: translate(0, 0) rotate(0deg); }
+        25% { transform: translate(100px, 50px) rotate(90deg); }
+        50% { transform: translate(0, 100px) rotate(180deg); }
+        75% { transform: translate(-100px, 50px) rotate(270deg); }
+        100% { transform: translate(0, 0) rotate(360deg); }
+    }
+
+    body {
+        background-color: #0a0a0a;
+        color: white;
+        font-family: Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 20px;
+        background-image: radial-gradient(circle at center, #1a1a1a 0%, #0a0a0a 100%);
+        position: relative;
+        overflow-x: hidden;
+    }
+
+    .title {
+        font-family: 'UnifrakturMaguntia', cursive;
+        font-size: 48px;
+        color: #d4af37;
+        text-align: center;
+        margin: 20px 0;
+        text-shadow: 0 0 15px rgba(139, 0, 0, 0.5);
+        animation: float 4s infinite ease-in-out;
+    }
+
+    .candle {
+        position: fixed;
+        width: 100px;
+        height: 200px;
+        animation: flicker 3s infinite alternate;
+        z-index: -1;
+    }
+
+    .candle-left {
+        left: 50px;
+        top: 50px;
+    }
+
+    .candle-right {
+        right: 50px;
+        top: 50px;
+    }
+
+    .pentagram {
+        position: fixed;
+        width: 150px;
+        height: 150px;
+        opacity: 0.3;
+        animation: float 6s infinite ease-in-out;
+        z-index: -1;
+    }
+
+    .pentagram-left {
+        left: 20px;
+        bottom: 50px;
+    }
+
+    .pentagram-right {
+        right: 20px;
+        bottom: 50px;
+    }
+
+    .ouija-board {
+        width: 800px;
+        height: 500px;
+        background-image: linear-gradient(45deg, #2a1810 0%, #3b2b1f 50%, #2a1810 100%);
+        border-radius: 15px;
+        position: relative;
+        border: 15px solid #1a130e;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        box-shadow: 0 0 30px rgba(139, 0, 0, 0.3), inset 0 0 50px rgba(0,0,0,0.5);
+        background-size: 100px 100px;
+        background-image: 
+            repeating-linear-gradient(0deg, 
+                rgba(58, 43, 31, 0.2) 0px,
+                transparent 1px,
+                transparent 50px),
+            repeating-linear-gradient(90deg,
+                rgba(58, 43, 31, 0.2) 0px,
+                transparent 1px,
+                transparent 50px);
+    }
+
+    .letters {
+        display: grid;
+        grid-template-columns: repeat(11, 1fr);
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .letter {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: #d4af37;
+        text-shadow: 0 0 5px rgba(212, 175, 55, 0.5);
+        font-family: Arial, sans-serif;
+        font-weight: bold;
+        transition: text-shadow 0.3s;
+    }
+
+    .planchette {
+        width: 80px;
+        height: 120px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        transition: all 0.8s ease-in-out;
+        filter: drop-shadow(0 0 10px rgba(139, 0, 0, 0.5));
+        z-index: 2;
+    }
+
+    .question-box {
+        width: 80%;
+        padding: 15px;
+        margin: 20px;
+        background-color: #1a130e;
+        border: 2px solid #d4af37;
+        color: #d4af37;
+        font-family: Arial, sans-serif; 
+        font-size: 18px;
+        border-radius: 5px;
+        box-shadow: 0 0 15px rgba(139, 0, 0, 0.3);
+    }
+
+    .answer-display {
+        min-height: 30px;
+        margin: 10px;
+        color: #d4af37;
+        font-size: 28px;
+        text-align: center;
+        text-shadow: 0 0 10px rgba(139, 0, 0, 0.5);
+        font-family: Arial, sans-serif;
+    }
+
+    .words {
+        position: absolute;
+        bottom: 40px;
+        display: flex;
+        gap: 100px;
+        justify-content: center;
+        width: 100%;
+    }
+
+    .word {
+        font-size: 32px;
+        color: #d4af37;
+        text-shadow: 0 0 10px rgba(139, 0, 0, 0.5);
+        font-family: Arial, sans-serif;
+        font-weight: bold;
+    }
+
+    .history-box {
+        width: 780px;
+        margin-top: 20px;
+        padding: 20px;
+        background-color: rgba(26, 19, 14, 0.9);
+        border: 2px solid #8b0000;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(139, 0, 0, 0.2);
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    .history-entry {
+        margin: 10px 0;
+        color: #d4af37;
+        font-size: 16px;
+        padding: 5px;
+        border-bottom: 1px solid rgba(139, 0, 0, 0.3);
+        font-family: Arial, sans-serif;
+    }
+
+    ::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #1a130e;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #8b0000;
+        border-radius: 5px;
+    }
+
+    .ghost {
+        position: fixed;
+        width: 150px;
+        height: 150px;
+        z-index: -1;
+        opacity: 0.6;
+        filter: blur(1px);
+    }
+
+    .ghost-left {
+        left: 200px;
+        top: 300px;
+        animation: float 8s infinite ease-in-out;
+    }
+
+    .ghost-right {
+        right: 200px; 
+        top: 300px;
+        animation: float 7s infinite ease-in-out;
+    }
+
+    .crow {
+        position: fixed;
+        width: 100px;
+        height: 100px;
+        top: 100px;
+        right: 150px;
+        animation: flyAround 20s infinite linear;
+        z-index: -1;
+    }
+
+    .bat {
+        position: fixed; 
+        width: 80px;
+        height: 80px;
+        top: 150px;
+        left: 150px;
+        animation: flyAround 15s infinite linear reverse;
+        z-index: -1;
+    }
+</style>
+</head>
+<body>
+    <div class="title">Virtual Ouija</div>
+    <svg class="candle candle-left" viewBox="0 0 100 200">
+        <path d="M40,180 L60,180 L60,80 L40,80 Z" fill="#8B4513"/>
+        <path d="M45,80 Q50,40 55,80 Z" fill="#FFD700"/>
+        <circle cx="50" cy="60" r="15" fill="#FFA500">
+            <animate attributeName="r" values="15;17;15" dur="1s" repeatCount="indefinite"/>
+        </circle>
+    </svg>
+
+    <svg class="candle candle-right" viewBox="0 0 100 200">
+        <path d="M40,180 L60,180 L60,80 L40,80 Z" fill="#8B4513"/>
+        <path d="M45,80 Q50,40 55,80 Z" fill="#FFD700"/>
+        <circle cx="50" cy="60" r="15" fill="#FFA500">
+            <animate attributeName="r" values="15;17;15" dur="1.2s" repeatCount="indefinite"/>
+        </circle>
+    </svg>
+
+    <svg class="pentagram pentagram-left" viewBox="0 0 100 100">
+        <path d="M50,0 L61,35 L97,35 L68,57 L79,90 L50,69 L21,90 L32,57 L3,35 L39,35 Z" fill="none" stroke="#8b0000" stroke-width="2"/>
+    </svg>
+
+    <svg class="pentagram pentagram-right" viewBox="0 0 100 100">
+        <path d="M50,0 L61,35 L97,35 L68,57 L79,90 L50,69 L21,90 L32,57 L3,35 L39,35 Z" fill="none" stroke="#8b0000" stroke-width="2"/>
+    </svg>
+
+    <svg class="ghost ghost-left" viewBox="0 0 100 100">
+      <path d="M20,50 Q50,20 80,50 L80,80 Q65,70 50,80 Q35,70 20,80 Z" fill="rgba(255,255,255,0.2)">
+        <animate attributeName="d" values="M20,50 Q50,20 80,50 L80,80 Q65,70 50,80 Q35,70 20,80 Z;
+                  M20,55 Q50,25 80,55 L80,85 Q65,75 50,85 Q35,75 20,85 Z;
+                  M20,50 Q50,20 80,50 L80,80 Q65,70 50,80 Q35,70 20,80 Z" dur="4s" repeatCount="indefinite"/>
+      </path>
+      <circle cx="40" cy="45" r="5" fill="rgba(255,255,255,0.3)"/>
+      <circle cx="60" cy="45" r="5" fill="rgba(255,255,255,0.3)"/>
+    </svg>
+
+    <svg class="ghost ghost-right" viewBox="0 0 100 100">
+      <path d="M20,50 Q50,20 80,50 L80,80 Q65,70 50,80 Q35,70 20,80 Z" fill="rgba(255,255,255,0.2)">
+        <animate attributeName="d" values="M20,50 Q50,20 80,50 L80,80 Q65,70 50,80 Q35,70 20,80 Z;
+                  M20,55 Q50,25 80,55 L80,85 Q65,75 50,85 Q35,75 20,85 Z;
+                  M20,50 Q50,20 80,50 L80,80 Q65,70 50,80 Q35,70 20,80 Z" dur="3s" repeatCount="indefinite"/>
+      </path>
+      <circle cx="40" cy="45" r="5" fill="rgba(255,255,255,0.3)"/>
+      <circle cx="60" cy="45" r="5" fill="rgba(255,255,255,0.3)"/>
+    </svg>
+
+    <div class="crow">
+      <svg viewBox="0 0 100 100">
+        <path d="M40,20 Q50,10 60,20 L80,40 L60,30 L40,30 L20,40 Z" fill="#000000"/>
+        <path d="M30,30 L70,30 L50,50 Z" fill="#000000"/>
+        <circle cx="45" cy="25" r="2" fill="red"/>
+        <circle cx="55" cy="25" r="2" fill="red"/>
+      </svg>
+    </div>
+
+    <div class="bat">
+      <svg viewBox="0 0 100 100">
+        <path d="M30,50 Q50,30 70,50 Q90,30 80,20 Q70,30 50,20 Q30,30 20,20 Q10,30 30,50" fill="#000000">
+          <animate attributeName="d" values="M30,50 Q50,30 70,50 Q90,30 80,20 Q70,30 50,20 Q30,30 20,20 Q10,30 30,50;
+                    M30,55 Q50,35 70,55 Q90,35 80,25 Q70,35 50,25 Q30,35 20,25 Q10,35 30,55;
+                    M30,50 Q50,30 70,50 Q90,30 80,20 Q70,30 50,20 Q30,30 20,20 Q10,30 30,50" dur="0.5s" repeatCount="indefinite"/>
+        </path>
+        <circle cx="45" cy="40" r="2" fill="red"/>
+        <circle cx="55" cy="40" r="2" fill="red"/>
+      </svg>
+    </div>
+
+    <div class="ouija-board">
+        <input type="text" class="question-box" placeholder="Ask your question..." maxlength="100">
+        <div class="answer-display"></div>
+        
+        <svg class="planchette" viewBox="0 0 100 150">
+            <path d="M50 0 L100 100 L75 150 L25 150 L0 100 Z" fill="#1a130e" stroke="#8b0000" stroke-width="2"/>
+            <circle cx="50" cy="60" r="15" fill="transparent" stroke="#8b0000" stroke-width="2"/>
+            <path d="M50 45 L50 75" stroke="#8b0000" stroke-width="1"/>
+            <path d="M35 60 L65 60" stroke="#8b0000" stroke-width="1"/>
+        </svg>
+
+        <div class="letters">
+            <div class="letter">A</div>
+            <div class="letter">B</div>
+            <div class="letter">C</div>
+            <div class="letter">D</div>
+            <div class="letter">E</div>
+            <div class="letter">F</div>
+            <div class="letter">G</div>
+            <div class="letter">H</div>
+            <div class="letter">I</div>
+            <div class="letter">J</div>
+            <div class="letter">K</div>
+            <div class="letter">L</div>
+            <div class="letter">M</div>
+            <div class="letter">N</div>
+            <div class="letter">O</div>
+            <div class="letter">P</div>
+            <div class="letter">Q</div>
+            <div class="letter">R</div>
+            <div class="letter">S</div>
+            <div class="letter">T</div>
+            <div class="letter">U</div>
+            <div class="letter">V</div>
+            <div class="letter">W</div>
+            <div class="letter">X</div>
+            <div class="letter">Y</div>
+            <div class="letter">Z</div>
+            <div class="letter">1</div>
+            <div class="letter">2</div>
+            <div class="letter">3</div>
+            <div class="letter">4</div>
+            <div class="letter">5</div>
+            <div class="letter">6</div>
+            <div class="letter">7</div>
+            <div class="letter">8</div>
+            <div class="letter">9</div>
+            <div class="letter">0</div>
+        </div>
+
+        <div class="words">
+            <div class="word">YES</div>
+            <div class="word">NO</div>
+            <div class="word">GOODBYE</div>
+        </div>
+    </div>
+    <div class="history-box"></div>
+
+<script>const responseCategories = {
+  farewell: ["GOODBYE", "FAREWELL", "SEE YOU", "BYE", "CYA"],
+  confirmation: ["YES", "CERTAINLY", "INDEED"],
+  negation: ["NO", "NEVER", "NOT AT ALL"]
+};
+async function fetchGPTResponse(question) {
+  try {
+    const response = await fetch('/api/ai_completion', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        prompt: `Generate a very short response for a Ouija board question: "${question}". Keep the responses within 2-3 words. Ensure the responses are coherent in relation to the following question words if present: who, what, when, where, why, and how.
+                    
+                    interface AIResponse {
+                      response: string;
+                    }
+                    `,
+        data: {
+          question
+        }
+      })
+    });
+    const data = await response.json();
+    return data.response;
+  } catch (error) {
+    console.error('Error fetching GPT response:', error);
+    return 'SPIRITS ARE SILENT';
+  }
+}
+const letterElements = document.querySelectorAll('.letter');
+const planchette = document.querySelector('.planchette');
+const questionBox = document.querySelector('.question-box');
+const answerDisplay = document.querySelector('.answer-display');
+const historyBox = document.querySelector('.history-box');
+let isAnimating = false;
+function animateResponse(answer) {
+  if (typeof answer !== 'string') {
+    console.error('Error: answer is not a string');
+    return;
+  }
+  const flickerInterval = setInterval(() => {
+    document.body.style.backgroundColor = Math.random() > 0.8 ? '#1a0000' : '#0a0a0a';
+    document.querySelectorAll('.pentagram').forEach(p => {
+      p.style.opacity = Math.random() * 0.5 + 0.1;
+    });
+  }, 100);
+  const letters = Array.from(answer);
+  const animateLetters = async idx => {
+    if (idx < letters.length) {
+      await moveToLetter(letters[idx]);
+      answerDisplay.textContent += letters[idx];
+      setTimeout(() => animateLetters(idx + 1), 800);
+    } else {
+      clearInterval(flickerInterval);
+    }
+  };
+  animateLetters(0);
+}
+function styleOuijaBoardForFarewell() {
+  document.querySelector('.ouija-board').style.opacity = '0.5';
+  setTimeout(() => {
+    document.querySelector('.ouija-board').style.opacity = '1';
+  }, 2000);
+}
+function addAnswerToHistory(question, answer) {
+  const historyEntry = document.createElement('div');
+  historyEntry.className = 'history-entry';
+  historyEntry.innerHTML = `<strong>Q:</strong> ${question}<br><strong>A:</strong> ${answer}`;
+  historyBox.insertBefore(historyEntry, historyBox.firstChild);
+}
+function resetOuijaSettings() {
+  setTimeout(() => {
+    planchette.style.top = '50%';
+    planchette.style.left = '50%';
+    isAnimating = false;
+  }, 1000);
+  questionBox.value = '';
+  document.body.style.backgroundColor = '#0a0a0a';
+  document.querySelectorAll('.pentagram').forEach(p => {
+    p.style.opacity = 0.3;
+  });
+}
+function moveToLetter(letter) {
+  return new Promise(resolve => {
+    const letterElement = Array.from(letterElements).find(el => el.textContent === letter);
+    if (letterElement) {
+      const rect = letterElement.getBoundingClientRect();
+      const boardRect = document.querySelector('.ouija-board').getBoundingClientRect();
+      const x = rect.left - boardRect.left + rect.width / 2;
+      const y = rect.top - boardRect.top + rect.height / 2;
+      planchette.style.left = `${x}px`;
+      planchette.style.top = `${y}px`;
+      letterElement.style.textShadow = '0 0 20px rgba(139, 0, 0, 0.8)';
+      setTimeout(() => {
+        letterElement.style.textShadow = '0 0 5px rgba(139, 0, 0, 0.5)';
+      }, 800);
+      if (Math.random() > 0.5) {
+        document.querySelector('.ouija-board').style.transform = `rotate(${(Math.random() - 0.5) * 2}deg)`;
+        setTimeout(() => {
+          document.querySelector('.ouija-board').style.transform = 'none';
+        }, 200);
+      }
+      setTimeout(resolve, 800);
+    } else {
+      resolve();
+    }
+  });
+}
+document.body.addEventListener('keypress', async e => {
+  if (e.key === 'Enter' && !isAnimating && questionBox.value.trim() !== '') {
+    isAnimating = true;
+    const question = questionBox.value;
+    answerDisplay.textContent = '';
+    const answer = await fetchGPTResponse(question);
+    if (!responseCategories.farewell.includes(answer)) {
+      await animateResponse(answer);
+    } else {
+      styleOuijaBoardForFarewell();
+    }
+    addAnswerToHistory(question, answer);
+    resetOuijaSettings();
+  }
+});
+setInterval(() => {
+  const letters = document.querySelectorAll('.letter');
+  const randomLetters = Array.from(letters).sort(() => Math.random() - 0.5).slice(0, 3);
+  randomLetters.forEach(letter => {
+    letter.style.textShadow = '0 0 15px rgba(139, 0, 0, 0.7)';
+    setTimeout(() => {
+      letter.style.textShadow = '0 0 5px rgba(139, 0, 0, 0.5)';
+    }, 500);
+  });
+}, 2000);
+setInterval(() => {
+  document.querySelectorAll('.ghost').forEach(ghost => {
+    ghost.style.opacity = (Math.random() * 0.3 + 0.3).toString();
+  });
+}, 3000);</script>
+</body>
+</html>
