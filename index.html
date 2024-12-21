@@ -1,0 +1,1228 @@
+<html><head><base href="/">
+<title>Dandy's World</title>
+<style>
+body {
+    margin: 0;
+    background: #1a1a1a;
+    color: white;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+#gameTitle {
+    text-align: center;
+    margin: 20px;
+}
+
+#startScreen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#startButton {
+    padding: 15px 30px;
+    font-size: 24px;
+    background: #4CAF50;
+    border: none;
+    border-radius: 10px;
+    color: white;
+    cursor: pointer;
+    margin: 20px;
+}
+
+#characterSelect {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+}
+
+.character-options {
+    display: flex;
+    gap: 40px;
+    margin: 20px;
+}
+
+.character-card {
+    background: #333;
+    padding: 20px;
+    border-radius: 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.character-card:hover {
+    transform: scale(1.05);
+}
+
+.character-image {
+    width: 150px;
+    height: 150px;
+    object-fit: contain;
+}
+
+.game-container {
+    position: relative;
+    width: 800px;
+    height: 600px;
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+#gameArea {
+    width: 1600px;
+    height: 1200px;
+    position: relative;
+    overflow: auto;
+}
+
+#player {
+    width: 50px;
+    height: 50px;
+    position: absolute;
+    transition: all 0.1s;
+}
+
+#dandy {
+    width: 60px;
+    height: 60px;
+    position: absolute;
+    left: 100px;
+    top: 300px;
+    cursor: pointer;
+}
+
+#shop {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.9);
+    padding: 20px;
+    border-radius: 10px;
+    z-index: 100;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.shop-item {
+    background: #333;
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.shop-item img {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+}
+
+.shop-item-details {
+    flex-grow: 1;
+}
+
+.buy-button {
+    padding: 5px 10px;
+    background: #4CAF50;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+}
+
+.buy-button:disabled {
+    background: #666;
+    cursor: not-allowed;
+}
+
+#joystick {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 150px;
+    height: 150px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: none;
+    touch-action: none;
+}
+
+#joystick-knob {
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#closeShop {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #ff4444;
+    border: none;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#twistedIndex {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.9);
+    padding: 20px;
+    border-radius: 10px;
+    z-index: 100;
+    max-height: 80vh;
+    overflow-y: auto;
+    width: 80%;
+    max-width: 600px;
+}
+
+.twisted-entry {
+    background: #333;
+    margin: 10px 0;
+    padding: 15px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.twisted-entry img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+}
+
+.twisted-info {
+    flex-grow: 1;
+}
+
+#closeIndex {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #ff4444;
+    border: none;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.index-greeting {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1.2em;
+    color: #4CAF50;
+}
+
+.elevator-doors {
+    width: 100%;
+    height: 100%;
+    display: flex;
+}
+
+.elevator-doors .door {
+    width: 50%;
+    height: 100%;
+    background: #222;
+    transition: transform 1s;
+}
+
+.door.left {
+    transform-origin: left;
+}
+
+.door.right {
+    transform-origin: right;
+}
+
+.machine {
+    width: 60px;
+    height: 60px;
+    position: absolute;
+    background: #666;
+    border: 2px solid #888;
+    cursor: pointer;
+}
+
+.machine.possessed {
+    background: #4488ff;
+}
+
+.twisted {
+    width: 50px;
+    height: 50px;
+    position: absolute;
+    transition: left 0.2s, top 0.2s;
+}
+
+.twisted.stunned {
+    opacity: 0.5;
+    pointer-events: none;
+    filter: grayscale(100%);
+}
+
+@media (max-width: 768px) {
+    #joystick {
+        display: block;
+    }
+}
+</style>
+</head>
+<body>
+
+<div id="gameTitle">
+    <h1>Dandy's World</h1>
+    <img src="DandyFullIcon.png" alt="Dandy" width="100">
+</div>
+
+<div id="startScreen">
+    <button id="startButton">Start Game</button>
+</div>
+
+<div id="characterSelect">
+    <h2>Choose Your Character</h2>
+    <div class="character-options">
+        <div class="character-card" data-character="poppy">
+            <img src="PoppyArtwork.png" alt="Poppy" class="character-image">
+            <h3>Poppy</h3>
+            <p>Speed boost for 3s when attacked</p>
+        </div>
+        <div class="character-card" data-character="boxten">
+            <img src="BoxtenArtwork.png" alt="Boxten" class="character-image">
+            <h3>Boxten</h3>
+            <p>Extra extraction speed</p>
+        </div>
+    </div>
+</div>
+
+<div class="game-container">
+    <div id="gameArea">
+        <img id="player" src="" alt="Player">
+        <img id="dandy" src="DandyFullIcon.png" alt="Dandy">
+        <button id="startPlaying" style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);">Start Playing</button>
+        
+        <div id="elevator" style="display: none; position: absolute; width: 100%; height: 100%; background: #333; z-index: 10;">
+            <div class="elevator-doors" style="display: flex;">
+                <div class="door left"></div>
+                <div class="door right"></div>
+            </div>
+        </div>
+
+        <div id="machines" style="display: none;">
+            <!-- Will be populated dynamically -->
+        </div>
+
+        <div id="hearts" style="position: absolute; top: 10px; left: 10px;">
+            ❤️❤️❤️
+        </div>
+
+        <div id="skillCheck" style="display: none; position: absolute; width: 200px; height: 20px; background: #444;">
+            <div class="targetZone" style="position: absolute; width: 30px; height: 100%; background: yellow;"></div>
+            <div class="marker" style="position: absolute; width: 5px; height: 100%; background: white;"></div>
+        </div>
+
+        <div id="shop">
+            <button id="closeShop">Close Shop</button>
+            <h2>Dandy's Shop</h2>
+            <div id="shopItems"></div>
+        </div>
+        <div id="twistedIndex">
+            <button id="closeIndex">Close</button>
+            <div class="index-content">
+                <h2>Twisted Index</h2>
+                <div id="indexEntries"></div>
+            </div>
+        </div>
+        <img id="tisha" src="Tisha.webp" alt="Tisha" style="position: absolute; right: 100px; top: 300px; width: 60px; height: 60px; cursor: pointer;">
+        <div id="ichorDisplay" style="position: absolute; top: 20px; right: 20px; color: #4CAF50; font-size: 24px;"></div>
+    </div>
+</div>
+
+<div id="joystick">
+    <div id="joystick-knob"></div>
+</div>
+
+<script>
+const gameState = {
+    selectedCharacter: null,
+    unlockedCharacters: ['poppy', 'boxten'],
+    playerPosition: { x: 400, y: 300 },
+    ichor: 0,
+    metCharacters: [],
+    hearts: 3,
+    currentFloor: 1,
+    machinesCompleted: 0,
+    elevatorOpen: false,
+    gameActive: false,
+    activeTwisteds: [],
+    sounds: {
+        elevator: new Audio('dandys_world_elevator.mp3'),
+        hit: new Audio('dandy\'s-world-(hit)-made-with-Voicemod.mp3'),
+        caught: new Audio('dandy\'s-world-(caught-sound)-made-with-Voicemod.mp3'),
+        death: new Audio('dandy\'s-world-(death)-made-with-Voicemod.mp3'),
+        popup: new Audio('Pop-Up.ogg'),
+        twistedVeeSpot: new Audio('TwistedVeeSpot.ogg')
+    },
+    playerSpeed: 12,
+    debuffs: {
+        slowedBy: 0
+    }
+};
+
+function startGame() {
+    function gameLoop() {
+        if (gameState.gameActive) {
+            updateTwisteds();
+        }
+        requestAnimationFrame(gameLoop);
+    }
+    
+    gameLoop(); // Start the game loop
+    
+    player.style.display = 'block';
+    dandy.style.display = 'block';
+    tisha.style.display = 'block';
+    document.getElementById('startPlaying').style.display = 'block';
+    document.getElementById('elevator').style.display = 'none';
+    document.getElementById('machines').style.display = 'none';
+    
+    gameState.gameActive = false;
+    gameState.hearts = 3;
+    updateHearts();
+    
+    if ('ontouchstart' in window) {
+        joystick.style.display = 'block';
+    }
+}
+
+function spawnTwisteds() {
+    const availableTwisteds = [
+        'twisted_poppy',
+        'twisted_boxten', 
+        'twisted_connie',
+        'twisted_gigi',
+        'twisted_scraps',
+        'twisted_vee'
+    ];
+    
+    // Shuffle array
+    for (let i = availableTwisteds.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [availableTwisteds[i], availableTwisteds[j]] = [availableTwisteds[j], availableTwisteds[i]];
+    }
+    
+    const numTwisteds = Math.min(2 + Math.floor(gameState.currentFloor / 2), 4);
+    gameState.activeTwisteds = [];
+    
+    for (let i = 0; i < numTwisteds; i++) {
+        const newTwisted = {
+            type: availableTwisteds[i],
+            x: Math.random() * (gameArea.offsetWidth - 50),
+            y: Math.random() * (gameArea.offsetHeight - 50),
+            stunned: false,
+            targetX: null,
+            targetY: null
+        };
+        gameState.activeTwisteds.push(newTwisted);
+    }
+
+    spawnTwistedElements();
+}
+
+function getTwistedImage(twistedType) {
+    const imageMap = {
+        'twisted_poppy': 'creepy_cartoon_girl.png',
+        'twisted_boxten': 'purple_cube_character.png',
+        'twisted_connie': 'twisted_connie.webp',
+        'twisted_gigi': 'Twisted_Gigi.png',
+        'twisted_scraps': 'TwistedScraps.webp',
+        'twisted_vee': 'TwistedVee.webp'
+    };
+    return imageMap[twistedType] || 'TwistedScraps.webp';
+}
+
+function spawnTwistedElements() {
+    document.querySelectorAll('.twisted').forEach(el => el.remove());
+    
+    gameState.activeTwisteds.forEach(twisted => {
+        const twistedElement = document.createElement('img');
+        twistedElement.className = 'twisted';
+        twistedElement.src = getTwistedImage(twisted.type);
+        twistedElement.style.left = twisted.x + 'px';
+        twistedElement.style.top = twisted.y + 'px';
+        twistedElement.alt = twisted.type;
+        
+        twistedElement.onerror = () => {
+            console.error(`Failed to load image for ${twisted.type}`);
+            twistedElement.src = 'TwistedScraps.webp';
+        };
+        
+        gameArea.appendChild(twistedElement);
+    });
+}
+
+function loadProgress() {
+    const savedState = localStorage.getItem('dandyWorldSave');
+    if (savedState) {
+        const parsedState = JSON.parse(savedState);
+        Object.assign(gameState, parsedState);
+    }
+}
+
+function saveProgress() {
+    localStorage.setItem('dandyWorldSave', JSON.stringify(gameState));
+}
+
+function initializeSounds() {
+    try {
+        gameState.sounds = {
+            elevator: new Audio('dandys_world_elevator.mp3'),
+            hit: new Audio('dandy\'s-world-(hit)-made-with-Voicemod.mp3'),
+            caught: new Audio('dandy\'s-world-(caught-sound)-made-with-Voicemod.mp3'),
+            death: new Audio('dandy\'s-world-(death)-made-with-Voicemod.mp3'),
+            popup: new Audio('Pop-Up.ogg'),
+            twistedVeeSpot: new Audio('TwistedVeeSpot.ogg')
+        };
+
+        Object.values(gameState.sounds).forEach(audio => {
+            if (audio && typeof audio.load === 'function') {
+                audio.load();
+                audio.volume = 0.5;
+            }
+        });
+    } catch (err) {
+        console.log('Error initializing sounds:', err);
+        gameState.sounds = {
+            elevator: { play: () => Promise.resolve() },
+            hit: { play: () => Promise.resolve() },
+            caught: { play: () => Promise.resolve() },
+            death: { play: () => Promise.resolve() },
+            popup: { play: () => Promise.resolve() },
+            twistedVeeSpot: { play: () => Promise.resolve() }
+        };
+    }
+}
+
+initializeSounds();
+
+const shopItems = [
+    {
+        id: 'gigi',
+        name: 'Gigi',
+        description: 'A speedy character with unique abilities',
+        price: 1000,
+        image: 'Gigi.webp'
+    },
+    {
+        id: 'vee',
+        name: 'Vee',
+        description: 'A technical character with hacking abilities',
+        price: 1500,
+        image: 'Vee.webp'
+    }
+];
+
+const startButton = document.getElementById('startButton');
+const characterSelect = document.getElementById('characterSelect');
+const startScreen = document.getElementById('startScreen');
+const gameArea = document.getElementById('gameArea');
+const player = document.getElementById('player');
+const gameTitle = document.getElementById('gameTitle');
+const joystick = document.getElementById('joystick');
+const joystickKnob = document.getElementById('joystick-knob');
+const shop = document.getElementById('shop');
+const dandy = document.getElementById('dandy');
+const closeShopButton = document.getElementById('closeShop');
+const tisha = document.getElementById('tisha');
+const twistedIndex = document.getElementById('twistedIndex');
+const closeIndexButton = document.getElementById('closeIndex');
+
+function canSeePlayer(twisted) {
+    const dx = gameState.playerPosition.x - twisted.x;
+    const dy = gameState.playerPosition.y - twisted.y;
+    return Math.sqrt(dx * dx + dy * dy) < 200; 
+}
+
+function chasePlayer(twisted) {
+    const speed = 2; 
+    const dx = gameState.playerPosition.x - twisted.x;
+    const dy = gameState.playerPosition.y - twisted.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    
+    if (distance > 0) {
+        const moveX = (dx / distance) * speed;
+        const moveY = (dy / distance) * speed;
+        
+        twisted.x += moveX;
+        twisted.y += moveY;
+        
+        const element = document.querySelector(`.twisted[alt="${twisted.type}"]`);
+        if (element) {
+            element.style.left = twisted.x + 'px';
+            element.style.top = twisted.y + 'px';
+        }
+    }
+    
+    if (distance < 30 && !twisted.stunned) { 
+        try {
+            gameState.sounds.caught.play()
+                .catch(err => console.log('Error playing caught sound:', err));
+        } catch (err) {
+            console.log('Error playing caught sound:', err);
+        }
+        takeDamage();
+        
+        if (twisted.type === 'twisted_vee') {
+            try {
+                gameState.sounds.twistedVeeSpot.play()
+                    .catch(err => console.log('Error playing Vee spot sound:', err));
+            } catch (err) {
+                console.log('Error playing Vee spot sound:', err); 
+            }
+            gameState.debuffs.slowedBy = 0.5; 
+            setTimeout(() => {
+                gameState.debuffs.slowedBy = 0;
+            }, 2000);
+        }
+    }
+}
+
+function roamRandomly(twisted) {
+    if (!twisted.targetX || !twisted.targetY || 
+        (Math.abs(twisted.x - twisted.targetX) < 5 && Math.abs(twisted.y - twisted.targetY) < 5)) {
+        twisted.targetX = Math.random() * (gameArea.offsetWidth - 50);
+        twisted.targetY = Math.random() * (gameArea.offsetHeight - 50);
+    }
+    
+    const speed = 1; 
+    const dx = twisted.targetX - twisted.x;
+    const dy = twisted.targetY - twisted.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    
+    if (distance > 0) {
+        const moveX = (dx / distance) * speed;
+        const moveY = (dy / distance) * speed;
+        
+        twisted.x += moveX;
+        twisted.y += moveY;
+        
+        const element = document.querySelector(`.twisted[alt="${twisted.type}"]`);
+        if (element) {
+            element.style.left = twisted.x + 'px';
+            element.style.top = twisted.y + 'px';
+        }
+    }
+}
+
+function updateTwisteds() {
+    if (!gameState.gameActive) return;
+    
+    gameState.activeTwisteds.forEach(twisted => {
+        if (twisted.stunned) return;
+        
+        const dx = gameState.playerPosition.x - twisted.x;
+        const dy = gameState.playerPosition.y - twisted.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distance < 200) { 
+            chasePlayer(twisted);
+        } else {
+            roamRandomly(twisted);
+        }
+    });
+}
+
+function beginFloorGame() {
+    dandy.style.display = 'none';
+    tisha.style.display = 'none';
+    document.getElementById('startPlaying').style.display = 'none';
+    const elevator = document.getElementById('elevator');
+    elevator.style.display = 'block';
+    
+    try {
+        if (gameState.sounds.elevator) {
+            gameState.sounds.elevator.play()
+                .catch(err => console.log('Error playing elevator sound:', err));
+        }
+    } catch (err) {
+        console.log('Error accessing elevator sound:', err);
+    }
+
+    const leftDoor = elevator.querySelector('.door.left');
+    const rightDoor = elevator.querySelector('.door.right');
+    
+    leftDoor.style.transform = 'scaleX(1)';
+    rightDoor.style.transform = 'scaleX(1)';
+    
+    setTimeout(() => {
+        leftDoor.style.transform = 'scaleX(0)';
+        rightDoor.style.transform = 'scaleX(0)';
+        
+        setTimeout(() => {
+            elevator.style.display = 'none';
+            gameState.gameActive = true;
+            setupFloor();
+        }, 1000);
+    }, 1000);
+}
+
+function setupFloor() {
+    gameState.hearts = 3;
+    updateHearts();
+    
+    const machines = document.getElementById('machines');
+    machines.style.display = 'block';
+    spawnMachines();
+    
+    spawnTwisteds();
+}
+
+function updateHearts() {
+    const heartsDisplay = document.getElementById('hearts');
+    heartsDisplay.innerHTML = '❤️'.repeat(gameState.hearts);
+}
+
+document.getElementById('startPlaying').addEventListener('click', () => {
+    beginFloorGame();
+});
+
+function updateShop() {
+    const shopItemsContainer = document.getElementById('shopItems');
+    shopItemsContainer.innerHTML = '';
+    
+    shopItems.forEach(item => {
+        if (gameState.unlockedCharacters.includes(item.id)) return; 
+        
+        const itemElement = document.createElement('div');
+        itemElement.className = 'shop-item';
+        itemElement.innerHTML = `
+            <img src="${item.image}" alt="${item.name}">
+            <div class="shop-item-details">
+                <h3>${item.name}</h3>
+                <p>${item.description}</p>
+                <p>Price: ${item.price} ichor</p>
+            </div>
+            <button class="buy-button" ${canAffordItem(item.price) ? '' : 'disabled'}>Buy</button>
+        `;
+
+        const buyButton = itemElement.querySelector('.buy-button');
+        buyButton.addEventListener('click', () => {
+            if (canAffordItem(item.price)) {
+                gameState.ichor -= item.price;
+                gameState.unlockedCharacters.push(item.id);
+                updateShop();
+                saveProgress();
+            }
+        });
+        
+        shopItemsContainer.appendChild(itemElement);
+    });
+}
+
+function updateTwistedIndex() {
+    const indexEntries = document.getElementById('indexEntries');
+    indexEntries.innerHTML = `
+        <div class="index-greeting">
+            "Hiya! Welcome to this twisted Index! It's sure to help you understand some Twisteds!"
+        </div>
+    `;
+    
+    twistedData.forEach(twisted => {
+        const entryElement = document.createElement('div');
+        entryElement.className = 'twisted-entry';
+        entryElement.innerHTML = `
+            <img src="${twisted.image}" alt="${twisted.name}">
+            <div class="twisted-info">
+                <h3>${twisted.name}</h3>
+                <p>${twisted.description}</p>
+            </div>
+        `;
+        indexEntries.appendChild(entryElement);
+    });
+}
+
+function checkProximity(pos1, pos2) {
+    const dx = pos1.x - pos2.x;
+    const dy = pos1.y - pos2.y;
+    return Math.sqrt(dx * dx + dy * dy) < 100; 
+}
+
+dandy.addEventListener('click', () => {
+    if (checkProximity(gameState.playerPosition, { x: 100, y: 300 })) {
+        shop.style.display = 'block';
+        updateShop();
+    }
+});
+
+closeShopButton.addEventListener('click', () => {
+    shop.style.display = 'none';
+});
+
+tisha.addEventListener('click', () => {
+    if (checkProximity(gameState.playerPosition, { x: 700, y: 300 })) {
+        twistedIndex.style.display = 'block';
+        updateTwistedIndex();
+    }
+});
+
+closeIndexButton.addEventListener('click', () => {
+    twistedIndex.style.display = 'none';
+});
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'e') {
+        if (checkProximity(gameState.playerPosition, { x: 100, y: 300 })) {
+            shop.style.display = 'block';
+            updateShop();
+        }
+        if (checkProximity(gameState.playerPosition, { x: 700, y: 300 })) {
+            twistedIndex.style.display = 'block';
+            updateTwistedIndex();
+        }
+    }
+});
+
+startButton.addEventListener('click', () => {
+    startScreen.style.display = 'none';
+    characterSelect.style.display = 'flex';
+});
+
+document.querySelectorAll('.character-card').forEach(card => {
+    card.addEventListener('click', () => {
+        const character = card.dataset.character;
+        gameState.selectedCharacter = character;
+        player.src = character === 'poppy' ? 'PoppyArtwork.png' : 'BoxtenArtwork.png';
+        characterSelect.style.display = 'none';
+        gameTitle.style.display = 'none';
+        gameArea.style.display = 'block';
+        startGame();
+        saveProgress();
+    });
+});
+
+let joystickActive = false;
+let joystickCenter = { x: 0, y: 0 };
+
+function handleJoystickStart(e) {
+    joystickActive = true;
+    const touch = e.touches[0];
+    const rect = joystick.getBoundingClientRect();
+    joystickCenter.x = rect.left + rect.width / 2;
+    joystickCenter.y = rect.top + rect.height / 2;
+}
+
+function handleJoystickMove(e) {
+    if (!joystickActive) return;
+    e.preventDefault();
+    
+    const touch = e.touches[0];
+    const maxDistance = 50;
+    
+    let dx = touch.clientX - joystickCenter.x;
+    let dy = touch.clientY - joystickCenter.y;
+    
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    
+    if (distance > maxDistance) {
+        dx = (dx / distance) * maxDistance;
+        dy = (dy / distance) * maxDistance;
+    }
+    
+    joystickKnob.style.transform = `translate(${dx}px, ${dy}px)`;
+    
+    const speed = 5;
+    const normalizedDx = dx / maxDistance;
+    const normalizedDy = dy / maxDistance;
+    
+    let newX = gameState.playerPosition.x + normalizedDx * speed;
+    let newY = gameState.playerPosition.y + normalizedDy * speed;
+    
+    updatePlayerPosition(newX, newY);
+}
+
+function handleJoystickEnd() {
+    joystickActive = false;
+    joystickKnob.style.transform = 'translate(-50%, -50%)';
+}
+
+joystick.addEventListener('touchstart', handleJoystickStart);
+joystick.addEventListener('touchmove', handleJoystickMove);
+joystick.addEventListener('touchend', handleJoystickEnd);
+
+function updatePlayerPosition(x, y) {
+    const speed = gameState.playerSpeed * (1 - gameState.debuffs.slowedBy);
+    const dx = x - gameState.playerPosition.x;
+    const dy = y - gameState.playerPosition.y;
+    
+    const moveX = dx * (speed / 5); 
+    const moveY = dy * (speed / 5);
+    
+    x = gameState.playerPosition.x + moveX;
+    y = gameState.playerPosition.y + moveY;
+    
+    x = Math.max(0, Math.min(x, gameArea.offsetWidth - player.offsetWidth));
+    y = Math.max(0, Math.min(y, gameArea.offsetHeight - player.offsetHeight));
+    
+    gameState.playerPosition.x = x;
+    gameState.playerPosition.y = y;
+    player.style.left = x + 'px';
+    player.style.top = y + 'px';
+
+    const gameContainer = gameArea.parentElement;
+    const viewportWidth = gameContainer.offsetWidth;
+    const viewportHeight = gameContainer.offsetHeight;
+    
+    const scrollX = x - (viewportWidth / 2) + (player.offsetWidth / 2);
+    const scrollY = y - (viewportHeight / 2) + (player.offsetHeight / 2);
+    
+    gameArea.parentElement.scrollLeft = Math.max(0, Math.min(scrollX, gameArea.offsetWidth - viewportWidth));
+    gameArea.parentElement.scrollTop = Math.max(0, Math.min(scrollY, gameArea.offsetHeight - viewportHeight));
+}
+
+function takeDamage() {
+    if (!gameState.gameActive) return;
+    
+    gameState.hearts--;
+    updateHearts();
+    try {
+        gameState.sounds.hit.play()
+            .catch(err => console.log('Error playing hit sound:', err));
+    } catch (err) {
+        console.log('Error playing hit sound:', err);
+    }
+    stunTwisteds();
+    
+    if (gameState.selectedCharacter === 'poppy') {
+        gameState.playerSpeed = 16; 
+        setTimeout(() => {
+            gameState.playerSpeed = 12; 
+        }, 3000);
+    }
+    
+    if (gameState.hearts <= 0) {
+        die();
+    }
+}
+
+function die() {
+    try {
+        gameState.sounds.death.play();
+    } catch(err) {
+        console.log('Error playing death sound:', err);
+    }
+    returnToLobby();
+}
+
+function returnToLobby() {
+    gameState.gameActive = false;
+    gameState.machinesCompleted = 0;
+    gameState.hearts = 3;
+    gameState.elevatorOpen = false;
+    gameState.playerSpeed = 12; 
+    gameState.debuffs.slowedBy = 0; 
+    
+    document.querySelectorAll('.twisted').forEach(el => el.remove());
+    document.getElementById('machines').innerHTML = '';
+    document.getElementById('machines').style.display = 'none';
+    document.getElementById('elevator').style.display = 'none';
+    
+    dandy.style.display = 'block';
+    tisha.style.display = 'block';
+    document.getElementById('startPlaying').style.display = 'block';
+    
+    updatePlayerPosition(400, 300);
+    updateHearts();
+    document.getElementById('skillCheck').style.display = 'none';
+    
+    updateLobbyDisplay(); 
+    saveProgress();
+}
+
+function updateLobbyDisplay() {
+    const ichorDisplay = document.getElementById('ichorDisplay');
+    ichorDisplay.textContent = `Ichor: ${gameState.ichor}`;
+}
+
+function startSkillCheck(machine) {
+    const skillCheck = document.getElementById('skillCheck');
+    skillCheck.style.display = 'block';
+    
+    const machineRect = machine.getBoundingClientRect();
+    const gameAreaRect = gameArea.getBoundingClientRect();
+    
+    skillCheck.style.left = (machineRect.left - gameAreaRect.left) + 'px';
+    skillCheck.style.top = (machineRect.top - gameAreaRect.top - 30) + 'px';
+    
+    const marker = skillCheck.querySelector('.marker');
+    const targetZone = skillCheck.querySelector('.targetZone');
+    
+    if (gameState.selectedCharacter === 'boxten') {
+        targetZone.style.width = '60px'; 
+    } else {
+        targetZone.style.width = '30px';
+    }
+    
+    const targetPosition = Math.random() * (skillCheck.offsetWidth - targetZone.offsetWidth);
+    targetZone.style.left = targetPosition + 'px';
+    
+    let markerPosition = 0;
+    let direction = 1;
+    let active = true;
+    
+    function moveMarker() {
+        if (!active) return;
+        
+        markerPosition += direction * 2;
+        if (markerPosition >= skillCheck.offsetWidth - marker.offsetWidth) {
+            direction = -1;
+        } else if (markerPosition <= 0) {
+            direction = 1;
+        }
+        
+        marker.style.left = markerPosition + 'px';
+        requestAnimationFrame(moveMarker);
+    }
+    
+    moveMarker();
+    
+    const handleSkillCheck = (e) => {
+        if (e.code === 'Space') {
+            active = false;
+            const success = isMarkerInTarget(markerPosition, targetPosition);
+            if (success) {
+                handleMachineCompletion(machine);
+            } else {
+                handleSkillCheckFailure(machine);
+            }
+            
+            skillCheck.style.display = 'none';
+            document.removeEventListener('keydown', handleSkillCheck);
+        }
+    };
+    
+    document.addEventListener('keydown', handleSkillCheck);
+}
+
+function isMarkerInTarget(markerPos, targetPos) {
+    return Math.abs(markerPos - targetPos) < 20;
+}
+
+function handleMachineCompletion(machine) {
+    machine.style.background = '#4CAF50';
+    gameState.machinesCompleted++;
+    gameState.ichor += 50;
+    showIchorNotification();
+    updateLobbyDisplay();
+    saveProgress();
+    
+    if (gameState.machinesCompleted >= document.querySelectorAll('.machine').length) {
+        gameState.currentFloor++;
+        openElevator();
+    }
+}
+
+function handleSkillCheckFailure(machine) {
+    machine.style.background = '#ff4444';
+    gameState.activeTwisteds.forEach(twisted => {
+        twisted.targetX = gameState.playerPosition.x;
+        twisted.targetY = gameState.playerPosition.y;
+    });
+    try {
+        gameState.sounds.twistedVeeSpot.play();
+    } catch(err) {
+        console.log('Error playing twisted spot sound:', err);
+    }
+}
+
+function openElevator() {
+    const elevator = document.getElementById('elevator');
+    elevator.style.display = 'block';
+    
+    try {
+        gameState.sounds.elevator.play();
+    } catch(err) {
+        console.log('Error playing elevator sound:', err);
+    }
+    
+    const leftDoor = elevator.querySelector('.door.left');
+    const rightDoor = elevator.querySelector('.door.right');
+    
+    leftDoor.style.transform = 'scaleX(0)';
+    rightDoor.style.transform = 'scaleX(0)';
+    
+    gameState.elevatorOpen = true;
+    
+    setTimeout(() => {
+        elevator.style.display = 'none';
+        setupFloor();
+    }, 2000);
+}
+
+function showIchorNotification() {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(76, 175, 80, 0.9);
+        color: white;
+        padding: 15px 30px;
+        border-radius: 10px;
+        font-size: 24px;
+        animation: fadeOut 2s forwards;
+        z-index: 1000;
+    `;
+    notification.textContent = '+50 Ichor';
+    gameArea.appendChild(notification);
+    
+    try {
+        gameState.sounds.popup.play();
+    } catch(err) {
+        console.log('Error playing popup sound:', err);
+    }
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 2000);
+}
+
+function spawnMachines() {
+    const machines = document.getElementById('machines');
+    machines.innerHTML = ''; 
+    
+    const numMachines = Math.min(3 + Math.floor(gameState.currentFloor / 2), 6);
+    
+    const gridSize = Math.ceil(Math.sqrt(numMachines));
+    const cellWidth = gameArea.offsetWidth / gridSize;
+    const cellHeight = gameArea.offsetHeight / gridSize;
+    
+    for (let i = 0; i < numMachines; i++) {
+        const machine = document.createElement('div');
+        machine.className = 'machine';
+        
+        const gridX = i % gridSize;
+        const gridY = Math.floor(i / gridSize);
+        
+        const offsetX = Math.random() * (cellWidth - 60);
+        const offsetY = Math.random() * (cellHeight - 60);
+        
+        const x = (gridX * cellWidth) + offsetX;
+        const y = (gridY * cellHeight) + offsetY;
+        
+        machine.style.left = x + 'px';
+        machine.style.top = y + 'px';
+        
+        machine.addEventListener('click', () => {
+            if (checkProximity(gameState.playerPosition, {x, y})) {
+                startSkillCheck(machine);
+            }
+        });
+        
+        machines.appendChild(machine);
+    }
+}
+
+loadProgress();
+
+function stunTwisteds() {
+    gameState.activeTwisteds.forEach(twisted => {
+        twisted.stunned = true;
+        const element = document.querySelector(`.twisted[alt="${twisted.type}"]`);
+        if (element) {
+            element.classList.add('stunned');
+        }
+        setTimeout(() => {
+            twisted.stunned = false;
+            if (element) {
+                element.classList.remove('stunned');
+            }
+        }, 3000);
+    });
+}
+
+const twistedData = [
+    {
+        name: 'Twisted Poppy',
+        description: 'A corrupted version of Poppy that stalks players',
+        image: 'creepy_cartoon_girl.png'
+    },
+    {
+        name: 'Twisted Boxten',
+        description: 'A menacing version of Boxten that hunts players',
+        image: 'purple_cube_character.png'
+    },
+    {
+        name: 'Twisted Connie',
+        description: 'A ghost-like entity that possesses machines',
+        image: 'twisted_connie.webp'
+    },
+    {
+        name: 'Twisted Gigi',
+        description: 'A fast-moving corrupted version of Gigi',
+        image: 'Twisted_Gigi.png'
+    },
+    {
+        name: 'Twisted Scraps',
+        description: 'A mysterious entity that appears in the darkness',
+        image: 'TwistedScraps.webp'
+    },
+    {
+        name: 'Twisted Vee',
+        description: 'A corrupted robot that interferes with machines',
+        image: 'TwistedVee.webp'
+    }
+];
+
+document.addEventListener('keydown', (e) => {
+    if (!gameState.gameActive) return;
+        
+    const speed = 5;
+    let newX = gameState.playerPosition.x;
+    let newY = gameState.playerPosition.y;
+        
+    switch(e.key) {
+        case 'ArrowUp':
+        case 'w':
+            newY -= speed;
+            break;
+        case 'ArrowDown':
+        case 's':
+            newY += speed;
+            break;
+        case 'ArrowLeft':
+        case 'a':
+            newX -= speed;
+            break;
+        case 'ArrowRight':
+        case 'd':
+            newX += speed;
+            break;
+    }
+        
+    updatePlayerPosition(newX, newY);
+});
+
+</script>
+</body></html>
