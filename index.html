@@ -1,0 +1,645 @@
+<html><head><base href="/"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D Scene with Three.js</title>
+<style>
+body { 
+    margin: 0;
+    overflow: hidden;
+    background: linear-gradient(#000000, #1a0033);
+}
+canvas {
+    width: 100vw;
+    height: 100vh;
+    display: block;
+}
+.controls {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    color: white;
+    font-family: Arial, sans-serif;
+    background: rgba(0,0,0,0.7);
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid #333;
+    box-shadow: 0 0 10px rgba(255,255,255,0.1);
+}
+.fps {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    color: #00ff00;
+    font-family: 'Courier New', monospace;
+    background: rgba(0,0,0,0.8);
+    padding: 15px 20px;
+    border-radius: 10px;
+    border: 2px solid #00ff00;
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+    animation: glowPulse 2s infinite;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    backdrop-filter: blur(5px);
+    transform: skew(-5deg);
+}
+
+.fps::before {
+    content: "⚡";
+    font-size: 1.2em;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes glowPulse {
+    0% {
+        box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 25px rgba(0, 255, 0, 0.5);
+    }
+    100% {
+        box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+    }
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 768px) {
+    .fps {
+        top: 5px;
+        right: 5px;
+        padding: 10px 15px;
+        font-size: 0.9em;
+    }
+}
+
+.fps.high {
+    color: #00ff00;
+    border-color: #00ff00;
+}
+
+.fps.medium {
+    color: #ffff00;
+    border-color: #ffff00;
+}
+
+.fps.low {
+    color: #ff0000;
+    border-color: #ff0000;
+}
+
+.quality-toggle {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    color: white;
+    font-family: Arial, sans-serif;
+    background: rgba(0,0,0,0.8);
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 2px solid #00ff00;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    font-weight: bold;
+    letter-spacing: 1px;
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
+}
+
+.quality-toggle:hover {
+    background: rgba(0,0,0,0.9);
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.4);
+}
+
+.quality-toggle::before {
+    content: "⚙️";
+    margin-right: 8px;
+    font-size: 1.2em;
+}
+
+.auto-rotate {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    color: white;
+    font-family: Arial, sans-serif;
+    background: rgba(0,0,0,0.7);
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    border: 1px solid #333;
+}
+.model-indicator {
+    position: fixed;
+    top: 50%;
+    right: 20px;
+    transform: translateY(-50%);
+    color: #00ff00;
+    font-family: 'Courier New', monospace;
+    font-size: 3em;
+    background: rgba(0,0,0,0.8);
+    padding: 20px;
+    border-radius: 15px;
+    border: 2px solid #00ff00;
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    backdrop-filter: blur(5px);
+}
+
+.model-indicator .number {
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.model-indicator .label {
+    font-size: 0.4em;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+<div class="controls">
+    Use mouse to rotate<br>
+    Scroll to zoom<br>
+    Press 1-12 to switch shapes<br>
+    Press Q to cycle quality<br>
+    Press R for next model<br>
+    Press E for previous model<br>
+    Press SPACE to pulse<br>
+    Press C to change color mode<br>
+    Use text input to modify 3D text
+</div>
+<div class="fps">FPS: 0</div>
+<div class="quality-toggle">Quality: High</div>
+<div class="auto-rotate">Auto-rotate: OFF</div>
+<div style="position: fixed; bottom: 50px; left: 10px; background: rgba(0,0,0,0.7); padding: 10px; border-radius: 5px; z-index: 1000;">
+    <input type="text" id="textInput" placeholder="Enter 3D text" style="background: rgba(255,255,255,0.9); border: none; padding: 5px; border-radius: 3px; width: 200px;">
+    <button onclick="updateText()" style="background: #00ff00; border: none; padding: 5px 10px; border-radius: 3px; margin-left: 5px; cursor: pointer; color: black; font-weight: bold;">Update Text</button>
+</div>
+<div class="model-indicator">
+    <div class="number">1</div>
+    <div class="label">Model</div>
+</div>
+<script>const R6_BODY_COLOR = 0xCCCCCC;
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({
+  antialias: true
+});
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+let qualityLevel = 2;
+const qualitySettings = {
+  ultra: {
+    segments: {
+      torus: [200, 40],
+      sphere: [96, 96],
+      cube: [40, 40, 40],
+      octahedron: 24,
+      dodecahedron: 8,
+      icosahedron: 6,
+      cylinder: [80, 80, 80],
+      cone: [80, 80]
+    }
+  },
+  high: {
+    segments: {
+      torus: [120, 20],
+      sphere: [48, 48],
+      cube: [20, 20, 20],
+      octahedron: 12,
+      dodecahedron: 4,
+      icosahedron: 3,
+      cylinder: [40, 40, 40],
+      cone: [40, 40]
+    }
+  },
+  low: {
+    segments: {
+      torus: [50, 8],
+      sphere: [16, 16],
+      cube: [8, 8, 8],
+      octahedron: 5,
+      dodecahedron: 2,
+      icosahedron: 1,
+      cylinder: [16, 16, 16],
+      cone: [16, 16]
+    }
+  },
+  awful: {
+    segments: {
+      torus: [6, 3],
+      sphere: [4, 4],
+      cube: [2, 2, 2],
+      octahedron: 1,
+      dodecahedron: 0,
+      icosahedron: 0,
+      cylinder: [6, 6, 6],
+      cone: [6, 6]
+    }
+  }
+};
+const textQualitySettings = {
+  ultra: {
+    curveSegments: 30,
+    bevelSegments: 12
+  },
+  high: {
+    curveSegments: 15,
+    bevelSegments: 6
+  },
+  low: {
+    curveSegments: 6,
+    bevelSegments: 3
+  },
+  awful: {
+    curveSegments: 2,
+    bevelSegments: 1
+  }
+};
+const materials = {
+  torusKnot: new THREE.MeshPhongMaterial({
+    color: 0x00ff00,
+    shininess: 100,
+    wireframe: true
+  }),
+  sphere: new THREE.MeshPhongMaterial({
+    color: 0x00ff00,
+    shininess: 100,
+    flatShading: true
+  }),
+  cube: new THREE.MeshStandardMaterial({
+    color: 0x00ff00,
+    metalness: 0.5,
+    roughness: 0.1
+  }),
+  octahedron: new THREE.MeshPhongMaterial({
+    color: 0x00ff00,
+    specular: 0xffffff,
+    shininess: 100
+  }),
+  dodecahedron: new THREE.MeshPhongMaterial({
+    color: 0x00ff00,
+    specular: 0xffffff,
+    shininess: 150,
+    flatShading: true
+  }),
+  icosahedron: new THREE.MeshStandardMaterial({
+    color: 0x00ff00,
+    metalness: 0.8,
+    roughness: 0.2
+  }),
+  cylinder: new THREE.MeshPhongMaterial({
+    color: 0x00ff00,
+    specular: 0xffffff,
+    shininess: 80
+  }),
+  cone: new THREE.MeshStandardMaterial({
+    color: 0x00ff00,
+    metalness: 0.3,
+    roughness: 0.4
+  })
+};
+const textMaterials = {
+  text: new THREE.MeshPhongMaterial({
+    color: 0x00ff00,
+    specular: 0xffffff,
+    shininess: 100,
+    flatShading: true
+  })
+};
+const fontLoader = new THREE.FontLoader();
+async function createGeometries(qualityLevel) {
+  let settings;
+  switch (qualityLevel) {
+    case 3:
+      settings = qualitySettings.ultra;
+      break;
+    case 2:
+      settings = qualitySettings.high;
+      break;
+    case 1:
+      settings = qualitySettings.low;
+      break;
+    case 0:
+      settings = qualitySettings.awful;
+      break;
+  }
+  return new Promise(resolve => {
+    fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+      const initialText = document.getElementById('textInput').value || 'Hello 3D!';
+      const textQuality = qualityLevel === 3 ? textQualitySettings.ultra : qualityLevel === 2 ? textQualitySettings.high : qualityLevel === 1 ? textQualitySettings.low : textQualitySettings.awful;
+      const geometries = {
+        torusKnot: new THREE.TorusKnotGeometry(10, 3, ...settings.segments.torus),
+        sphere: new THREE.SphereGeometry(10, ...settings.segments.sphere),
+        cube: new THREE.BoxGeometry(...settings.segments.cube),
+        octahedron: new THREE.OctahedronGeometry(settings.segments.octahedron),
+        dodecahedron: new THREE.DodecahedronGeometry(10, settings.segments.dodecahedron),
+        icosahedron: new THREE.IcosahedronGeometry(10, settings.segments.icosahedron),
+        cylinder: new THREE.CylinderGeometry(5, 5, 20, ...settings.segments.cylinder),
+        cone: new THREE.ConeGeometry(5, 20, ...settings.segments.cone),
+        text: new THREE.TextGeometry(initialText, {
+          font: font,
+          size: 3,
+          height: 1,
+          curveSegments: textQuality.curveSegments,
+          bevelEnabled: true,
+          bevelThickness: 0.2,
+          bevelSize: 0.1,
+          bevelSegments: textQuality.bevelSegments
+        }),
+        ring: new THREE.TorusGeometry(8, 2, settings.segments.torus[0], settings.segments.torus[1]),
+        tetrahedron: new THREE.TetrahedronGeometry(7, qualityLevel === 3 ? 2 : qualityLevel === 2 ? 2 : qualityLevel === 1 ? 1 : 0)
+      };
+      resolve(geometries);
+    });
+  });
+}
+let geometries;
+let shapes;
+let currentShape = 0;
+const pointLight = new THREE.PointLight(0xffffff, 1, 100);
+pointLight.position.set(10, 10, 10);
+scene.add(pointLight);
+const ambientLight = new THREE.AmbientLight(0x404040);
+scene.add(ambientLight);
+camera.position.z = 30;
+let mouseX = 0;
+let mouseY = 0;
+let targetRotationX = 0;
+let targetRotationY = 0;
+let autoRotate = false;
+let colorMode = 0;
+let pulseEffect = false;
+let pulseScale = 1;
+let frameCount = 0;
+let lastTime = performance.now();
+const fpsElement = document.querySelector('.fps');
+const qualityToggle = document.querySelector('.quality-toggle');
+const autoRotateElement = document.querySelector('.auto-rotate');
+const modelIndicator = document.querySelector('.model-indicator .number');
+function createR6Model() {
+  const group = new THREE.Group();
+  
+  const torso = new THREE.Mesh(
+    new THREE.BoxGeometry(2, 3, 1),
+    new THREE.MeshPhongMaterial({ color: R6_BODY_COLOR })
+  );
+  group.add(torso);
+  
+  const head = new THREE.Mesh(
+    new THREE.BoxGeometry(2, 2, 2),
+    new THREE.MeshPhongMaterial({ color: R6_BODY_COLOR })
+  );
+  head.position.y = 2.5; 
+  group.add(head);
+  
+  const leftArm = new THREE.Mesh(
+    new THREE.BoxGeometry(1, 2.5, 1),
+    new THREE.MeshPhongMaterial({ color: R6_BODY_COLOR })
+  );
+  leftArm.position.set(-1.5, 0.75, 0);
+  group.add(leftArm);
+  
+  const rightArm = new THREE.Mesh(
+    new THREE.BoxGeometry(1, 2.5, 1),
+    new THREE.MeshPhongMaterial({ color: R6_BODY_COLOR })
+  );
+  rightArm.position.set(1.5, 0.75, 0);
+  group.add(rightArm);
+  
+  const leftLeg = new THREE.Mesh(
+    new THREE.BoxGeometry(1, 2.5, 1),
+    new THREE.MeshPhongMaterial({ color: R6_BODY_COLOR })
+  );
+  leftLeg.position.set(-0.6, -2.75, 0);
+  group.add(leftLeg);
+  
+  const rightLeg = new THREE.Mesh(
+    new THREE.BoxGeometry(1, 2.5, 1),
+    new THREE.MeshPhongMaterial({ color: R6_BODY_COLOR })
+  );
+  rightLeg.position.set(0.6, -2.75, 0);
+  group.add(rightLeg);
+  
+  group.scale.set(2.5, 2.5, 2.5);
+  
+  group.position.y = 2;
+  
+  return group;
+}
+function updateFPS() {
+  const currentTime = performance.now();
+  const elapsed = currentTime - lastTime;
+  if (elapsed >= 1000) {
+    const fps = Math.round(frameCount * 1000 / elapsed);
+    fpsElement.textContent = `FPS: ${fps}`;
+    fpsElement.classList.remove('high', 'medium', 'low');
+    if (fps >= 50) {
+      fpsElement.classList.add('high');
+    } else if (fps >= 30) {
+      fpsElement.classList.add('medium');
+    } else {
+      fpsElement.classList.add('low');
+    }
+    fpsElement.style.transform = 'skew(-5deg) scale(1.1)';
+    setTimeout(() => {
+      fpsElement.style.transform = 'skew(-5deg) scale(1)';
+    }, 150);
+    frameCount = 0;
+    lastTime = currentTime;
+  }
+  frameCount++;
+}
+document.addEventListener('mousemove', event => {
+  mouseX = (event.clientX - window.innerWidth / 2) / 100;
+  mouseY = (event.clientY - window.innerHeight / 2) / 100;
+});
+document.addEventListener('wheel', event => {
+  camera.position.z += event.deltaY * 0.01;
+  camera.position.z = Math.max(15, Math.min(50, camera.position.z));
+});
+function toggleQuality() {
+  qualityLevel = (qualityLevel + 1) % 4;
+  const qualityNames = ['Ultra Low', 'Medium', 'High', 'Ultra High'];
+  qualityToggle.textContent = `Quality: ${qualityNames[qualityLevel]}`;
+  qualityToggle.style.transform = 'scale(1.1)';
+  setTimeout(() => {
+    qualityToggle.style.transform = 'scale(1)';
+  }, 200);
+  scene.remove(shapes[currentShape]);
+  createGeometries(qualityLevel).then(newGeometries => {
+    shapes = [new THREE.Mesh(newGeometries.torusKnot, materials.torusKnot), new THREE.Mesh(newGeometries.sphere, materials.sphere), new THREE.Mesh(newGeometries.cube, materials.cube), new THREE.Mesh(newGeometries.octahedron, materials.octahedron), new THREE.Mesh(newGeometries.dodecahedron, materials.dodecahedron), new THREE.Mesh(newGeometries.icosahedron, materials.icosahedron), new THREE.Mesh(newGeometries.cylinder, materials.cylinder), new THREE.Mesh(newGeometries.cone, materials.cone), new THREE.Mesh(newGeometries.text, textMaterials.text), new THREE.Mesh(newGeometries.ring, materials.torusKnot), new THREE.Mesh(newGeometries.tetrahedron, materials.dodecahedron), createR6Model()];
+    newGeometries.text.computeBoundingBox();
+    const textWidth = newGeometries.text.boundingBox.max.x - newGeometries.text.boundingBox.min.x;
+    shapes[8].position.x = -textWidth / 2;
+    scene.add(shapes[currentShape]);
+  });
+}
+document.addEventListener('keydown', event => {
+  if (event.key >= '1' && event.key <= '8') {
+    scene.remove(shapes[currentShape]);
+    currentShape = parseInt(event.key) - 1;
+    scene.add(shapes[currentShape]);
+    modelIndicator.textContent = (currentShape + 1).toString();
+  } else if (event.key === '9') {
+    scene.remove(shapes[currentShape]);
+    currentShape = 8;
+    scene.add(shapes[currentShape]);
+    modelIndicator.textContent = (currentShape + 1).toString();
+  } else if (event.key === '0') {
+    scene.remove(shapes[currentShape]);
+    currentShape = 9;
+    scene.add(shapes[currentShape]);
+    modelIndicator.textContent = (currentShape + 1).toString();
+  } else if (event.key === '-' || event.key === '=') {
+    scene.remove(shapes[currentShape]);
+    currentShape = 11;
+    scene.add(shapes[currentShape]);
+    modelIndicator.textContent = (currentShape + 1).toString();
+  } else if (event.key.toLowerCase() === 'q') {
+    toggleQuality();
+  } else if (event.key.toLowerCase() === 'r') {
+    scene.remove(shapes[currentShape]);
+    currentShape = (currentShape + 1) % shapes.length;
+    scene.add(shapes[currentShape]);
+    modelIndicator.textContent = (currentShape + 1).toString();
+  } else if (event.key.toLowerCase() === 'e') {
+    scene.remove(shapes[currentShape]);
+    currentShape = (currentShape - 1 + shapes.length) % shapes.length;
+    scene.add(shapes[currentShape]);
+    modelIndicator.textContent = (currentShape + 1).toString();
+  } else if (event.key.toLowerCase() === 'c') {
+    colorMode = (colorMode + 1) % 3;
+  } else if (event.key === ' ') {
+    pulseEffect = !pulseEffect;
+  }
+});
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+function animate() {
+  requestAnimationFrame(animate);
+  
+  if (shapes && Array.isArray(shapes) && shapes[currentShape] && shapes[currentShape].rotation) {
+    if (autoRotate) {
+      targetRotationX += 0.01;
+      targetRotationY += 0.005;
+    } else {
+      targetRotationX += (mouseX - targetRotationX) * 0.05;
+      targetRotationY += (mouseY - targetRotationY) * 0.05;
+    }
+    
+    shapes[currentShape].rotation.x = targetRotationY;
+    shapes[currentShape].rotation.y = targetRotationX;
+
+    if (shapes[currentShape].material) {
+      switch (colorMode) {
+        case 0:
+          const hue = Date.now() * 0.001 % 1;
+          shapes[currentShape].material.color.setHSL(hue, 1, 0.5);
+          break;
+        case 1:
+          const pulseColor = Math.sin(Date.now() * 0.003) * 0.5 + 0.5;
+          shapes[currentShape].material.color.setRGB(pulseColor, 1 - pulseColor, 0.5);
+          break;
+        case 2:
+          shapes[currentShape].material.color.setRGB(0, 1, 0);
+          break;
+      }
+    }
+
+    if (pulseEffect && shapes[currentShape].scale) {
+      pulseScale = 1 + Math.sin(Date.now() * 0.005) * 0.2;
+      shapes[currentShape].scale.set(pulseScale, pulseScale, pulseScale);
+    }
+  }
+
+  updateFPS();
+  
+  if (modelIndicator) {
+    modelIndicator.textContent = (currentShape + 1).toString();
+  }
+
+  renderer.render(scene, camera);
+}
+
+async function initScene() {
+  try {
+    shapes = [];
+    currentShape = 0;
+    
+    geometries = await createGeometries(qualityLevel);
+    
+    shapes = [
+      new THREE.Mesh(geometries.torusKnot, materials.torusKnot),
+      new THREE.Mesh(geometries.sphere, materials.sphere),
+      new THREE.Mesh(geometries.cube, materials.cube),
+      new THREE.Mesh(geometries.octahedron, materials.octahedron),
+      new THREE.Mesh(geometries.dodecahedron, materials.dodecahedron),
+      new THREE.Mesh(geometries.icosahedron, materials.icosahedron),
+      new THREE.Mesh(geometries.cylinder, materials.cylinder),
+      new THREE.Mesh(geometries.cone, materials.cone),
+      new THREE.Mesh(geometries.text, textMaterials.text),
+      new THREE.Mesh(geometries.ring, materials.torusKnot),
+      new THREE.Mesh(geometries.tetrahedron, materials.dodecahedron),
+      createR6Model()
+    ];
+
+    if (geometries.text && shapes[8]) {
+      geometries.text.computeBoundingBox();
+      const textWidth = geometries.text.boundingBox.max.x - geometries.text.boundingBox.min.x;
+      shapes[8].position.x = -textWidth / 2;
+    }
+
+    if (shapes[currentShape]) {
+      scene.add(shapes[currentShape]);
+    }
+
+    animate();
+  } catch (error) {
+    console.error('Error initializing scene:', error);
+  }
+}
+async function updateText() {
+  const input = document.getElementById('textInput').value || 'Hello 3D!';
+  return new Promise(resolve => {
+    fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+      if (currentShape === 8) {
+        scene.remove(shapes[currentShape]);
+        const textGeometry = new THREE.TextGeometry(input, {
+          font: font,
+          size: 3,
+          height: 1,
+          curveSegments: qualityLevel === 3 ? textQualitySettings.ultra.curveSegments : qualityLevel === 2 ? textQualitySettings.high.curveSegments : qualityLevel === 1 ? textQualitySettings.low.curveSegments : textQualitySettings.awful.curveSegments,
+          bevelEnabled: true,
+          bevelThickness: 0.2,
+          bevelSize: 0.1,
+          bevelSegments: qualityLevel === 3 ? textQualitySettings.ultra.bevelSegments : qualityLevel === 2 ? textQualitySettings.high.bevelSegments : qualityLevel === 1 ? textQualitySettings.low.bevelSegments : textQualitySettings.awful.bevelSegments
+        });
+        shapes[8] = new THREE.Mesh(textGeometry, textMaterials.text);
+        textGeometry.computeBoundingBox();
+        const textWidth = textGeometry.boundingBox.max.x - textGeometry.boundingBox.min.x;
+        shapes[8].position.x = -textWidth / 2;
+        scene.add(shapes[8]);
+        resolve();
+      }
+    });
+  });
+}
+initScene();
+</script>
+</body></html>
