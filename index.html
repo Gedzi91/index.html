@@ -1,0 +1,295 @@
+<html><head><base href="https://websim.ai"><title>SlopHound's Profile</title><style>
+:root {
+  --bg-color: #1a1a1a;
+  --text-color: #f0f0f0;
+  --accent-color: #ff5e5e;
+  --panel-color: #292929;
+  --font-display: 'Bebas Neue', Arial, sans-serif;
+  --font-body: 'Roboto', Arial, sans-serif;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  margin: 0;
+  padding: 0;
+  background-image:
+    linear-gradient(0deg, transparent 24%, rgba(255, 255, 255, .05) 25%, rgba(255, 255, 255, .05) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, .05) 75%, rgba(255, 255, 255, .05) 76%, transparent 77%, transparent),
+    linear-gradient(90deg, transparent 24%, rgba(255, 255, 255, .05) 25%, rgba(255, 255, 255, .05) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, .05) 75%, rgba(255, 255, 255, .05) 76%, transparent 77%, transparent);
+  background-size:50px 50px;
+}
+
+.container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.side-panel {
+  width: 300px;
+  background-color: var(--panel-color);
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  overflow: hidden;
+  max-height: 300px;
+    border-radius: 10px;
+    margin: 10px;
+}
+
+.profile-info {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.profile-info img {
+  width: 200px;
+  height: 200px;
+  border-radius: 10px;
+  object-fit: cover;
+  margin-bottom: 20px;
+  border: 5px solid var(--accent-color);
+}
+
+.profile-info h2 {
+  font-family: var(--font-display);
+  font-size: 36px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.profile-links {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  text-align: center;
+}
+
+.profile-links li {
+  margin-bottom: 20px;
+}
+
+.profile-links a {
+  color: var(--text-color);
+  text-decoration: none;
+  font-family: var(--font-display);
+  font-size: 24px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.profile-links a:hover {
+  color: var(--accent-color);
+}
+
+.main-panel {
+  flex-grow: 1;
+  padding: 40px;
+}
+
+h1 {
+  font-family: var(--font-display);
+  font-size: 48px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin: 0 0 40px;
+  border-bottom: 5px solid var(--accent-color);
+  padding-bottom: 10px;
+}
+
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-gap: 40px;
+}
+
+.project-card {
+  background-color: var(--panel-color);
+  padding: 30px;
+  text-align: center;
+  position: relative;
+    border-radius: 10px;
+}
+
+.project-card img {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  margin-bottom: 20px;
+  border-radius: 8px;
+}
+
+.project-card h3 {
+  color: var(--accent-color);
+  font-family: var(--font-display);
+  font-size: 30px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin: 0 0 10px;
+}
+
+.project-card p {
+  color: var(--text-color);
+  margin: 0;
+}
+
+.tba-icon {
+  width: 100%;
+  height: 250px;
+  background-color: #444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 48px;
+  color: #777;
+  border-radius: 8px;
+}
+
+.tba-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(68, 68, 68, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: var(--font-display);
+  font-size: 48px;
+  color: #777;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+    border-radius: 10px;
+}
+
+.project-card:hover .tba-overlay {
+  opacity: 1;
+}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+<div class="side-panel">
+<div class="profile-info">
+  <img src="https://i.imgur.com/62p4Wv4.png" alt="Profile Picture">
+  <h2>@SlopHound</h2>
+</div>
+</div>
+
+<div class="main-panel">
+
+  <h1>Portfolio</h1>
+
+  <div class="project-grid">
+    <div class="project-card">
+      <img src="https://i.imgur.com/ByClpaG.png" alt="No, My Name">
+      <div class="tba-overlay">TBA</div>
+      <h3>No, My Name</h3>
+      <p>People you've never met and will never now</p>
+    </div>
+    
+    <div class="project-card">
+      <a href="https://websim.ai/@SlopHound/lost-dogs" target="_blank"><img src="https://i.imgur.com/2UvBRFQ.png" alt="Bring Lost Dogs Home to Vanished Men: Prelude"></a>
+      <h3>Bring Lost Dogs Home to Vanished Men: Prelude</h3>
+      <p>An installation honoring the stray animals euthanized in the US each year</p>
+    </div>
+
+    <div class="project-card">
+      <a href="https://websim.ai/@SlopHound/cant-say-much" target="_blank"><img src="https://i.imgur.com/frhEBmz.png" alt="I Can't Say Much"></a>
+      <h3>I Can't Say Much</h3>
+      <p>An apartment in Ukrain- lost to war</p>
+    </div>
+
+    <div class="project-card">
+      <a href="https://websim.ai/@SlopHound/maps-of-home" target="_blank"><img src="https://i.imgur.com/cn38Jhd.png" alt="Maps of Home"></a>
+      <h3>Maps of Home</h3>
+      <p>A personal exploration of memory through fractals</p>
+    </div>
+
+    <div class="project-card">
+      <a href="https://websim.ai/@SlopHound/mortal-wares" target="_blank"><img src="https://i.imgur.com/HUOCFH3.jpeg" alt="Mortal Wares"></a>
+      <h3>Mortal Wares</h3>
+      <p>An alternative process in clay making</p>
+    </div>
+
+    <div class="project-card">
+      <a href="https://www.pareidolia.guide" target="_blank"><img src="https://i.imgur.com/c17LCgn.png" alt="Welcome to Pareidolia"></a>
+      <h3>Welcome to Pareidolia</h3>
+      <p>A guide to understanding and appreciating pareidolia</p>
+    </div>
+
+  </div>
+
+  <h1>Projects</h1>
+  
+  <div class="project-grid">
+    <div class="project-card">
+      <a href="https://websim.ai/p/ojc_v_uzxqwazerfji4k" target="_blank"><img src="https://i.imgur.com/NTWywCC.png" alt="Print Page Layout"></a>
+      <h3>Print Page Layout</h3>
+      <p>A web app for formatting images for professional printing</p>
+    </div>
+    
+    <div class="project-card">
+      <a href="https://websim.ai/p/06q1h2a_2oi67ad3s6dc" target="_blank"><img src="https://i.imgur.com/Tbj47yT.png" alt="Image Blender - Memphis WIN98 Style"></a>
+      <h3>Image Blender</h3>
+      <p>Mean Stack Denoising</p>
+    </div>
+    
+    <div class="project-card">
+      <a href="https://websim.ai/p/umq1nq5n_najdru2bnq5" target="_blank"><img src="https://i.imgur.com/goydEmu.png" alt="HARMONIC CHOROTRON"></a>
+      <h3>HARMONIC CHOROTRON</h3>
+      <p>An interactive musical synthesizer with 7th chord harmonies</p>
+    </div>
+    
+    <div class="project-card">
+      <a href="https://websim.ai/p/f3vb33qgcizs3e0i1wjg" target="_blank"><img src="https://i.imgur.com/ePlLMPB.png" alt="Audio Worm"></a>
+      <h3>Audio Worm</h3>
+      <p>An interactive audiovisual canvas with a worm</p>
+    </div>
+
+    <div class="project-card">
+      <a href="https://websim.ai/p/0e1kp_rac5hb33uuvx19/145" target="_blank"><img src="https://i.imgur.com/itXNYyo.png" alt="Glitch Effects"></a>
+      <h3>Glitch Effects</h3>
+      <p>Experimental glitch art created with WebGL shaders</p>
+    </div>
+    
+    <div class="project-card">
+      <a href="https://websim.ai/p/g4skqvy1dv-g7dlnaeti/159" target="_blank"><img src="https://i.imgur.com/THaOZvM.png" alt="Image Generation"></a>
+      <h3>Image Generation</h3>
+      <p>Generative images using machine learning</p>
+    </div>
+
+    <div class="project-card">
+      <a href="https://websim.ai/@SlopHound/talk-2-the-hand" target="_blank"><img src="https://i.imgur.com/SqzBqYt.png" alt="Talk 2 the Hand"></a>
+      <h3>Talk 2 the Hand</h3>
+      <p>Interactive hand gesture recognition and visualization</p>
+    </div>
+
+  </div>
+  
+  <h1 style="margin-top: 60px;">Favorites</h1>
+
+  <div class="project-grid">
+      <div class="project-card">
+         <a href="https://google.com" target="_blank"><img src="https://i.imgur.com/ABcFP6a.png" alt="Google Whisk"></a>
+        <h3>Google Whisk</h3>
+        <p>Simple, fun AI</p>
+      </div>
+      <div class="project-card">
+         <a href="https://www.krea.ai/home" target="_blank"><img src="https://i.imgur.com/rDEQPUE.png" alt="Krea"></a>
+        <h3>Krea</h3>
+        <p>A Generative AI platform.</p>
+      </div>
+    </div>
+</div>
+
+</div>
+</body>
+</html>
