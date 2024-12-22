@@ -1,0 +1,1758 @@
+<html><head><base href="/" /><title>Greentext Generator</title><style>
+body {
+    background: linear-gradient(135deg, #111917 0%, #000000 100%);
+    color: #98BB97;
+    font-family: 'Consolas', monospace;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    margin: 0;
+    padding: 40px 20px;
+    box-sizing: border-box;
+}
+
+.context-input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    background-color: #2F3D2F;
+    border: 1px solid #7ea676;
+    border-radius: 4px;
+    color: #98BB97;
+    font-family: 'Consolas', monospace;
+    font-size: 16px;
+    min-height: 60px;
+    resize: vertical;
+}
+
+.context-input::placeholder {
+    color: #98BB97;
+}
+
+.context-input:focus {
+    outline: none;
+    border-color: #5f8c57;
+}
+
+.cube-container {
+    position: absolute;
+    top: -55px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 100px;
+    perspective: 400px;
+    z-index: 1000;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateX(-50%) translateY(0px); }
+    50% { transform: translateX(-50%) translateY(-10px); }
+}
+
+.cube {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    animation: rotate 20s infinite linear;
+}
+
+.cube div {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    border: 2px solid #7ea676;
+    background: rgba(126, 166, 118, 0.1);
+}
+
+.front  { transform: rotateY(0deg) translateZ(50px); }
+.back   { transform: rotateY(180deg) translateZ(50px); }
+.right  { transform: rotateY(90deg) translateZ(50px); }
+.left   { transform: rotateY(-90deg) translateZ(50px); }
+.top    { transform: rotateX(90deg) translateZ(50px); }
+.bottom { transform: rotateX(-90deg) translateZ(50px); }
+
+@keyframes rotate {
+    0% { transform: rotateX(0) rotateY(0); }
+    100% { transform: rotateX(360deg) rotateY(360deg); }
+}
+
+.container {
+    background-color: #181F1A;
+    border-radius: 8px;
+    padding: 40px 20px;
+    max-width: 800px;
+    width: 100%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: relative;
+    margin: 60px auto;
+    box-sizing: border-box;
+}
+
+.topic-input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    background-color: #2F3D2F;
+    border: 1px solid #7ea676;
+    border-radius: 4px;
+    color: #98BB97;
+    font-family: 'Consolas', monospace;
+    font-size: 16px;
+}
+
+.control-row {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.control-row input[type="range"] {
+    flex: 1;
+    -webkit-appearance: none;
+    height: 5px;
+    background: #2F3D2F;
+    border-radius: 5px;
+    outline: none;
+}
+
+.control-row input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 15px;
+    height: 15px;
+    background: #7ea676;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.control-row input[type="range"]::-moz-range-thumb {
+    width: 15px;
+    height: 15px;
+    background: #7ea676;
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+}
+
+.control-row input[type="range"]::-moz-range-progress {
+    background: #7ea676;
+    height: 5px;
+    border-radius: 5px;
+}
+
+.control-row input[type="range"]::-moz-range-track {
+    background: #2F3D2F;
+    height: 5px;
+    border-radius: 5px;
+}
+
+.control-row span {
+    min-width: 100px;
+}
+
+.topic-input::placeholder {
+    color: #98BB97;
+}
+
+.topic-input:focus {
+    outline: none;
+    border-color: #5f8c57;
+}
+
+.greentext-container {
+    background-color: #2F3D2F;
+    border-radius: 4px;
+    padding: 15px;
+    white-space: pre-wrap;
+    position: relative;
+}
+
+.greentext-line {
+    color: #98BB97;
+    margin: 0;
+    line-height: 1.5;
+    visibility: hidden;
+}
+
+.greentext-line.visible {
+    visibility: visible;
+}
+
+.story-end {
+    color: #98BB97;
+    text-align: center;
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px dashed #7ea676;
+}
+
+.loading {
+    color: #7ea676;
+    text-align: center;
+    font-style: italic;
+}
+
+.generate-btn {
+    background-color: #7ea676;
+    color: #1d1f21;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 20px;
+    transition: background-color 0.3s;
+    width: 100%;
+}
+
+.generate-btn:disabled {
+    background-color: #4B5A4D;
+    cursor: not-allowed;
+}
+
+.generate-btn:hover:not(:disabled) {
+    background-color: #5f8c57;
+}
+
+.save-controls button,
+.board-controls button {
+    background-color: #7ea676;
+    color: #1d1f21;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.save-controls button:hover,
+.board-controls button:hover {
+    background-color: #5f8c57;
+}
+
+.title-input {
+    width: 100%;
+    padding: 10px;
+    background-color: #2F3D2F;
+    border: 1px solid #7ea676;
+    border-radius: 4px;
+    color: #98BB97;
+    font-family: 'Consolas', monospace;
+    font-size: 16px;
+}
+
+.board-tabs .tab-btn,
+.sort-controls .sort-btn {
+    background-color: #2F3D2F;
+    color: #98BB97;
+}
+
+.board-tabs .tab-btn.active,
+.sort-controls .sort-btn.active {
+    background-color: #7ea676;
+    color: #1d1f21;
+}
+
+.greentext-card {
+    background-color: #2F3D2F;
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.greentext-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #7ea676;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.greentext-card-title-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 100%;
+}
+
+.greentext-card-title {
+    font-size: 1.2em;
+    color: #98BB97;
+}
+
+.greentext-card-prompt {
+    color: #7ea676;
+    font-size: 0.8em;
+    font-style: italic;
+}
+
+.greentext-card-meta {
+    display: flex;
+    gap: 15px;
+    color: #7ea676;
+    width: 100%;
+    justify-content: flex-end;
+}
+
+.like-btn {
+    background: none;
+    border: none;
+    color: #7ea676;
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: color 0.3s ease;
+    font-family: 'Consolas', monospace;
+    font-size: 16px;
+}
+
+.like-btn:hover {
+    color: #98BB97;
+}
+
+.like-btn.liked {
+    color: #98BB97;
+    font-weight: normal;
+}
+
+.like-btn:disabled {
+    cursor: default;
+    opacity: 1;
+    color: #98BB97;
+}
+
+.board-container h1 {
+    color: #98BB97;
+    font-family: 'Consolas', monospace;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.warning-message {
+    color: #ff6b6b;
+    margin-top: 15px;
+    text-align: center;
+    padding: 10px;
+    border: 1px solid #ff6b6b;
+    border-radius: 4px;
+    font-family: 'Consolas', monospace;
+}
+
+.owner-tag {
+    border: 1px solid #ffd700;
+    color: #ffd700;
+    background-color: transparent;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.8em;
+    margin-left: 5px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.username-link {
+    color: #98BB97;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.username-link:hover {
+    color: #7ea676;
+    text-decoration: underline;
+}
+
+.notifications-section {
+    background-color: #2F3D2F;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.notification-item {
+    padding: 12px;
+    border-bottom: 1px solid rgba(126, 166, 118, 0.2);
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 12px;
+    align-items: start;
+}
+
+.notification-item:last-child {
+    border-bottom: none;
+}
+
+.notification-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.notification-story {
+    color: #7ea676;
+    font-style: italic;
+}
+
+.notification-time {
+    color: #5f8c57;
+    font-size: 0.8em;
+}
+
+.notifications-empty {
+    padding: 20px;
+    text-align: center;
+    color: #7ea676;
+    font-style: italic;
+}
+
+.notifications-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #7ea676;
+}
+
+.notifications-title {
+    color: #98BB97;
+    font-size: 1.2em;
+    margin: 0;
+}
+
+.likes-list-panel {
+    display: none;
+}
+
+/* Add styles for pagination controls */
+.pagination-controls {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(126, 166, 118, 0.2);
+}
+
+.pagination-info {
+    color: #7ea676;
+    font-size: 0.9em;
+}
+
+.pagination-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.page-btn {
+    background-color: #2F3D2F;
+    color: #98BB97;
+    border: 1px solid #7ea676;
+    border-radius: 4px;
+    padding: 5px 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.page-btn:hover {
+    background-color: #7ea676;
+    color: #1d1f21;
+}
+
+/* Add style for delete button */
+.delete-btn {
+    background: none;
+    border: none;
+    color: #ff6b6b;
+    cursor: pointer;
+    padding: 5px;
+    display: flex !important; /* Override previous display:none */
+    align-items: center;
+    gap: 5px;
+    transition: color 0.3s ease;
+    font-family: 'Consolas', monospace;
+    font-size: 16px;
+}
+
+.delete-btn:hover {
+    color: #ff8f8f;
+}
+
+/* Add styles for reports */
+.reports-section {
+    background-color: #2F3D2F;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.report-item {
+    border-bottom: 1px solid rgba(126, 166, 118, 0.2);
+    padding: 10px 0;
+}
+
+.report-item:last-child {
+    border-bottom: none;
+}
+
+.report-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.report-btn {
+    background: none;
+    border: none;
+    color: #ff6b6b;
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: color 0.3s ease;
+    font-family: 'Consolas', monospace;
+    font-size: 16px;
+}
+
+.report-btn:hover {
+    color: #ff8f8f;
+}
+
+/* Add to the existing CSS */
+.edit-btn {
+    background: none;
+    border: none;
+    color: #7ea676;
+    cursor: pointer;
+    padding: 5px;
+    display: flex !important;
+    align-items: center;
+    gap: 5px;
+    transition: color 0.3s ease;
+    font-family: 'Consolas', monospace;
+    font-size: 16px;
+}
+
+.edit-btn:hover {
+    color: #98BB97;
+}
+
+/* Add styles for banned users */
+.ban-btn {
+    background: none;
+    border: none;
+    color: #ff6b6b;
+    cursor: pointer;
+    padding: 5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: color 0.3s ease;
+    font-family: 'Consolas', monospace;
+    font-size: 14px;
+    margin-left: 10px;
+}
+
+.ban-btn:hover {
+    color: #ff8f8f;
+}
+
+/* Add styles for search controls */
+.search-input {
+    background-color: #2F3D2F;
+    color: #98BB97;
+    border: 1px solid #7ea676;
+    border-radius: 4px;
+    padding: 8px;
+    font-family: 'Consolas', monospace;
+    transition: border-color 0.3s;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #5f8c57;
+}
+
+.search-input::placeholder {
+    color: #7ea676;
+}
+
+.search-type {
+    background-color: #2F3D2F;
+    color: #98BB97;
+    border: 1px solid #7ea676;
+    border-radius: 4px;
+    padding: 8px;
+    font-family: 'Consolas', monospace;
+    cursor: pointer;
+    width: 100%;
+}
+
+.search-type:focus {
+    outline: none;
+    border-color: #5f8c57;
+}
+
+.search-controls {
+    flex-direction: column;
+    gap: 5px;
+}
+
+.rating-controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.rate-btn {
+    background: #2F3D2F;
+    color: #98BB97;
+    border: 1px solid #7ea676;
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Consolas', monospace;
+}
+
+.rate-btn:hover {
+    background: #7ea676;
+    color: #1d1f21;
+}
+
+.rate-btn.active {
+    background: #7ea676;
+    color: #1d1f21;
+}
+
+.rate-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.rate-btn.active:disabled {
+    opacity: 1;
+    background-color: #7ea676;
+    color: #1d1f21;
+    cursor: not-allowed;
+}
+
+.rating-stats {
+    margin-top: 5px;
+    color: #7ea676;
+    font-size: 0.9em;
+}
+
+@media (max-width: 768px) {
+    .board-controls {
+        flex-direction: column;
+    }
+    
+    .search-controls {
+        width: 100%;
+    }
+}
+</style></head><body>
+<div class="container">
+    <div class="cube-container">
+        <div class="cube">
+            <div class="front"></div>
+            <div class="back"></div>
+            <div class="right"></div>
+            <div class="left"></div>
+            <div class="top"></div>
+            <div class="bottom"></div>
+        </div>
+    </div>
+
+    <img src="/a/a69efd2d-cc1d-4f74-964c-7d35274a7569" alt="Greentext Story Generator" style="display: block; max-width: 100%; height: auto; margin: 0 auto 20px;">
+    <input type="text" 
+           class="topic-input" 
+           placeholder="Enter any topic (e.g., 'first day at new job', 'cooking disaster', 'gaming tournament')"
+           aria-label="Topic input">
+    <textarea 
+           class="context-input" 
+           placeholder="Optional: Add additional context about the story (e.g., 'I'm a 25-year-old software developer who hates meetings' or 'Story takes place in medieval times')"
+           aria-label="Context input"
+           rows="3"></textarea>
+    <div class="control-row">
+        <span>Vulgar: 25%</span>
+        <input type="range" min="0" max="100" value="25" class="vulgar-slider">
+    </div>
+    <div class="control-row">
+        <span>Length: 40%</span>
+        <input type="range" min="0" max="100" value="40" class="length-slider">
+    </div>
+    <div class="control-row">
+        <span>Speed: 35%</span>
+        <input type="range" min="0" max="100" value="35" class="speed-slider">
+        <span style="font-size: 0.8em; color: #7ea676; margin-left: 10px;">(controls text typing speed)</span>
+    </div>
+    <div class="greentext-container">
+        <div id="greentext-content">Enter a topic and click Generate to create a greentext story!</div>
+    </div>
+    <button class="generate-btn" disabled>Generate Story</button>
+
+    <div class="save-controls" style="display: none; margin-top: 20px;">
+        <input type="text" 
+               class="title-input" 
+               placeholder="Give your greentext a title"
+               aria-label="Title input"
+               style="width: 100%; margin-bottom: 10px;">
+        <div style="display: flex; gap: 10px;">
+            <button class="save-private-btn">Save Privately</button>
+            <button class="publish-btn">Publish</button>
+        </div>
+    </div>
+
+    <div class="rules-section">
+        <h2>Greenboards Rules</h2>
+        <ul class="rules-list">
+            <li>keep content appropriate for teen audiences (13 - 18)</li>
+            <li>also you shouldnt mention immense violence or drugs</li>
+            <li>dont harrass people through topics ig</li>
+            <li>no spamming or excessive posting</li>
+        </ul>
+    </div>
+
+    <div class="notifications-section" style="margin-top: 40px; border-top: 1px dashed #7ea676; padding-top: 20px;">
+        <h2 style="color: #98BB97; text-align: center; margin-bottom: 20px;">Recent Notifications</h2>
+        <div class="notifications-container">
+            <div class="notifications-empty" style="text-align: center; color: #7ea676; font-style: italic;">
+                No notifications yet
+            </div>
+        </div>
+    </div>
+
+    <div class="board-container" style="margin-top: 40px; border-top: 1px dashed #7ea676; padding-top: 20px;">
+        <img src="/a/74f33523-78ab-4722-965f-0aafc0e7ec25" alt="Greenboards" style="display: block; max-width: 100%; height: auto; margin: 0 auto 20px;">
+        <div class="board-controls" style="display: flex; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+            <div class="search-controls" style="flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 5px;">
+                <select class="search-type" 
+                        style="padding: 8px; background-color: #2F3D2F; border: 1px solid #7ea676; border-radius: 4px; color: #98BB97; width: 100%;">
+                    <option value="title">Search by Title</option>
+                    <option value="prompt">Search by Prompt</option>
+                </select>
+                <input type="text" 
+                       class="search-input" 
+                       placeholder="Search stories..."
+                       style="flex: 1; padding: 8px; background-color: #2F3D2F; border: 1px solid #7ea676; border-radius: 4px; color: #98BB97;">
+            </div>
+            <div class="board-tabs" style="display: flex; gap: 10px;">
+                <button class="tab-btn active" data-tab="public">Public Boards</button>
+                <button class="tab-btn" data-tab="private">My Saved</button>
+            </div>
+            <div class="sort-controls" style="display: flex; gap: 10px;">
+                <button class="sort-btn active" data-sort="new">Newest</button>
+                <button class="sort-btn" data-sort="oldest">Oldest</button>
+                <button class="sort-btn" data-sort="popular">Popular</button>
+                <button class="sort-btn" data-sort="most funny">Most Funny</button>
+            </div>
+        </div>
+        <div class="board-stats" style="text-align: center; color: #7ea676; margin-bottom: 20px;"></div>
+        <div class="board-content"></div>
+    </div>
+</div>
+
+<script>
+const room = new WebsimSocket();
+
+/* TypeScript type definition (for reference only):
+interface Rating {
+  story_id: string;
+  username: string;
+  rating: 'funny' | 'a bit funny' | 'a bit bad' | 'bad';
+  timestamp: number;
+} */
+
+const getFunnyScore = (rating) => {
+    switch(rating) {
+        case 'funny': return 3;
+        case 'a bit funny': return 2;
+        case 'a bit bad': return 1;
+        case 'bad': return 0;
+        default: return 0;
+    }
+};
+
+const getAverageFunnyness = (ratings) => {
+    if (!ratings || ratings.length === 0) return 0;
+    const total = ratings.reduce((sum, r) => sum + getFunnyScore(r.rating), 0);
+    return total / ratings.length;
+};
+
+let bannedUsers = new Set(JSON.parse(localStorage.getItem('bannedUsers') || '[]'));
+let currentTab = 'public';
+let currentSort = 'new';
+let currentBoardPage = 1;
+const ITEMS_PER_PAGE = 6;
+
+let searchQuery = '';
+let searchType = 'title';
+const searchInput = document.querySelector('.search-input');
+const searchTypeSelect = document.querySelector('.search-type');
+
+// Add event listeners for search
+searchInput.addEventListener('input', (e) => {
+    searchQuery = e.target.value.toLowerCase();
+    loadBoardContent();
+});
+
+searchTypeSelect.addEventListener('change', (e) => {
+    searchType = e.target.value;
+    loadBoardContent();
+});
+
+function updateBannedUsersList() {
+    localStorage.setItem('bannedUsers', JSON.stringify([...bannedUsers]));
+}
+
+async function banUser(username) {
+    if (room.party.client.username !== 'DoubleFloat') return;
+    
+    if (confirm(`Are you sure you want to ban @${username} from posting on greenboards?`)) {
+        bannedUsers.add(username);
+        updateBannedUsersList();
+        alert(`@${username} has been banned from posting`);
+        loadBoardContent(); // Refresh to show changes
+    }
+}
+
+async function unbanUser(username) {
+    if (room.party.client.username !== 'DoubleFloat') return;
+    
+    if (confirm(`Are you sure you want to unban @${username}?`)) {
+        bannedUsers.delete(username);
+        updateBannedUsersList();
+        alert(`@${username} has been unbanned`);
+        loadBoardContent(); // Refresh to show changes
+    }
+}
+
+let topicInput = document.querySelector('.topic-input');
+let contextInput = document.querySelector('.context-input');
+let generateBtn = document.querySelector('.generate-btn');
+let vulgarSlider = document.querySelector('.vulgar-slider');
+let lengthSlider = document.querySelector('.length-slider');
+let speedSlider = document.querySelector('.speed-slider');
+
+let vulgarLabel = document.querySelector('.vulgar-slider').previousElementSibling;
+let lengthLabel = document.querySelector('.length-slider').previousElementSibling;
+let speedLabel = document.querySelector('.speed-slider').previousElementSibling;
+
+let currentStory = null;
+
+function getRelativeTime(timestamp) {
+    const current = Date.now();
+    const elapsed = current - timestamp;
+    
+    const seconds = Math.floor(elapsed / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    const weeks = Math.floor(days / 7);
+    const months = Math.floor(days / 30);
+    const years = Math.floor(days / 365);
+    
+    if (years > 0) return `${years} ${years === 1 ? 'year' : 'years'} ago`;
+    if (months > 0) return `${months} ${months === 1 ? 'month' : 'months'} ago`;
+    if (weeks > 0) return `${weeks} ${weeks === 1 ? 'week' : 'weeks'} ago`;
+    if (days > 0) return `${days} ${days === 1 ? 'day' : 'days'} ago`;
+    if (hours > 0) return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
+    if (minutes > 0) return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ago`;
+    return 'just now';
+}
+
+[
+    {slider: vulgarSlider, label: vulgarLabel, prefix: 'Vulgar: '},
+    {slider: lengthSlider, label: lengthLabel, prefix: 'Length: '},
+    {slider: speedSlider, label: speedLabel, prefix: 'Speed: '}
+].forEach(({slider, label, prefix}) => {
+    slider.addEventListener('input', (e) => {
+        label.textContent = `${prefix}${e.target.value}%`;
+    });
+});
+
+async function typeWriter(element, text, index = 0) {
+    if (index === 0) {
+        element.textContent = '';
+    }
+    
+    if (index < text.length) {
+        element.textContent += text.charAt(index);
+        const speed = Math.max(5, 30 * (1 - speedSlider.value / 100));
+        await new Promise(resolve => setTimeout(resolve, speed));
+        await typeWriter(element, text, index + 1);
+    }
+}
+
+async function getGreentextStory(topic, context, vulgarLevel, lengthLevel) {
+    try {
+        const minLines = 5;
+        const maxLines = Math.floor(5 + (lengthLevel / 100) * 15);
+        
+        const response = await fetch('/api/ai_completion', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+                prompt: `Generate a funny greentext story about ${topic}. ${context ? 'Context: ' + context : ''} 
+                The story MUST start with ">be me" as the first line. Use greentext format with each line starting with ">".
+                Keep it entertaining and somewhat absurd. The story should be ${minLines}-${maxLines} lines long.
+                
+                Content Guidelines:
+                - Mild swear words are allowed (e.g. "shit", "damn", "mfw", "wtf")
+                - NO slurs or hateful language 
+                - NO extreme swearing
+                - NO sexual content, innuendos, or horniness
+                - NO political topics or references
+                - NO adult themes or intimate relationships
+                - NO religious topics
+                - NO extreme violence or gore
+                - NO drug references
+                - Keep content suitable for teen audience (13-18)
+                - Focus on relatable, funny situations like:
+                  * School/work mishaps
+                  * Social awkwardness
+                  * Technology fails
+                  * Food-related incidents
+                  * Gaming moments
+                  * Public embarrassment
+                  * Family interactions
+                  * Pet stories
+                
+                <typescript-interface>
+                interface Response {
+                    story: string[];
+                }
+                </typescript-interface>
+                <examples>
+                [
+                    {
+                        "story": [
+                            ">be me",
+                            ">19 year old college student", 
+                            ">mfw I'm late for class",
+                            ">run to lecture hall like an idiot",
+                            ">trip and fall in front of everyone",
+                            ">shit.jpg",
+                            ">professor just sighs and continues teaching"
+                        ]
+                    }
+                ]</examples>`,
+                data: {
+                    topic: topic,
+                    context: context,
+                    vulgarLevel: vulgarLevel,
+                    lengthLevel: lengthLevel
+                }
+            }),
+        });
+        const data = await response.json();
+        return data.story;
+    } catch (error) {
+        console.error('Error:', error);
+        return ['Error generating story'];
+    }
+}
+
+async function checkContentAppropriateness(topic, story) {
+    if (!topic || !story || !Array.isArray(story)) {
+        return {
+            isAppropriate: false,
+            reason: "Invalid input provided"
+        };
+    }
+
+    // Modified list of banned keywords
+    const bannedKeywords = [
+        // Sexual content (keep strict)
+        'sex', 'virgin', 'nsfw', 'porn', 'masturbat', 
+        'dick', 'penis', 'vagina', 'pussy', 'cum',
+        'rape', 'molest', 'hentai', 'erectile',
+        'orgasm', 'anal', 'dildo', 'horny', 'sexy',
+        'climax', 'aroused', 'erect', 'thrust',
+        
+        // Political terms (keep)
+        'democrat', 'republican', 'liberal', 'conservative',
+        'biden', 'trump', 'election', 'voting', 'politics',
+        
+        // Drug references (keep)
+        'cocaine', 'heroin', 'weed', 'marijuana', 'meth',
+        'drugs', 'high', 'stoned', 'dealer', 'crack',
+        
+        // Violence (keep severe ones only)
+        'murder', 'gore', 'suicide', 'mutilate', 'torture'
+    ];
+    
+    const lowerTopic = topic.toLowerCase();
+    for (const keyword of bannedKeywords) {
+        if (lowerTopic.includes(keyword)) {
+            return {
+                isAppropriate: false,
+                reason: "Topic contains inappropriate keywords"
+            };
+        }
+    }
+    
+    const storyText = story.join(' ').toLowerCase();
+    for (const keyword of bannedKeywords) {
+        if (storyText.includes(keyword)) {
+            return {
+                isAppropriate: false,
+                reason: "Story contains inappropriate keywords"
+            };
+        }
+    }
+
+    try {
+        const response = await fetch('/api/ai_completion', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+                prompt: `Check if this greentext story and topic is appropriate for teen audiences (13-18).
+                Mild swear words and expressions like "mfw", "shit", "damn", "hell", "wtf" are allowed.
+                
+                Check for and flag:
+                - Slurs or hateful language
+                - Extreme swearing
+                - Sexual content or innuendos
+                - Political topics or references
+                - Adult themes
+                - Extreme violence
+                - Drug references
+                - Religious topics
+                - Harassment or discrimination
+                
+                Topic: "${topic}"
+                Story: "${story.join('\n')}"
+                
+                <typescript-interface>
+                interface Response {
+                    isAppropriate: boolean;
+                    reason: string;
+                }
+                </typescript-interface>
+                <example>
+                {
+                    "isAppropriate": true,
+                    "reason": "Content contains mild swearing but is otherwise appropriate for teens"
+                }
+                </example>`,
+                data: {
+                    topic,
+                    story
+                }
+            }),
+        });
+        
+        const result = await response.json();
+        
+        if (typeof result.isAppropriate !== 'boolean' || typeof result.reason !== 'string') {
+            return {
+                isAppropriate: false,
+                reason: "Error validating content appropriateness"
+            };
+        }
+        
+        return result;
+    } catch (error) {
+        console.error('Error checking content:', error);
+        return {
+            isAppropriate: false,
+            reason: error.message || "Error checking content appropriateness"
+        };
+    }
+}
+
+generateBtn.addEventListener('click', async () => {
+    const topic = topicInput.value.trim();
+    if (!topic) return;
+
+    generateBtn.disabled = true;
+    
+    const greentextContent = document.getElementById('greentext-content');
+    greentextContent.innerHTML = '<div class="loading">Generating story...</div>';
+    
+    try {
+        const vulgarLevel = parseInt(vulgarSlider.value);
+        const lengthLevel = parseInt(lengthSlider.value);
+        const context = contextInput.value.trim();
+        
+        const story = await getGreentextStory(topic, context, vulgarLevel, lengthLevel);
+        
+        if (!story || !Array.isArray(story)) {
+            throw new Error('Invalid story generated');
+        }
+        
+        const appropriatenessCheck = await checkContentAppropriateness(topic, story);
+        
+        greentextContent.innerHTML = '';
+        
+        for (let i = 0; i < story.length; i++) {
+            const line = story[i];
+            const p = document.createElement('p');
+            p.className = 'greentext-line';
+            greentextContent.appendChild(p);
+            await typeWriter(p, line);
+            p.classList.add('visible');
+            await new Promise(resolve => setTimeout(resolve, 200));
+        }
+        
+        const endMarker = document.createElement('div');
+        endMarker.className = 'story-end';
+        endMarker.textContent = '--- End of Greentext ---';
+        greentextContent.appendChild(endMarker);
+
+        if (!appropriatenessCheck.isAppropriate) {
+            const warningDiv = document.createElement('div');
+            warningDiv.className = 'warning-message';
+            warningDiv.textContent = `⚠️ This content has been marked as inappropriate for teen audiences. It can only be saved privately. Reason: ${appropriatenessCheck.reason}`;
+            greentextContent.appendChild(warningDiv);
+            
+            document.querySelector('.save-controls').style.display = 'block';
+            document.querySelector('.publish-btn').style.display = 'none';
+        } else {
+            document.querySelector('.save-controls').style.display = 'block';
+            document.querySelector('.publish-btn').style.display = 'inline-block';
+        }
+
+        currentStory = story;
+    } catch (error) {
+        console.error('Error generating story:', error);
+        greentextContent.innerHTML = `<div class="warning-message">Error generating story: ${error.message}</div>`;
+    } finally {
+        generateBtn.disabled = !topicInput.value.trim();
+    }
+});
+
+topicInput.addEventListener('input', () => {
+    generateBtn.disabled = !topicInput.value.trim();
+});
+
+topicInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && !generateBtn.disabled) {
+        generateBtn.click();
+    }
+});
+
+document.addEventListener('mousemove', (e) => {
+    const cube = document.querySelector('.cube');
+    const x = (window.innerWidth / 2 - e.pageX) * 0.1;
+    const y = (window.innerHeight / 2 - e.pageY) * 0.1;
+    cube.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
+});
+
+async function saveStory(isPublic) {
+    const titleInput = document.querySelector('.title-input');
+    const title = titleInput.value.trim();
+    
+    if (!title || !currentStory) return;
+    
+    if (bannedUsers.has(room.party.client.username)) {
+        alert('You are banned from posting on greenboards');
+        return;
+    }
+
+    // Check for duplicates before saving
+    const existingStories = await room.collection('greentext').getList();
+    const duplicateStory = existingStories.find(story => {
+        const sameContent = JSON.stringify(story.content) === JSON.stringify(currentStory);
+        const sameTitle = story.title === title;
+        const sameTopic = story.topic === topicInput.value.trim();
+        return sameContent && sameTitle && sameTopic;
+    });
+
+    if (duplicateStory) {
+        try {
+            await room.collection('greentext').delete(duplicateStory.id);
+            console.log('Deleted duplicate story:', duplicateStory.id);
+        } catch (error) {
+            console.error('Error deleting duplicate story:', error);
+        }
+    }
+
+    try {
+        const response = await fetch('/api/ai_completion', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+                prompt: `Check if this greentext story content for inappropriate or concerning content. Check for hate speech, extreme violence, adult content, harassment, or other problematic themes.
+                Title: "${title}"
+                Topic: "${topicInput.value.trim()}"
+                Story: "${currentStory.join('\n')}"
+                
+                <typescript-interface>
+                interface Response {
+                    isAppropriate: boolean;
+                    reason: string;
+                }
+                </typescript-interface>
+                <examples>
+                {
+                    "isAppropriate": false,
+                    "reason": "Story contains references to graphic violence and gore"
+                }
+                </examples>`,
+                data: {
+                    title,
+                    topic: topicInput.value.trim(),
+                    story: currentStory
+                }
+            }),
+        });
+
+        const automodResult = await response.json();
+
+        // Handle rate limit case
+        if (!automodResult.isAppropriate && automodResult.reason === "Generative API is not allowed") {
+            const warningDiv = document.createElement('div');
+            warningDiv.className = 'warning-message';
+            warningDiv.textContent = "ERROR: The AI that detects if the story is inappropriate is rate-limited, meaning you can't post it publicly. Sorry!";
+            document.getElementById('greentext-content').appendChild(warningDiv);
+            
+            // Only allow private saving
+            if (isPublic) {
+                return;
+            }
+        } else if (!automodResult.isAppropriate && room.party.client.username === 'DoubleFloat') {
+            const reason = automodResult.reason || 'unspecified inappropriate content';
+            if (confirm(`Would you like to delete this story? Automod flagged it for: ${reason}\n\nPost title: ${title}`)) {
+                document.querySelector('.save-controls').style.display = 'none';
+                titleInput.value = '';
+                return;
+            }
+        }
+        
+        const story = {
+            title: title,
+            content: currentStory,
+            isPublic: isPublic,
+            topic: topicInput.value.trim(),
+            context: contextInput.value.trim(),
+            timestamp: Date.now(),
+            likes: 0,
+            username: room.party.client.username,
+            created_by: room.party.client.username
+        };
+        
+        await room.collection('greentext').create(story);
+        
+        document.querySelector('.save-controls').style.display = 'none';
+        titleInput.value = '';
+        loadBoardContent();
+    } catch (error) {
+        console.error('Error with automod:', error);
+        alert('Error saving story');
+    }
+}
+
+const loadBoardContent = async () => {
+    const statsDisplay = document.querySelector('.board-stats');
+    if (!statsDisplay) {
+        console.error('Stats display element not found');
+        return;
+    }
+
+    const query = currentTab === 'private' 
+        ? room.collection('greentext').filter({ 
+            isPublic: false, 
+            created_by: room.party.client.username
+          })
+        : room.collection('greentext').filter({ isPublic: true });
+
+    const likesQuery = room.collection('greentext_like');
+    const ratingsQuery = room.collection('greentext_rating');
+    const reportsQuery = room.collection('reports');
+
+    query.subscribe(stories => {
+        if (!stories) stories = [];
+        
+        likesQuery.subscribe(likes => {
+            if (!likes) likes = [];
+            
+            ratingsQuery.subscribe(ratings => {
+                if (!ratings) ratings = [];
+                
+                reportsQuery.subscribe(reports => {
+                    if (!reports) reports = [];
+                    
+                    let filteredStories = [...stories];
+                    
+                    if (searchQuery) {
+                        filteredStories = filteredStories.filter(story => {
+                            if (searchType === 'title') {
+                                return story.title.toLowerCase().includes(searchQuery);
+                            } else {
+                                return story.topic.toLowerCase().includes(searchQuery);
+                            }
+                        });
+                    }
+
+                    const userGreentextCounts = new Map();
+                    filteredStories.forEach(story => {
+                        const count = userGreentextCounts.get(story.username) || 0;
+                        userGreentextCounts.set(story.username, count + 1);
+                    });
+
+                    let maxGreentexts = 0;
+                    let topUser = '';
+                    userGreentextCounts.forEach((count, user) => {
+                        if (count > maxGreentexts) {
+                            maxGreentexts = count;
+                            topUser = user;
+                        }
+                    });
+
+                    const totalGreentexts = filteredStories.length;
+                    const topUserPercentage = totalGreentexts > 0 ? 
+                        Math.round((maxGreentexts / totalGreentexts) * 100) : 0;
+
+                    statsDisplay.innerHTML = `
+                        this place has over ${totalGreentexts} greentexts<br>
+                        ${topUser ? `fun fact: @${topUser} has the most greentexts, making up ${topUserPercentage}% of the greentexts here` : ''}
+                    `;
+                    
+                    const storyLikes = new Map();
+                    const userLikes = new Set();
+                    
+                    likes.forEach(like => {
+                        const count = storyLikes.get(like.story_id) || 0;
+                        storyLikes.set(like.story_id, count + 1);
+                        
+                        if (like.username === room.party.client.username) {
+                            userLikes.add(like.story_id);
+                        }
+                    });
+                    
+                    const storyRatings = new Map();
+                    ratings.forEach(rating => {
+                        if (!storyRatings.has(rating.story_id)) {
+                            storyRatings.set(rating.story_id, []);
+                        }
+                        storyRatings.get(rating.story_id).push(rating);
+                    });
+
+                    const sortedStories = [...filteredStories].sort((a, b) => {
+                        switch(currentSort) {
+                            case 'new':
+                                return b.timestamp - a.timestamp;
+                            case 'oldest':
+                                return a.timestamp - b.timestamp;
+                            case 'popular':
+                                return (storyLikes.get(b.id) || 0) - (storyLikes.get(a.id) || 0);
+                            case 'most funny':
+                                const ratingListB = storyRatings.get(b.id) || [];
+                                const ratingListA = storyRatings.get(a.id) || [];
+                                return getAverageFunnyness(ratingListB) - getAverageFunnyness(ratingListA);
+                            default:
+                                return b.timestamp - a.timestamp;
+                        }
+                    });
+                    
+                    renderStories(sortedStories, storyLikes, userLikes, storyRatings, reports);
+                });
+            });
+        });
+    });
+};
+
+setInterval(loadBoardContent, 30000);
+
+loadBoardContent();
+
+async function toggleLike(storyId) {
+    const likeCollection = room.collection('greentext_like');
+    const likeBtn = document.querySelector(`.like-btn[data-story="${storyId}"]`);
+    if (!likeBtn || likeBtn.disabled) return;
+    
+    const existingLikes = await likeCollection.filter({
+        story_id: storyId,
+        username: room.party.client.username
+    }).getList();
+    
+    if (existingLikes.length === 0) {
+        await likeCollection.create({
+            story_id: storyId,
+            timestamp: Date.now()
+        });
+        
+        likeBtn.classList.add('liked');
+        likeBtn.disabled = true;
+        const count = parseInt(likeBtn.querySelector('.like-count').textContent);
+        const newCount = count + 1;
+        likeBtn.textContent = `${newCount} ${newCount === 1 ? 'like' : 'likes'}`;
+    }
+}
+
+async function rateStory(storyId, rating) {
+    const ratingCollection = room.collection('greentext_rating');
+    
+    // Get the story to check ownership
+    const stories = await room.collection('greentext').filter({ id: storyId }).getList();
+    const story = stories[0];
+    
+    if (!story) {
+        console.error('Story not found');
+        return;
+    }
+    
+    // Prevent rating your own story
+    if (story.username === room.party.client.username) {
+        alert("You cannot rate your own greentext!");
+        return;
+    }
+    
+    // Check if user already rated
+    const existingRatings = await ratingCollection.filter({
+        story_id: storyId,
+        username: room.party.client.username
+    }).getList();
+    
+    if (existingRatings.length > 0) {
+        // User already rated, do nothing
+        return;
+    }
+    
+    // Create new rating
+    await ratingCollection.create({
+        story_id: storyId,
+        rating,
+        timestamp: Date.now()
+    });
+    
+    loadBoardContent();
+}
+
+async function deleteStory(storyId) {
+    if (!confirm('Are you sure you want to delete this greentext?')) return;
+    
+    try {
+        await room.collection('greentext').delete(storyId);
+        
+        const reports = await room.collection('reports').filter({
+            story_id: storyId
+        }).getList();
+        
+        for (const report of reports) {
+            await room.collection('reports').delete(report.id);
+        }
+        
+        loadBoardContent();
+    } catch (error) {
+        console.error('Error deleting story:', error);
+        alert('Failed to delete the story');
+    }
+}
+
+async function editStory(storyId) {
+    const stories = await room.collection('greentext').filter({ id: storyId }).getList();
+    const story = stories[0];
+    if (!story) return;
+    
+    const newTitle = prompt('Enter new title:', story.title);
+    if (newTitle === null) return; // User clicked cancel
+    if (!newTitle.trim()) {
+        alert('Title cannot be empty');
+        return;
+    }
+    
+    const newTopic = prompt('Enter new topic/prompt:', story.topic);
+    if (newTopic === null) return; // User clicked cancel
+    if (!newTopic.trim()) {
+        alert('Topic cannot be empty');
+        return;
+    }
+    
+    const currentContent = story.content.join('\n');
+    const newContent = prompt('Enter new greentext content (use line breaks for new lines):', currentContent);
+    if (newContent === null) return; // User clicked cancel
+    if (!newContent.trim()) {
+        alert('Content cannot be empty');
+        return;
+    }
+    
+    // Ensure each line starts with '>'
+    const contentArray = newContent.split('\n').map(line => {
+        line = line.trim();
+        return line.startsWith('>') ? line : '>' + line;
+    });
+    
+    try {
+        await room.collection('greentext').update(storyId, {
+            title: newTitle.trim(),
+            topic: newTopic.trim(),
+            content: contentArray
+        });
+        
+        loadBoardContent();
+        alert('Story updated successfully!');
+    } catch (error) {
+        console.error('Error updating story:', error);
+        alert('Failed to update the story. Please try again.');
+    }
+}
+
+async function handleReport(reportId, storyId, shouldDelete) {
+    try {
+        if (shouldDelete) {
+            await deleteStory(storyId);
+        }
+        
+        await room.collection('reports').delete(reportId);
+        
+        loadBoardContent();
+    } catch (error) {
+        console.error('Error handling report:', error);
+        alert('Failed to handle report');
+    }
+}
+
+async function reportStory(storyId) {
+    const reason = prompt('Please enter the reason for reporting this story:');
+    if (!reason) return;
+
+    try {
+        await room.collection('reports').create({
+            story_id: storyId,
+            reporter: room.party.client.username,
+            reason: reason,
+            timestamp: Date.now(),
+            status: 'pending'
+        });
+
+        alert('Thank you for your report. It will be reviewed by moderators.');
+        loadBoardContent(); 
+    } catch (error) {
+        console.error('Error submitting report:', error);
+        alert('Failed to submit report');
+    }
+}
+
+document.querySelector('.save-private-btn').addEventListener('click', () => saveStory(false));
+document.querySelector('.publish-btn').addEventListener('click', () => saveStory(true));
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        currentTab = e.target.dataset.tab;
+        loadBoardContent();
+    });
+});
+
+document.querySelectorAll('.sort-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        currentSort = e.target.dataset.sort;
+        loadBoardContent();
+    });
+});
+
+function renderStories(stories, storyLikes, userLikes, storyRatings, reports) {
+    const boardContent = document.querySelector('.board-content');
+    boardContent.innerHTML = '';
+    
+    if (stories.length === 0) {
+        boardContent.innerHTML += '<div style="text-align: center; color: #7ea676;">No stories found</div>';
+        return;
+    }
+
+    const startIdx = (currentBoardPage - 1) * ITEMS_PER_PAGE;
+    const endIdx = startIdx + ITEMS_PER_PAGE;
+    const paginatedStories = stories.slice(startIdx, endIdx);
+    const totalPages = Math.ceil(stories.length / ITEMS_PER_PAGE);
+
+    paginatedStories.forEach(story => {
+        const likeCount = storyLikes.get(story.id) || 0;
+        const isLiked = userLikes.has(story.id);
+        const relativeTime = getRelativeTime(story.timestamp);
+        const isOwner = story.username === room.party.client.username;
+        
+        const likeButtonContent = isLiked ? 
+            `${likeCount} ${likeCount === 1 ? 'like' : 'likes'}` : 
+            `♥ <span class="like-count">${likeCount}</span>`;
+    
+        const promptText = story.topic ? 
+            `( ORIGINAL PROMPT: ${story.topic} )` : 
+            "( ORIGINAL PROMPT: [unknown] )";
+        
+        const ownerTag = isOwner ? '<span class="owner-tag">Owner</span>' : '';
+        const isAdmin = room.party.client.username === 'DoubleFloat';
+        const adminButtons = `
+            ${isOwner || isAdmin ? `
+                <button class="edit-btn" onclick="editStory('${story.id}')">Edit</button>
+                <button class="delete-btn" onclick="deleteStory('${story.id}')">Delete</button>
+            ` : ''}
+            ${!isOwner ? `<button class="report-btn" onclick="reportStory('${story.id}')">Report</button>` : ''}
+        `;
+        
+        const usernameSpan = `
+            <a href="https://websim.ai/@${story.username}" class="username-link">@${story.username}</a>
+            ${ownerTag}
+            ${isAdmin && story.username !== 'DoubleFloat' ? `
+                <button class="ban-btn" onclick="event.stopPropagation(); ${bannedUsers.has(story.username) ? 
+                    `unbanUser('${story.username}')` : 
+                    `banUser('${story.username}')`}">
+                    ${bannedUsers.has(story.username) ? '🔓 Unban User' : '🔒 Ban User'}
+                </button>` : ''}
+        `;
+        
+        const card = document.createElement('div');
+        card.className = 'greentext-card';
+        
+        const hasUserRatedAlready = storyRatings.get(story.id)?.some(r => r.username === room.party.client.username);
+
+        const ratingButtons = `
+          <div class="rating-controls">
+            <button class="rate-btn" data-rating="funny" 
+                onclick="rateStory('${story.id}', 'funny')" 
+                ${hasUserRatedAlready || isOwner ? 'disabled' : ''} 
+                title="${isOwner ? 'You cannot rate your own greentext' : hasUserRatedAlready ? 'You have already rated this greentext' : ''}">Funny</button>
+            <button class="rate-btn" data-rating="a bit funny" 
+                onclick="rateStory('${story.id}', 'a bit funny')" 
+                ${hasUserRatedAlready || isOwner ? 'disabled' : ''}
+                title="${isOwner ? 'You cannot rate your own greentext' : hasUserRatedAlready ? 'You have already rated this greentext' : ''}">A Bit Funny</button>
+            <button class="rate-btn" data-rating="a bit bad" 
+                onclick="rateStory('${story.id}', 'a bit bad')" 
+                ${hasUserRatedAlready || isOwner ? 'disabled' : ''}
+                title="${isOwner ? 'You cannot rate your own greentext' : hasUserRatedAlready ? 'You have already rated this greentext' : ''}">A Bit Bad</button>
+            <button class="rate-btn" data-rating="bad" 
+                onclick="rateStory('${story.id}', 'bad')" 
+                ${hasUserRatedAlready || isOwner ? 'disabled' : ''}
+                title="${isOwner ? 'You cannot rate your own greentext' : hasUserRatedAlready ? 'You have already rated this greentext' : ''}">Bad</button>
+          </div>
+          <div class="rating-stats"></div>
+        `;
+
+        card.innerHTML = `
+            <div class="greentext-card-header">
+                <div class="greentext-card-title-group">
+                    <div class="greentext-card-title">${story.title}</div>
+                    <div class="greentext-card-prompt">${promptText}</div>
+                </div>
+                <div class="greentext-card-meta">
+                    <span>by ${usernameSpan}</span>
+                    <span>${relativeTime}</span>
+                    <button class="like-btn ${isLiked ? 'liked' : ''}" 
+                            data-story="${story.id}" 
+                            onclick="toggleLike('${story.id}')"
+                            ${isLiked ? 'disabled' : ''}>
+                        ${likeButtonContent}
+                    </button>
+                    ${adminButtons}
+                </div>
+            </div>
+            <div class="greentext-content">
+                ${story.content.map(line => `<p>${line}</p>`).join('')}
+            </div>
+            ${ratingButtons}
+        `;
+
+        const allRatings = storyRatings.get(story.id) || [];
+        const averageScore = getAverageFunnyness(allRatings);
+        const ratingCounts = {
+            funny: allRatings.filter(r => r.rating === 'funny').length,
+            'a bit funny': allRatings.filter(r => r.rating === 'a bit funny').length,
+            'a bit bad': allRatings.filter(r => r.rating === 'a bit bad').length,
+            bad: allRatings.filter(r => r.rating === 'bad').length
+        };
+        
+        card.querySelector('.rating-stats').innerHTML = `
+            Average Funnyness: ${averageScore.toFixed(1)}/3
+            (${allRatings.length} ${allRatings.length ===  1 ? 'rating' : 'ratings'})
+            ${Object.entries(ratingCounts)
+              .filter(([_, count]) => count > 0)
+              .map(([rating, count]) => `${count} ${rating}`).join(', ')}
+        `;
+        
+        // Highlight user's rating if they rated
+        const userRating = storyRatings.get(story.id)?.find(r => r.username === room.party.client.username);
+        if (userRating) {
+            card.querySelector(`[data-rating="${userRating.rating}"]`).classList.add('active');
+        }
+
+        boardContent.appendChild(card);
+
+        if (room.party.client.username === 'DoubleFloat') {
+            const storyReports = reports.filter(r => r.story_id === story.id);
+            if (storyReports.length > 0) {
+                const reportsDiv = document.createElement('div');
+                reportsDiv.className = 'reports-section';
+                reportsDiv.innerHTML = storyReports.map(report => `
+                    <div class="report-item">
+                        <p>Post "${story.title}" reported by @${report.reporter} for: ${report.reason}</p>
+                        <div class="report-actions">
+                            <button onclick="handleReport('${report.id}', '${story.id}', true)">Delete Post</button>
+                            <button onclick="handleReport('${report.id}', '${story.id}', false)">Dismiss Report</button>
+                        </div>
+                    </div>
+                `).join('');
+                
+                const rulesSection = document.querySelector('.rules-section');
+                if (rulesSection && !document.querySelector('.reports-section')) {
+                    rulesSection.insertAdjacentElement('afterend', reportsDiv);
+                }
+            }
+        }
+    });
+
+    if (stories.length > 0) {
+        const paginationDiv = document.createElement('div');
+        paginationDiv.className = 'pagination-controls';
+        paginationDiv.innerHTML = `
+            <div class="pagination-info">Page ${currentBoardPage} of ${totalPages}</div>
+            <div class="pagination-buttons">
+                ${currentBoardPage > 1 ? `<button class="page-btn" onclick="changeBoardPage(${currentBoardPage - 1})">Previous</button>` : ''}
+                ${currentBoardPage < totalPages ? `<button class="page-btn" onclick="changeBoardPage(${currentBoardPage + 1})">Next</button>` : ''}
+            </div>
+        `;
+        boardContent.appendChild(paginationDiv);
+    }
+}
+
+// Add pagination logic
+function changeBoardPage(newPage) {
+    currentBoardPage = newPage;
+    loadBoardContent();
+}
+
+async function resetAllRatings() {
+    const ratings = await room.collection('greentext_rating').getList();
+    for (const rating of ratings) {
+        try {
+            await room.collection('greentext_rating').delete(rating.id);
+        } catch (e) {
+            console.error('Error deleting rating:', rating.id, e);
+        }
+    }
+    console.log('All ratings have been reset');
+    loadBoardContent();
+}
+
+// Only run this once from the moderator account to clear ratings
+resetAllRatings();
+</script>
+</body></html>
