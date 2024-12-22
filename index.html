@@ -1,0 +1,909 @@
+<html><head><base href="/">
+<title>Tomato Clicker</title>
+<style>
+@font-face {
+    font-family: 'Windows';
+    src: url('Windows Regular.ttf') format('truetype');
+}
+
+body {
+    background: #FFE5E5;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    font-family: 'Windows', sans-serif;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+    gap: 40px;
+}
+
+body.dark-mode {
+    background: #1a1a1a;
+}
+
+body.dark-mode .leaderboard {
+    background: rgba(40, 40, 40, 0.9);
+    color: #fff;
+}
+
+body.dark-mode .leaderboard h2 {
+    color: #FF6B6B;
+}
+
+body.dark-mode .leaderboard-entry {
+    background: rgba(255,107,107,0.05);
+    color: #fff;
+}
+
+body.dark-mode .counter {
+    color: #FF6B6B;
+}
+
+body.dark-mode h1 {
+    color: #FF6B6B;
+}
+
+body.dark-mode .skins {
+    background: rgba(40, 40, 40, 0.9);
+}
+
+body.dark-mode .skins h3 {
+    color: #FF6B6B;
+}
+
+.leaderboard {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    min-width: 250px;
+    max-height: 80vh;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #FF4444 rgba(255, 255, 255, 0.1);
+}
+
+/* Add custom scrollbar styling for webkit browsers */
+.leaderboard::-webkit-scrollbar {
+    width: 8px;
+}
+
+.leaderboard::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.leaderboard::-webkit-scrollbar-thumb {
+    background: #FF4444;
+    border-radius: 4px;
+}
+
+/* Dark mode scrollbar adjustments */
+body.dark-mode .leaderboard::-webkit-scrollbar-track {
+    background: rgba(40, 40, 40, 0.5);
+}
+
+body.dark-mode .leaderboard::-webkit-scrollbar-thumb {
+    background: #FF6B6B;
+}
+
+body.dark-mode .leaderboard {
+    scrollbar-color: #FF6B6B rgba(40, 40, 40, 0.5);
+}
+
+.leaderboard h2 {
+    color: #FF4444;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.leaderboard-entry {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding: 10px;
+    background: rgba(255,107,107,0.1);
+    border-radius: 8px;
+}
+
+.rank {
+    font-weight: bold;
+    color: #FF4444;
+    min-width: 30px;
+}
+
+.game-container {
+    text-align: center;
+}
+
+#tomato {
+    cursor: pointer;
+    transition: transform 0.1s;
+    user-select: none;
+    width: 200px;
+    height: 200px;
+}
+
+#tomato:active {
+    transform: scale(0.95);
+}
+
+.counter {
+    font-size: 2em;
+    margin: 20px 0;
+    color: #FF4444;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+
+.upgrades {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.upgrade-btn {
+    background: #FF6B6B;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    color: white;
+    cursor: pointer;
+    font-family: 'Windows', sans-serif;
+    transition: transform 0.2s;
+}
+
+.upgrade-btn:hover {
+    transform: scale(1.05);
+    background: #FF4444;
+}
+
+.upgrade-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+#audio-click-status {
+    color: #FF4444;
+    margin-top: 10px;
+    font-size: 1.2em;
+}
+
+.audio-controls {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(255,255,255,0.8);
+    padding: 10px;
+    border-radius: 10px;
+}
+
+@keyframes wobble {
+    0% { transform: rotate(0deg) scale(1); }
+    25% { transform: rotate(-5deg) scale(1.1); }
+    75% { transform: rotate(5deg) scale(1.1); }
+    100% { transform: rotate(0deg) scale(1); }
+}
+
+.wobble {
+    animation: wobble 0.3s ease-in-out;
+}
+
+.skins {
+    margin-top: 20px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+}
+
+.skins h3 {
+    color: #FF4444;
+    margin-bottom: 10px;
+}
+
+.theme-toggle {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    background: rgba(255,255,255,0.8);
+    padding: 10px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Windows', sans-serif;
+}
+
+body.dark-mode .theme-toggle,
+body.dark-mode .audio-controls {
+    background: rgba(40, 40, 40, 0.9);
+    color: #fff;
+}
+
+.theme-toggle label {
+    cursor: pointer;
+}
+</style>
+</head>
+<body>
+<div class="leaderboard">
+    <h2>Leaderboard</h2>
+    <div id="leaderboard-list">
+        <!-- Leaderboard entries will be populated here -->
+    </div>
+</div>
+
+<div class="game-container">
+    <h1>Tomato Clicker</h1>
+    <div class="counter">Tomatoes: <span id="score">0</span></div>
+    <img id="tomato" src="tomato.png" alt="A minimalist, childlike cartoon illustration of a tomato with a slightly sad expression" width="200" height="200">
+    <div id="auto-click-status"></div>
+    <div id="boost-timer" style="color: #FF4444; margin-top: 10px; font-weight: bold;"></div>
+    
+    <div class="upgrades">
+        <button class="upgrade-btn" id="click-upgrade">
+            Upgrade Click (Cost: 10)
+        </button>
+        <button class="upgrade-btn" id="auto-clicker">
+            Buy Auto-Clicker (Cost: 50)
+        </button>
+        <button class="upgrade-btn" id="boost-btn">
+            1.5x Boost - 30s (Cost: 150)
+        </button>
+    </div>
+
+    <div class="skins">
+        <h3>Skins</h3>
+        <button class="upgrade-btn" id="default-skin">
+            Default Tomato (Selected)
+        </button>
+        <button class="upgrade-btn" id="cool-skin">
+            Cool Tomato Skin (Cost: 50)
+        </button>
+        <button class="upgrade-btn" id="green-masked-skin">
+            Green Masked Tomato (Cost: 100)
+        </button>
+        <button class="upgrade-btn" id="yandere-skin">
+            Yandere Tomato (Cost: 200)
+        </button>
+        <button class="upgrade-btn" id="tocato-skin">
+            Tocato Skin (Cost: 100)
+        </button>
+        <button class="upgrade-btn" id="sean-skin">
+            Sean Tomato (Cost: 50)
+        </button>
+        <button class="upgrade-btn" id="cactus-skin">
+            Cactus (Cost: 10)
+        </button>
+        <button class="upgrade-btn" id="tv-skin">
+            TV Tomato (Cost: 250)
+        </button>
+        <button class="upgrade-btn" id="zombie-skin">
+            Zombie Tomato (Cost: 50)
+        </button>
+        <button class="upgrade-btn" id="rapper-skin">
+            Rapper Tomato (Cost: 131)
+        </button>
+    </div>
+</div>
+
+<div class="audio-controls">
+    <label>
+        <input type="checkbox" id="music-toggle" checked> Background Music
+    </label>
+    <label>
+        <input type="checkbox" id="sound-toggle" checked> Sound Effects
+    </label>
+</div>
+
+<div class="theme-toggle">
+    <label>
+        <input type="checkbox" id="dark-mode-toggle"> Dark Mode
+    </label>
+</div>
+
+<audio id="bgMusic" loop>
+    <source src="Undertale OST_ 054 - Hotel [ ezmp3.cc ].mp3" type="audio/mpeg">
+</audio>
+<audio id="clickSound">
+    <source src="click.wav" type="audio/wav">
+</audio>
+
+<script>
+async function createScoresTable() {
+    const query = `CREATE TABLE IF NOT EXISTS scores (
+        username TEXT PRIMARY KEY,
+        score INTEGER,
+        current_skin TEXT DEFAULT 'default',
+        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`;
+    await fetch('/api/v1/sql/?' + new URLSearchParams({sql: query}));
+}
+
+let purchasedSkins = ['default'];
+let currentSkin = 'default';
+let clickTimes = [];
+let isCheatDetected = false;
+
+let boostMultiplier = 1;
+let boostTimeLeft = 0;
+let boostCost = 150; // Cost for 30-second boost
+
+async function updateLeaderboardScore(score) {
+    try {
+        const user = await window.websim.getUser();
+        if (!user) return;
+        
+        const query = `INSERT OR REPLACE INTO scores (username, score, current_skin) VALUES ('${user.username}', ${score}, '${currentSkin}')`;
+        await fetch('/api/v1/sql/?' + new URLSearchParams({sql: query}));
+    } catch (error) {
+        console.error('Error updating leaderboard score:', error);
+    }
+}
+
+async function fetchLeaderboard() {
+    try {
+        const query = `SELECT username, score, COALESCE(current_skin, 'default') as current_skin 
+                      FROM scores 
+                      WHERE score > 0 
+                      ORDER BY score DESC 
+                      LIMIT 100`;  // Changed from 10 to 100
+        const response = await fetch('/api/v1/sql/?' + new URLSearchParams({sql: query}));
+        const data = await response.json();
+        
+        const leaderboardList = document.getElementById('leaderboard-list');
+        leaderboardList.innerHTML = '';
+        
+        if (Array.isArray(data) && data.length > 0) {
+            data.forEach((entry, index) => {
+                const div = document.createElement('div');
+                div.className = 'leaderboard-entry';
+                div.innerHTML = `
+                    <span class="rank">#${index + 1}</span>
+                    <span>${entry.username}</span>
+                    <span>${entry.score} tomatoes [${entry.current_skin || 'default'}]</span>
+                `;
+                leaderboardList.appendChild(div);
+            });
+        } else {
+            const div = document.createElement('div');
+            div.className = 'leaderboard-entry';
+            div.innerHTML = `<span>No scores yet!</span>`;
+            leaderboardList.appendChild(div);
+        }
+    } catch (error) {
+        console.error('Error fetching leaderboard:', error);
+        const leaderboardList = document.getElementById('leaderboard-list');
+        leaderboardList.innerHTML = '<div class="leaderboard-entry">Error loading leaderboard</div>';
+    }
+}
+
+let score = 0;
+let clickPower = 1;
+let autoClickerCount = 0;
+let clickUpgradeCost = 10;
+let autoClickerCost = 50;
+
+const scoreElement = document.getElementById('score');
+const tomatoButton = document.getElementById('tomato');
+const clickUpgradeBtn = document.getElementById('click-upgrade');
+const autoClickerBtn = document.getElementById('auto-clicker');
+const boostBtn = document.getElementById('boost-btn');
+const boostTimer = document.getElementById('boost-timer');
+const defaultSkinBtn = document.getElementById('default-skin');
+const coolSkinBtn = document.getElementById('cool-skin');
+const greenMaskedSkinBtn = document.getElementById('green-masked-skin');
+const yandereSkinBtn = document.getElementById('yandere-skin');
+const tocatoSkinBtn = document.getElementById('tocato-skin');
+const seanSkinBtn = document.getElementById('sean-skin');
+const cactusSkinBtn = document.getElementById('cactus-skin');
+const tvSkinBtn = document.getElementById('tv-skin');
+const zombieSkinBtn = document.getElementById('zombie-skin');
+const rapperSkinBtn = document.getElementById('rapper-skin');
+const autoClickStatus = document.getElementById('auto-click-status');
+const bgMusic = document.getElementById('bgMusic');
+const clickSound = document.getElementById('clickSound');
+const musicToggle = document.getElementById('music-toggle');
+const soundToggle = document.getElementById('sound-toggle');
+const darkModeToggle = document.getElementById('dark-mode-toggle');
+
+// Check for saved theme preference
+if (localStorage.getItem('darkMode') === 'true') {
+    document.body.classList.add('dark-mode');
+    darkModeToggle.checked = true;
+}
+
+darkModeToggle.addEventListener('change', () => {
+    if (darkModeToggle.checked) {
+        document.body.classList.add('dark-mode');
+        localStorage.setItem('darkMode', 'true');
+    } else {
+        document.body.classList.remove('dark-mode');
+        localStorage.setItem('darkMode', 'false');
+    }
+});
+
+createScoresTable();
+setInterval(fetchLeaderboard, 1000);
+
+musicToggle.addEventListener('change', () => {
+    if (musicToggle.checked) {
+        bgMusic.play();
+    } else {
+        bgMusic.pause();
+    }
+});
+
+soundToggle.addEventListener('change', () => {
+    clickSound.muted = !soundToggle.checked;
+});
+
+bgMusic.volume = 0.3;
+bgMusic.play();
+
+function playClickSound() {
+    if (soundToggle.checked) {
+        clickSound.currentTime = 0;
+        clickSound.play();
+    }
+}
+
+async function updateScore(amount) {
+    score += amount;
+    scoreElement.textContent = score;
+    updateButtons();
+    await updateLeaderboardScore(score);
+}
+
+function updateBoostButton() {
+    boostBtn.textContent = boostTimeLeft > 0 ? 
+        `1.5x Boost Active (${boostTimeLeft}s)` : 
+        `1.5x Boost - 30s (Cost: ${boostCost})`;
+    boostBtn.disabled = (score < boostCost) || (boostTimeLeft > 0);
+}
+
+function updateSkinButtons() {
+    defaultSkinBtn.textContent = currentSkin === 'default' ? 
+        'Default Tomato (Selected)' : 'Select Default Tomato';
+        
+    if (purchasedSkins.includes('cool')) {
+        coolSkinBtn.textContent = currentSkin === 'cool' ? 
+            'Cool Tomato (Selected)' : 'Select Cool Tomato';
+    }
+    if (purchasedSkins.includes('green-masked')) {
+        greenMaskedSkinBtn.textContent = currentSkin === 'green-masked' ? 
+            'Green Masked Tomato (Selected)' : 'Select Green Masked Tomato';
+    }
+    if (purchasedSkins.includes('yandere')) {
+        yandereSkinBtn.textContent = currentSkin === 'yandere' ? 
+            'Yandere Tomato (Selected)' : 'Select Yandere Tomato';
+    }
+    if (purchasedSkins.includes('tocato')) {
+        tocatoSkinBtn.textContent = currentSkin === 'tocato' ? 
+            'Tocato (Selected)' : 'Select Tocato';
+    }
+    if (purchasedSkins.includes('sean')) {
+        seanSkinBtn.textContent = currentSkin === 'sean' ? 
+            'Sean Tomato (Selected)' : 'Select Sean Tomato';
+    }
+    if (purchasedSkins.includes('cactus')) {
+        cactusSkinBtn.textContent = currentSkin === 'cactus' ? 
+            'Cactus (Selected)' : 'Select Cactus';
+    }
+    if (purchasedSkins.includes('tv')) {
+        tvSkinBtn.textContent = currentSkin === 'tv' ? 
+            'TV Tomato (Selected)' : 'Select TV Tomato';
+    }
+    if (purchasedSkins.includes('zombie')) {
+        zombieSkinBtn.textContent = currentSkin === 'zombie' ? 
+            'Zombie Tomato (Selected)' : 'Select Zombie Tomato';
+    }
+    if (purchasedSkins.includes('rapper')) {
+        rapperSkinBtn.textContent = currentSkin === 'rapper' ? 
+            'Rapper Tomato (Selected)' : 'Select Rapper Tomato';
+    }
+}
+
+function updateButtons() {
+    clickUpgradeBtn.textContent = `Upgrade Click (Cost: ${clickUpgradeCost})`;
+    clickUpgradeBtn.disabled = score < clickUpgradeCost;
+    
+    autoClickerBtn.textContent = `Buy Auto-Clicker (Cost: ${autoClickerCost})`;
+    autoClickerBtn.disabled = score < autoClickerCost;
+
+    updateBoostButton();
+
+    // Update skin buttons
+    updateSkinButtons();
+}
+
+function animateTomato() {
+    tomatoButton.classList.add('wobble');
+    switch(currentSkin) {
+        case 'cactus':
+            tomatoButton.src = 'cactus-clicked.png';
+            tomatoButton.alt = 'A cartoon drawing of a cactus-like creature with a worried expression';
+            break;
+        case 'sean':
+            tomatoButton.src = 'sean-tomato-clicked.png';
+            tomatoButton.alt = 'A digital drawing of a stylized tomato with an annoyed expression';
+            break;
+        case 'tocato':
+            tomatoButton.src = 'tocato-clicked.png';
+            tomatoButton.alt = 'A digital drawing of a cartoon character resembling a cat or similar creature';
+            break;
+        case 'yandere':
+            tomatoButton.src = 'yandere-tomato-clicked.png';
+            tomatoButton.alt = 'A digital drawing of a stylized tomato character with an angry expression';
+            break;
+        case 'green-masked':
+            tomatoButton.src = 'tgo-tomato-clicked.png';
+            tomatoButton.alt = 'A cartoon drawing of a tomato with a distressed expression and a green mask';
+            break;
+        case 'cool':
+            tomatoButton.src = 'cool-tomato-clicked.png';
+            tomatoButton.alt = 'A cartoon drawing of a cool tomato wearing sunglasses with a surprised expression';
+            break;
+        case 'tv':
+            tomatoButton.src = 'tv-tomato-clicked.png';
+            tomatoButton.alt = 'A cartoon drawing of a dark brown television set with a fiery orange and yellow flame emanating from its top';
+            break;
+        case 'zombie':
+            tomatoButton.src = 'zombie-tomato-clicked.png';
+            tomatoButton.alt = 'A cartoon drawing of a zombified tomato';
+            break;
+        case 'rapper':
+            tomatoButton.src = 'rapper-tomato-clicked.png';
+            tomatoButton.alt = 'A digital drawing of a cartoon tomato wearing a grey hat with TOMATO written in dripping red font';
+            break;
+        default:
+            tomatoButton.src = 'tomato-clicked.png';
+            tomatoButton.alt = 'A minimalist, childlike cartoon illustration of a tomato with a worried expression';
+    }
+    
+    setTimeout(() => {
+        tomatoButton.classList.remove('wobble');
+        switch(currentSkin) {
+            case 'cactus':
+                tomatoButton.src = 'cactus.png';
+                tomatoButton.alt = 'A cartoon drawing of a light green cactus with a slightly unhappy expression';
+                break;
+            case 'sean':
+                tomatoButton.src = 'sean-tomato.png';
+                tomatoButton.alt = 'A cartoon drawing of a pink, striped, cube-like creature with a slightly sad expression';
+                break;
+            case 'tocato':
+                tomatoButton.src = 'tocato.png';
+                tomatoButton.alt = 'A digital drawing of a cartoon character resembling a cat or similar creature';
+                break;
+            case 'yandere':
+                tomatoButton.src = 'yandere-tomato.png';
+                tomatoButton.alt = 'A digital drawing of a stylized tomato character with a sullen expression';
+                break;
+            case 'green-masked':
+                tomatoButton.src = 'tgo-tomato.png';
+                tomatoButton.alt = 'A cartoon drawing of a tomato with a green mask';
+                break;
+            case 'cool':
+                tomatoButton.src = 'cool-tomato.png';
+                tomatoButton.alt = 'A cartoon illustration of a cool tomato wearing sunglasses';
+                break;
+            case 'tv':
+                tomatoButton.src = 'tv-tomato.png';
+                tomatoButton.alt = 'A cartoon drawing of a vintage television set with a stylized pink tomato on the screen';
+                break;
+            case 'zombie':
+                tomatoButton.src = 'zombie-tomato.png';
+                tomatoButton.alt = 'A cartoon drawing of a tomato that appears to be a zombie';
+                break;
+            case 'rapper':
+                tomatoButton.src = 'rapper-tomato.png';
+                tomatoButton.alt = 'A digital drawing of a red, boxy character resembling a tomato, wearing a grey hat with red splotches';
+                break;
+            default:
+                tomatoButton.src = 'tomato.png';
+                tomatoButton.alt = 'A minimalist, childlike cartoon illustration of a tomato with a slightly sad expression';
+        }
+    }, 700);
+}
+
+tomatoButton.addEventListener('click', () => {
+    // Anti-cheat check
+    const now = Date.now();
+    clickTimes.push(now);
+    
+    // Only keep clicks from the last second
+    clickTimes = clickTimes.filter(time => now - time <= 1000);
+    
+    // Calculate clicks per second
+    const clicksPerSecond = clickTimes.length;
+    
+    // Check if clicking too fast
+    if (clicksPerSecond >= 30 && !isCheatDetected) {
+        isCheatDetected = true;
+        alert('Cheating detected! Please play fairly. Your progress will be reset.');
+        
+        // Reset game state
+        score = 0;
+        clickPower = 1;
+        autoClickerCount = 0;
+        clickUpgradeCost = 10;
+        autoClickerCost = 50;
+        purchasedSkins = ['default'];
+        currentSkin = 'default';
+        boostMultiplier = 1;
+        boostTimeLeft = 0;
+        boostTimer.textContent = '';
+        updateBoostButton();
+        
+        // Reset visual elements
+        tomatoButton.src = 'tomato.png';
+        tomatoButton.alt = 'A minimalist, childlike cartoon illustration of a tomato with a slightly sad expression';
+        autoClickStatus.textContent = '';
+        
+        // Update everything
+        updateScore(0);
+        updateButtons();
+        updateSkinButtons();
+        
+        // Reset cheat detection after 5 seconds
+        setTimeout(() => {
+            isCheatDetected = false;
+            clickTimes = [];
+        }, 5000);
+        
+        return;
+    }
+    
+    // Normal click behavior if no cheating detected
+    if (!isCheatDetected) {
+        updateScore(clickPower * boostMultiplier);
+        playClickSound();
+        animateTomato();
+    }
+});
+
+clickUpgradeBtn.addEventListener('click', () => {
+    if (score >= clickUpgradeCost) {
+        score -= clickUpgradeCost;
+        clickPower++;
+        clickUpgradeCost = Math.floor(clickUpgradeCost * 1.5);
+        updateScore(0);
+        playClickSound();
+    }
+});
+
+autoClickerBtn.addEventListener('click', () => {
+    if (score >= autoClickerCost) {
+        score -= autoClickerCost;
+        autoClickerCount++;
+        autoClickerCost = Math.floor(autoClickerCost * 1.5);
+        updateScore(0);
+        playClickSound();
+        updateAutoClickStatus();
+    }
+});
+
+boostBtn.addEventListener('click', () => {
+    if (score >= boostCost && boostTimeLeft <= 0) {
+        score -= boostCost;
+        boostMultiplier = 1.5;
+        boostTimeLeft = 30;
+        updateScore(0);
+        playClickSound();
+        
+        // Start boost timer
+        const boostInterval = setInterval(() => {
+            boostTimeLeft--;
+            updateBoostButton();
+            boostTimer.textContent = boostTimeLeft > 0 ? 
+                `Boost active for ${boostTimeLeft} seconds!` : '';
+            
+            if (boostTimeLeft <= 0) {
+                clearInterval(boostInterval);
+                boostMultiplier = 1;
+                updateBoostButton();
+                boostTimer.textContent = '';
+            }
+        }, 1000);
+    }
+});
+
+defaultSkinBtn.addEventListener('click', () => {
+    currentSkin = 'default';
+    tomatoButton.src = 'tomato.png';
+    tomatoButton.alt = 'A minimalist, childlike cartoon illustration of a tomato with a slightly sad expression';
+    updateLeaderboardScore(score);
+    updateSkinButtons();
+});
+
+coolSkinBtn.addEventListener('click', () => {
+    if (!purchasedSkins.includes('cool') && score >= 50) {
+        score -= 50;
+        purchasedSkins.push('cool');
+        currentSkin = 'cool';
+        updateScore(0);
+        playClickSound();
+        tomatoButton.src = 'cool-tomato.png';
+        tomatoButton.alt = 'A cartoon illustration of a cool tomato wearing sunglasses';
+    } else if (purchasedSkins.includes('cool')) {
+        currentSkin = 'cool';
+        tomatoButton.src = 'cool-tomato.png';
+        tomatoButton.alt = 'A cartoon illustration of a cool tomato wearing sunglasses';
+        updateLeaderboardScore(score);
+    }
+    updateSkinButtons();
+});
+
+greenMaskedSkinBtn.addEventListener('click', () => {
+    if (!purchasedSkins.includes('green-masked') && score >= 100) {
+        score -= 100;
+        purchasedSkins.push('green-masked');
+        currentSkin = 'green-masked';
+        updateScore(0);
+        playClickSound();
+        tomatoButton.src = 'tgo-tomato.png';
+        tomatoButton.alt = 'A cartoon drawing of a tomato with a green mask';
+    } else if (purchasedSkins.includes('green-masked')) {
+        currentSkin = 'green-masked';
+        tomatoButton.src = 'tgo-tomato.png';
+        tomatoButton.alt = 'A cartoon drawing of a tomato with a green mask';
+        updateLeaderboardScore(score);
+    }
+    updateSkinButtons();
+});
+
+yandereSkinBtn.addEventListener('click', () => {
+    if (!purchasedSkins.includes('yandere') && score >= 200) {
+        score -= 200;
+        purchasedSkins.push('yandere');
+        currentSkin = 'yandere';
+        updateScore(0);
+        playClickSound();
+        tomatoButton.src = 'yandere-tomato.png';
+        tomatoButton.alt = 'A digital drawing of a stylized tomato character with a sullen expression';
+    } else if (purchasedSkins.includes('yandere')) {
+        currentSkin = 'yandere';
+        tomatoButton.src = 'yandere-tomato.png';
+        tomatoButton.alt = 'A digital drawing of a stylized tomato character with a sullen expression';
+        updateLeaderboardScore(score);
+    }
+    updateSkinButtons();
+});
+
+tocatoSkinBtn.addEventListener('click', () => {
+    if (!purchasedSkins.includes('tocato') && score >= 100) {
+        score -= 100;
+        purchasedSkins.push('tocato');
+        currentSkin = 'tocato';
+        updateScore(0);
+        playClickSound();
+        tomatoButton.src = 'tocato.png';
+        tomatoButton.alt = 'A digital drawing of a cartoon character resembling a cat or similar creature';
+    } else if (purchasedSkins.includes('tocato')) {
+        currentSkin = 'tocato';
+        tomatoButton.src = 'tocato.png';
+        tomatoButton.alt = 'A digital drawing of a cartoon character resembling a cat or similar creature';
+        updateLeaderboardScore(score);
+    }
+    updateSkinButtons();
+});
+
+seanSkinBtn.addEventListener('click', () => {
+    if (!purchasedSkins.includes('sean') && score >= 50) {
+        score -= 50;
+        purchasedSkins.push('sean');
+        currentSkin = 'sean';
+        updateScore(0);
+        playClickSound();
+        tomatoButton.src = 'sean-tomato.png';
+        tomatoButton.alt = 'A cartoon drawing of a pink, striped, cube-like creature with a slightly sad expression';
+    } else if (purchasedSkins.includes('sean')) {
+        currentSkin = 'sean';
+        tomatoButton.src = 'sean-tomato.png';
+        tomatoButton.alt = 'A cartoon drawing of a pink, striped, cube-like creature with a slightly sad expression';
+        updateLeaderboardScore(score);
+    }
+    updateSkinButtons();
+});
+
+cactusSkinBtn.addEventListener('click', () => {
+    if (!purchasedSkins.includes('cactus') && score >= 10) {
+        score -= 10;
+        purchasedSkins.push('cactus');
+        currentSkin = 'cactus';
+        updateScore(0);
+        playClickSound();
+        tomatoButton.src = 'cactus.png';
+        tomatoButton.alt = 'A cartoon drawing of a light green cactus with a slightly unhappy expression';
+    } else if (purchasedSkins.includes('cactus')) {
+        currentSkin = 'cactus';
+        tomatoButton.src = 'cactus.png';
+        tomatoButton.alt = 'A cartoon drawing of a light green cactus with a slightly unhappy expression';
+        updateLeaderboardScore(score);
+    }
+    updateSkinButtons();
+});
+
+tvSkinBtn.addEventListener('click', () => {
+    if (!purchasedSkins.includes('tv') && score >= 250) {
+        score -= 250;
+        purchasedSkins.push('tv');
+        currentSkin = 'tv';
+        updateScore(0);
+        playClickSound();
+        tomatoButton.src = 'tv-tomato.png';
+        tomatoButton.alt = 'A cartoon drawing of a vintage television set with a stylized pink tomato on the screen';
+    } else if (purchasedSkins.includes('tv')) {
+        currentSkin = 'tv';
+        tomatoButton.src = 'tv-tomato.png';
+        tomatoButton.alt = 'A cartoon drawing of a vintage television set with a stylized pink tomato on the screen';
+        updateLeaderboardScore(score);
+    }
+    updateSkinButtons();
+});
+
+zombieSkinBtn.addEventListener('click', () => {
+    if (!purchasedSkins.includes('zombie') && score >= 50) {
+        score -= 50;
+        purchasedSkins.push('zombie');
+        currentSkin = 'zombie';
+        updateScore(0);
+        playClickSound();
+        tomatoButton.src = 'zombie-tomato.png';
+        tomatoButton.alt = 'A cartoon drawing of a tomato that appears to be a zombie';
+    } else if (purchasedSkins.includes('zombie')) {
+        currentSkin = 'zombie';
+        tomatoButton.src = 'zombie-tomato.png';
+        tomatoButton.alt = 'A cartoon drawing of a tomato that appears to be a zombie';
+        updateLeaderboardScore(score);
+    }
+    updateSkinButtons();
+});
+
+rapperSkinBtn.addEventListener('click', () => {
+    if (!purchasedSkins.includes('rapper') && score >= 131) {
+        score -= 131;
+        purchasedSkins.push('rapper');
+        currentSkin = 'rapper';
+        updateScore(0);
+        playClickSound();
+        tomatoButton.src = 'rapper-tomato.png';
+        tomatoButton.alt = 'A digital drawing of a red, boxy character resembling a tomato, wearing a grey hat with red splotches';
+    } else if (purchasedSkins.includes('rapper')) {
+        currentSkin = 'rapper';
+        tomatoButton.src = 'rapper-tomato.png';
+        tomatoButton.alt = 'A digital drawing of a red, boxy character resembling a tomato, wearing a grey hat with red splotches';
+        updateLeaderboardScore(score);
+    }
+    updateSkinButtons();
+});
+
+function updateAutoClickStatus() {
+    if (autoClickerCount > 0) {
+        autoClickStatus.textContent = `Auto-Clickers: ${autoClickerCount} (${autoClickerCount}/sec)`;
+    } else {
+        autoClickStatus.textContent = '';
+    }
+}
+
+setInterval(() => {
+    if (autoClickerCount > 0) {
+        updateScore(autoClickerCount * boostMultiplier);
+    }
+}, 1000);
+
+setInterval(() => {
+    if (boostTimeLeft > 0) {
+        boostTimeLeft--;
+        updateBoostButton();
+    }
+}, 1000);
+
+updateButtons();
+</script>
+</body>
+</html>
