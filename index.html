@@ -1,0 +1,1396 @@
+<html><head><base href="ObsiRocks Profile">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ObsiRocks Profile</title>
+<style>
+  @font-face {
+    font-family: 'Kremlin';
+    src: url('/kremlin.ttf') format('truetype');
+  }
+  body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #000;
+    font-family: 'Courier New', monospace;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    cursor: none;
+    perspective: 800px;
+  }
+  canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    will-change: transform;
+  }
+  @keyframes pulseGradient {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+  #menuSection {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20%;
+    max-width: 400px;
+    min-width: 280px;
+    height: 70%;
+    background: linear-gradient(45deg, rgba(240, 240, 240, 0.9), rgba(255, 255, 255, 0.9), rgba(240, 240, 240, 0.9));
+    background-size: 200% 200%;
+    animation: pulseGradient 5s ease infinite;
+    border: 1px solid rgba(80, 80, 80, 0.3);
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(200, 200, 200, 0.4);
+    backdrop-filter: blur(5px);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px;
+    box-sizing: border-box;
+    transition: transform 0.1s ease-out;
+    overflow: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    transform-style: preserve-3d;
+  }
+  #menuSection.menu-move-back {
+    animation: moveBack 2s forwards;
+  }
+  #menuSection.menu-move-forward {
+    animation: moveForward 2s forwards;
+  }
+  @keyframes moveBack {
+    0% {
+      transform: translate(-50%, -50%) translate3d(0, 0, 0) scale(1) rotateX(0deg) rotateY(0deg);
+      opacity: 1;
+    }
+    100% {
+      transform: translate(-50%, -50%) translate3d(0, 0, -2000px) scale(0.1) rotateX(45deg) rotateY(45deg);
+      opacity: 0;
+    }
+  }
+  @keyframes moveForward {
+    0% {
+      transform: translate(-50%, -50%) translate3d(0, 0, -2000px) scale(0.1) rotateX(45deg) rotateY(45deg);
+      opacity: 0;
+    }
+    100% {
+      transform: translate(-50%, -50%) translate3d(0, 0, 0) scale(1) rotateX(0deg) rotateY(0deg);
+      opacity: 1;
+    }
+  }
+  #menuSection::-webkit-scrollbar {
+    display: none;
+  }
+  #menuSection::before {
+    content: "";
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    border-radius: 15px;
+    background: linear-gradient(45deg, rgba(220, 220, 220, 0.3), rgba(240, 240, 240, 0.1));
+    z-index: -1;
+    filter: blur(10px);
+    opacity: 0.7;
+  }
+  #profileContainer {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: flex;
+    align-items: flex-start;
+    width: 100%;
+  }
+  #profileLogo {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 10px;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  #profileLogo::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.05));
+    transform: translateY(-50%);
+    animation: scanline 2s linear infinite;
+  }
+  @keyframes scanline {
+    0% {
+      transform: translateY(-50%);
+    }
+    100% {
+      transform: translateY(50%);
+    }
+  }
+  #profileInfo {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  #typingContainer {
+    font-size: 18px;
+    color: #333;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+  }
+  #cursor {
+    width: 10px;
+    height: 20px;
+    background-color: #333;
+    margin-left: 2px;
+    animation: blink 0.7s infinite;
+  }
+  @keyframes blink {
+    0% { opacity: 0; }
+    50% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  #cursorCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1001;
+  }
+  #followersCount {
+    font-size: 12px;
+    color: #333;
+    margin-top: 5px;
+  }
+  #followersNames {
+    font-size: 12px;
+    color: #555;
+    margin-top: 5px;
+    white-space: normal;
+    word-break: break-word;
+  }
+  #followersNames span {
+    animation: glowWave 3s ease-in-out infinite;
+    display: inline-block;
+  }
+  @keyframes glowWave {
+    0% {
+      color: #ff0066;
+      text-shadow: 0 0 5px #ff0066;
+    }
+    50% {
+      color: #00ffcc;
+      text-shadow: 0 0 5px #00ffcc;
+    }
+    100% {
+      color: #ffcc00;
+      text-shadow: 0 0 5px #ffcc00;
+    }
+  }
+  #finishedProjects {
+    margin-top: 250px;
+    font-size: 14px;
+    color: #333;
+    align-self: flex-start;
+    opacity: 0;
+  }
+  #finishedProjects h3 {
+    margin: 0 0 5px 0;
+    font-size: 16px;
+    color: #000;
+  }
+  #projectsList {
+    font-size: 12px;
+    color: #000;
+  }
+  #browseProjectsButton {
+    position: relative;
+    overflow: visible;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #fff;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+    align-self: center;
+    animation: buttonBGAnimation 12s ease infinite;
+    background: linear-gradient(270deg, #ff0066, #ffcc00, #00ffcc, #ff0066);
+    background-size: 600% 600%;
+    -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text;
+  }
+  #browseProjectsButton::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    background: linear-gradient(270deg, #ff0066, #ffcc00, #00ffcc, #ff0066);
+    background-size: 600% 600%;
+    filter: blur(15px);
+    z-index: -1;
+    animation: buttonBGAnimation 12s ease infinite;
+  }
+  @keyframes buttonBGAnimation {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+  #browseProjectsButton:hover {
+    filter: brightness(1.2);
+  }
+  /* Added styles for the text inside the button */
+  #browseProjectsText {
+    color: white;
+    -webkit-text-fill-color: white;
+    -webkit-background-clip: unset;
+    background: none;
+    font-family: 'Kremlin', sans-serif;
+    text-transform: uppercase;
+  }
+  #backButton {
+    position: relative;
+    overflow: visible;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #fff;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+    align-self: center;
+    animation: buttonBGAnimation 12s ease infinite;
+    background: linear-gradient(270deg, #ff0066, #ffcc00, #00ffcc, #ff0066);
+    background-size: 600% 600%;
+    -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text;
+  }
+  #backButton::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    background: linear-gradient(270deg, #ff0066, #ffcc00, #00ffcc, #ff0066);
+    background-size: 600% 600%;
+    filter: blur(15px);
+    z-index: -1;
+    animation: buttonBGAnimation 12s ease infinite;
+  }
+  #backButton:hover {
+    filter: brightness(1.2);
+  }
+  #backButtonText {
+    color: white;
+    -webkit-text-fill-color: white;
+    -webkit-background-clip: unset;
+    background: none;
+    font-family: 'Kremlin', sans-serif;
+    text-transform: uppercase;
+  }
+  #expandedBanner {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+    cursor: default;
+  }
+  body.expanded-banner {
+    cursor: default;
+  }
+  body.expanded-banner #cursorCanvas {
+    display: none;
+  }
+  #closeButton {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+  }
+  #expandedImage {
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+    transition: transform 0.3s;
+  }
+  #bannerLink {
+    display: block;
+    margin-top: 10px;
+    font-size: 16px;
+    text-decoration: none;
+    background: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 200% auto;
+    animation: rgbWave 5s linear infinite;
+  }
+  @keyframes rgbWave {
+    to {
+      background-position: 200% center;
+    }
+  }
+
+  #secondMenuSection {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) translateZ(-500px);
+    width: 20%;
+    max-width: 400px;
+    min-width: 280px;
+    height: 70%;
+    background: linear-gradient(45deg, rgba(240, 240, 240, 1), rgba(255, 255, 255, 1), rgba(240, 240, 240, 1));
+    background-size: 200% 200%;
+    animation: pulseGradient 5s ease infinite;
+    border: 1px solid rgba(80, 80, 80, 1);
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(200, 200, 200, 1);
+    backdrop-filter: blur(5px);
+    z-index: 999;
+    display: none;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px;
+    box-sizing: border-box;
+    transition: transform 0.1s ease-out;
+    overflow: hidden;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    transform-style: preserve-3d;
+  }
+  #secondMenuSection::-webkit-scrollbar {
+    display: none;
+  }
+  #secondMenuSection::before {
+    content: "";
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    border-radius: 15px;
+    background: linear-gradient(45deg, rgba(220, 220, 220, 1), rgba(240, 240, 240, 1));
+    z-index: -1;
+    filter: blur(10px);
+    opacity: 1;
+  }
+  /* Scrollbar styles for projectsGrid */
+  #projectsGrid {
+    overflow-y: auto;
+    overflow-x: hidden;
+    width: 100%;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(100, 100, 100, 0.5) transparent;
+  }
+  #projectsGrid::-webkit-scrollbar {
+    width: 8px;
+  }
+  #projectsGrid::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 10px;
+  }
+  #projectsGrid::-webkit-scrollbar-thumb {
+    background: rgba(100, 100, 100, 0.5);
+    border-radius: 10px;
+  }
+  #projectsGrid::-webkit-scrollbar-thumb:hover {
+    background: rgba(100, 100, 100, 0.7);
+  }
+  /* Adjust other styles for second menu as needed */
+  @media (max-width: 768px) {
+    #menuSection, #secondMenuSection {
+      width: 90%;
+      height: auto;
+      padding: 20px;
+      overflow: auto;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    #menuSection::-webkit-scrollbar, #secondMenuSection::-webkit-scrollbar {
+      display: none;
+    }
+    #profileLogo {
+      width: 80px;
+      height: 80px;
+    }
+    #typingContainer {
+      font-size: 24px;
+    }
+    #cursor {
+      width: 12px;
+      height: 24px;
+    }
+    #followersCount {
+      font-size: 14px;
+    }
+    #followersNames {
+      font-size: 14px;
+    }
+    #finishedProjects {
+      margin-top: 20px;
+    }
+    #browseProjectsButton {
+      font-size: 18px;
+    }
+    #backButton {
+      font-size: 18px;
+    }
+  }
+
+  @media (hover: none) and (pointer: coarse) {
+    body {
+      cursor: default;
+    }
+    #cursorCanvas {
+      display: none;
+    }
+  }
+
+  @media (max-width: 480px) {
+    #typingContainer {
+      font-size: 20px;
+    }
+  }
+</style>
+</head>
+<body>
+<canvas id="voidCanvas"></canvas>
+<canvas id="cursorCanvas"></canvas>
+<div id="menuSection">
+  <div id="profileContainer">
+    <img id="profileLogo" src="https://images.websim.ai/avatar/ObsiRocks" alt="Profile Logo">
+    <div id="profileInfo">
+      <div id="typingContainer">
+        <span id="typedText"></span>
+        <div id="cursor"></div>
+      </div>
+      <div id="followersCount"></div>
+      <div id="followersNames"></div>
+    </div>
+  </div>
+  <div id="finishedProjects">
+    <h3>Finished Projects:</h3>
+    <div id="projectsList">NONE</div>
+  </div>
+  <button id="browseProjectsButton"><span id="browseProjectsText">BROWSE PROJECTS</span></button>
+</div>
+<div id="secondMenuSection">
+  <button id="backButton"><span id="backButtonText">BACK</span></button>
+  <h2 style="color: #333; margin-bottom: 20px;">Published Projects</h2>
+  <div id="projectsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; width: 100%;">
+    <!-- Projects will be populated dynamically -->
+  </div>
+</div>
+<div id="expandedBanner">
+  <button id="closeButton">X</button>
+  <img id="expandedImage" src="https://i.imgur.com/TQsGfYq_d.webp?maxwidth=760&fidelity=grand" alt="Expanded Banner">
+  <a id="bannerLink" href="https://websim.ai/p/vrx_vq19s6taipoirkrm/127" target="_blank">https://websim.ai/p/vrx_vq19s6taipoirkrm/127</a>
+</div>
+<script>
+window.addEventListener('load', function() {
+const canvas = document.getElementById('voidCanvas');
+const ctx = canvas.getContext('2d', { alpha: false });
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let particles = [];
+let nodes = [];
+let warpParticles = [];
+let mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+
+const glowCanvas = document.createElement('canvas');
+const glowCtx = glowCanvas.getContext('2d');
+const bloomCanvas = document.createElement('canvas');
+const bloomCtx = bloomCanvas.getContext('2d');
+
+glowCanvas.width = canvas.width;
+glowCanvas.height = canvas.height;
+bloomCanvas.width = canvas.width;
+bloomCanvas.height = canvas.height;
+
+const cursorCanvas = document.getElementById('cursorCanvas');
+const cursorCtx = cursorCanvas.getContext('2d');
+cursorCanvas.width = window.innerWidth;
+cursorCanvas.height = window.innerHeight;
+
+const backgroundColors = ['#ff0066', '#ffcc00', '#00ffcc'];
+const gradientStartColors = ['#ff0066', '#ffcc00', '#00ffcc'];
+const gradientEndColors = ['#000000', '#333333', '#666666']; // black to gray
+
+const cursorStartColors = ['#ff0066', '#ffcc00', '#00ffcc'];
+const cursorEndColors = ['#000088', '#0000ff', '#000044']; // dark blue colors
+
+const cursorColors = [...cursorStartColors];
+
+const baseParallaxStrength = 0.05;
+const baseParallaxStrengthWarpParticles = 0.15;
+const maxCameraPositionZ = 250 * 2; // cameraMaxSpeed * cameraAcceleratingDuration
+
+// Camera movement variables
+let cameraPositionZ = 0;
+let cameraMovementStartTime = null;
+const cameraAcceleratingDuration = 2; // seconds
+const cameraMaxSpeed = 250; // units per second
+let cameraMovingForward = true;
+
+// Particle target color
+const particleTargetColor = 'hsl(220, 100%, 20%)'; // Dark blue
+
+class Particle {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    this.z = Math.random() * 1000 - 500;
+    this.size = 0;
+    this.targetSize = Math.random() * 15 + 10;
+    this.baseSize = this.targetSize;
+    this.speedX = Math.random() * 4 - 2;
+    this.speedY = Math.random() * 4 - 2;
+    this.speedZ = Math.random() * 4 - 2;
+    this.color = `hsl(${Math.random() * 60 + 200}, 100%, ${Math.random() * 30 + 50}%)`;
+    this.initialColor = this.color;
+    this.life = Math.random() * 200 + 200;
+    this.initialLife = this.life;
+    this.trail = [];
+    this.trailLength = 15;
+    this.popState = 'in';
+    this.popProgress = 0;
+  }
+
+  update() {
+    this.trail.unshift({ x: this.x, y: this.y, z: this.z, size: Math.max(this.size, 0.1) });
+    if (this.trail.length > this.trailLength) {
+      this.trail.pop();
+    }
+
+    this.x += this.speedX;
+    this.y += this.speedY;
+    this.z += this.speedZ;
+
+    this.life--;
+
+    const lifeFraction = this.life / this.initialLife;
+
+    if (this.popState === 'in') {
+      this.popProgress += 0.05;
+      this.size = this.targetSize * Math.sin(this.popProgress * Math.PI / 2);
+      if (this.popProgress >= 1) {
+        this.popState = 'stable';
+        this.size = this.targetSize;
+      }
+    } else if (lifeFraction < 0.3) {
+      this.size = this.targetSize * (lifeFraction / 0.3);
+      if (this.size <= 0) {
+        this.life = 0;
+      }
+    }
+
+    const speed = Math.sqrt(this.speedX * this.speedX + this.speedY * this.speedY + this.speedZ * this.speedZ);
+    if (speed > 3) {
+      this.speedX = (this.speedX / speed) * 3;
+      this.speedY = (this.speedY / speed) * 3;
+      this.speedZ = (this.speedZ / speed) * 3;
+    }
+
+    if (this.x < -canvas.width / 2) this.x = canvas.width / 2;
+    if (this.x > canvas.width / 2) this.x = -canvas.width / 2;
+    if (this.y < -canvas.height / 2) this.y = canvas.height / 2;
+    if (this.y > canvas.height / 2) this.y = -canvas.height / 2;
+    if (this.z < -500) this.z = 500;
+    if (this.z > 500) this.z = -500;
+  }
+
+  draw(context, cameraX, cameraY, gradientProgress) {
+    const fov = 500;
+    const adjustedZ = this.z - cameraPositionZ;
+    const scale = fov / (fov + adjustedZ);
+    const x2d = (this.x - cameraX) * scale + canvas.width / 2;
+    const y2d = (this.y - cameraY) * scale + canvas.height / 2;
+    const drawSize = Math.max(this.size * scale, 0.1);
+
+    const currentColor = interpolateHSL(this.initialColor, particleTargetColor, gradientProgress);
+
+    for (let i = 0; i < this.trail.length; i++) {
+      const t = this.trail[i];
+      const trailAdjustedZ = t.z - cameraPositionZ;
+      const trailScale = fov / (fov + trailAdjustedZ);
+      const tx2d = (t.x - cameraX) * trailScale + canvas.width / 2;
+      const ty2d = (t.y - cameraY) * trailScale + canvas.height / 2;
+      const alpha = (i / this.trail.length) * 0.6;
+      const trailSize = Math.max(t.size * trailScale, 0.1);
+      context.beginPath();
+      context.arc(tx2d, ty2d, trailSize, 0, Math.PI * 2);
+      context.fillStyle = `${currentColor.slice(0, -1)}, ${alpha})`;
+      context.fill();
+    }
+
+    context.beginPath();
+    context.arc(x2d, y2d, drawSize, 0, Math.PI * 2);
+    context.fillStyle = currentColor;
+    context.fill();
+  }
+}
+
+class Node {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    this.z = Math.random() * 1000 - 500;
+    this.size = 0;
+    this.targetSize = Math.random() * 4 + 3;
+    this.color = `hsl(${Math.random() * 60 + 200}, 100%, 70%)`;
+    this.initialColor = this.color;
+    this.popState = 'in';
+    this.popProgress = 0;
+  }
+
+  update() {
+    if (this.popState === 'in') {
+      this.popProgress += 0.05;
+      this.size = this.targetSize * Math.sin(this.popProgress * Math.PI / 2);
+      if (this.popProgress >= 1) {
+        this.popState = 'stable';
+        this.size = this.targetSize;
+      }
+    }
+  }
+
+  draw(context, cameraX, cameraY, gradientProgress) {
+    const fov = 500;
+    const adjustedZ = this.z - cameraPositionZ;
+    const scale = fov / (fov + adjustedZ);
+    const x2d = (this.x - cameraX) * scale + canvas.width / 2;
+    const y2d = (this.y - cameraY) * scale + canvas.height / 2;
+    const drawSize = Math.max(this.size * scale, 0.1);
+
+    const currentColor = interpolateHSL(this.initialColor, particleTargetColor, gradientProgress);
+
+    context.beginPath();
+    context.arc(x2d, y2d, drawSize, 0, Math.PI * 2);
+    context.fillStyle = currentColor;
+    context.fill();
+  }
+}
+
+class WarpParticle {
+  constructor() {
+    this.init();
+  }
+
+  init() {
+    this.x = (Math.random() - 0.5) * canvas.width * 2;
+    this.y = (Math.random() - 0.5) * canvas.height * 2;
+    this.z = Math.random() * 1000;
+    this.speed = 5;
+    this.color = '#ffffff';
+  }
+
+  update() {
+    this.z -= this.speed;
+    if (this.z < 1) {
+      this.init();
+    }
+  }
+
+  draw(context, cameraX, cameraY) {
+    const fov = 500;
+    const adjustedZ = this.z - cameraPositionZ;
+    const scale = fov / (fov + adjustedZ);
+    const x = (this.x - cameraX) * scale + canvas.width / 2;
+    const y = (this.y - cameraY) * scale + canvas.height / 2;
+    const size = (1 - adjustedZ / 1000) * 2;
+
+    context.beginPath();
+    context.arc(x, y, size, 0, Math.PI * 2);
+    context.fillStyle = this.color;
+    context.fill();
+  }
+}
+
+class Cursor {
+  constructor() {
+    this.x = 0;
+    this.y = 0;
+    this.targetX = 0;
+    this.targetY = 0;
+    this.trail = [];
+    this.trailLength = 20;
+    this.size = 16;
+  }
+
+  update() {
+    const dx = this.targetX - this.x;
+    const dy = this.targetY - this.y;
+    this.x += dx * 0.2;
+    this.y += dy * 0.2;
+
+    this.trail.unshift({ x: this.x, y: this.y, size: this.size });
+    if (this.trail.length > this.trailLength) {
+      this.trail.pop();
+    }
+  }
+
+  draw(context) {
+    context.shadowBlur = 15;
+    for (let i = 0; i < this.trail.length; i++) {
+      const t = this.trail[i];
+      const alpha = (1 - i / this.trail.length) * 0.6;
+      const trailSize = this.size * (1 - i / this.trail.length);
+      const colorRatio = i / this.trail.length;
+      let color;
+      if (colorRatio <= 0.5) {
+        color = interpolateColor(cursorColors[0], cursorColors[1], colorRatio * 2);
+      } else {
+        color = interpolateColor(cursorColors[1], cursorColors[2], (colorRatio - 0.5) * 2);
+      }
+      context.beginPath();
+      context.arc(t.x, t.y, trailSize, 0, Math.PI * 2);
+      context.fillStyle = color;
+      context.shadowColor = color;
+      context.globalAlpha = alpha;
+      context.fill();
+    }
+
+    const color = cursorColors[0];
+    context.globalAlpha = 1;
+    context.beginPath();
+    context.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    context.fillStyle = color;
+    context.shadowColor = color;
+    context.fill();
+
+    context.shadowBlur = 0;
+    context.shadowColor = 'transparent';
+    context.globalAlpha = 1;
+  }
+}
+
+function interpolateColor(color1, color2, factor) {
+  var c1 = hexToRgb(color1);
+  var c2 = hexToRgb(color2);
+  var r = Math.round(c1.r + factor * (c2.r - c1.r));
+  var g = Math.round(c1.g + factor * (c2.g - c1.g));
+  var b = Math.round(c1.b + factor * (c2.b - c1.b));
+  return 'rgb(' + r + ',' + g + ',' + b + ')';
+}
+
+function hexToRgb(hex) {
+  var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+  var rgbRegex = /^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/i;
+
+  hex = hex.trim();
+
+  if (hex.match(rgbRegex)) {
+    var result = rgbRegex.exec(hex);
+    return result ? {
+      r: parseInt(result[1], 10),
+      g: parseInt(result[2], 10),
+      b: parseInt(result[3], 10)
+    } : null;
+  } else {
+    hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+      return r + r + g + g + b + b;
+    });
+
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16)
+    } : null;
+  }
+}
+
+function interpolateHSL(color1, color2, fraction) {
+  var hsl1 = hslStringToHSL(color1);
+  var hsl2 = hslStringToHSL(color2);
+
+  if (hsl1 && hsl2) {
+    var h = hsl1.h + fraction * (hsl2.h - hsl1.h);
+    var s = hsl1.s + fraction * (hsl2.s - hsl1.s);
+    var l = hsl1.l + fraction * (hsl2.l - hsl1.l);
+  
+    return `hsl(${h}, ${s}%, ${l}%)`;
+  } else {
+    return color1;
+  }
+}
+
+function hslStringToHSL(hslString) {
+  var result = /hsl\(\s*(\d+(?:\.\d+)?),\s*(\d+(?:\.\d+)?)%\s*,\s*(\d+(?:\.\d+)?)%\s*\)/i.exec(hslString);
+  return result ? {
+    h: parseFloat(result[1]),
+    s: parseFloat(result[2]),
+    l: parseFloat(result[3])
+  } : null;
+}
+
+function easeInOutCubic(t) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+let audioContext;
+
+function initAudio() {
+  audioContext = new (window.AudioContext || window.webkitAudioContext)();
+}
+
+function playChime() {
+  if (!audioContext) initAudio();
+
+  const oscillator = audioContext.createOscillator();
+  const gainNode = audioContext.createGain();
+  const filter = audioContext.createBiquadFilter();
+  const delay = audioContext.createDelay();
+  const reverb = audioContext.createConvolver();
+  const reverbGain = audioContext.createGain();
+
+  oscillator.connect(gainNode);
+  gainNode.connect(filter);
+  filter.connect(delay);
+  delay.connect(reverb);
+  reverb.connect(reverbGain);
+  reverbGain.connect(audioContext.destination);
+
+  const now = audioContext.currentTime;
+  const freq = 500 + Math.random() * 200;
+
+  oscillator.type = 'sine';
+  oscillator.frequency.setValueAtTime(freq, now);
+
+  gainNode.gain.setValueAtTime(0, now);
+  gainNode.gain.linearRampToValueAtTime(0.2, now + 0.02);
+  gainNode.gain.exponentialRampToValueAtTime(0.001, now + 2);
+
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(1000, now);
+  filter.Q.setValueAtTime(1, now);
+
+  delay.delayTime.setValueAtTime(0.2, now);
+
+  const impulseLength = 2;
+  const impulse = audioContext.createBuffer(2, audioContext.sampleRate * impulseLength, audioContext.sampleRate);
+  const impulseL = impulse.getChannelData(0);
+  const impulseR = impulse.getChannelData(1);
+  for (let i = 0; i < impulse.length; i++) {
+    impulseL[i] = (Math.random() * 2 - 1) * Math.exp(-i / (impulse.length / 3));
+    impulseR[i] = (Math.random() * 2 - 1) * Math.exp(-i / (impulse.length / 3));
+  }
+  reverb.buffer = impulse;
+
+  reverbGain.gain.setValueAtTime(0.3, now);
+
+  oscillator.start(now);
+  oscillator.stop(now + 2);
+}
+
+const cursor = new Cursor();
+
+function createParticles() {
+  if (particles.length < 30) {
+    const x = Math.random() * canvas.width - canvas.width / 2;
+    const y = Math.random() * canvas.height - canvas.height / 2;
+    particles.push(new Particle(x, y));
+
+    playChime();
+  }
+}
+
+function createNodes() {
+  for (let i = 0; i < 40; i++) {
+    const x = Math.random() * canvas.width - canvas.width / 2;
+    const y = Math.random() * canvas.height - canvas.height / 2;
+    nodes.push(new Node(x, y));
+  }
+}
+
+function createWarpParticles() {
+  for (let i = 0; i < 200; i++) {
+    warpParticles.push(new WarpParticle());
+  }
+}
+
+function applyBloom(sourceContext, targetContext, intensity = 0.6) {
+  if (sourceContext.canvas.width === 0 || sourceContext.canvas.height === 0) {
+    return;
+  }
+  const tempCanvas = document.createElement('canvas');
+  const tempCtx = tempCanvas.getContext('2d');
+  tempCanvas.width = sourceContext.canvas.width;
+  tempCanvas.height = sourceContext.canvas.height;
+
+  tempCtx.filter = 'blur(15px)';
+  tempCtx.drawImage(sourceContext.canvas, 0, 0);
+
+  tempCtx.globalCompositeOperation = 'screen';
+  tempCtx.drawImage(tempCanvas, 0, 0);
+  tempCtx.drawImage(tempCanvas, 0, 0);
+
+  targetContext.globalAlpha = intensity;
+  targetContext.globalCompositeOperation = 'lighter';
+  targetContext.drawImage(tempCanvas, 0, 0);
+  targetContext.globalAlpha = 1;
+  targetContext.globalCompositeOperation = 'source-over';
+}
+
+function animateVoidEnergy() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  glowCtx.clearRect(0, 0, glowCanvas.width, glowCanvas.height);
+  bloomCtx.clearRect(0, 0, bloomCanvas.width, bloomCanvas.height);
+  cursorCtx.clearRect(0, 0, cursorCanvas.width, cursorCanvas.height);
+
+  const now = performance.now();
+
+  // Update cameraPositionZ if camera movement has started
+  if (cameraMovementStartTime !== null && now >= cameraMovementStartTime) {
+    const elapsedTime = (now - cameraMovementStartTime) / 1000; // in seconds
+    if (elapsedTime <= cameraAcceleratingDuration) {
+      const t = elapsedTime / cameraAcceleratingDuration; // t from 0 to 1
+      const easing = easeInOutCubic(t);
+      if (cameraMovingForward) {
+        cameraPositionZ = cameraMaxSpeed * cameraAcceleratingDuration * easing;
+      } else {
+        cameraPositionZ = cameraMaxSpeed * cameraAcceleratingDuration * (1 - easing);
+      }
+    } else {
+      if (cameraMovingForward) {
+        cameraPositionZ = cameraMaxSpeed * cameraAcceleratingDuration;
+      } else {
+        cameraPositionZ = 0;
+        cameraMovementStartTime = null;
+      }
+    }
+  }
+
+  // Calculate gradient progress
+  let gradientProgress = 0;
+  if (cameraMovementStartTime !== null) {
+    const totalCameraDistance = cameraMaxSpeed * cameraAcceleratingDuration;
+    gradientProgress = cameraPositionZ / totalCameraDistance;
+    gradientProgress = Math.min(Math.max(gradientProgress, 0), 1); // Clamp between 0 and 1
+  }
+
+  // Adjust parallaxStrength based on cameraPositionZ
+  const parallaxMultiplier = 1 - Math.min(cameraPositionZ / maxCameraPositionZ, 1);
+  const parallaxStrength = baseParallaxStrength * parallaxMultiplier;
+  const parallaxStrengthWarpParticles = baseParallaxStrengthWarpParticles * parallaxMultiplier;
+
+  // Parallax calculations
+  let cameraX = (mouse.x - window.innerWidth / 2) * parallaxStrength;
+  let cameraY = (mouse.y - window.innerHeight / 2) * parallaxStrength;
+
+  let cameraXWarp = (mouse.x - window.innerWidth / 2) * parallaxStrengthWarpParticles;
+  let cameraYWarp = (mouse.y - window.innerHeight / 2) * parallaxStrengthWarpParticles;
+
+  // Interpolate background gradient colors
+  const color1 = interpolateColor(gradientStartColors[0], gradientEndColors[0], gradientProgress);
+  const color2 = interpolateColor(gradientStartColors[1], gradientEndColors[1], gradientProgress);
+  const color3 = interpolateColor(gradientStartColors[2], gradientEndColors[2], gradientProgress);
+
+  // Interpolate cursor colors
+  cursorColors[0] = interpolateColor(cursorStartColors[0], cursorEndColors[0], gradientProgress);
+  cursorColors[1] = interpolateColor(cursorStartColors[1], cursorEndColors[1], gradientProgress);
+  cursorColors[2] = interpolateColor(cursorStartColors[2], cursorEndColors[2], gradientProgress);
+
+  const gradient = ctx.createRadialGradient(
+    canvas.width / 2 - cameraX * 0.5,
+    canvas.height / 2 - cameraY * 0.5,
+    0,
+    canvas.width / 2, canvas.height / 2, Math.max(canvas.width, canvas.height) / 2
+  );
+  gradient.addColorStop(0, color1);
+  gradient.addColorStop(0.5, color2);
+  gradient.addColorStop(1, color3);
+
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.globalAlpha = 0.8;
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.globalAlpha = 1;
+
+  warpParticles.forEach(particle => {
+    particle.update();
+    particle.draw(ctx, cameraXWarp, cameraYWarp);
+  });
+
+  particles.forEach(particle => {
+    particle.update();
+    particle.draw(glowCtx, cameraX, cameraY, gradientProgress);
+  });
+
+  nodes.forEach(node => {
+    node.update();
+    node.draw(glowCtx, cameraX, cameraY, gradientProgress);
+  });
+
+  glowCtx.strokeStyle = 'rgba(100, 200, 255, 0.08)';
+  glowCtx.lineWidth = 0.8;
+  for (let i = 0; i < nodes.length; i++) {
+    const nodeA = nodes[i];
+    const fov = 500;
+    const adjustedZA = nodeA.z - cameraPositionZ;
+    const scaleA = fov / (fov + adjustedZA);
+    const nodeAX = (nodeA.x - cameraX) * scaleA + canvas.width / 2;
+    const nodeAY = (nodeA.y - cameraY) * scaleA + canvas.height / 2;
+    for (let j = i + 1; j < nodes.length; j++) {
+      const nodeB = nodes[j];
+      const adjustedZB = nodeB.z - cameraPositionZ;
+      const scaleB = fov / (fov + adjustedZB);
+      const nodeBX = (nodeB.x - cameraX) * scaleB + canvas.width / 2;
+      const nodeBY = (nodeB.y - cameraY) * scaleB + canvas.height / 2;
+      const dx = nodeAX - nodeBX;
+      const dy = nodeAY - nodeBY;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (distance < 200) {
+        glowCtx.beginPath();
+        glowCtx.moveTo(nodeAX, nodeAY);
+        glowCtx.lineTo(nodeBX, nodeBY);
+        glowCtx.stroke();
+      }
+    }
+  }
+
+  particles.forEach(particle => {
+    const fov = 500;
+    const adjustedZP = particle.z - cameraPositionZ;
+    const scaleP = fov / (fov + adjustedZP);
+    const particleX = (particle.x - cameraX) * scaleP + canvas.width / 2;
+    const particleY = (particle.y - cameraY) * scaleP + canvas.height / 2;
+    nodes.forEach(node => {
+      const adjustedZN = node.z - cameraPositionZ;
+      const scaleN = fov / (fov + adjustedZN);
+      const nodeX = (node.x - cameraX) * scaleN + canvas.width / 2;
+      const nodeY = (node.y - cameraY) * scaleN + canvas.height / 2;
+      const dx = particleX - nodeX;
+      const dy = particleY - nodeY;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (distance < 150) {
+        glowCtx.beginPath();
+        glowCtx.strokeStyle = `rgba(150, 220, 255, ${0.3 - distance / 500})`;
+        glowCtx.lineWidth = 1.5;
+        glowCtx.moveTo(particleX, particleY);
+        glowCtx.lineTo(nodeX, nodeY);
+        glowCtx.stroke();
+      }
+    });
+  });
+
+  applyBloom(glowCtx, bloomCtx, 0.7);
+
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.drawImage(glowCanvas, 0, 0);
+  ctx.drawImage(bloomCanvas, 0, 0);
+  ctx.globalCompositeOperation = 'source-over';
+
+  cursor.update();
+  cursor.draw(cursorCtx);
+
+  particles = particles.filter(particle => particle.life > 0);
+
+  createParticles();
+
+  // Update second menu position based on camera Z position and parallax
+  if (cameraPositionZ > 0) {
+    if (secondMenuSection.style.display === 'none') {
+      secondMenuSection.style.display = 'flex';
+    }
+    const scale = 1 + (cameraPositionZ / 1000);
+    const opacity = Math.min(cameraPositionZ / 500, 1);
+    const secondMenuParallaxX = (mouse.x - window.innerWidth / 2) * parallaxStrength;
+    const secondMenuParallaxY = (mouse.y - window.innerHeight / 2) * parallaxStrength;
+    
+    secondMenuSection.style.transform = `translate(-50%, -50%) 
+      translate3d(${secondMenuParallaxX}px, ${secondMenuParallaxY}px, ${-500 + cameraPositionZ}px)`;
+    secondMenuSection.style.opacity = opacity;
+  } else {
+    secondMenuSection.style.display = 'none';
+  }
+
+  requestAnimationFrame(animateVoidEnergy);
+}
+
+const menuSection = document.getElementById('menuSection');
+const secondMenuSection = document.getElementById('secondMenuSection');
+let menuRect = menuSection.getBoundingClientRect();
+
+window.addEventListener('mousemove', (event) => {
+  mouse.x = event.clientX;
+  mouse.y = event.clientY;
+  cursor.targetX = event.clientX;
+  cursor.targetY = event.clientY;
+
+  if (!menuSection.classList.contains('menu-move-back')) {
+    const centerX = menuRect.left + menuRect.width / 2;
+    const centerY = menuRect.top + menuRect.height / 2;
+    const deltaX = (event.clientX - centerX) / 30;
+    const deltaY = (event.clientY - centerY) / 30;
+    menuSection.style.transform = `translate(-50%, -50%) translate3d(${deltaX}px, ${deltaY}px, 0)`;
+  }
+  
+  if (secondMenuSection.style.display === 'flex') {
+    const secondMenuRect = secondMenuSection.getBoundingClientRect();
+    const secondCenterX = secondMenuRect.left + secondMenuRect.width / 2;
+    const secondCenterY = secondMenuRect.top + secondMenuRect.height / 2;
+    const secondDeltaX = (event.clientX - secondCenterX) / 30;
+    const secondDeltaY = (event.clientY - secondCenterY) / 30;
+    const currentZ = -500 + cameraPositionZ;
+    secondMenuSection.style.transform = `translate(-50%, -50%) translate3d(${secondDeltaX}px, ${secondDeltaY}px, ${currentZ}px)`;
+  }
+});
+
+window.addEventListener('resize', () => {
+  canvas.width = glowCanvas.width = bloomCanvas.width = cursorCanvas.width = window.innerWidth;
+  canvas.height = glowCanvas.height = bloomCanvas.height = cursorCanvas.height = window.innerHeight;
+  nodes = [];
+  warpParticles = [];
+  createNodes();
+  createWarpParticles();
+  menuRect = menuSection.getBoundingClientRect();
+});
+
+createNodes();
+createParticles();
+createWarpParticles();
+animateVoidEnergy();
+
+const typedTextElement = document.getElementById('typedText');
+const cursorElement = document.getElementById('cursor');
+const textToType = "ObsiRocks";
+let charIndex = 0;
+
+function typeText() {
+  if (charIndex < textToType.length) {
+    typedTextElement.textContent += textToType.charAt(charIndex);
+    charIndex++;
+    setTimeout(typeText, 150);
+  }
+}
+
+setTimeout(typeText, 1000);
+
+const finishedProjectsElement = document.getElementById('finishedProjects');
+const projectsListElement = document.getElementById('projectsList');
+
+function typeFinishedProjects() {
+  const textToType = "Finished Projects:";
+  let charIndex = 0;
+
+  function typeChar() {
+    if (charIndex < textToType.length) {
+      finishedProjectsElement.innerHTML += textToType.charAt(charIndex);
+      charIndex++;
+      setTimeout(typeChar, 100);
+    } else {
+      setTimeout(() => {
+        projectsListElement.style.opacity = 1;
+      }, 500);
+    }
+  }
+
+  typeChar();
+}
+
+setTimeout(typeFinishedProjects, 2000);
+
+async function updateFollowersCount() {
+  const followersElement = document.getElementById('followersCount');
+  const followersNamesElement = document.getElementById('followersNames');
+
+  try {
+    const response = await fetch(`/api/v1/users/ObsiRocks/followers?count=true`);
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    const data = await response.json();
+    const followers = data.followers;
+    const count = followers.meta.count || 0;
+    followersElement.textContent = `${count.toLocaleString()} followers`;
+
+    const followerUsernamesHTML = followers.data.map((f, index) => `<span style="animation-delay: ${index * 0.2}s;">@${f.follow.user.username}</span>`).join(' ');
+    followersNamesElement.innerHTML = followerUsernamesHTML;
+  } catch (error) {
+    console.error('Error fetching followers:', error);
+    followersElement.textContent = '2 followers';
+    followersNamesElement.innerHTML = '<span>@sean</span> <span>@api</span>';
+  }
+}
+
+async function loadProjects() {
+  const projectsGrid = document.getElementById('projectsGrid');
+  
+  try {
+    const response = await fetch(`/api/v1/users/ObsiRocks/projects?posted=true`);
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    const data = await response.json();
+    const projects = data.projects.data;
+
+    const projectItems = await Promise.all(projects.map(async item => {
+      const project = item.project;
+      const projectRevision = item.project_revision;
+      const projectId = project.id;
+      const projectVersion = projectRevision.version;
+      const projectTitle = project.title || 'Untitled Project';
+      const projectDescription = project.description || 'No description';
+      const projectUrl = `https://websim.ai/p/${projectId}`;
+      let screenshotUrl = projectRevision.current_screenshot_url;
+
+      if (!screenshotUrl) {
+        // Fetch the screenshots for the project revision
+        const screenshotResponse = await fetch(`/api/v1/projects/${projectId}/revisions/${projectVersion}/screenshots`);
+        if (screenshotResponse.ok) {
+          const screenshotData = await screenshotResponse.json();
+          if (screenshotData.screenshots.length > 0) {
+            // Use the first screenshot
+            screenshotUrl = screenshotData.screenshots[0].url;
+          } else {
+            // Use placeholder image
+            screenshotUrl = `https://via.placeholder.com/200x120?text=No+Screenshot`;
+          }
+        } else {
+          screenshotUrl = `https://via.placeholder.com/200x120?text=No+Screenshot`;
+        }
+      }
+
+      return `
+        <a href="${projectUrl}" target="_blank" style="
+          text-decoration: none;
+          background: rgba(255, 255, 255, 0.9);
+          border-radius: 10px;
+          padding: 10px;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          transition: transform 0.3s, box-shadow 0.3s;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        "
+        onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'"
+        onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)'">
+          <img src="${screenshotUrl}" 
+               alt="Screenshot for ${projectTitle}"
+               style="width: 100%; height: 120px; object-fit: cover; border-radius: 5px;"
+               onerror="this.src='https://via.placeholder.com/200x120?text=No+Screenshot'">
+          <div style="color: #333; font-size: 14px; font-weight: bold;">${projectTitle}</div>
+          <div style="color: #666; font-size: 12px;">${projectDescription}</div>
+        </a>
+      `;
+    }));
+
+    projectsGrid.innerHTML = projectItems.join('');
+
+  } catch (error) {
+    console.error('Error fetching projects:', error);
+    projectsGrid.innerHTML = '<div style="color: #333;">Unable to load projects</div>';
+  }
+}
+
+updateFollowersCount();
+loadProjects();
+setInterval(updateFollowersCount, 60000);
+
+const expandedBanner = document.getElementById('expandedBanner');
+const closeButton = document.getElementById('closeButton');
+const body = document.body;
+
+closeButton.addEventListener('click', () => {
+  expandedBanner.style.display = 'none';
+  body.classList.remove('expanded-banner');
+  cursorCanvas.style.display = 'block';
+  body.style.cursor = 'none';
+});
+
+expandedBanner.addEventListener('click', (e) => {
+  if (e.target === expandedBanner) {
+    expandedBanner.style.display = 'none';
+    body.classList.remove('expanded-banner');
+    cursorCanvas.style.display = 'block';
+    body.style.cursor = 'none';
+  }
+});
+
+const expandedImage = document.getElementById('expandedImage');
+expandedBanner.addEventListener('mousemove', (e) => {
+  const x = (e.clientX - window.innerWidth / 2) / 50;
+  const y = (e.clientY - window.innerHeight / 2) / 50;
+  expandedImage.style.transform = `translate(${x}px, ${y}px)`;
+});
+
+expandedBanner.addEventListener('mouseleave', () => {
+  expandedImage.style.transform = 'translate(0, 0)';
+});
+
+const browseProjectsButton = document.getElementById('browseProjectsButton');
+browseProjectsButton.addEventListener('mouseover', () => {
+  document.body.style.cursor = 'default';
+  cursorCanvas.style.display = 'none';
+});
+browseProjectsButton.addEventListener('mouseout', () => {
+  document.body.style.cursor = 'none';
+  cursorCanvas.style.display = 'block';
+});
+browseProjectsButton.addEventListener('click', () => {
+  menuSection.classList.remove('menu-move-forward');
+  menuSection.classList.add('menu-move-back');
+  cameraMovementStartTime = performance.now() + 2000; // Start moving camera after 2 seconds
+  cameraMovingForward = true;
+});
+
+const backButton = document.getElementById('backButton');
+backButton.addEventListener('click', () => {
+  menuSection.classList.remove('menu-move-back');
+  menuSection.classList.add('menu-move-forward');
+  cameraMovementStartTime = performance.now();
+  cameraMovingForward = false;
+});
+});
+</script>
+</body>
+</html>
