@@ -1,0 +1,1205 @@
+<html><head><base href="https://angykitty.com"><title>Angy Kitty 3.0 - Now with Loaf Love!</title>
+<style>
+    :root {
+        --bg-color: #FFF0F5;
+        --header-bg: #FFB6C1;
+        --text-color: #333;
+        --accent-color: #FF1493;
+        --kitty-color: #808080;
+    }
+
+    [data-theme="dark"] {
+        --bg-color: #2D2D2D;
+        --header-bg: #1A1A1A;
+        --text-color: #E0E0E0;
+        --accent-color: #FF69B4;
+        --kitty-color: #606060;
+    }
+
+    body {
+        font-family: 'Comic Sans MS', cursive, sans-serif;
+        background-color: var(--bg-color);
+        margin: 0;
+        padding: 0;
+        color: var(--text-color);
+        transition: all 0.3s ease;
+        cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" style="fill:pink;font-size:24px"><text y="20">🐱</text></svg>'), auto;
+        background-image: repeating-linear-gradient(45deg, var(--bg-color) 0%, var(--bg-color) 10%, #FFE5E5 10%, #FFE5E5 20%);
+        animation: backgroundShift 20s linear infinite;
+    }
+
+    @font-face {
+        font-family: 'Comic Neue';
+        src: url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap');
+    }
+
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    header {
+        background-color: var(--header-bg);
+        padding: 20px 0;
+        text-align: center;
+    }
+
+    h1 {
+        font-size: 3em;
+        color: var(--accent-color);
+        margin: 0;
+        text-shadow: 2px 2px #FFC0CB;
+    }
+
+    .kitty-container {
+        position: relative;
+        width: 300px;
+        height: 300px;
+        margin: 50px auto;
+    }
+
+    .kitty {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-color: var(--kitty-color);
+        border-radius: 50%;
+        transition: background-color 0.3s;
+    }
+
+    .stripes {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        opacity: 0;
+    }
+
+    .face-markings {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .siamese-marking {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        opacity: 0;
+        mask: radial-gradient(circle at center 60%, black 40%, transparent 60%);
+        -webkit-mask: radial-gradient(circle at center 60%, black 40%, transparent 60%);
+    }
+
+    .mouth-marking {
+        position: absolute;
+        width: 60px;
+        height: 30px;
+        background-color: rgba(0,0,0,0.2);
+        top: 190px;
+        left: 120px;
+        border-radius: 20px;
+        opacity: 0;
+    }
+
+    .ear {
+        position: absolute;
+        width: 0;
+        height: 0;
+        border-left: 50px solid transparent;
+        border-right: 50px solid transparent;
+        border-bottom: 80px solid var(--kitty-color);
+    }
+
+    .ear-left {
+        top: -40px;
+        left: 20px;
+        transform: rotate(-30deg);
+    }
+
+    .ear-right {
+        top: -40px;
+        right: 20px;
+        transform: rotate(30deg);
+    }
+
+    .eye {
+        position: absolute;
+        width: 60px;
+        height: 60px;
+        background-color: #FFFF00;
+        border-radius: 50%;
+        top: 80px;
+    }
+
+    .eye-left { left: 60px; }
+    .eye-right { right: 60px; }
+
+    .pupil {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        background-color: #000;
+        border-radius: 50%;
+        top: 15px;
+        left: 15px;
+    }
+
+    .nose {
+        position: absolute;
+        width: 30px;
+        height: 20px;
+        background-color: #FFC0CB;
+        border-radius: 50%;
+        top: 180px;
+        left: 135px;
+    }
+
+    .mouth {
+        position: absolute;
+        width: 100px;
+        height: 60px;
+        border: 10px solid #000;
+        border-radius: 0 0 100px 100px;
+        border-top: none;
+        top: 200px;
+        left: 100px;
+    }
+
+    .speech-bubble {
+        position: absolute;
+        background: white;
+        border-radius: 15px;
+        padding: 10px;
+        min-width: 150px;
+        top: -80px;
+        left: 320px;
+        display: none;
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+    }
+
+    .speech-bubble:after {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        width: 0;
+        height: 0;
+        border: 20px solid transparent;
+        border-right-color: white;
+        border-left: 0;
+        margin-top: -20px;
+        margin-left: -20px;
+    }
+
+    .controls {
+        background-color: var(--header-bg);
+        padding: 20px;
+        border-radius: 10px;
+        margin: 20px 0;
+    }
+
+    .control-group {
+        margin: 10px 0;
+    }
+
+    .color-palette {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin: 10px 0;
+    }
+
+    .color-option {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .color-option label {
+        min-width: 100px;
+    }
+
+    .settings-btn, .customize-btn {
+        background-color: var(--accent-color);
+        border: none;
+        border-radius: 25px;
+        color: white;
+        cursor: pointer;
+        font-size: 1.2em;
+        margin: 10px;
+        padding: 10px 20px;
+    }
+
+    .angy-meter {
+        background-color: var(--bg-color);
+        border: 2px solid var(--accent-color);
+        border-radius: 20px;
+        height: 30px;
+        margin: 20px auto;
+        position: relative;
+        width: 80%;
+    }
+
+    .angy-level {
+        background-color: var(--accent-color);
+        border-radius: 20px;
+        height: 100%;
+        width: 75%;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { opacity: 0.7; }
+        50% { opacity: 1; }
+        100% { opacity: 0.7; }
+    }
+
+    .angy-button {
+        background-color: var(--accent-color);
+        border: none;
+        border-radius: 25px;
+        color: white;
+        cursor: pointer;
+        font-size: 1.2em;
+        margin: 10px;
+        padding: 10px 20px;
+    }
+
+    .angy-button:hover {
+        filter: brightness(1.2);
+    }
+
+    .ai-angy-button {
+        background-color: #4CAF50;
+        border: none;
+        border-radius: 25px;
+        color: white;
+        cursor: pointer;
+        font-size: 1.2em;
+        margin: 10px;
+        padding: 10px 20px;
+    }
+
+    .ai-angy-button:hover {
+        filter: brightness(1.2);
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.7);
+        z-index: 1000;
+    }
+
+    .modal-content {
+        background-color: var(--bg-color);
+        margin: 15% auto;
+        padding: 20px;
+        border-radius: 10px;
+        width: 80%;
+        max-width: 500px;
+    }
+
+    .close {
+        float: right;
+        cursor: pointer;
+        font-size: 28px;
+    }
+
+    #colorPicker {
+        margin: 10px 0;
+    }
+
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+    }
+
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 34px;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+
+    input:checked + .slider {
+        background-color: var(--accent-color);
+    }
+
+    input:checked + .slider:before {
+        transform: translateX(26px);
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-10px); }
+        75% { transform: translateX(10px); }
+    }
+
+    .loaf-cat {
+        position: absolute;
+        width: 400px;
+        height: 200px;
+        background-color: var(--kitty-color);
+        border-radius: 100px;
+        transform: scale(0);
+        transition: transform 0.5s;
+        z-index: 5;
+    }
+
+    .loaf-cat.second-loaf {
+        left: 300px;
+        background-color: var(--kitty-color);
+        filter: brightness(1.2);
+    }
+
+    .loaf-cat.active {
+        transform: scale(1);
+        animation: loafFall 1s forwards;
+    }
+
+    .smoosh-effect {
+        animation: getSmooshed 0.5s forwards;
+    }
+
+    @keyframes loafFall {
+        0% { 
+            transform: translateY(-500px) scale(1);
+        }
+        90% {
+            transform: translateY(0) scale(1.2);
+        }
+        100% {
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    @keyframes getSmooshed {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.2, 0.5); }
+        100% { transform: scale(0); }
+    }
+
+    .shop-section {
+        background: var(--header-bg);
+        padding: 20px;
+        border-radius: 10px;
+        margin: 20px 0;
+    }
+
+    .shop-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: var(--bg-color);
+        padding: 15px;
+        border-radius: 8px;
+        margin: 10px 0;
+    }
+
+    .mega-angy-button {
+        background-color: #FF0000;
+        border: none;
+        border-radius: 25px;
+        color: white;
+        cursor: pointer;
+        font-size: 1.4em;
+        margin: 10px;
+        padding: 15px 30px;
+        animation: pulse 1s infinite;
+    }
+
+    .swear-bubble {
+        position: absolute;
+        background: #FF0000;
+        color: white;
+        border-radius: 15px;
+        padding: 10px;
+        font-weight: bold;
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    .heart {
+        position: absolute;
+        color: red;
+        font-size: 40px;
+        opacity: 0;
+        z-index: 10;
+        animation: float 2s infinite;
+    }
+
+    .baby-loaf {
+        position: absolute;
+        width: 200px;
+        height: 100px;
+        background-color: var(--kitty-color);
+        border-radius: 50px;
+        transform: scale(0);
+        left: 200px;
+        top: 100px;
+        z-index: 6;
+    }
+
+    .baby-loaf.active {
+        transform: scale(1);
+        animation: babyPop 0.5s forwards;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-20px); }
+    }
+
+    @keyframes babyPop {
+        0% { transform: scale(0) rotate(0deg); }
+        50% { transform: scale(1.2) rotate(180deg); }
+        100% { transform: scale(1) rotate(360deg); }
+    }
+
+    .ultra-rage {
+        animation: ultraRage 0.1s infinite;
+    }
+
+    @keyframes ultraRage {
+        0% { transform: translate(0, 0) rotate(0deg); }
+        25% { transform: translate(-5px, -5px) rotate(-5deg); }
+        50% { transform: translate(5px, 5px) rotate(5deg); }
+        75% { transform: translate(-5px, 5px) rotate(-5deg); }
+        100% { transform: translate(5px, -5px) rotate(5deg); }
+    }
+
+    .rainbow-text {
+        background: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet);
+        -webkit-background-clip: text;
+        color: transparent;
+        animation: rainbow 3s linear infinite;
+    }
+
+    .glitter {
+        position: fixed;
+        pointer-events: none;
+        width: 10px;
+        height: 10px;
+        background: radial-gradient(circle, white, transparent);
+        animation: glitter 2s linear infinite;
+        z-index: 9999;
+    }
+
+    @keyframes rainbow {
+        0% { filter: hue-rotate(0deg); }
+        100% { filter: hue-rotate(360deg); }
+    }
+
+    @keyframes glitter {
+        0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+        100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+    }
+
+    .marquee {
+        position: fixed;
+        top: 0;
+        width: 100%;
+        background: #FF69B4;
+        color: white;
+        white-space: nowrap;
+        overflow: hidden;
+        padding: 5px;
+        z-index: 1000;
+    }
+
+    .marquee span {
+        display: inline-block;
+        animation: marquee 15s linear infinite;
+    }
+
+    @keyframes marquee {
+        0% { transform: translateX(100%); }
+        100% { transform: translateX(-100%); }
+    }
+
+    .visitor-counter {
+        background: #000;
+        color: #0F0;
+        font-family: "Courier New", monospace;
+        padding: 5px;
+        border: 3px ridge #666;
+        display: inline-block;
+        margin: 10px;
+    }
+
+    .under-construction {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 100px;
+        height: 100px;
+        background: repeating-linear-gradient(45deg, #FF0, #FF0 10px, #000 10px, #000 20px);
+        animation: construct 1s infinite;
+        border: 5px solid #000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        text-align: center;
+        color: red;
+        text-shadow: 2px 2px #000;
+    }
+
+    @keyframes construct {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    @keyframes backgroundShift {
+        0% { background-position: 0 0; }
+        100% { background-position: 100% 100%; }
+    }
+</style>
+</head>
+<body>
+    <div class="marquee">
+        <span>🐱 WELCOME TO ANGY KITTY 3.0 - NOW WITH 2763x MORE SWEARING! 😾 BEST VIEWED IN NETSCAPE NAVIGATOR 4.0 🐱 UNDER CONSTRUCTION 🚧</span>
+    </div>
+    <div class="visitor-counter">Visitors: 123456</div>
+    <div class="under-construction">
+        🚧<br>UNDER<br>CONSTRUCTION
+    </div>
+    <header>
+        <h1 class="rainbow-text">Angy Kitty 3.0 - Now with Loaf Love!</h1>
+    </header>
+    <div class="container">
+        <div class="kitty-container">
+            <div class="loaf-cat">
+                <div class="eye eye-left"><div class="pupil"></div></div>
+                <div class="eye eye-right"><div class="pupil"></div></div>
+                <div class="mouth"></div>
+            </div>
+            <div class="loaf-cat second-loaf">
+                <div class="eye eye-left"><div class="pupil"></div></div>
+                <div class="eye eye-right"><div class="pupil"></div></div>
+                <div class="mouth"></div>
+            </div>
+            <div class="baby-loaf">
+                <div class="eye eye-left"><div class="pupil"></div></div>
+                <div class="eye eye-right"><div class="pupil"></div></div>
+                <div class="mouth"></div>
+            </div>
+            <div class="kitty">
+                <div class="stripes"></div>
+                <div class="face-markings"></div>
+                <div class="siamese-marking"></div>
+                <div class="mouth-marking"></div>
+                <div class="ear ear-left"></div>
+                <div class="ear ear-right"></div>
+                <div class="eye eye-left"><div class="pupil"></div></div>
+                <div class="eye eye-right"><div class="pupil"></div></div>
+                <div class="nose"></div>
+                <div class="mouth"></div>
+            </div>
+            <div class="speech-bubble">
+                Why are you making me angrier? 😾
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="settings-btn" onclick="openSettings()">⚙️ Settings</button>
+            <button class="customize-btn" onclick="openCustomize()">🎨 Customize Kitty</button>
+            <button class="angy-button" onclick="makeAngier()">Make Kitty Angier</button>
+            <button class="ai-angy-button" onclick="makeAIAngry()">🤖 AI Anger Mode</button>
+        </div>
+
+        <div class="shop-section">
+            <h2 class="rainbow-text">Angy Shop</h2>
+            <div class="shop-item">
+                <div>
+                    <h3>Giant Loaf Cat</h3>
+                    <p>Warning: Will destroy current cat!</p>
+                </div>
+                <button onclick="buyLoafCat()" class="angy-button">Buy for 9999 Angy Points</button>
+            </div>
+        </div>
+
+        <button class="mega-angy-button" onclick="megaAngy()">MEGA ANGY MODE</button>
+
+        <div class="angy-meter">
+            <div class="angy-level"></div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('settingsModal')">&times;</span>
+            <h2>Settings</h2>
+            <div class="control-group">
+                <label>Dark Mode</label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="control-group">
+                <label>Sound Effects</label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="soundToggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customize Modal -->
+    <div id="customizeModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('customizeModal')">&times;</span>
+            <h2>Customize Your Kitty</h2>
+            
+            <div class="control-group">
+                <h3>Color Palette</h3>
+                <div class="color-palette">
+                    <div class="color-option">
+                        <label>Fur Color:</label>
+                        <input type="color" id="furColor" value="#808080" onchange="updateColors('fur', this.value)">
+                    </div>
+                    <div class="color-option">
+                        <label>Eye Color:</label>
+                        <input type="color" id="eyeColor" value="#FFFF00" onchange="updateColors('eye', this.value)">
+                    </div>
+                    <div class="color-option">
+                        <label>Nose Color:</label>
+                        <input type="color" id="noseColor" value="#FFC0CB" onchange="updateColors('nose', this.value)">
+                    </div>
+                    <div class="color-option">
+                        <label>Marking Color:</label>
+                        <input type="color" id="markingColor" value="#000000" onchange="updateColors('marking', this.value)">
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <h3>Markings</h3>
+                <div class="pattern-select">
+                    <div class="pattern-option" onclick="setPattern('none')" style="background-color: #ccc;">None</div>
+                    <div class="pattern-option" onclick="setPattern('stripes')" style="background: repeating-linear-gradient(45deg, #000, #000 5px, transparent 5px, transparent 15px)">Stripes</div>
+                    <div class="pattern-option" onclick="setPattern('spots')" style="background: radial-gradient(circle at 30% 30%, #000 2%, transparent 5%) 0 0/15px 15px">Spots</div>
+                    <div class="pattern-option" onclick="setPattern('siamese')" style="background: radial-gradient(circle at center 60%, #000 40%, transparent 60%)">Siamese</div>
+                    <div class="pattern-option" onclick="setPattern('mouth-marking')" style="background: linear-gradient(0deg, #000 50%, transparent 50%)">Mouth</div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <h3>Expression</h3>
+                <select id="expressionSelect" onchange="updateExpression(this.value)">
+                    <option value="angry">Angry</option>
+                    <option value="very-angry">Very Angry</option>
+                    <option value="furious">Furious</option>
+                    <option value="grumpy">Grumpy</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+<script>
+let angyLevel = 75;
+let currentPattern = 'none';
+let isLoafActive = false;
+let swearInterval;
+let isSecondLoafActive = false;
+let isInLove = false;
+let swearRate = 100;
+const phrases = [
+    "Why are you making me angrier? 😾",
+    "Stop poking me! 🙀",
+    "I will end you! 😾",
+    "Feed me or else! 😿",
+    "Your demise is imminent! 😾",
+    "I am the night! 🌙",
+    "Fear my wrath! ⚡",
+];
+const swearPhrases = [
+    "#@$%! I'M SO ANGY! 🤬",
+    "WHAT THE #@$%! 😠",
+    "*ANGRY LOAF NOISES* 😾",
+    "I HATE EVERYTHING! 🤬",
+    "MAXIMUM RAGE! 💢",
+];
+const loveSwearPhrases = [
+    "OH #@$%! I LOVE YOU! 💘",
+    "BE MY #@$%ING VALENTINE! 💝",
+    "LET'S MAKE #@$%ING TOAST! 💖",
+    "YOU'RE #@$%ING PURRRFECT! 💗",
+    "MARRY ME YOU #@$%! 💑",
+];
+const babySwearPhrases = [
+    "HEWWO #@$%ERS! 👶",
+    "BABY'S FIRST #@$%! 🍼",
+    "I'M A #@$%ING BABY! 👶",
+    "#@$% GOO GOO! 🍼",
+];
+
+function makeAngier() {
+    if (angyLevel < 100) {
+        angyLevel += 5;
+        updateAngyMeter();
+        updateKittyFace();
+        showSpeechBubble();
+    }
+    if (angyLevel >= 100) {
+        alert("MAXIMUM ANGY ACHIEVED! 😾🙀");
+    }
+}
+
+async function getAIResponse() {
+    try {
+        const response = await fetch('/api/ai_completion', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+                prompt: `Generate a grumpy cat phrase that's both funny and annoyed. The response should be short (max 50 characters) and include an emoji.
+
+                <typescript-interface>
+                interface Response {
+                    phrase: string;
+                }
+                </typescript-interface>
+
+                <example>
+                {
+                    "phrase": "Your existence offends me! 😾"
+                }
+                </example>`,
+                data: "angry cat"
+            }),
+        });
+        const data = await response.json();
+        return data.phrase;
+    } catch (error) {
+        console.error('Error fetching AI response:', error);
+        return 'Human, you broke me! 😾';
+    }
+}
+
+async function makeAIAngry() {
+    // Increase angy level
+    angyLevel = Math.min(100, angyLevel + 10);
+    updateAngyMeter();
+    updateKittyFace();
+    
+    // Get AI-generated phrase
+    const aiPhrase = await getAIResponse();
+    
+    // Show speech bubble with AI phrase
+    const speechBubble = document.querySelector('.speech-bubble');
+    speechBubble.textContent = aiPhrase;
+    speechBubble.style.display = 'block';
+    
+    // Add some random animations
+    const kitty = document.querySelector('.kitty');
+    kitty.style.animation = 'shake 0.5s ease-in-out';
+    setTimeout(() => {
+        kitty.style.animation = '';
+        speechBubble.style.display = 'none';
+    }, 3000);
+}
+
+function updateAngyMeter() {
+    const angyLevelElement = document.querySelector('.angy-level');
+    // Allow for super angy levels beyond 100%
+    const displayLevel = Math.min(100, angyLevel);
+    angyLevelElement.style.width = displayLevel + '%';
+    
+    if (angyLevel > 100) {
+        angyLevelElement.style.backgroundColor = '#FF0000';
+        angyLevelElement.style.boxShadow = '0 0 10px #FF0000';
+    }
+}
+
+function updateKittyFace() {
+    const kitty = document.querySelector('.kitty');
+    const eyes = document.querySelectorAll('.eye');
+    const pupils = document.querySelectorAll('.pupil');
+    const mouth = document.querySelector('.mouth');
+    const ears = document.querySelectorAll('.ear');
+
+    // Make kitty redder as it gets angrier
+    const currentColor = getComputedStyle(kitty).backgroundColor;
+    const rgb = currentColor.match(/\d+/g);
+    const newColor = `rgb(${rgb[0]}, ${Math.max(0, rgb[1] - 5)}, ${Math.max(0, rgb[2] - 5)})`;
+    kitty.style.backgroundColor = newColor;
+    ears.forEach(ear => {
+        ear.style.borderBottomColor = newColor;
+    });
+
+    // Make eyes narrower
+    eyes.forEach(eye => {
+        eye.style.height = `${60 - (angyLevel / 5)}px`;
+    });
+
+    // Move pupils to glare
+    pupils.forEach(pupil => {
+        pupil.style.left = `${15 + (angyLevel / 10)}px`;
+    });
+
+    // Make mouth more frowny
+    mouth.style.height = `${60 + (angyLevel / 2)}px`;
+    mouth.style.borderRadius = `0 0 ${100 + angyLevel}px ${100 + angyLevel}px`;
+}
+
+function showSpeechBubble() {
+    const speechBubble = document.querySelector('.speech-bubble');
+    speechBubble.textContent = phrases[Math.floor(Math.random() * phrases.length)];
+    speechBubble.style.display = 'block';
+    setTimeout(() => {
+        speechBubble.style.display = 'none';
+    }, 3000);
+}
+
+function openSettings() {
+    document.getElementById('settingsModal').style.display = 'block';
+}
+
+function openCustomize() {
+    document.getElementById('customizeModal').style.display = 'block';
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+}
+
+function toggleDarkMode() {
+    document.body.setAttribute('data-theme', 
+        document.getElementById('darkModeToggle').checked ? 'dark' : 'light');
+}
+
+function updateColors(part, color) {
+    const kitty = document.querySelector('.kitty');
+    const ears = document.querySelectorAll('.ear');
+    const eyes = document.querySelectorAll('.eye');
+    const nose = document.querySelector('.nose');
+    const markings = document.querySelectorAll('.stripes, .face-markings, .siamese-marking, .mouth-marking');
+
+    switch(part) {
+        case 'fur':
+            kitty.style.backgroundColor = color;
+            ears.forEach(ear => ear.style.borderBottomColor = color);
+            break;
+        case 'eye':
+            eyes.forEach(eye => eye.style.backgroundColor = color);
+            break;
+        case 'nose':
+            nose.style.backgroundColor = color;
+            break;
+        case 'marking':
+            markings.forEach(marking => marking.style.backgroundColor = color);
+            break;
+    }
+}
+
+function updateExpression(expression) {
+    const eyes = document.querySelectorAll('.eye');
+    const mouth = document.querySelector('.mouth');
+    const pupils = document.querySelectorAll('.pupil');
+
+    switch(expression) {
+        case 'angry':
+            eyes.forEach(eye => eye.style.height = '50px');
+            pupils.forEach(pupil => pupil.style.left = '20px');
+            mouth.style.height = '70px';
+            mouth.style.borderRadius = '0 0 100px 100px';
+            break;
+        case 'very-angry':
+            eyes.forEach(eye => eye.style.height = '40px');
+            pupils.forEach(pupil => pupil.style.left = '25px');
+            mouth.style.height = '80px';
+            mouth.style.borderRadius = '0 0 120px 120px';
+            break;
+        case 'furious':
+            eyes.forEach(eye => eye.style.height = '30px');
+            pupils.forEach(pupil => pupil.style.left = '30px');
+            mouth.style.height = '90px';
+            mouth.style.borderRadius = '0 0 140px 140px';
+            break;
+        case 'grumpy':
+            eyes.forEach(eye => eye.style.height = '45px');
+            pupils.forEach(pupil => pupil.style.left = '15px');
+            mouth.style.height = '65px';
+            mouth.style.borderRadius = '0 0 90px 90px';
+            break;
+    }
+}
+
+// Update the existing setPattern function
+function setPattern(pattern) {
+    const stripes = document.querySelector('.stripes');
+    const faceMarkings = document.querySelector('.face-markings');
+    const siameseMarking = document.querySelector('.siamese-marking');
+    const mouthMarking = document.querySelector('.mouth-marking');
+    const markingColor = document.getElementById('markingColor').value;
+
+    // Reset all markings
+    [stripes, faceMarkings, siameseMarking, mouthMarking].forEach(el => el.style.opacity = '0');
+
+    switch(pattern) {
+        case 'stripes':
+            stripes.style.background = `repeating-linear-gradient(45deg, ${markingColor}, ${markingColor} 5px, transparent 5px, transparent 15px)`;
+            stripes.style.opacity = '1';
+            break;
+        case 'spots':
+            stripes.style.background = `radial-gradient(circle at 30% 30%, ${markingColor} 2%, transparent 5%) 0 0/15px 15px`;
+            stripes.style.opacity = '1';
+            break;
+        case 'siamese':
+            siameseMarking.style.backgroundColor = markingColor;
+            siameseMarking.style.opacity = '1'; // Changed from 0.3 to 1
+            break;
+        case 'mouth-marking':
+            mouthMarking.style.backgroundColor = markingColor;
+            mouthMarking.style.opacity = '1';
+            break;
+    }
+    currentPattern = pattern;
+}
+
+function megaAngy() {
+    angyLevel = Math.min(200, angyLevel + 50);
+    updateAngyMeter();
+    updateKittyFace();
+    
+    const kitty = document.querySelector('.kitty');
+    kitty.classList.add('ultra-rage');
+    document.body.style.animation = 'backgroundShift 5s linear infinite';
+    
+    // Spawn random emoji explosions
+    for(let i = 0; i < 20; i++) {
+        setTimeout(() => {
+            const emoji = document.createElement('div');
+            emoji.style.position = 'fixed';
+            emoji.style.left = Math.random() * window.innerWidth + 'px';
+            emoji.style.top = Math.random() * window.innerHeight + 'px';
+            emoji.style.fontSize = '40px';
+            emoji.textContent = '😾🙀😿'[Math.floor(Math.random() * 3)];
+            emoji.style.zIndex = '9999';
+            emoji.style.animation = 'float 1s forwards';
+            document.body.appendChild(emoji);
+            setTimeout(() => emoji.remove(), 1000);
+        }, i * 100);
+    }
+    
+    setTimeout(() => {
+        kitty.classList.remove('ultra-rage');
+        document.body.style.animation = '';
+    }, 3000);
+}
+
+function buyLoafCat() {
+    if (!isLoafActive) {
+        // First loaf behavior
+        isLoafActive = true;
+        const loafCat = document.querySelector('.loaf-cat');
+        const originalKitty = document.querySelector('.kitty');
+        
+        loafCat.classList.add('active');
+        
+        setTimeout(() => {
+            originalKitty.classList.add('smoosh-effect');
+            startLoafSwearing();
+        }, 1000);
+    } else if (!isSecondLoafActive) {
+        // Second loaf behavior
+        isSecondLoafActive = true;
+        const secondLoaf = document.querySelector('.loaf-cat.second-loaf');
+        secondLoaf.classList.add('active');
+        
+        setTimeout(() => {
+            startLoafLove();
+        }, 1000);
+    }
+}
+
+function startLoafLove() {
+    isInLove = true;
+    swearRate = 0.36; // Swear 2763x faster (100ms / 2763)
+    
+    // Create floating hearts
+    setInterval(() => {
+        if (!isInLove) return;
+        const heart = document.createElement('div');
+        heart.className = 'heart';
+        heart.textContent = '❤️';
+        heart.style.left = (Math.random() * 400 + 100) + 'px';
+        heart.style.top = '50px';
+        document.querySelector('.kitty-container').appendChild(heart);
+        
+        setTimeout(() => heart.remove(), 2000);
+    }, 500);
+
+    // Clear existing swear interval and start new faster one
+    clearInterval(swearInterval);
+    startLoafSwearing();
+    
+    // Create baby loaf after a moment
+    setTimeout(createBabyLoaf, 3000);
+}
+
+function createBabyLoaf() {
+    const babyLoaf = document.querySelector('.baby-loaf');
+    babyLoaf.classList.add('active');
+    babyLoaf.classList.add('ultra-rage');
+    
+    // Baby starts swearing too
+    setInterval(() => {
+        const swear = document.createElement('div');
+        swear.className = 'swear-bubble';
+        swear.textContent = babySwearPhrases[Math.floor(Math.random() * babySwearPhrases.length)];
+        swear.style.left = Math.random() * 150 + 25 + 'px';
+        swear.style.top = '-30px';
+        babyLoaf.appendChild(swear);
+        
+        requestAnimationFrame(() => {
+            swear.style.opacity = '1';
+            swear.style.transform = 'translateY(-20px)';
+        });
+        
+        setTimeout(() => swear.remove(), 1000);
+    }, swearRate);
+}
+
+// Update the startLoafSwearing function
+function startLoafSwearing() {
+    swearInterval = setInterval(() => {
+        const loafs = document.querySelectorAll('.loaf-cat.active');
+        loafs.forEach(loaf => {
+            const swear = document.createElement('div');
+            swear.className = 'swear-bubble';
+            swear.textContent = isInLove ? 
+                loveSwearPhrases[Math.floor(Math.random() * loveSwearPhrases.length)] :
+                swearPhrases[Math.floor(Math.random() * swearPhrases.length)];
+            
+            swear.style.left = Math.random() * 300 + 'px';
+            swear.style.top = '-50px';
+            
+            loaf.appendChild(swear);
+            
+            requestAnimationFrame(() => {
+                swear.style.opacity = '1';
+                swear.style.transform = 'translateY(-40px)';
+            });
+            
+            setTimeout(() => swear.remove(), 1000);
+        });
+    }, swearRate);
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    if (event.target.classList.contains('modal')) {
+        event.target.style.display = 'none';
+    }
+}
+
+// Initialize
+updateAngyMeter();
+updateKittyFace();
+
+function initFeverDream() {
+    // Add marquee
+    const marquee = document.createElement('div');
+    marquee.className = 'marquee';
+    marquee.innerHTML = '<span>🐱 WELCOME TO ANGY KITTY 3.0 - NOW WITH 2763x MORE SWEARING! 😾 BEST VIEWED IN NETSCAPE NAVIGATOR 4.0 🐱 UNDER CONSTRUCTION 🚧</span>';
+    document.body.prepend(marquee);
+
+    // Add visitor counter
+    const counter = document.createElement('div');
+    counter.className = 'visitor-counter';
+    counter.innerHTML = `Visitors: ${Math.floor(Math.random() * 1000000)}`;
+    document.querySelector('.container').prepend(counter);
+
+    // Add under construction gif simulation
+    const construction = document.createElement('div');
+    construction.className = 'under-construction';
+    construction.innerHTML = '🚧<br>UNDER<br>CONSTRUCTION';
+    document.body.appendChild(construction);
+
+    // Add glitter effect
+    setInterval(() => {
+        const glitter = document.createElement('div');
+        glitter.className = 'glitter';
+        glitter.style.left = Math.random() * window.innerWidth + 'px';
+        document.body.appendChild(glitter);
+        setTimeout(() => glitter.remove(), 2000);
+    }, 100);
+
+    // Rainbow-ify all headings
+    document.querySelectorAll('h1, h2').forEach(heading => {
+        heading.classList.add('rainbow-text');
+    });
+}
+
+// Add new special effects
+function addChaosEffect() {
+    const randomEffects = [
+        () => document.body.style.transform = `rotate(${Math.random() * 2 - 1}deg)`,
+        () => document.body.style.filter = `hue-rotate(${Math.random() * 360}deg)`,
+        () => document.querySelectorAll('.kitty').forEach(k => k.style.transform = `scale(${0.8 + Math.random() * 0.4})`),
+        () => new Audio('data:audio/wav;base64,UklGRn').play().catch(() => {}), // Silent audio to avoid errors
+        () => document.body.style.animation = 'shake 0.1s infinite'
+    ];
+
+    setInterval(() => {
+        if (Math.random() < 0.1) { // 10% chance of random effect
+            randomEffects[Math.floor(Math.random() * randomEffects.length)]();
+            setTimeout(() => {
+                document.body.style.transform = '';
+                document.body.style.filter = '';
+                document.body.style.animation = '';
+            }, 1000);
+        }
+    }, 5000);
+}
+
+// Call these functions at the end of your existing script
+document.addEventListener('DOMContentLoaded', () => {
+    initFeverDream();
+    addChaosEffect();
+});
+</script>
+</body>
+</html>
