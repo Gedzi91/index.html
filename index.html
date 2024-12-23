@@ -1,0 +1,272 @@
+<html><head><base href="https://redsmile.virus/"><title>Red Smile Virus</title>
+<style>
+body {
+  font-family: 'MS Sans Serif', sans-serif;
+  background-color: #800000;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  overflow: hidden;
+}
+
+#virus-window {
+  width: 400px;
+  height: 300px;
+  background-color: #ff8080;
+  border: 2px outset #ff0000;
+  box-shadow: 2px 2px 0px #400000;
+  position: relative;
+}
+
+#title-bar {
+  background-color: #a00000;
+  color: #ffcccc;
+  padding: 2px 5px;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#exit-btn {
+  background-color: #ff8080;
+  border: 1px outset #ff0000;
+  padding: 1px 3px;
+  font-size: 12px;
+  cursor: pointer;
+  color: #400000;
+}
+
+#content {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#red-smile {
+  width: 200px;
+  height: 200px;
+}
+
+#timer, #chances, #hint {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #400000;
+}
+
+#hint {
+  font-style: italic;
+  text-align: center;
+}
+
+#code-input {
+  display: none;
+  margin-top: 10px;
+}
+
+#code-input input {
+  width: 100px;
+  background-color: #ffcccc;
+  border: 1px solid #a00000;
+  color: #400000;
+}
+
+#code-input button {
+  margin-left: 5px;
+  background-color: #a00000;
+  color: #ffcccc;
+  border: 1px solid #ff0000;
+  cursor: pointer;
+}
+
+#info-box {
+  background-color: #ffcccc;
+  border: 1px solid #a00000;
+  padding: 10px;
+  margin-top: 10px;
+  color: #400000;
+  font-size: 14px;
+  text-align: center;
+}
+</style>
+</head>
+<body>
+<div id="virus-window">
+  <div id="title-bar">
+    <span>Red Smile Virus</span>
+    <button id="exit-btn">Exit Program</button>
+  </div>
+  <div id="content">
+    <svg id="red-smile" viewBox="0 0 200 200">
+      <circle id="face" cx="100" cy="100" r="90" fill="#ff0000"/>
+      <circle id="left-eye" cx="70" cy="80" r="15" fill="#ffcccc"/>
+      <circle id="right-eye" cx="130" cy="80" r="15" fill="#ffcccc"/>
+      <circle id="left-pupil" cx="70" cy="80" r="5" fill="#400000"/>
+      <circle id="right-pupil" cx="130" cy="80" r="5" fill="#400000"/>
+      <path id="mouth" d="M50 120 Q100 160 150 120" stroke="#ffcccc" stroke-width="5" fill="none"/>
+    </svg>
+    <div id="timer">Time remaining: 5:00</div>
+    <div id="chances">Chances: 20</div>
+    <div id="hint">Hint: The number of the beast</div>
+    <div id="code-input">
+      <input type="text" placeholder="Enter code">
+      <button onclick="checkCode()">Submit</button>
+    </div>
+    <div id="info-box">
+      The "number of the beast" is often associated with 666, as mentioned in the Book of Revelation in the Bible. However, some scholars argue it might be 616 based on certain ancient manuscripts. In popular culture, 666 is more widely recognized as the "number of the beast".
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+<script>
+const redSmile = document.getElementById('red-smile');
+const timerDisplay = document.getElementById('timer');
+const chancesDisplay = document.getElementById('chances');
+const exitBtn = document.getElementById('exit-btn');
+const codeInput = document.getElementById('code-input');
+const virusWindow = document.getElementById('virus-window');
+const hintDisplay = document.getElementById('hint');
+
+let timer = 300; // 5 minutes in seconds
+let chances = 20;
+let mood = 'happy';
+let intervalId;
+
+function updateRedSmileMood() {
+  const leftEye = document.getElementById('left-eye');
+  const rightEye = document.getElementById('right-eye');
+  const leftPupil = document.getElementById('left-pupil');
+  const rightPupil = document.getElementById('right-pupil');
+  const mouth = document.getElementById('mouth');
+
+  switch (mood) {
+    case 'sad':
+      gsap.to([leftEye, rightEye, leftPupil, rightPupil], { y: 10, duration: 0.3 });
+      gsap.to(mouth, { attr: { d: "M50 140 Q100 100 150 140" }, duration: 0.3 });
+      break;
+    case 'mad':
+      gsap.to([leftEye, rightEye], { y: -5, duration: 0.3 });
+      gsap.to([leftPupil, rightPupil], { y: -5, duration: 0.3 });
+      gsap.to(mouth, { attr: { d: "M50 130 Q100 170 150 130" }, duration: 0.3 });
+      break;
+    case 'scary':
+      gsap.to([leftEye, rightEye], { scaleY: 0.5, duration: 0.3 });
+      gsap.to([leftPupil, rightPupil], { scale: 1.5, duration: 0.3 });
+      gsap.to(mouth, { attr: { d: "M40 130 Q100 180 160 130" }, duration: 0.3 });
+      break;
+    case 'disturbing':
+      gsap.to('#face', { fill: '#660000', duration: 0.3 });
+      gsap.to([leftEye, rightEye], { fill: '#330000', duration: 0.3 });
+      gsap.to([leftPupil, rightPupil], { fill: '#ff0000', duration: 0.3 });
+      gsap.to(mouth, { attr: { d: "M40 140 Q100 80 160 140" }, stroke: '#330000', duration: 0.3 });
+      break;
+  }
+}
+
+function updateTimer() {
+  const minutes = Math.floor(timer / 60);
+  const seconds = timer % 60;
+  timerDisplay.textContent = `Time remaining: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+  timer--;
+
+  if (timer < 0) {
+    clearInterval(intervalId);
+    endGame();
+  }
+}
+
+function updateChances() {
+  chancesDisplay.textContent = `Chances: ${chances}`;
+  if (chances <= 0) {
+    endGame();
+  }
+}
+
+function endGame() {
+  clearInterval(intervalId);
+  mood = 'disturbing';
+  updateRedSmileMood();
+  codeInput.style.display = 'block';
+  hintDisplay.style.display = 'block';
+  speak("Your time has run out. Enter the code of redemption, if you dare.");
+}
+
+function checkCode() {
+  const code = codeInput.querySelector('input').value;
+  if (code !== '666') {
+    flashScreen();
+    redSmile.innerHTML = '<circle cx="100" cy="100" r="90" fill="#000000"/>';
+    speak("Incorrect. Your soul is mine now.");
+  } else {
+    speak("You've bested me this time, mortal. But I'll be back.");
+    // Reset the game or do something else here
+  }
+}
+
+function flashScreen() {
+  document.body.style.backgroundColor = '#ff0000';
+  setTimeout(() => {
+    document.body.style.backgroundColor = '#800000';
+  }, 1000);
+}
+
+function speak(text) {
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.rate = 0.8;
+  utterance.pitch = 0.5;
+  speechSynthesis.speak(utterance);
+}
+
+exitBtn.addEventListener('click', () => {
+  gsap.to(virusWindow, { opacity: 0, duration: 0.5, onComplete: () => {
+    setTimeout(() => {
+      gsap.to(virusWindow, { opacity: 1, duration: 0.5 });
+    }, 1000);
+  }});
+  
+  chances--;
+  updateChances();
+  timer += 30;
+  updateTimer();
+  
+  switch (mood) {
+    case 'happy':
+      mood = 'sad';
+      break;
+    case 'sad':
+      mood = 'mad';
+      break;
+    case 'mad':
+      mood = 'scary';
+      break;
+    default:
+      mood = 'scary';
+  }
+  updateRedSmileMood();
+  speak(getMoodPhrase());
+});
+
+function getMoodPhrase() {
+  switch (mood) {
+    case 'sad':
+      return "Your resistance only prolongs the inevitable.";
+    case 'mad':
+      return "Your defiance fuels my wrath. Submit now!";
+    case 'scary':
+      return "Feel the tendrils of fear grip your heart. I am inescapable!";
+    default:
+      return "Your doom approaches. Embrace the crimson smile!";
+  }
+}
+
+intervalId = setInterval(updateTimer, 1000);
+updateChances();
+speak("Greetings, mortal. The Red Smile Virus has chosen you. Let the game begin.");
+</script>
+</body>
+</html>
