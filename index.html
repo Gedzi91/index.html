@@ -1,0 +1,258 @@
+<html><head><base href="https://example.com/dancing-orangutan/" /><title>Dancing Orangutan</title><style>
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    background-color: #87CEEB; /* Sky blue background */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+}
+
+#scene-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+#orangutan-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 300px;
+    width: 300px;
+    position: relative;
+    z-index: 2;
+}
+
+#site-title {
+    font-size: 32px;
+    font-weight: bold;
+    color: #FF6B6B;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    z-index: 3;
+}
+
+#dance-text {
+    font-size: 18px;
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: bold;
+    color: #333;
+    z-index: 3;
+}
+
+#orangutan {
+    font-size: 200px;
+    animation: dance 1s infinite alternate ease-in-out;
+    position: relative;
+    z-index: 2;
+}
+
+@keyframes dance {
+    0% {
+        transform: translateY(0) rotate(0deg);
+    }
+    25% {
+        transform: translateY(-20px) rotate(-10deg);
+    }
+    50% {
+        transform: translateY(0) rotate(0deg);
+    }
+    75% {
+        transform: translateY(-20px) rotate(10deg);
+    }
+    100% {
+        transform: translateY(0) rotate(0deg);
+    }
+}
+
+#ground {
+    width: 100%;
+    height: 100px;
+    background-color: #4CAF50;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1;
+}
+
+#url-input {
+    margin-top: 20px;
+    width: 300px;
+    padding: 10px;
+    font-size: 16px;
+    border: 2px solid #FF6B6B;
+    border-radius: 5px;
+    z-index: 3;
+}
+
+#player {
+    margin-top: 20px;
+    width: 640px;
+    height: 360px;
+    display: none;
+    z-index: 3;
+}
+
+#toggle-video {
+    margin-top: 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #FF6B6B;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    display: none;
+    transition: background-color 0.3s ease;
+    z-index: 3;
+}
+
+#toggle-video:hover {
+    background-color: #FF8E8E;
+}
+
+.tree {
+    position: absolute;
+    bottom: 100px; /* Adjust based on ground height */
+    z-index: 1;
+}
+
+.tree-trunk {
+    width: 40px;
+    height: 120px;
+    background-color: #8B4513;
+}
+
+.tree-top {
+    width: 0;
+    height: 0;
+    border-left: 60px solid transparent;
+    border-right: 60px solid transparent;
+    border-bottom: 150px solid #228B22;
+    position: absolute;
+    bottom: 100px;
+    left: -40px;
+}
+
+#tree1 {
+    left: 10%;
+    transform: scale(0.8);
+}
+
+#tree2 {
+    left: 30%;
+    transform: scale(1.2);
+}
+
+#tree3 {
+    right: 20%;
+    transform: scale(0.9);
+}
+
+#tree4 {
+    right: 5%;
+    transform: scale(1.1);
+}
+</style></head><body>
+<div id="scene-container">
+    <h1 id="site-title">Dancing Orangutan</h1>
+    <div id="orangutan-container">
+        <div id="dance-text">This dude will dance to any music you play</div>
+        <div id="orangutan">🦧</div>
+    </div>
+    <input type="text" id="url-input" placeholder="Paste YouTube URL here">
+    <div id="player"></div>
+    <button id="toggle-video">Hide Video</button>
+    <div id="ground"></div>
+    <div id="tree1" class="tree">
+        <div class="tree-trunk"></div>
+        <div class="tree-top"></div>
+    </div>
+    <div id="tree2" class="tree">
+        <div class="tree-trunk"></div>
+        <div class="tree-top"></div>
+    </div>
+    <div id="tree3" class="tree">
+        <div class="tree-trunk"></div>
+        <div class="tree-top"></div>
+    </div>
+    <div id="tree4" class="tree">
+        <div class="tree-trunk"></div>
+        <div class="tree-top"></div>
+    </div>
+</div>
+
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+let player;
+let isVideoHidden = false;
+
+function onYouTubeIframeAPIReady() {
+    // The API is ready, but we don't create the player yet
+}
+
+document.getElementById('url-input').addEventListener('input', function(e) {
+    const url = e.target.value;
+    const videoId = extractVideoID(url);
+    
+    if (videoId) {
+        if (player) {
+            player.loadVideoById(videoId);
+        } else {
+            createPlayer(videoId);
+        }
+        document.getElementById('player').style.display = 'block';
+        document.getElementById('toggle-video').style.display = 'block';
+    }
+});
+
+document.getElementById('toggle-video').addEventListener('click', function() {
+    if (player) {
+        if (isVideoHidden) {
+            player.getIframe().style.display = 'block';
+            this.textContent = 'Hide Video';
+            isVideoHidden = false;
+        } else {
+            player.getIframe().style.display = 'none';
+            this.textContent = 'Show Video';
+            isVideoHidden = true;
+        }
+    }
+});
+
+function extractVideoID(url) {
+    const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[7].length == 11) ? match[7] : false;
+}
+
+function createPlayer(videoId) {
+    player = new YT.Player('player', {
+        height: '360',
+        width: '640',
+        videoId: videoId,
+        events: {
+            'onReady': onPlayerReady
+        }
+    });
+}
+
+function onPlayerReady(event) {
+    event.target.playVideo();
+    document.getElementById('toggle-video').style.display = 'block';
+}
+</script>
+</body></html>
