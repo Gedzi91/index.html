@@ -1,0 +1,266 @@
+<html><head><base href="https://websim.ai/draw_svg.php?query=stop+rotating+center+the+rectangle+standing+tall"><style>
+body {
+  background-color: #000;
+  color: maroon;
+  font-family: monospace;
+  margin: 0;
+  padding: 0;
+}
+svg {
+  fill: white;
+  stroke: maroon; 
+  stroke-width: 2px;
+  width: 100%;
+  height: 100vh;
+}
+svg text {
+  fill: maroon;
+  stroke: none;
+  font-size: 18px;
+  font-weight: bold;
+  font-family: inherit;
+}
+</style></head><body>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <filter id="glitch">
+      <feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="r" />
+      <feOffset in="r" result="r" dx="-5">
+        <animate attributeName="dx" attributeType="XML" values="-4; -20; 20; 4; -4" dur="5s" repeatCount="indefinite"/>
+      </feOffset>
+      <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="g"/>
+      <feOffset in="g" result="g" dx="-5" dy="1">
+        <animate attributeName="dx" attributeType="XML" values="4; 20; -20; -4; 4" dur="4s" repeatCount="indefinite"/>
+      </feOffset>
+      <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="b"/>
+      <feOffset in="b" result="b" dx="5" dy="2">
+        <animate attributeName="dx" attributeType="XML" values="-8; -20; 20; 8; -8" dur="3s" repeatCount="indefinite"/>
+      </feOffset>
+      <feBlend in="r" in2="g" mode="screen" result="blend" />
+      <feBlend in="blend" in2="b" mode="screen" />
+    </filter>
+    
+    <filter id="liquid">
+      <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="2" result="turbulence"/>
+      <feDisplacementMap in="SourceGraphic" in2="turbulence" scale="20" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    
+    <filter id="swirl">
+      <feTurbulence type="turbulence" baseFrequency="0.01" numOctaves="3" seed="1" stitchTiles="stitch" result="turbulence"/>
+      <feDisplacementMap in="SourceGraphic" in2="turbulence" scale="40" >
+        <animate attributeName="scale" values="40; 60; 40" dur="10s" repeatCount="indefinite"/>
+      </feDisplacementMap>
+    </filter>
+    
+    <filter id="shadow">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/> 
+      <feOffset dx="2" dy="4"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/> 
+      </feMerge>
+    </filter>
+    
+    <linearGradient id="gradient1" gradientTransform="rotate(90)">
+      <stop offset="0%"  stop-color="red"/>
+      <stop offset="25%" stop-color="orange"/>
+      <stop offset="50%" stop-color="yellow"/>      
+      <stop offset="75%" stop-color="green"/>
+      <stop offset="100%" stop-color="blue"/>
+    </linearGradient>
+    
+    <linearGradient id="gradient2" gradientTransform="rotate(45)">
+      <stop offset="0%"  stop-color="purple"/>
+      <stop offset="25%" stop-color="pink"/>
+      <stop offset="50%" stop-color="red"/>      
+      <stop offset="75%" stop-color="orange"/>
+      <stop offset="100%" stop-color="yellow"/>
+    </linearGradient>
+    
+    <pattern id="circuit1" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+      <circle cx="10" cy="10" r="8" fill="none" stroke="black"/>
+      <line x1="10" y1="2" x2="10" y2="18" stroke="lime"/>
+      <line x1="2" y1="10" x2="18" y2="10" stroke="lime"/>
+    </pattern>
+   
+    <pattern id="circuit2" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+      <rect x="0" y="0" width="20" height="20" fill="black"/>
+      <rect x="20" y="20" width="20" height="20" fill="black"/>
+      <rect x="9" y="4" width="2" height="12" fill="url(#gradient1)"/> 
+      <rect x="4" y="9" width="12" height="2" fill="url(#gradient2)"/>
+      <rect x="29" y="24" width="2" height="12" fill="url(#gradient1)"/> 
+      <rect x="24" y="29" width="12" height="2" fill="url(#gradient2)"/>
+    </pattern>
+  </defs>
+  
+  <rect x="0" y="0" width="400" height="600" fill="black"/>
+  
+  <g filter="url(#swirl)">
+    <g filter="url(#glitch)">
+      <g>
+        <g id="stripes" filter="url(#liquid)">
+          <path fill="#ff4d4d" d="M0,30 Q200,60 400,30 Q200,-10 0,30 Z"/> 
+          <path fill="red" d="M0,70 Q200,100 400,70 Q200,30 0,70 Z"/>
+          <path fill="white" d="M0,110 Q200,140 400,110 Q200,70 0,110 Z"/>
+            
+          <path fill="#ff4d4d" d="M0,230 Q200,260 400,230 Q200,190 0,230 Z"/>   
+          <path fill="red" d="M0,270 Q200,300 400,270 Q200,230 0,270 Z"/>  
+          <path fill="white" d="M0,310 Q200,340 400,310 Q200,270 0,310 Z"/>
+            
+          <path fill="#ff4d4d" d="M0,430 Q200,460 400,430 Q200,390 0,430 Z"/>
+          <path fill="red" d="M0,470 Q200,500 400,470 Q200,430 0,470 Z"/>
+          <path fill="white" d="M0,510 Q200,540 400,510 Q200,470 0,510 Z"/>  
+        </g>
+    
+        <g id="platelets" filter="url(#shadow)">
+        </g>
+      </g>
+    </g>
+  </g>
+
+  
+<script type="text/javascript"><![CDATA[
+  var svg = document.querySelector("svg");
+  var platelets = document.getElementById("platelets");
+  var numPlatelets = 300;
+  var svgWidth = 400;
+  var svgHeight = 600;
+  var colors = ["#ffe6e6", "#ffcccc", "#ff9999", "#ff6666"]; // Light to dark red
+   
+  var patterns = ["url(#circuit1)", "url(#circuit2)"];
+  
+  // Responsive scaling
+  function scaleToFit() {
+    var rect = svg.getBoundingClientRect();
+    var aspectRatio = rect.width / rect.height;
+    
+    if (aspectRatio > 400/600) {
+      svg.setAttribute("viewBox", "0 0 400 " + (400/aspectRatio));
+      svgHeight = 400/aspectRatio;  
+    } else {
+      svg.setAttribute("viewBox", "0 0 " + (600*aspectRatio) + " 600"); 
+      svgWidth = 600*aspectRatio;
+    }
+  }
+  
+  window.addEventListener("resize", scaleToFit);
+  scaleToFit();
+  
+  var activePlatelets = [];
+  
+  // Generate initial platelets
+  for (var i = 0; i < numPlatelets; i++) { 
+    var platelet = makePlatelet(i, colors);
+    platelets.appendChild(platelet);
+    activePlatelets.push(platelet);
+  }
+  
+  // Ebb and flow animation
+  var minPlatelets = 100;
+  var maxPlatelets = 500;
+  var changeInterval = 5000;
+  var animateInterval = 300;
+
+  var targetNumPlatelets;
+  
+  function adjustNumPlatelets() {
+     targetNumPlatelets = minPlatelets + Math.floor(Math.random() * (maxPlatelets - minPlatelets));
+     setTimeout(adjustNumPlatelets, changeInterval + Math.random() * changeInterval);  
+  }
+  adjustNumPlatelets();
+
+  function animatePlatelets() {
+    
+    if (activePlatelets.length < targetNumPlatelets) {
+      // Add platelets
+      var toAdd = Math.min(10, targetNumPlatelets - activePlatelets.length);
+      for (var i = 0; i < toAdd; i++) {
+        var platelet = makePlatelet(activePlatelets.length + i, colors);
+        platelets.appendChild(platelet);
+        activePlatelets.push(platelet);
+      } 
+    } else if (activePlatelets.length > targetNumPlatelets) {
+      // Remove platelets
+      var toRemove = Math.min(10, activePlatelets.length - targetNumPlatelets);
+      for (var i = 0; i < toRemove; i++) {
+        var platelet = activePlatelets.pop();
+        platelet.remove(); 
+      }
+    }
+    
+    setTimeout(animatePlatelets, animateInterval);
+  }
+  animatePlatelets();
+   
+  function makePlatelet(i, colors) {
+    var platelet = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    var cx = Math.random() * svgWidth;
+    var cy = Math.random() * svgHeight; 
+    
+    var scale = 0.2 + Math.random()*0.3;
+    platelet.setAttribute("transform", "translate(" + cx + "," + cy + ") scale(" + scale + ")");
+
+    var r = Math.random() * 10 + 5;
+    var points = "";
+    var numPoints = 6 + Math.floor(Math.random() * 6);
+    
+    for (var j = 0; j < numPoints; j++) {
+      var a = j * Math.PI * 2 / numPoints;
+      var x = Math.cos(a) * r * (1 + (Math.random()*0.5-0.25));  
+      var y = Math.sin(a) * r * (1 + (Math.random()*0.5-0.25));
+      points += x + "," + y + " ";
+    }
+    
+    var color = colors[Math.floor(Math.random()*colors.length)];
+
+    platelet.appendChild(polygonSVG(points, color));
+    
+    patternType = Math.random() < 0.5 ? 0 : 1;
+    platelet.appendChild(patternOverlaySVG(points, patterns[patternType]));
+    
+    animatePlatelet(platelet, i);
+    
+    return platelet;  
+  }
+  
+  function animatePlatelet(platelet, index) {
+    var anim = document.createElementNS("http://www.w3.org/2000/svg", "animateTransform");
+    anim.setAttribute("attributeName", "transform");
+    anim.setAttribute("attributeType", "XML"); 
+    anim.setAttribute("type", "translate");
+    anim.setAttribute("from", platelet.getAttribute("transform").split("scale")[0].split("(")[1].split(")")[0]); 
+    
+    var toX = Math.random() * svgWidth;
+    var toY = Math.random() * svgHeight;
+    anim.setAttribute("to", toX + "," + toY);
+    
+    anim.setAttribute("dur", (2 + Math.random()*6) + "s"); 
+    anim.setAttribute("begin", (Math.random()*10) + "s");
+    anim.setAttribute("repeatCount", "indefinite");
+    anim.setAttribute("fill", "freeze");
+    platelet.appendChild(anim);
+    
+  }
+
+  function polygonSVG(points, fill) {
+    var p = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+    p.setAttribute("points", points);
+    p.setAttribute("fill", fill);
+    p.setAttribute("stroke", "maroon");
+    p.setAttribute("stroke-width", "1");
+    return p;
+  }
+
+  function patternOverlaySVG(points, patternURL) {
+    var p = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+    p.setAttribute("points", points);
+    p.setAttribute("fill", patternURL);
+    p.setAttribute("stroke", "none");
+    p.setAttribute("opacity", "0.8");
+    return p;
+  }
+]]></script>
+
+  
+</svg>
+</body></html>
