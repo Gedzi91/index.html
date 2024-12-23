@@ -1,0 +1,2784 @@
+<html><head><base href="."><style>
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-family: Arial, sans-serif;
+  color: white;
+}
+
+#gameContainer {
+  position: relative;
+  width: 800px;
+  height: 600px;
+  border: 2px solid #333;
+  overflow: hidden;
+  animation: phase1-bg 2s infinite;
+}
+
+#boss {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  top: 50px;
+  right: 50px;
+  transition: all 1s;
+}
+
+#player {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  background-color: #00ff00;
+  border-radius: 25px;
+  bottom: 50px;
+  left: 50px;
+}
+
+.projectile {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background-color: #ff0000;
+  border-radius: 10px;
+}
+
+.upgrade {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-radius: 15px;
+  animation: pulse 1s infinite;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  transition: transform 0.3s;
+  z-index: 5;
+}
+
+.upgrade:hover {
+  transform: scale(1.2);
+}
+
+.common { background-color: #808080; }
+.rare { background-color: #0000ff; }
+.epic { background-color: #800080; }
+.legendary { background-color: #ffd700; }
+.extreme { background-color: #ff4500; }
+.ultimate { background-color: #ff1493; }
+.divine { background-color: #e6e6fa; animation: divine-glow 2s infinite !important; }
+.chaos { background-color: #000000; animation: chaos-pulse 1s infinite !important; }
+.rainbow { animation: rainbow-shift 2s infinite !important; }
+.mythical { background-color: #ff1493; animation: mythical-glow 2s infinite !important; }
+.transcendent { background-color: #4b0082; animation: transcendent-glow 2s infinite !important; }
+.supreme { background-color: #ffd700; animation: supreme-glow 2s infinite !important; }
+
+.rainbow-shot {
+  animation: rainbow-shift 1s infinite;
+  filter: brightness(1.5);
+}
+
+#healthBar {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 200px;
+  height: 20px;
+  background-color: #333;
+  border: 2px solid #666;
+}
+
+#playerHealth {
+  position: absolute;
+  top: 50px;
+  left: 20px;
+  width: 200px;
+  height: 20px;
+  background-color: #333;
+  border: 2px solid #666;
+}
+
+#healthFill, #playerHealthFill {
+  width: 100%;
+  height: 100%;
+  background-color: #ff0000;
+  transition: width 0.3s;
+}
+
+#gameOver {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 48px;
+  color: #ff0000;
+  text-align: center;
+}
+
+#controls {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  text-align: center;
+}
+
+#phaseText {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 48px;
+  color: #ff0000;
+  text-align: center;
+  display: none;
+  z-index: 100;
+}
+
+#stats {
+  position: absolute;
+  top: 80px;
+  left: 20px;
+  color: white;
+  font-size: 14px;
+}
+
+#respawnButton {
+  display: none;
+  position: absolute;
+  top: 60%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 10px 20px;
+  font-size: 24px;
+  background-color: #4CAF50; 
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  z-index: 100; 
+}
+
+#respawnButton:hover {
+  background-color: #45a049;
+}
+
+.player {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  background-color: #00ff00;
+  border-radius: 25px;
+}
+
+.phase6-projectile {
+  position: absolute;
+  width: 25px;
+  height: 25px;
+  background-color: #ff0000;
+  border-radius: 12.5px;
+  filter: drop-shadow(0 0 5px #fff);
+}
+
+.minion {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  background-image: url('epicfacespin.gif');
+  background-size: cover;
+  z-index: 2;
+}
+
+.minion-projectile {
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  background-color: #ff9900;
+  border-radius: 50%;
+  z-index: 1;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.8; }
+}
+
+@keyframes collect-effect {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(2); opacity: 0; }
+}
+
+@keyframes phase6-glow {
+  0% { filter: drop-shadow(0 0 10px #fff); }
+  50% { filter: drop-shadow(0 0 20px #00f); }
+  100% { filter: drop-shadow(0 0 10px #fff); }
+}
+
+@keyframes demon-glow {
+  0% { filter: drop-shadow(0 0 10px #ff0000); }
+  50% { filter: drop-shadow(0 0 30px #ff0000); }
+  100% { filter: drop-shadow(0 0 10px #ff0000); }
+}
+
+@keyframes static-effect {
+  0% { opacity: 0.7; }
+  50% { opacity: 1; }
+  100% { opacity: 0.7; }
+}
+
+@keyframes divine-glow {
+  0% { box-shadow: 0 0 20px #fff, 0 0 40px #fff; }
+  50% { box-shadow: 0 0 40px #fff, 0 0 80px #fff; }
+  100% { box-shadow: 0 0 20px #fff, 0 0 40px #fff; }
+}
+
+@keyframes chaos-pulse {
+  0% { transform: scale(1); background-color: #000; }
+  50% { transform: scale(1.3); background-color: #f00; }
+  100% { transform: scale(1); background-color: #000; }
+}
+
+@keyframes rainbow-shift {
+  0% { background-color: #ff0000; }
+  17% { background-color: #ffa500; }
+  33% { background-color: #ffff00; }
+  50% { background-color: #00ff00; }
+  67% { background-color: #0000ff; }
+  83% { background-color: #4b0082; }
+  100% { background-color: #ff0000; }
+}
+
+@keyframes mythical-glow {
+  0% { box-shadow: 0 0 30px #ff1493, 0 0 60px #ff1493; }
+  50% { box-shadow: 0 0 60px #ff1493, 0 0 120px #ff1493; }
+  100% { box-shadow: 0 0 30px #ff1493, 0 0 60px #ff1493; }
+}
+
+@keyframes transcendent-glow {
+  0% { box-shadow: 0 0 40px #4b0082, 0 0 80px #4b0082; }
+  50% { box-shadow: 0 0 80px #4b0082, 0 0 160px #4b0082; }
+  100% { box-shadow: 0 0 40px #4b0082, 0 0 80px #4b0082; }
+}
+
+@keyframes supreme-glow {
+  0% { box-shadow: 0 0 50px #ffd700, 0 0 100px #ffd700; }
+  50% { box-shadow: 0 0 100px #ffd700, 0 0 200px #ffd700; }
+  100% { box-shadow: 0 0 50px #ffd700, 0 0 100px #ffd700; }
+}
+
+@keyframes phase1-bg {
+  0% { background-color: #000; }
+  50% { background-color: #1a1a1a; }
+  100% { background-color: #000; }
+}
+
+@keyframes phase2-bg {
+  0% { background-color: #2b1810; }
+  50% { background-color: #3b2820; }
+  100% { background-color: #2b1810; }
+}
+
+@keyframes phase3-bg {
+  0% { background: linear-gradient(45deg, #1a1a1a, #2a2a2a); }
+  50% { background: linear-gradient(45deg, #2a2a2a, #3a3a3a); }
+  100% { background: linear-gradient(45deg, #1a1a1a, #2a2a2a); }
+}
+
+@keyframes phase4-bg {
+  0% { background: linear-gradient(45deg, #2b2b2b, #3b3b3b); }
+  50% { background: linear-gradient(45deg, #3b3b3b, #4b4b4b); }
+  100% { background: linear-gradient(45deg, #2b2b2b, #3b3b3b); }
+}
+
+@keyframes phase5-bg {
+  0% { background: linear-gradient(45deg, #00264d, #003366); }
+  50% { background: linear-gradient(45deg, #003366, #004080); }
+  100% { background: linear-gradient(45deg, #00264d, #003366); }
+}
+
+@keyframes phase6-bg {
+  0% { background: repeating-radial-gradient(circle at center, #000, #111 10%, #000 20%); }
+  100% { background: repeating-radial-gradient(circle at center, #111, #000 10%, #111 20%); }
+}
+
+@keyframes phase7-bg {
+  0% { background: repeating-radial-gradient(circle at center, #300, #500 10%, #300 20%); }
+  100% { background: repeating-radial-gradient(circle at center, #500, #300 10%, #500 20%); }
+}
+
+@keyframes phase8-bg {
+  0% { background: linear-gradient(45deg, #111, #222); }
+  50% { background: linear-gradient(45deg, #222, #333); }
+  100% { background: linear-gradient(45deg, #111, #222); }
+}
+
+@keyframes phase9-bg {
+  0% { background: repeating-linear-gradient(45deg, #000, #111 10%, #000 20%); }
+  100% { background: repeating-linear-gradient(45deg, #111, #000 10%, #111 20%); }
+}
+
+@keyframes phase10-bg {
+  0% { background: linear-gradient(90deg, #000, #222, #000); }
+  50% { background: linear-gradient(90deg, #222, #000, #222); }
+  100% { background: linear-gradient(90deg, #000, #222, #000); }
+}
+
+@keyframes phase11-bg {
+  0% { background: linear-gradient(to bottom, #87CEEB, #4682B4); }
+  50% { background: linear-gradient(to bottom, #87CEEB, #5B92C5); }
+  100% { background: linear-gradient(to bottom, #87CEEB, #4682B4); }
+}
+
+@keyframes moveClouds {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes grassSway {
+  0% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(5deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+.cloud {
+  position: absolute;
+  background: white;
+  border-radius: 50px;
+  filter: blur(3px);
+  opacity: 0.8;
+  animation: moveClouds 15s linear infinite;
+}
+
+.grass {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 50px;
+  background: repeating-linear-gradient(
+    45deg,
+    #228B22,
+    #228B22 10px,
+    #32CD32 10px,
+    #32CD32 20px
+  );
+  animation: grassSway 2s ease-in-out infinite;
+  transform-origin: bottom;
+}
+
+.tooltip {
+  visibility: hidden;
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 14px;
+  width: 200px;
+  z-index: 100;
+  pointer-events: none;
+  white-space: pre-wrap;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  transform: translate(15px, -50%);
+}
+
+.upgrade:hover .tooltip {
+  visibility: visible;
+}
+</style>
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head><body>
+<div id="gameContainer">
+  <img id="boss" src="IMG_0526.gif" alt="Boss">
+  <div id="player"></div>
+  <div id="healthBar">
+    <div id="healthFill"></div>
+  </div>
+  <div id="playerHealth">
+    <div id="playerHealthFill"></div>
+  </div>
+  <div id="stats">
+    Damage: 1x<br>
+    Defense: 1x<br>
+    Speed: 1x
+  </div>
+  <div id="gameOver">Game Over!</div>
+  <div id="controls">
+    WASD to move | Space to shoot
+  </div>
+  <div id="phaseText">PHASE 2</div>
+  <button id="respawnButton">Respawn</button>
+</div>
+<audio id="phase6Music" src="Roblox-Wind of Fjords.mp3" loop></audio>
+<audio id="phase7Music" src="8 Bit Weapon - M.U.L.E. (Bitblaster Mix) - Roblox Remastered Soundtrack.mp3" loop></audio>
+<audio id="phase8Music" src="Roblox Music - Nezzera.mp3" loop></audio>
+<audio id="phase10Music" src="meow.mp3" loop></audio>
+<audio id="phase11Music" src="Ultimate Battle Boss Websim.ogg" loop></audio>
+<script>const player = document.getElementById('player');
+const boss = document.getElementById('boss');
+const gameContainer = document.getElementById('gameContainer');
+const healthFill = document.getElementById('healthFill');
+const playerHealthFill = document.getElementById('playerHealthFill');
+const gameOver = document.getElementById('gameOver');
+const phaseText = document.getElementById('phaseText');
+const stats = document.getElementById('stats');
+const respawnButton = document.getElementById('respawnButton');
+let playerX = 50;
+let playerY = 500;
+let bossHealth = 100;
+let playerHealth = 100;
+let gameActive = true;
+let currentPhase = 1;
+let bossPattern = 'normal';
+let bossAttackTimer = 0;
+let playerStats = {
+  damage: 1,
+  defense: 1,
+  speed: 1,
+  magnetic: false
+};
+const keys = {};
+const projectiles = [];
+const bossProjectiles = [];
+const upgrades = [];
+const upgradeTypes = {
+  damageBoost: {
+    type: 'damageBoost',
+    color: '#ff0000',
+    effect: () => {
+      if (playerStats.damage < 15.5) {
+        playerStats.damage = Math.min(15.5, playerStats.damage + 0.2);
+      }
+    },
+    rarity: 'common'
+  },
+  defenseBoost: {
+    type: 'defenseBoost',
+    color: '#00ff00',
+    effect: () => {
+      playerStats.defense += 0.2;
+    },
+    rarity: 'common'
+  },
+  speedBoost: {
+    type: 'speedBoost',
+    color: '#0000ff',
+    effect: () => {
+      if (playerStats.speed < 2.5) {
+        playerStats.speed = Math.min(2.5, playerStats.speed + 0.2);
+      }
+    },
+    rarity: 'common'
+  },
+  healthOrb: {
+    type: 'healthOrb',
+    color: '#ff69b4',
+    effect: () => {
+      playerHealth = Math.min(playerHealth + 25, 100);
+      playerHealthFill.style.width = playerHealth + '%';
+    },
+    rarity: 'common'
+  },
+  minorRegen: {
+    type: 'minorRegen',
+    color: '#98FB98',
+    effect: () => {
+      playerHealth = Math.min(playerHealth + 15, 100);
+      playerHealthFill.style.width = playerHealth + '%';
+    },
+    rarity: 'common'
+  },
+  quickBoost: {
+    type: 'quickBoost',
+    color: '#87CEEB',
+    effect: () => {
+      if (playerStats.speed < 2.5) {
+        playerStats.speed = Math.min(2.5, playerStats.speed + 0.15);
+      }
+    },
+    rarity: 'common'
+  },
+  lightArmor: {
+    type: 'lightArmor',
+    color: '#DEB887',
+    effect: () => {
+      playerStats.defense += 0.15;
+    },
+    rarity: 'common'
+  },
+  majorDamage: {
+    type: 'majorDamage',
+    color: '#ff00ff',
+    effect: () => {
+      if (playerStats.damage < 15.5) {
+        playerStats.damage = Math.min(15.5, playerStats.damage + 0.5);
+      }
+    },
+    rarity: 'rare'
+  },
+  majorDefense: {
+    type: 'majorDefense',
+    color: '#00ffff',
+    effect: () => {
+      playerStats.defense += 0.5;
+    },
+    rarity: 'rare'
+  },
+  majorSpeed: {
+    type: 'majorSpeed',
+    color: '#ffff00',
+    effect: () => {
+      if (playerStats.speed < 2.5) {
+        playerStats.speed = Math.min(2.5, playerStats.speed + 0.5);
+      }
+    },
+    rarity: 'rare'
+  },
+  megaHealthOrb: {
+    type: 'megaHealthOrb',
+    color: '#ff1493',
+    effect: () => {
+      playerHealth = 100;
+      playerHealthFill.style.width = '100%';
+    },
+    rarity: 'rare'
+  },
+  doubleStrike: {
+    type: 'doubleStrike',
+    color: '#FF4500',
+    effect: () => {
+      playerStats.damage += 0.4;
+    },
+    rarity: 'rare'
+  },
+  swiftness: {
+    type: 'swiftness',
+    color: '#7FFF00',
+    effect: () => {
+      if (playerStats.speed < 2.5) {
+        playerStats.speed = Math.min(2.5, playerStats.speed + 0.4);
+      }
+    },
+    rarity: 'rare'
+  },
+  ironSkin: {
+    type: 'ironSkin',
+    color: '#A0522D',
+    effect: () => {
+      playerStats.defense += 0.4;
+    },
+    rarity: 'rare'
+  },
+  berserk: {
+    type: 'berserk',
+    color: '#8b0000',
+    effect: () => {
+      const newDamage = playerStats.damage * 1.15;
+      playerStats.damage = Math.min(15.5, newDamage);
+      playerStats.defense *= 0.9;
+    },
+    rarity: 'extreme'
+  },
+  guardian: {
+    type: 'guardian',
+    color: '#4169e1',
+    effect: () => {
+      playerStats.defense *= 1.15;
+      playerStats.speed *= 0.9;
+    },
+    rarity: 'extreme'
+  },
+  swift: {
+    type: 'swift',
+    color: '#7fff00',
+    effect: () => {
+      const newSpeed = playerStats.speed * 1.15;
+      playerStats.speed = Math.min(2.5, newSpeed);
+      playerStats.damage *= 0.9;
+    },
+    rarity: 'extreme'
+  },
+  vengeance: {
+    type: 'vengeance',
+    color: '#DC143C',
+    effect: () => {
+      playerStats.damage *= 1.2;
+      playerStats.speed *= 0.85;
+    },
+    rarity: 'extreme'
+  },
+  fortress: {
+    type: 'fortress',
+    color: '#4682B4',
+    effect: () => {
+      playerStats.defense *= 1.2;
+      playerStats.damage *= 0.85;
+    },
+    rarity: 'extreme'
+  },
+  balanced: {
+    type: 'balanced',
+    color: '#dda0dd',
+    effect: () => {
+      const newDamage = playerStats.damage * 1.1;
+      const newSpeed = playerStats.speed * 1.1;
+      playerStats.damage = Math.min(15.5, newDamage);
+      playerStats.speed = Math.min(2.5, newSpeed);
+      playerStats.defense *= 1.1;
+    },
+    rarity: 'legendary'
+  },
+  elementalist: {
+    type: 'elementalist',
+    color: '#FFB6C1',
+    effect: () => {
+      const newDamage = playerStats.damage * 1.25;
+      const newSpeed = playerStats.speed * 1.1;
+      playerStats.damage = Math.min(15.5, newDamage);
+      playerStats.speed = Math.min(2.5, newSpeed);
+      playerStats.defense *= 0.9;
+    },
+    rarity: 'legendary'
+  },
+  juggernaut: {
+    type: 'juggernaut',
+    color: '#B8860B',
+    effect: () => {
+      playerStats.defense *= 1.25;
+      playerStats.damage *= 1.1;
+      playerStats.speed *= 0.9;
+    },
+    rarity: 'legendary'
+  },
+  phantom: {
+    type: 'phantom',
+    color: '#9370DB',
+    effect: () => {
+      const newSpeed = playerStats.speed * 1.25;
+      playerStats.speed = Math.min(2.5, newSpeed);
+      playerStats.defense *= 1.1;
+      playerStats.damage *= 0.9;
+    },
+    rarity: 'legendary'
+  },
+  glass: {
+    type: 'glass',
+    color: '#87ceeb',
+    effect: () => {
+      playerStats.damage *= 1.5;
+      playerStats.defense *= 0.7;
+    },
+    rarity: 'chaos'
+  },
+  tank: {
+    type: 'tank',
+    color: '#8b4513',
+    effect: () => {
+      playerStats.defense *= 1.5;
+      playerStats.speed *= 0.7;
+    },
+    rarity: 'chaos'
+  },
+  assassin: {
+    type: 'assassin',
+    color: '#483d8b',
+    effect: () => {
+      playerStats.speed *= 1.5;
+      playerStats.damage *= 0.7;
+    },
+    rarity: 'chaos'
+  },
+  perfectBalance: {
+    type: 'perfectBalance',
+    color: '#fff8dc',
+    effect: () => {
+      playerStats.damage *= 1.2;
+      playerStats.defense *= 1.2;
+      playerStats.speed *= 1.2;
+    },
+    rarity: 'divine'
+  },
+  ultimate: {
+    type: 'ultimate',
+    color: '#ffd700',
+    effect: () => {
+      playerStats.damage *= 1.3;
+      playerStats.defense *= 1.3;
+      playerStats.speed *= 1.3;
+    },
+    rarity: 'ultimate'
+  },
+  supernova: {
+    type: 'supernova',
+    color: '#ff4500',
+    effect: () => {
+      playerStats.damage *= 1.8;
+      playerStats.defense *= 0.6;
+      playerStats.speed *= 1.8;
+    },
+    rarity: 'chaos'
+  },
+  rainbowTripleShot: {
+    type: 'rainbowTripleShot',
+    color: '#ff00ff',
+    effect: () => {
+      if (!hasTripleShot) {
+        hasTripleShot = true;
+      }
+    },
+    rarity: 'rainbow'
+  },
+  mythicalPower: {
+    type: 'mythicalPower',
+    color: '#ff1493',
+    effect: () => {
+      const newDamage = playerStats.damage * 1.4;
+      const newSpeed = playerStats.speed * 1.4;
+      playerStats.damage = Math.min(15.5, newDamage);
+      playerStats.speed = Math.min(2.5, newSpeed);
+      playerStats.defense *= 1.4;
+    },
+    rarity: 'mythical'
+  },
+  transcendentPower: {
+    type: 'transcendentPower',
+    color: '#4b0082',
+    effect: () => {
+      const newDamage = playerStats.damage * 1.5;
+      const newSpeed = playerStats.speed * 1.5;
+      playerStats.damage = Math.min(15.5, newDamage);
+      playerStats.speed = Math.min(2.5, newSpeed);
+      playerStats.defense *= 1.5;
+    },
+    rarity: 'transcendent'
+  },
+  supremePower: {
+    type: 'supremePower',
+    color: '#ffd700',
+    effect: () => {
+      const newDamage = playerStats.damage * 1.6;
+      const newSpeed = playerStats.speed * 1.6;
+      playerStats.damage = Math.min(15.5, newDamage);
+      playerStats.speed = Math.min(2.5, newSpeed);
+      playerStats.defense *= 1.6;
+    },
+    rarity: 'supreme'
+  },
+  berserkerRage: {
+    type: 'berserkerRage',
+    color: '#8b0000',
+    effect: () => {
+      const newDamage = playerStats.damage * 2.0;
+      playerStats.damage = Math.min(15.5, newDamage);
+      playerStats.defense *= 0.5;
+    },
+    rarity: 'mythical'
+  },
+  timeWarp: {
+    type: 'timeWarp',
+    color: '#4169e1',
+    effect: () => {
+      const newSpeed = playerStats.speed * 2.0;
+      playerStats.speed = Math.min(2.5, newSpeed);
+      playerStats.defense *= 0.8;
+    },
+    rarity: 'transcendent'
+  },
+  godMode: {
+    type: 'godMode',
+    color: '#ffd700',
+    effect: () => {
+      const newDamage = playerStats.damage * 1.8;
+      const newSpeed = playerStats.speed * 1.8;
+      playerStats.damage = Math.min(15.5, newDamage);
+      playerStats.speed = Math.min(2.5, newSpeed);
+      playerStats.defense *= 1.8;
+    },
+    rarity: 'supreme'
+  },
+  cosmicPower: {
+    type: 'cosmicPower',
+    color: '#4b0082',
+    effect: () => {
+      const newDamage = playerStats.damage * 1.3;
+      playerStats.damage = Math.min(15.5, newDamage);
+      playerStats.defense *= 1.2;
+    },
+    rarity: 'mythical'
+  },
+  celestialBoost: {
+    type: 'celestialBoost',
+    color: '#e6e6fa',
+    effect: () => {
+      const newSpeed = playerStats.speed * 1.3;
+      playerStats.speed = Math.min(2.5, newSpeed);
+      playerStats.defense *= 1.2;
+    },
+    rarity: 'divine'
+  },
+  voidPower: {
+    type: 'voidPower',
+    color: '#2F4F4F',
+    effect: () => {
+      const newDamage = playerStats.damage * 1.2;
+      playerStats.damage = Math.min(15.5, newDamage);
+      const newSpeed = playerStats.speed * 1.1;
+      playerStats.speed = Math.min(2.5, newSpeed);
+    },
+    rarity: 'legendary'
+  },
+  ancientBlessing: {
+    type: 'ancientBlessing',
+    color: '#DAA520',
+    effect: () => {
+      playerStats.defense *= 1.15;
+      const newSpeed = playerStats.speed * 1.1;
+      playerStats.speed = Math.min(2.5, newSpeed);
+    },
+    rarity: 'epic'
+  },
+  luckMultiplier: {
+    type: 'luckMultiplier',
+    color: '#FFD700',
+    effect: () => {
+      if (powerupLuckBoosts < 2) {
+        powerupLuckBoosts++;
+      }
+    },
+    rarity: 'divine'
+  },
+  magneticField: {
+    type: 'magneticField',
+    color: '#4682B4',
+    effect: () => {
+      playerStats.magnetic = true;
+    },
+    rarity: 'rare'
+  },
+  starPower: {
+    type: 'starPower',
+    color: '#FFD700',
+    effect: () => {
+      const newDamage = playerStats.damage * 1.2;
+      playerStats.damage = Math.min(15.5, newDamage);
+      playerStats.defense *= 1.1;
+    },
+    rarity: 'rare'
+  },
+  thunderStrike: {
+    type: 'thunderStrike',
+    color: '#00FFFF',
+    effect: () => {
+      const newDamage = playerStats.damage * 1.3;
+      playerStats.damage = Math.min(15.5, newDamage);
+      playerStats.speed *= 0.9;
+    },
+    rarity: 'epic'
+  },
+  dragonScale: {
+    type: 'dragonScale',
+    color: '#FF4500',
+    effect: () => {
+      playerStats.defense *= 1.3;
+      playerStats.speed *= 0.9;
+    },
+    rarity: 'epic'
+  },
+  windRunner: {
+    type: 'windRunner',
+    color: '#98FB98',
+    effect: () => {
+      const newSpeed = playerStats.speed * 1.3;
+      playerStats.speed = Math.min(2.5, newSpeed);
+      playerStats.defense *= 0.9;
+    },
+    rarity: 'epic'
+  },
+  vampiricTouch: {
+    type: 'vampiricTouch',
+    color: '#8B0000',
+    effect: () => {
+      const healing = 35;
+      playerHealth = Math.min(playerHealth + healing, 100);
+      playerHealthFill.style.width = playerHealth + '%';
+      playerStats.damage *= 1.1;
+    },
+    rarity: 'legendary'
+  },
+  phoenixFeather: {
+    type: 'phoenixFeather',
+    color: '#FFA500',
+    effect: () => {
+      playerHealth = 100;
+      playerHealthFill.style.width = '100%';
+      playerStats.defense *= 1.1;
+    },
+    rarity: 'legendary'
+  },
+  crystalArmor: {
+    type: 'crystalArmor',
+    color: '#E6E6FA',
+    effect: () => {
+      playerStats.defense *= 1.35;
+      const newSpeed = playerStats.speed * 0.85;
+      playerStats.speed = Math.min(2.5, newSpeed);
+    },
+    rarity: 'legendary'
+  },
+  shadowStep: {
+    type: 'shadowStep',
+    color: '#483D8B',
+    effect: () => {
+      const newSpeed = playerStats.speed * 1.35;
+      playerStats.speed = Math.min(2.5, newSpeed);
+      playerStats.defense *= 0.85;
+    },
+    rarity: 'legendary'
+  },
+  demonHeart: {
+    type: 'demonHeart',
+    color: '#DC143C',
+    effect: () => {
+      const newDamage = playerStats.damage * 1.4;
+      playerStats.damage = Math.min(15.5, newDamage);
+      playerStats.defense *= 0.8;
+    },
+    rarity: 'mythical'
+  },
+  angelicGrace: {
+    type: 'angelicGrace',
+    color: '#F0F8FF',
+    effect: () => {
+      playerStats.defense *= 1.4;
+      playerStats.speed *= 0.8;
+    },
+    rarity: 'mythical'
+  },
+  frozenTime: {
+    type: 'frozenTime',
+    color: '#87CEEB',
+    effect: () => {
+      const newSpeed = playerStats.speed * 1.4;
+      playerStats.speed = Math.min(2.5, newSpeed);
+      playerStats.damage *= 0.8;
+    },
+    rarity: 'mythical'
+  },
+  chaosEmbrace: {
+    type: 'chaosEmbrace',
+    color: '#8B008B',
+    effect: () => {
+      const newDamage = playerStats.damage * 1.7;
+      playerStats.damage = Math.min(15.5, newDamage);
+      playerStats.defense *= 0.6;
+      playerStats.speed *= 0.6;
+    },
+    rarity: 'transcendent'
+  },
+  orderMantle: {
+    type: 'orderMantle',
+    color: '#F5F5F5',
+    effect: () => {
+      playerStats.defense *= 1.7;
+      const newSpeed = playerStats.speed * 0.6;
+      playerStats.speed = Math.min(2.5, newSpeed);
+      playerStats.damage *= 0.6;
+    },
+    rarity: 'transcendent'
+  },
+  timeWarp: {
+    type: 'timeWarp',
+    color: '#9370DB',
+    effect: () => {
+      const newSpeed = playerStats.speed * 1.7;
+      playerStats.speed = Math.min(2.5, newSpeed);
+      playerStats.defense *= 0.6;
+      playerStats.damage *= 0.6;
+    },
+    rarity: 'transcendent'
+  },
+  galaxyCore: {
+    type: 'galaxyCore',
+    color: '#6A5ACD',
+    effect: () => {
+      const newDamage = playerStats.damage * 1.45;
+      playerStats.damage = Math.min(15.5, newDamage);
+      playerStats.defense *= 1.45;
+      const newSpeed = playerStats.speed * 0.7;
+      playerStats.speed = Math.min(2.5, newSpeed);
+    },
+    rarity: 'supreme'
+  },
+  eternityVeil: {
+    type: 'eternityVeil',
+    color: '#4B0082',
+    effect: () => {
+      playerStats.defense *= 1.45;
+      const newSpeed = playerStats.speed * 1.45;
+      playerStats.speed = Math.min(2.5, newSpeed);
+      playerStats.damage *= 0.7;
+    },
+    rarity: 'supreme'
+  },
+  infinityEdge: {
+    type: 'infinityEdge',
+    color: '#FF1493',
+    effect: () => {
+      const newDamage = playerStats.damage * 1.45;
+      playerStats.damage = Math.min(15.5, newDamage);
+      const newSpeed = playerStats.speed * 1.45;
+      playerStats.speed = Math.min(2.5, newSpeed);
+      playerStats.defense *= 0.7;
+    },
+    rarity: 'supreme'
+  },
+  omegaForce: {
+    type: 'omegaForce',
+    color: '#FFD700',
+    effect: () => {
+      const newDamage = playerStats.damage * 1.9;
+      playerStats.damage = Math.min(15.5, newDamage);
+      playerStats.defense *= 1.9;
+      const newSpeed = playerStats.speed * 0.5;
+      playerStats.speed = Math.min(2.5, newSpeed);
+    },
+    rarity: 'divine'
+  },
+  alphaSpeed: {
+    type: 'alphaSpeed',
+    color: '#00FFFF',
+    effect: () => {
+      const newSpeed = playerStats.speed * 1.9;
+      playerStats.speed = Math.min(2.5, newSpeed);
+      playerStats.defense *= 1.9;
+      playerStats.damage *= 0.5;
+    },
+    rarity: 'divine'
+  },
+  ultimateDefense: {
+    type: 'ultimateDefense',
+    color: '#FF4500',
+    effect: () => {
+      playerStats.defense *= 1.9;
+      const newSpeed = playerStats.speed * 1.9;
+      playerStats.speed = Math.min(2.5, newSpeed);
+      playerStats.damage *= 0.5;
+    },
+    rarity: 'divine'
+  },
+  ancientCurse: {
+    type: 'ancientCurse',
+    color: '#8B0000',
+    effect: () => {
+      const newDamage = playerStats.damage * 2.5;
+      playerStats.damage = Math.min(15.5, newDamage);
+      playerStats.defense *= 0.4;
+      playerStats.speed *= 0.4;
+    },
+    rarity: 'chaos'
+  },
+  divineBlessing: {
+    type: 'divineBlessing',
+    color: '#F0F8FF',
+    effect: () => {
+      playerStats.defense *= 2.5;
+      const newSpeed = playerStats.speed * 0.4;
+      playerStats.speed = Math.min(2.5, newSpeed);
+      playerStats.damage *= 0.4;
+    },
+    rarity: 'chaos'
+  },
+  celestialHaste: {
+    type: 'celestialHaste',
+    color: '#87CEEB',
+    effect: () => {
+      const newSpeed = playerStats.speed * 2.5;
+      playerStats.speed = Math.min(2.5, newSpeed);
+      playerStats.defense *= 0.4;
+      playerStats.damage *= 0.4;
+    },
+    rarity: 'chaos'
+  },
+  absolutePower: {
+    type: 'absolutePower',
+    color: '#FFD700',
+    effect: () => {
+      const newDamage = playerStats.damage * 2.0;
+      playerStats.damage = Math.min(15.5, newDamage);
+      playerStats.defense *= 2.0;
+      const newSpeed = playerStats.speed * 2.0;
+      playerStats.speed = Math.min(2.5, newSpeed);
+    },
+    rarity: 'supreme'
+  },
+  cosmicMight: {
+    type: 'cosmicMight',
+    color: '#4B0082',
+    effect: () => {
+      const newDamage = playerStats.damage * 3.0;
+      playerStats.damage = Math.min(15.5, newDamage);
+      playerStats.defense *= 0.3;
+      playerStats.speed *= 0.3;
+    },
+    rarity: 'supreme'
+  },
+  universalBalance: {
+    type: 'universalBalance',
+    color: '#F5F5F5',
+    effect: () => {
+      const newDamage = playerStats.damage * 1.5;
+      playerStats.damage = Math.min(15.5, newDamage);
+      playerStats.defense *= 1.5;
+      const newSpeed = playerStats.speed * 1.5;
+      playerStats.speed = Math.min(2.5, newSpeed);
+    },
+    rarity: 'divine'
+  },
+  starfireBurst: {
+    type: 'starfireBurst',
+    color: '#FFE4E1',
+    effect: () => {
+      const newDamage = playerStats.damage * 1.35;
+      playerStats.damage = Math.min(15.5, newDamage);
+    },
+    rarity: 'epic'
+  },
+  swiftShadow: {
+    type: 'swiftShadow',
+    color: '#2F4F4F',
+    effect: () => {
+      const newSpeed = playerStats.speed * 1.35;
+      playerStats.speed = Math.min(2.5, newSpeed);
+    },
+    rarity: 'epic'
+  },
+  titanicBarrier: {
+    type: 'titanicBarrier',
+    color: '#B8860B',
+    effect: () => {
+      playerStats.defense *= 1.35;
+    },
+    rarity: 'epic'
+  },
+  zephyrWings: {
+    type: 'zephyrWings',
+    color: '#E6E6FA',
+    effect: () => {
+      const newSpeed = playerStats.speed * 1.25;
+      playerStats.speed = Math.min(2.5, newSpeed);
+      playerStats.defense *= 1.1;
+    },
+    rarity: 'rare'
+  },
+  quantumParadox: {
+    type: 'quantumParadox',
+    color: '#4B0082',
+    effect: () => {
+      const newDamage = playerStats.damage * 2.2;
+      playerStats.damage = Math.min(15.5, newDamage);
+      playerStats.defense *= 0.5;
+      const newSpeed = playerStats.speed * 1.5;
+      playerStats.speed = Math.min(2.5, newSpeed);
+    },
+    rarity: 'supreme'
+  },
+  ancientPower1: {
+    type: 'ancientPower1', 
+    color: '#4682B4',
+    effect: () => {
+      const newDamage = playerStats.damage * 1.21;
+      playerStats.damage = Math.min(15.5, newDamage);
+      playerStats.defense *= 1.11;
+    },
+    rarity: 'legendary'
+  },
+  ancientPower2: {
+    type: 'ancientPower2', 
+    color: '#4682B5',
+    effect: () => {
+      const newDamage = playerStats.damage * 1.22;
+      playerStats.damage = Math.min(15.5, newDamage);
+      playerStats.defense *= 1.12;
+    },
+    rarity: 'legendary'
+  },
+  ancientPower3: {
+    type: 'ancientPower3', 
+    color: '#4682B6',
+    effect: () => {
+      const newDamage = playerStats.damage * 1.23;
+      playerStats.damage = Math.min(15.5, newDamage);
+      playerStats.defense *= 1.13;
+    },
+    rarity: 'legendary'
+  },
+  ancientPower4: {
+    type: 'ancientPower4', 
+    color: '#4682B7',
+    effect: () => {
+      const newDamage = playerStats.damage * 1.24;
+      playerStats.damage = Math.min(15.5, newDamage);
+      playerStats.defense *= 1.14;
+    },
+    rarity: 'legendary'
+  },
+  ancientPower5: {
+    type: 'ancientPower5', 
+    color: '#4682B8',
+    effect: () => {
+      const newDamage = playerStats.damage * 1.25;
+      playerStats.damage = Math.min(15.5, newDamage);
+      playerStats.defense *= 1.15;
+    },
+    rarity: 'legendary'
+  },
+  firePower1: {
+    type: 'firePower1',
+    color: '#FF4501',
+    effect: () => {
+      const newDamage = playerStats.damage * 1.22;
+      playerStats.damage = Math.min(15.5, newDamage);
+      playerStats.speed *= 1.12;
+    },
+    rarity: 'epic'
+  },
+  firePower2: {
+    type: 'firePower2',
+    color: '#FF4502',
+    effect: () => {
+      const newDamage = playerStats.damage * 1.23;
+      playerStats.damage = Math.min(15.5, newDamage);
+      playerStats.speed *= 1.13;
+    },
+    rarity: 'epic'
+  },
+  firePower3: {
+    type: 'firePower3',
+    color: '#FF4503',
+    effect: () => {
+      const newDamage = playerStats.damage * 1.24;
+      playerStats.damage = Math.min(15.5, newDamage);
+      playerStats.speed *= 1.14;
+    },
+    rarity: 'epic'
+  },
+  cosmicPower1: {
+    type: 'cosmicPower1',
+    color: '#483D8B',
+    effect: () => {
+      const newDamage = playerStats.damage * 1.23;
+      playerStats.damage = Math.min(15.5, newDamage);
+      const newSpeed = playerStats.speed * 1.13;
+      playerStats.speed = Math.min(2.5, newSpeed);
+    },
+    rarity: 'mythical'
+  },
+  cosmicPower2: {
+    type: 'cosmicPower2',
+    color: '#483D8C',
+    effect: () => {
+      const newDamage = playerStats.damage * 1.24;
+      playerStats.damage = Math.min(15.5, newDamage);
+      const newSpeed = playerStats.speed * 1.14;
+      playerStats.speed = Math.min(2.5, newSpeed);
+    },
+    rarity: 'mythical'
+  },
+  cosmicPower3: {
+    type: 'cosmicPower3',
+    color: '#483D8D',
+    effect: () => {
+      const newDamage = playerStats.damage * 1.25;
+      playerStats.damage = Math.min(15.5, newDamage);
+      const newSpeed = playerStats.speed * 1.15;
+      playerStats.speed = Math.min(2.5, newSpeed);
+    },
+    rarity: 'mythical'
+  },
+  divinePower1: {
+    type: 'divinePower1', 
+    color: '#FFD701',
+    effect: () => {
+      const newDamage = playerStats.damage * 1.24;
+      playerStats.damage = Math.min(15.5, newDamage);
+      playerStats.defense *= 1.14;
+      const newSpeed = playerStats.speed * 1.14;
+      playerStats.speed = Math.min(2.5, newSpeed);
+    },
+    rarity: 'divine'
+  },
+  divinePower2: {
+    type: 'divinePower2', 
+    color: '#FFD702',
+    effect: () => {
+      const newDamage = playerStats.damage * 1.25;
+      playerStats.damage = Math.min(15.5, newDamage);
+      playerStats.defense *= 1.15;
+      const newSpeed = playerStats.speed * 1.15;
+      playerStats.speed = Math.min(2.5, newSpeed);
+    },
+    rarity: 'divine'
+  },
+  voidPower1: {
+    type: 'voidPower1',
+    color: '#4B0083',
+    effect: () => {
+      const newDamage = playerStats.damage * 1.25;
+      playerStats.damage = Math.min(15.5, newDamage);
+      playerStats.defense *= 0.95;
+      const newSpeed = playerStats.speed * 1.15;
+      playerStats.speed = Math.min(2.5, newSpeed);
+    },
+    rarity: 'chaos'
+  },
+  voidPower2: {
+    type: 'voidPower2',
+    color: '#4B0084',
+    effect: () => {
+      const newDamage = playerStats.damage * 1.26;
+      playerStats.damage = Math.min(15.5, newDamage);
+      playerStats.defense *= 0.94;
+      const newSpeed = playerStats.speed * 1.16;
+      playerStats.speed = Math.min(2.5, newSpeed);
+    },
+    rarity: 'chaos'
+  },
+  timePower1: {
+    type: 'timePower1',
+    color: '#9370DC',
+    effect: () => {
+      const newSpeed = playerStats.speed * 1.26;
+      playerStats.speed = Math.min(2.5, newSpeed);
+      playerStats.defense *= 1.16;
+    },
+    rarity: 'transcendent'
+  },
+  naturePower1: {
+    type: 'naturePower1',
+    color: '#32CD33',
+    effect: () => {
+      playerStats.defense *= 1.27;
+      const newSpeed = playerStats.speed * 1.17;
+      playerStats.speed = Math.min(2.5, newSpeed);
+    },
+    rarity: 'rare'
+  },
+  celestialPower1: {
+    type: 'celestialPower1',
+    color: '#E6E6FB',
+    effect: () => {
+      const newDamage = playerStats.damage * 1.28;
+      playerStats.damage = Math.min(15.5, newDamage);
+      playerStats.defense *= 1.18;
+      const newSpeed = playerStats.speed * 1.18;
+      playerStats.speed = Math.min(2.5, newSpeed);
+    },
+    rarity: 'supreme'
+  },
+  mechPower1: {
+    type: 'mechPower1',
+    color: '#B8860C',
+    effect: () => {
+      const newDamage = playerStats.damage * 1.29;
+      playerStats.damage = Math.min(15.5, newDamage);
+      playerStats.defense *= 1.19;
+    },
+    rarity: 'epic'
+  },
+  dimensionalPower1: {
+    type: 'dimensionalPower1',
+    color: '#8A2BE3',
+    effect: () => {
+      const newSpeed = playerStats.speed * 1.30;
+      playerStats.speed = Math.min(2.5, newSpeed);
+      const newDamage = playerStats.damage * 1.20;
+      playerStats.damage = Math.min(15.5, newDamage);
+    },
+    rarity: 'mythical'
+  },
+};
+const room = new WebsimSocket();
+const otherPlayers = new Map();
+const minions = [];
+let minionSpawnCooldown = 0;
+let hasTripleShot = false;
+let powerupLuckBoosts = 0;
+function bossShoot() {
+  if (currentPhase === 1) {
+    const p = document.createElement('div');
+    p.className = 'projectile';
+    p.style.left = boss.offsetLeft + boss.offsetWidth / 2 + 'px';
+    p.style.top = boss.offsetTop + boss.offsetHeight / 2 + 'px';
+    gameContainer.appendChild(p);
+    const angle = Math.atan2(playerY - (boss.offsetTop + boss.offsetHeight / 2), playerX - (boss.offsetLeft + boss.offsetWidth / 2));
+    bossProjectiles.push({
+      element: p,
+      x: boss.offsetLeft + boss.offsetWidth / 2,
+      y: boss.offsetTop + boss.offsetHeight / 2,
+      angle: angle
+    });
+  } else if (currentPhase === 2) {
+    for (let i = 0; i < 3; i++) {
+      const p = document.createElement('div');
+      p.className = 'projectile';
+      p.style.left = boss.offsetLeft + boss.offsetWidth / 2 + 'px';
+      p.style.top = boss.offsetTop + boss.offsetHeight / 2 + 'px';
+      gameContainer.appendChild(p);
+      const baseAngle = Math.atan2(playerY - (boss.offsetTop + boss.offsetHeight / 2), playerX - (boss.offsetLeft + boss.offsetWidth / 2));
+      const angle = baseAngle + (i - 1) * Math.PI / 8;
+      bossProjectiles.push({
+        element: p,
+        x: boss.offsetLeft + boss.offsetWidth / 2,
+        y: boss.offsetTop + boss.offsetHeight / 2,
+        angle: angle
+      });
+    }
+  } else if (currentPhase === 3) {
+    const projectileCount = 8;
+    for (let i = 0; i < projectileCount; i++) {
+      const p = document.createElement('div');
+      p.className = 'projectile';
+      p.style.left = boss.offsetLeft + boss.offsetWidth / 2 + 'px';
+      p.style.top = boss.offsetTop + boss.offsetHeight / 2 + 'px';
+      gameContainer.appendChild(p);
+      const angle = i * 2 * Math.PI / projectileCount;
+      bossProjectiles.push({
+        element: p,
+        x: boss.offsetLeft + boss.offsetWidth / 2,
+        y: boss.offsetTop + boss.offsetHeight / 2,
+        angle: angle
+      });
+    }
+  } else if ([4, 5].includes(currentPhase)) {
+    const projectileCount = 8;
+    for (let i = 0; i < projectileCount; i++) {
+      const p = document.createElement('div');
+      p.className = 'projectile';
+      p.style.left = boss.offsetLeft + boss.offsetWidth / 2 + 'px';
+      p.style.top = boss.offsetTop + boss.offsetHeight / 2 + 'px';
+      gameContainer.appendChild(p);
+      const angle = i * 2 * Math.PI / projectileCount;
+      bossProjectiles.push({
+        element: p,
+        x: boss.offsetLeft + boss.offsetWidth / 2,
+        y: boss.offsetTop + boss.offsetHeight / 2,
+        angle: angle
+      });
+    }
+    for (let i = 0; i < 3; i++) {
+      const p = document.createElement('div');
+      p.className = 'projectile';
+      p.style.left = boss.offsetLeft + boss.offsetWidth / 2 + 'px';
+      p.style.top = boss.offsetTop + boss.offsetHeight / 2 + 'px';
+      gameContainer.appendChild(p);
+      const angle = Math.atan2(playerY - (boss.offsetTop + boss.offsetHeight / 2), playerX - (boss.offsetLeft + boss.offsetWidth / 2));
+      bossProjectiles.push({
+        element: p,
+        x: boss.offsetLeft + boss.offsetWidth / 2,
+        y: boss.offsetTop + boss.offsetHeight / 2,
+        angle: angle + (i - 1) * 0.2
+      });
+    }
+  } else if (currentPhase === 6) {
+    for (let i = 0; i < 5; i++) {
+      const p = document.createElement('div');
+      p.className = 'projectile phase6-projectile';
+      p.style.left = boss.offsetLeft + boss.offsetWidth / 2 + 'px';
+      p.style.top = boss.offsetTop + boss.offsetHeight / 2 + 'px';
+      gameContainer.appendChild(p);
+      const angle = Math.atan2(playerY - (boss.offsetTop + boss.offsetHeight / 2), playerX - (boss.offsetLeft + boss.offsetWidth / 2)) + (Math.random() - 0.5) * 0.5;
+      bossProjectiles.push({
+        element: p,
+        x: boss.offsetLeft + boss.offsetWidth / 2,
+        y: boss.offsetTop + boss.offsetHeight / 2,
+        angle: angle
+      });
+    }
+  } else if (currentPhase === 7) {
+    const projectileCount = 12;
+    for (let i = 0; i < projectileCount; i++) {
+      const p = document.createElement('div');
+      p.className = 'projectile';
+      p.style.backgroundColor = '#ff0000';
+      p.style.filter = 'brightness(1.5)';
+      p.style.left = boss.offsetLeft + boss.offsetWidth / 2 + 'px';
+      p.style.top = boss.offsetTop + boss.offsetHeight / 2 + 'px';
+      gameContainer.appendChild(p);
+      const angle = i * 2 * Math.PI / projectileCount + Math.random() * 0.2;
+      bossProjectiles.push({
+        element: p,
+        x: boss.offsetLeft + boss.offsetWidth / 2,
+        y: boss.offsetTop + boss.offsetHeight / 2,
+        angle: angle
+      });
+    }
+  } else if (currentPhase === 8) {
+    for (let i = 0; i < 8; i++) {
+      const p = document.createElement('div');
+      p.className = 'projectile';
+      p.style.backgroundColor = '#ffffff';
+      p.style.filter = 'brightness(2)';
+      p.style.left = boss.offsetLeft + boss.offsetWidth / 2 + 'px';
+      p.style.top = boss.offsetTop + boss.offsetHeight / 2 + 'px';
+      gameContainer.appendChild(p);
+      const angle = Math.random() * Math.PI * 2;
+      bossProjectiles.push({
+        element: p,
+        x: boss.offsetLeft + boss.offsetWidth / 2,
+        y: boss.offsetTop + boss.offsetHeight / 2,
+        angle: angle
+      });
+    }
+  }
+}
+function spawnUpgrade() {
+  const roll = Math.random() / (powerupLuckBoosts > 0 ? 6 : 1);
+  let type;
+  const types = Object.values(upgradeTypes);
+  if (roll < 0.0003) {
+    type = types.find(u => u.rarity === 'supreme');
+  } else if (roll < 0.0006) {
+    type = types.find(u => u.rarity === 'transcendent');
+  } else if (roll < 0.001) {
+    type = types.filter(u => u.rarity === 'mythical');
+    type = type[Math.floor(Math.random() * type.length)];
+  } else if (roll < 0.002) {
+    type = types.filter(u => u.rarity === 'divine');
+    type = type[Math.floor(Math.random() * type.length)];
+  } else if (roll < 0.004) {
+    type = types.filter(u => u.rarity === 'chaos');
+    type = type[Math.floor(Math.random() * type.length)];
+  } else if (roll < 0.008) {
+    type = types.find(u => u.rarity === 'rainbow');
+  } else if (roll < 0.015) {
+    type = types.filter(u => u.rarity === 'legendary');
+    type = type[Math.floor(Math.random() * type.length)];
+  } else if (roll < 0.03) {
+    type = types.filter(u => u.rarity === 'ultimate');
+    type = type[Math.floor(Math.random() * type.length)];
+  } else if (roll < 0.06) {
+    type = types.filter(u => u.rarity === 'extreme');
+    type = type[Math.floor(Math.random() * type.length)];
+  } else if (roll < 0.15) {
+    type = types.filter(u => u.rarity === 'rare');
+    type = type[Math.floor(Math.random() * type.length)];
+  } else {
+    type = types.filter(u => u.rarity === 'common');
+    type = type[Math.floor(Math.random() * type.length)];
+  }
+  if (!type) {
+    type = types.find(u => u.rarity === 'common');
+  }
+  const upgradeData = {
+    id: Date.now(),
+    x: Math.random() * (gameContainer.clientWidth - 100) + 50,
+    y: Math.random() * (gameContainer.clientHeight - 100) + 50,
+    color: type.color,
+    rarity: type.rarity,
+    typeIndex: types.indexOf(type)
+  };
+  room.send({
+    type: "upgradeSpawn",
+    upgrade: upgradeData
+  });
+  createUpgradeElement(upgradeData);
+}
+function createUpgradeElement(upgradeData) {
+  const upgrade = document.createElement('div');
+  upgrade.className = `upgrade ${upgradeData.rarity}`;
+  upgrade.setAttribute('data-id', upgradeData.id);
+  upgrade.style.backgroundColor = upgradeData.color;
+  upgrade.style.left = upgradeData.x + 'px';
+  upgrade.style.top = upgradeData.y + 'px';
+  const tooltip = document.createElement('div');
+  tooltip.className = 'tooltip';
+  const upgradeType = Object.values(upgradeTypes)[upgradeData.typeIndex];
+  let effectDescription = "";
+  switch (upgradeType.type) {
+    case 'damageBoost':
+      effectDescription = "Increases damage by 0.2x (Max: 15.5x)";
+      break;
+    case 'defenseBoost':
+      effectDescription = "Increases defense by 0.2x";
+      break;
+    case 'speedBoost':
+      effectDescription = "Increases speed by 0.2x (Max: 2.5x)";
+      break;
+    case 'healthOrb':
+      effectDescription = "Heals 25 HP";
+      break;
+    case 'minorRegen':
+      effectDescription = "Heals 15 HP";
+      break;
+    case 'quickBoost':
+      effectDescription = "Increases speed by 0.15x (Max: 2.5x)";
+      break;
+    case 'lightArmor':
+      effectDescription = "Increases defense by 0.15x";
+      break;
+    case 'majorDamage':
+      effectDescription = "Increases damage by 0.5x (Max: 15.5x)";
+      break;
+    case 'majorDefense':
+      effectDescription = "Increases defense by 0.5x";
+      break;
+    case 'majorSpeed':
+      effectDescription = "Increases speed by 0.5x (Max: 2.5x)";
+      break;
+    case 'megaHealthOrb':
+      effectDescription = "Fully restores HP";
+      break;
+    case 'doubleStrike':
+      effectDescription = "Increases damage by 0.4x (Max: 15.5x)";
+      break;
+    case 'swiftness':
+      effectDescription = "Increases speed by 0.4x (Max: 2.5x)";
+      break;
+    case 'ironSkin':
+      effectDescription = "Increases defense by 0.4x";
+      break;
+    case 'berserk':
+      effectDescription = "Increases damage by 15% but reduces defense by 10%";
+      break;
+    case 'guardian':
+      effectDescription = "Increases defense by 15% but reduces speed by 10%";
+      break;
+    case 'swift':
+      effectDescription = "Increases speed by 15% but reduces damage by 10%";
+      break;
+    case 'vengeance':
+      effectDescription = "Increases damage by 20% but reduces speed by 15%";
+      break;
+    case 'fortress':
+      effectDescription = "Increases defense by 20% but reduces damage by 15%";
+      break;
+    case 'balanced':
+      effectDescription = "Increases all stats by 10%";
+      break;
+    case 'elementalist':
+      effectDescription = "Increases damage by 25% and speed by 10%, but reduces defense by 10%";
+      break;
+    case 'juggernaut':
+      effectDescription = "Increases defense by 25% and damage by 10%, but reduces speed by 10%";
+      break;
+    case 'phantom':
+      effectDescription = "Increases speed by 25% and defense by 10%, but reduces damage by 10%";
+      break;
+    case 'glass':
+      effectDescription = "Increases damage by 50% but reduces defense by 30%";
+      break;
+    case 'tank':
+      effectDescription = "Increases defense by 50% but reduces speed by 30%";
+      break;
+    case 'assassin':
+      effectDescription = "Increases speed by 50% but reduces damage by 30%";
+      break;
+    case 'perfectBalance':
+      effectDescription = "Increases all stats by 20%";
+      break;
+    case 'ultimate':
+      effectDescription = "Increases all stats by 30%";
+      break;
+    case 'supernova':
+      effectDescription = "Increases damage and speed by 80% but reduces defense by 40%";
+      break;
+    case 'rainbowTripleShot':
+      effectDescription = "Enables triple shot mode permanently";
+      break;
+    case 'mythicalPower':
+      effectDescription = "Increases all stats by 40%";
+      break;
+    case 'transcendentPower':
+      effectDescription = "Increases all stats by 50%";
+      break;
+    case 'supremePower':
+      effectDescription = "Increases all stats by 60%";
+      break;
+    case 'berserkerRage':
+      effectDescription = "Doubles damage but halves defense";
+      break;
+    case 'timeWarp':
+      effectDescription = "Doubles speed but reduces defense by 20%";
+      break;
+    case 'godMode':
+      effectDescription = "Increases all stats by 80%";
+      break;
+    case 'cosmicPower':
+      effectDescription = "Increases damage by 30% and defense by 20%";
+      break;
+    case 'celestialBoost':
+      effectDescription = "Increases speed by 30% and defense by 20%";
+      break;
+    case 'voidPower':
+      effectDescription = "Increases damage by 20% and speed by 10%";
+      break;
+    case 'ancientBlessing':
+      effectDescription = "Increases defense by 15% and speed by 10%";
+      break;
+    case 'luckMultiplier':
+      if (powerupLuckBoosts < 2) {
+        effectDescription = "Multiplies powerup luck by 6x (Can be obtained twice)";
+      } else {
+        effectDescription = "Luck multiplier maxed out!";
+      }
+      break;
+    case 'magneticField':
+      effectDescription = "Activates a magnetic field";
+      break;
+    case 'starPower':
+      effectDescription = "Increases damage by 20% and defense by 10%";
+      break;
+    case 'thunderStrike':
+      effectDescription = "Increases damage by 30% but reduces speed by 10%";
+      break;
+    case 'dragonScale':
+      effectDescription = "Increases defense by 30% but reduces speed by 10%";
+      break;
+    case 'windRunner':
+      effectDescription = "Increases speed by 30% but reduces defense by 10%";
+      break;
+    case 'vampiricTouch':
+      effectDescription = "Heals 35 HP and increases damage by 10%";
+      break;
+    case 'phoenixFeather':
+      effectDescription = "Fully restores HP and increases defense by 10%";
+      break;
+    case 'crystalArmor':
+      effectDescription = "Increases defense by 35% but reduces speed by 15%";
+      break;
+    case 'shadowStep':
+      effectDescription = "Increases speed by 35% but reduces defense by 15%";
+      break;
+    case 'demonHeart':
+      effectDescription = "Increases damage by 40% but reduces defense by 20%";
+      break;
+    case 'angelicGrace':
+      effectDescription = "Increases defense by 40% but reduces speed by 20%";
+      break;
+    case 'frozenTime':
+      effectDescription = "Increases speed by 40% but reduces damage by 20%";
+      break;
+    case 'chaosEmbrace':
+      effectDescription = "Increases damage by 70% but reduces defense and speed by 40%";
+      break;
+    case 'orderMantle':
+      effectDescription = "Increases defense by 70% but reduces damage and speed by 40%";
+      break;
+    case 'timeWarp':
+      effectDescription = "Increases speed by 70% but reduces defense and damage by 40%";
+      break;
+    case 'galaxyCore':
+      effectDescription = "Increases damage and defense by 45% but reduces speed by 30%";
+      break;
+    case 'eternityVeil':
+      effectDescription = "Increases defense and speed by 45% but reduces damage by 30%";
+      break;
+    case 'infinityEdge':
+      effectDescription = "Increases damage and speed by 45% but reduces defense by 30%";
+      break;
+    case 'omegaForce':
+      effectDescription = "Increases damage, defense, and speed by 90% but reduces speed by 50%";
+      break;
+    case 'alphaSpeed':
+      effectDescription = "Increases speed by 90% and defense by 90% but reduces damage by 50%";
+      break;
+    case 'ultimateDefense':
+      effectDescription = "Increases defense by 90% and speed by 90% but reduces damage by 50%";
+      break;
+    case 'ancientCurse':
+      effectDescription = "Increases damage by 150% but reduces defense and speed by 60%";
+      break;
+    case 'divineBlessing':
+      effectDescription = "Increases defense by 150% but reduces speed and damage by 60%";
+      break;
+    case 'celestialHaste':
+      effectDescription = "Increases speed by 150% but reduces defense and damage by 60%";
+      break;
+    case 'absolutePower':
+      effectDescription = "Increases damage, defense, and speed by 100%";
+      break;
+    case 'cosmicMight':
+      effectDescription = "Increases damage by 200% but reduces defense and speed by 70%";
+      break;
+    case 'universalBalance':
+      effectDescription = "Increases damage, defense, and speed by 50%";
+      break;
+    case 'starfireBurst':
+      effectDescription = "Increases damage by 35%";
+      break;
+    case 'swiftShadow':
+      effectDescription = "Increases speed by 35%";
+      break;
+    case 'titanicBarrier':
+      effectDescription = "Increases defense by 35%";
+      break;
+    case 'zephyrWings':
+      effectDescription = "Increases speed by 25% and defense by 10%";
+      break;
+    case 'quantumParadox':
+      effectDescription = "Increases damage by 120% but reduces defense by 50% and increases speed by 50%";
+      break;
+    case 'ancientPower1':
+      effectDescription = "Increases damage by 21% and defense by 11%";
+      break;
+    case 'ancientPower2':
+      effectDescription = "Increases damage by 22% and defense by 12%";
+      break;
+    case 'ancientPower3':
+      effectDescription = "Increases damage by 23% and defense by 13%";
+      break;
+    case 'ancientPower4':
+      effectDescription = "Increases damage by 24% and defense by 14%";
+      break;
+    case 'ancientPower5':
+      effectDescription = "Increases damage by 25% and defense by 15%";
+      break;
+    case 'firePower1':
+      effectDescription = "Increases damage by 22% and speed by 12%";
+      break;
+    case 'firePower2':
+      effectDescription = "Increases damage by 23% and speed by 13%";
+      break;
+    case 'firePower3':
+      effectDescription = "Increases damage by 24% and speed by 14%";
+      break;
+    case 'cosmicPower1':
+      effectDescription = "Increases damage by 23% and speed by 13%";
+      break;
+    case 'cosmicPower2':
+      effectDescription = "Increases damage by 24% and speed by 14%";
+      break;
+    case 'cosmicPower3':
+      effectDescription = "Increases damage by 25% and speed by 15%";
+      break;
+    case 'divinePower1':
+      effectDescription = "Increases damage by 24% and defense by 14% and speed by 14%";
+      break;
+    case 'divinePower2':
+      effectDescription = "Increases damage by 25% and defense by 15% and speed by 15%";
+      break;
+    case 'voidPower1':
+      effectDescription = "Increases damage by 25% and speed by 15% but reduces defense by 5%";
+      break;
+    case 'voidPower2':
+      effectDescription = "Increases damage by 26% and speed by 16% but reduces defense by 6%";
+      break;
+    case 'timePower1':
+      effectDescription = "Increases speed by 26% and defense by 16%";
+      break;
+    case 'naturePower1':
+      effectDescription = "Increases defense by 27% and speed by 17%";
+      break;
+    case 'celestialPower1':
+      effectDescription = "Increases damage by 28% and defense by 18% and speed by 18%";
+      break;
+    case 'mechPower1':
+      effectDescription = "Increases damage by 29% and defense by 19%";
+      break;
+    case 'dimensionalPower1':
+      effectDescription = "Increases speed by 30% and damage by 20%";
+      break;
+    default:
+      effectDescription = "Unknown effect";
+  }
+  tooltip.textContent = `${upgradeType.type.charAt(0).toUpperCase() + upgradeType.type.slice(1)}\n${effectDescription}\nRarity: ${upgradeType.rarity.charAt(0).toUpperCase() + upgradeType.rarity.slice(1)}`;
+  upgrade.appendChild(tooltip);
+  gameContainer.appendChild(upgrade);
+  upgrades.push({
+    element: upgrade,
+    id: upgradeData.id,
+    type: Object.values(upgradeTypes)[upgradeData.typeIndex]
+  });
+}
+document.addEventListener('keydown', e => {
+  keys[e.key] = true;
+  if (e.key === ' ') {
+    shootProjectile();
+  }
+});
+document.addEventListener('keyup', e => {
+  keys[e.key] = false;
+});
+function movePlayer() {
+  const speed = 5 * playerStats.speed;
+  if (keys['w'] && playerY > 0) playerY -= speed;
+  if (keys['s'] && playerY < 550) playerY += speed;
+  if (keys['a'] && playerX > 0) playerX -= speed;
+  if (keys['d'] && playerX < 750) playerX += speed;
+  player.style.left = playerX + 'px';
+  player.style.top = playerY + 'px';
+  room.send({
+    type: "playerMove",
+    x: playerX,
+    y: playerY
+  });
+}
+function shootProjectile() {
+  if (!gameActive) return;
+  const createSingleProjectile = (angleOffset = 0) => {
+    const projectile = document.createElement('div');
+    projectile.className = 'projectile';
+    projectile.style.left = playerX + 25 + 'px';
+    projectile.style.top = playerY + 25 + 'px';
+    gameContainer.appendChild(projectile);
+    let baseDamage;
+    switch (currentPhase) {
+      case 1:
+        baseDamage = 5;
+        break;
+      case 2:
+        baseDamage = 3;
+        break;
+      case 3:
+        baseDamage = 2;
+        break;
+      case 4:
+        baseDamage = 2;
+        break;
+      case 5:
+        baseDamage = 2;
+        break;
+      case 6:
+        baseDamage = 2;
+        break;
+      case 7:
+        baseDamage = 3;
+        break;
+      case 8:
+        baseDamage = 1;
+        break;
+      default:
+        baseDamage = 1;
+    }
+    const angle = angleOffset * (Math.PI / 8);
+    projectiles.push({
+      element: projectile,
+      x: playerX + 25,
+      y: playerY + 25,
+      damage: baseDamage,
+      angle: angle
+    });
+    room.send({
+      type: "playerShoot",
+      x: playerX + 25,
+      y: playerY + 25,
+      damage: baseDamage,
+      angle: angle
+    });
+  };
+  if (hasTripleShot) {
+    createSingleProjectile(-1);
+    createSingleProjectile(0);
+    createSingleProjectile(1);
+  } else {
+    createSingleProjectile(0);
+  }
+}
+function transitionToPhase2() {
+  room.send({
+    type: "phaseChange",
+    phase: 2
+  });
+  updatePhase(2);
+}
+function transitionToPhase3() {
+  room.send({
+    type: "phaseChange",
+    phase: 3
+  });
+  updatePhase(3);
+}
+function transitionToPhase4() {
+  room.send({
+    type: "phaseChange",
+    phase: 4
+  });
+  updatePhase(4);
+}
+function transitionToPhase5() {
+  room.send({
+    type: "phaseChange",
+    phase: 5
+  });
+  updatePhase(5);
+}
+function transitionToPhase6() {
+  room.send({
+    type: "phaseChange",
+    phase: 6
+  });
+  updatePhase(6);
+}
+function transitionToPhase7() {
+  room.send({
+    type: "phaseChange",
+    phase: 7
+  });
+  const phase6Music = document.getElementById('phase6Music');
+  const phase7Music = document.getElementById('phase7Music');
+  phase6Music.pause();
+  phase7Music.currentTime = 0;
+  phase7Music.play();
+  updatePhase(7);
+}
+function transitionToPhase8() {
+  room.send({
+    type: "phaseChange",
+    phase: 8
+  });
+  const phase7Music = document.getElementById('phase7Music');
+  const phase8Music = document.getElementById('phase8Music');
+  phase7Music.pause();
+  phase8Music.currentTime = 0;
+  phase8Music.play();
+  updatePhase(8);
+}
+function transitionToPhase9() {
+  room.send({
+    type: "phaseChange",
+    phase: 9
+  });
+  const phase8Music = document.getElementById('phase8Music');
+  phase8Music.pause();
+  updatePhase(9);
+}
+function transitionToPhase10() {
+  room.send({
+    type: "phaseChange",
+    phase: 10
+  });
+  const phase8Music = document.getElementById('phase8Music');
+  const phase10Music = document.getElementById('phase10Music');
+  phase8Music.pause();
+  phase10Music.currentTime = 0;
+  phase10Music.play();
+  updatePhase(10);
+}
+function transitionToPhase11() {
+  room.send({
+    type: "phaseChange",
+    phase: 11
+  });
+  const phase10Music = document.getElementById('phase10Music');
+  const phase11Music = document.getElementById('phase11Music');
+  phase10Music.pause();
+  phase11Music.currentTime = 0;
+  phase11Music.play();
+  updatePhase(11);
+}
+function updatePhase(phase) {
+  currentPhase = phase;
+  switch (phase) {
+    case 2:
+      bossHealth = 150;
+      healthFill.style.width = '100%';
+      boss.src = 'log.jpg';
+      phaseText.textContent = 'PHASE 2';
+      phaseText.style.display = 'block';
+      setTimeout(() => {
+        phaseText.style.display = 'none';
+      }, 2000);
+      boss.style.width = '300px';
+      boss.style.height = '300px';
+      bossPattern = 'aggressive';
+      gameContainer.style.animation = 'phase2-bg 2s infinite';
+      break;
+    case 3:
+      bossHealth = 200;
+      healthFill.style.width = '100%';
+      boss.src = 'Minecraft-Stone-Block.jpg';
+      phaseText.textContent = 'FINAL PHASE';
+      phaseText.style.display = 'block';
+      setTimeout(() => {
+        phaseText.style.display = 'none';
+      }, 2000);
+      boss.style.width = '400px';
+      boss.style.height = '400px';
+      bossPattern = 'ultimate';
+      gameContainer.style.animation = 'phase3-bg 2s infinite';
+      break;
+    case 4:
+      bossHealth = 300;
+      healthFill.style.width = '100%';
+      boss.src = 'Iron.jpg';
+      phaseText.textContent = 'ULTIMATE PHASE';
+      phaseText.style.display = 'block';
+      setTimeout(() => {
+        phaseText.style.display = 'none';
+      }, 2000);
+      boss.style.width = '500px';
+      boss.style.height = '500px';
+      bossPattern = 'final';
+      gameContainer.style.animation = 'phase4-bg 2s infinite';
+      break;
+    case 5:
+      bossHealth = 400;
+      healthFill.style.width = '100%';
+      boss.src = 'diamondes.jpg';
+      phaseText.textContent = 'DIAMOND PHASE';
+      phaseText.style.display = 'block';
+      setTimeout(() => {
+        phaseText.style.display = 'none';
+      }, 2000);
+      boss.style.width = '600px';
+      boss.style.height = '600px';
+      bossPattern = 'diamond';
+      gameContainer.style.animation = 'phase5-bg 2s infinite';
+      break;
+    case 6:
+      bossHealth = 500;
+      healthFill.style.width = '100%';
+      boss.src = 'ghikyujjjjjhhhhhhh (1).png';
+      phaseText.textContent = 'HEROBRINE PHASE';
+      phaseText.style.display = 'block';
+      const music = document.getElementById('phase6Music');
+      music.currentTime = 0;
+      music.play();
+      setTimeout(() => {
+        phaseText.style.display = 'none';
+      }, 2000);
+      boss.style.width = '400px';
+      boss.style.height = '400px';
+      bossPattern = 'herobrine';
+      boss.style.filter = 'drop-shadow(0 0 10px #fff)';
+      boss.style.animation = 'phase6-glow 2s infinite';
+      gameContainer.style.animation = 'phase6-bg 2s infinite';
+      break;
+    case 7:
+      bossHealth = 750;
+      healthFill.style.width = '100%';
+      boss.src = 'A-60_gif.webp';
+      phaseText.textContent = 'DEMON PHASE';
+      phaseText.style.display = 'block';
+      const phase6Music = document.getElementById('phase6Music');
+      const phase7Music = document.getElementById('phase7Music');
+      phase6Music.pause();
+      phase7Music.currentTime = 0;
+      phase7Music.play();
+      setTimeout(() => {
+        phaseText.style.display = 'none';
+      }, 2000);
+      boss.style.width = '400px';
+      boss.style.height = '400px';
+      bossPattern = 'demon';
+      boss.style.filter = 'drop-shadow(0 0 20px #ff0000)';
+      boss.style.animation = 'demon-glow 2s infinite';
+      gameContainer.style.animation = 'phase7-bg 2s infinite';
+      break;
+    case 8:
+      bossHealth = 2000;
+      healthFill.style.width = '100%';
+      boss.src = 'static.gif';
+      phaseText.textContent = 'STATIC PHASE';
+      phaseText.style.display = 'block';
+      setTimeout(() => {
+        phaseText.style.display = 'none';
+      }, 2000);
+      boss.style.width = '500px';
+      boss.style.height = '500px';
+      bossPattern = 'static';
+      boss.style.filter = 'grayscale(100%) brightness(150%)';
+      boss.style.animation = 'static-effect 0.5s infinite';
+      gameContainer.style.animation = 'phase8-bg 2s infinite';
+      break;
+    case 9:
+      bossHealth = 2500;
+      healthFill.style.width = '100%';
+      boss.src = 'epicfacespin.gif';
+      phaseText.textContent = 'EPIC PHASE';
+      phaseText.style.display = 'block';
+      setTimeout(() => {
+        phaseText.style.display = 'none';
+      }, 2000);
+      boss.style.width = '400px';
+      boss.style.height = '400px';
+      bossPattern = 'epic';
+      minionSpawnCooldown = 0;
+      gameContainer.style.animation = 'phase9-bg 2s infinite';
+      break;
+    case 10:
+      bossHealth = 3000;
+      healthFill.style.width = '100%';
+      boss.src = 'maxwell.gif';
+      phaseText.textContent = 'MAXWELL PHASE';
+      phaseText.style.display = 'block';
+      setTimeout(() => {
+        phaseText.style.display = 'none';
+      }, 2000);
+      boss.style.width = '300px';
+      boss.style.height = '300px';
+      bossPattern = 'maxwell';
+      gameContainer.style.animation = 'phase10-bg 2s infinite';
+      break;
+    case 11:
+      bossHealth = 10000;
+      healthFill.style.width = '100%';
+      boss.src = 'pig.webp';
+      phaseText.textContent = 'FINAL PHASE';
+      phaseText.style.display = 'block';
+      document.querySelectorAll('.cloud, .grass').forEach(el => el.remove());
+      const grass = document.createElement('div');
+      grass.className = 'grass';
+      gameContainer.appendChild(grass);
+      for (let i = 0; i < 5; i++) {
+        const cloud = document.createElement('div');
+        cloud.className = 'cloud';
+        cloud.style.top = `${Math.random() * 200}px`;
+        cloud.style.width = `${100 + Math.random() * 100}px`;
+        cloud.style.height = `${50 + Math.random() * 30}px`;
+        cloud.style.animationDelay = `${i * 3}s`;
+        gameContainer.appendChild(cloud);
+      }
+      setTimeout(() => {
+        phaseText.style.display = 'none';
+      }, 2000);
+      boss.style.width = '400px';
+      boss.style.height = '400px';
+      bossPattern = 'final';
+      boss.style.filter = 'drop-shadow(0 0 20px #ff0000)';
+      gameContainer.style.animation = 'phase11-bg 2s infinite';
+      break;
+    default:
+      break;
+  }
+}
+function bossBehavior() {
+  if (!gameActive) return;
+  bossAttackTimer++;
+  if (currentPhase === 9) {
+    minionSpawnCooldown--;
+    if (minionSpawnCooldown <= 0 && minions.length === 0) {
+      minionSpawnCooldown = 15 * 60;
+      for (let i = 0; i < 5; i++) {
+        spawnMinion();
+      }
+    }
+    updateMinions();
+    return;
+  }
+  if (currentPhase === 7) {
+    if (bossAttackTimer % 80 === 0) {
+      boss.style.top = Math.random() * (gameContainer.clientHeight - 400) + 'px';
+      boss.style.left = Math.random() * (gameContainer.clientWidth - 400) + 'px';
+    }
+    if (bossAttackTimer % 25 === 0) {
+      bossShoot();
+    }
+  } else if (currentPhase === 8) {
+    if (bossAttackTimer % 30 === 0) {
+      boss.style.top = Math.random() * (gameContainer.clientHeight - 500) + 'px';
+      boss.style.left = Math.random() * (gameContainer.clientWidth - 500) + 'px';
+    }
+    if (bossAttackTimer % 10 === 0) {
+      bossShoot();
+    }
+  } else if (currentPhase === 6) {
+    if (bossAttackTimer % 120 === 0) {
+      boss.style.top = Math.random() * (gameContainer.clientHeight - 400) + 'px';
+      boss.style.left = Math.random() * (gameContainer.clientWidth - 400) + 'px';
+    }
+    if (bossAttackTimer % 20 === 0) {
+      bossShoot();
+    }
+  } else if (currentPhase === 5) {
+    const bossY = parseInt(boss.style.top || 50);
+    boss.style.top = 50 + Math.sin(Date.now() / 300) * 300 + 'px';
+    if (bossAttackTimer % 30 === 0) {
+      bossShoot();
+    }
+  } else if (currentPhase === 4) {
+    const bossY = parseInt(boss.style.top || 50);
+    boss.style.top = 50 + Math.sin(Date.now() / 400) * 250 + 'px';
+    if (bossAttackTimer % 35 === 0) {
+      bossShoot();
+    }
+  } else if (currentPhase === 3) {
+    const bossY = parseInt(boss.style.top || 50);
+    boss.style.top = 50 + Math.sin(Date.now() / 300) * 200 + 'px';
+    if (bossAttackTimer % 30 === 0) {
+      bossShoot();
+    }
+  } else if (currentPhase === 2) {
+    const bossY = parseInt(boss.style.top || 50);
+    boss.style.top = 50 + Math.sin(Date.now() / 500) * 150 + 'px';
+    if (bossAttackTimer % 45 === 0) {
+      bossShoot();
+    }
+  } else {
+    const bossY = parseInt(boss.style.top || 50);
+    boss.style.top = 50 + Math.sin(Date.now() / 1000) * 100 + 'px';
+    if (bossAttackTimer % 60 === 0) {
+      bossShoot();
+    }
+  }
+  if (currentPhase === 10) {
+    if (bossAttackTimer % 60 === 0) {
+      boss.style.top = Math.random() * (gameContainer.clientHeight - 300) + 'px';
+      boss.style.left = Math.random() * (gameContainer.clientWidth - 300) + 'px';
+    }
+    if (bossAttackTimer % 30 === 0) {
+      const projectileCount = 16;
+      for (let i = 0; i < projectileCount; i++) {
+        const p = document.createElement('div');
+        p.className = 'projectile';
+        p.style.backgroundColor = '#FFD700';
+        p.style.width = '15px';
+        p.style.height = '15px';
+        p.style.filter = 'brightness(1.5)';
+        p.style.left = boss.offsetLeft + boss.offsetWidth / 2 + 'px';
+        p.style.top = boss.offsetTop + boss.offsetHeight / 2 + 'px';
+        gameContainer.appendChild(p);
+        const angle = i * 2 * Math.PI / projectileCount + bossAttackTimer / 60;
+        bossProjectiles.push({
+          element: p,
+          x: boss.offsetLeft + boss.offsetWidth / 2,
+          y: boss.offsetTop + boss.offsetHeight / 2,
+          angle: angle
+        });
+      }
+    }
+    if (bossAttackTimer % 90 === 0) {
+      for (let i = 0; i < 3; i++) {
+        const p = document.createElement('div');
+        p.className = 'projectile';
+        p.style.backgroundColor = '#FF4500';
+        p.style.width = '20px';
+        p.style.height = '20px';
+        p.style.filter = 'blur(2px) brightness(1.5)';
+        p.style.left = boss.offsetLeft + boss.offsetWidth / 2 + 'px';
+        p.style.top = boss.offsetTop + boss.offsetHeight / 2 + 'px';
+        gameContainer.appendChild(p);
+        const angle = Math.atan2(playerY - (boss.offsetTop + boss.offsetHeight / 2), playerX - (boss.offsetLeft + boss.offsetWidth / 2));
+        bossProjectiles.push({
+          element: p,
+          x: boss.offsetLeft + boss.offsetWidth / 2,
+          y: boss.offsetTop + boss.offsetHeight / 2,
+          angle: angle
+        });
+      }
+    }
+    return;
+  }
+  if (currentPhase === 11) {
+    if (bossAttackTimer % 30 === 0) {
+      boss.style.top = Math.random() * (gameContainer.clientHeight - 400) + 'px';
+      boss.style.left = Math.random() * (gameContainer.clientWidth - 400) + 'px';
+      const projectileCount = 24;
+      for (let i = 0; i < projectileCount; i++) {
+        const p = document.createElement('div');
+        p.className = 'projectile';
+        p.style.backgroundColor = '#ff69b4';
+        p.style.width = '20px';
+        p.style.height = '20px';
+        p.style.filter = 'brightness(1.5) blur(1px)';
+        p.style.left = boss.offsetLeft + boss.offsetWidth / 2 + 'px';
+        p.style.top = boss.offsetTop + boss.offsetHeight / 2 + 'px';
+        gameContainer.appendChild(p);
+        const angle = i * 2 * Math.PI / projectileCount + bossAttackTimer / 30;
+        bossProjectiles.push({
+          element: p,
+          x: boss.offsetLeft + boss.offsetWidth / 2,
+          y: boss.offsetTop + boss.offsetHeight / 2,
+          angle: angle
+        });
+      }
+    }
+    if (bossAttackTimer % 45 === 0) {
+      for (let i = 0; i < 5; i++) {
+        const p = document.createElement('div');
+        p.className = 'projectile';
+        p.style.backgroundColor = '#ff1493';
+        p.style.width = '25px';
+        p.style.height = '25px';
+        p.style.filter = 'drop-shadow(0 0 10px #ff69b4)';
+        p.style.left = boss.offsetLeft + boss.offsetWidth / 2 + 'px';
+        p.style.top = boss.offsetTop + boss.offsetHeight / 2 + 'px';
+        gameContainer.appendChild(p);
+        const angle = Math.atan2(playerY - (boss.offsetTop + boss.offsetHeight / 2), playerX - (boss.offsetLeft + boss.offsetWidth / 2));
+        bossProjectiles.push({
+          element: p,
+          x: boss.offsetLeft + boss.offsetWidth / 2,
+          y: boss.offsetTop + boss.offsetHeight / 2,
+          angle: angle + (i - 2) * 0.2
+        });
+      }
+    }
+    return;
+  }
+  if (bossAttackTimer % 120 === 0) {
+    spawnUpgrade();
+  }
+}
+function checkCollision(projectile, target) {
+  if (!projectile || !target) {
+    return false;
+  }
+  if (!projectile.element || !(projectile.element instanceof HTMLElement)) {
+    return false;
+  }
+  let targetElement;
+  if (target.element) {
+    targetElement = target.element;
+  } else if (target instanceof HTMLElement) {
+    targetElement = target;
+  } else {
+    return false;
+  }
+  const projectileRect = projectile.element.getBoundingClientRect();
+  const targetRect = targetElement.getBoundingClientRect();
+  return !(projectileRect.right < targetRect.left || projectileRect.left > targetRect.right || projectileRect.bottom < targetRect.top || projectileRect.top > targetRect.bottom);
+}
+function updateProjectiles() {
+  for (let i = projectiles.length - 1; i >= 0; i--) {
+    const projectile = projectiles[i];
+    if (!projectile || !projectile.element) {
+      projectiles.splice(i, 1);
+      continue;
+    }
+    const speed = 10;
+    if (projectile.angle !== undefined) {
+      projectile.x += Math.cos(projectile.angle) * speed;
+      projectile.y += Math.sin(projectile.angle) * speed;
+    } else {
+      projectile.x += speed;
+    }
+    projectile.element.style.left = projectile.x + 'px';
+    projectile.element.style.top = projectile.y + 'px';
+    if (boss && checkCollision(projectile, {
+      element: boss
+    })) {
+      const damage = projectile.damage * playerStats.damage;
+      bossHealth -= damage;
+      room.send({
+        type: "bossHealthUpdate",
+        health: bossHealth
+      });
+      healthFill.style.width = bossHealth + '%';
+      projectile.element.remove();
+      projectiles.splice(i, 1);
+      if (bossHealth <= 0) {
+        if (currentPhase === 1) {
+          transitionToPhase2();
+        } else if (currentPhase === 2) {
+          transitionToPhase3();
+        } else if (currentPhase === 3) {
+          transitionToPhase4();
+        } else if (currentPhase === 4) {
+          transitionToPhase5();
+        } else if (currentPhase === 5) {
+          transitionToPhase6();
+        } else if (currentPhase === 6) {
+          transitionToPhase7();
+        } else if (currentPhase === 7) {
+          transitionToPhase8();
+        } else if (currentPhase === 8) {
+          transitionToPhase9();
+        } else if (currentPhase === 9) {
+          transitionToPhase10();
+        } else if (currentPhase === 10) {
+          transitionToPhase11();
+        }
+      }
+    }
+    if (projectile.x > 800 || projectile.y < 0 || projectile.y > 600) {
+      projectile.element.remove();
+      projectiles.splice(i, 1);
+    }
+  }
+  for (let i = projectiles.length - 1; i >= 0; i--) {
+    const projectile = projectiles[i];
+    for (let j = minions.length - 1; j >= 0; j--) {
+      const minion = minions[j];
+      if (checkCollision(projectile, {
+        element: minion.element
+      })) {
+        minion.health -= projectile.damage * playerStats.damage;
+        projectile.element.remove();
+        projectiles.splice(i, 1);
+        if (minion.health <= 0) {
+          minion.element.remove();
+          minions.splice(j, 1);
+        }
+        break;
+      }
+    }
+  }
+  for (let i = bossProjectiles.length - 1; i >= 0; i--) {
+    const projectile = bossProjectiles[i];
+    if (!projectile || !projectile.element) {
+      bossProjectiles.splice(i, 1);
+      continue;
+    }
+    const speed = currentPhase === 1 ? 8 : currentPhase === 2 ? 10 : currentPhase === 3 ? 12 : currentPhase === 4 ? 8 : 6;
+    projectile.x += Math.cos(projectile.angle) * speed;
+    projectile.y += Math.sin(projectile.angle) * speed;
+    projectile.element.style.left = projectile.x + 'px';
+    projectile.element.style.top = projectile.y + 'px';
+    if (player && checkCollision(projectile, {
+      element: player
+    })) {
+      const damage = 20 / playerStats.defense;
+      playerHealth -= damage;
+      playerHealthFill.style.width = playerHealth + '%';
+      projectile.element.remove();
+      bossProjectiles.splice(i, 1);
+      if (playerHealth <= 0) {
+        gameOver.style.display = 'block';
+        respawnButton.style.display = 'block';
+        gameActive = false;
+      }
+    }
+    if (projectile.x < 0 || projectile.x > 800 || projectile.y < 0 || projectile.y > 600) {
+      projectile.element.remove();
+      bossProjectiles.splice(i, 1);
+    }
+  }
+}
+function checkUpgradeCollisions() {
+  const magnetRange = 150;
+  const magnetSpeed = 5;
+  for (let i = upgrades.length - 1; i >= 0; i--) {
+    const upgrade = upgrades[i];
+    const upgradeX = parseFloat(upgrade.element.style.left);
+    const upgradeY = parseFloat(upgrade.element.style.top);
+    const dx = playerX - upgradeX;
+    const dy = playerY - upgradeY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    if (playerStats.magnetic && distance < magnetRange) {
+      const moveX = dx / distance * magnetSpeed;
+      const moveY = dy / distance * magnetSpeed;
+      upgrade.element.style.left = upgradeX + moveX + 'px';
+      upgrade.element.style.top = upgradeY + moveY + 'px';
+    }
+    if (checkCollision({
+      element: player
+    }, upgrade.element)) {
+      room.send({
+        type: "upgradeCollected",
+        upgradeId: upgrade.id,
+        collectingPlayer: room.party.client.id
+      });
+      upgrade.type.effect();
+      upgrade.element.remove();
+      upgrades.splice(i, 1);
+      updateStats();
+      const effect = document.createElement('div');
+      effect.style.position = 'absolute';
+      effect.style.left = playerX + 'px';
+      effect.style.top = playerY + 'px';
+      effect.style.width = '50px';
+      effect.style.height = '50px';
+      effect.style.borderRadius = '25px';
+      effect.style.border = '2px solid ' + upgrade.type.color;
+      effect.style.animation = 'collect-effect 0.5s forwards';
+      gameContainer.appendChild(effect);
+      setTimeout(() => effect.remove(), 500);
+    }
+  }
+}
+function updateStats() {
+  const roundedDamage = Math.round(playerStats.damage * 100) / 100;
+  const roundedDefense = Math.round(playerStats.defense * 100) / 100;
+  const roundedSpeed = Math.round(playerStats.speed * 100) / 100;
+  stats.innerHTML = `
+    Damage: ${roundedDamage}x<br>
+    Defense: ${roundedDefense}x<br>
+    Speed: ${roundedSpeed}x<br>
+    ${playerStats.magnetic ? "Magnetic Field Active" : ""}
+  `;
+}
+room.onmessage = event => {
+  const data = event.data;
+  switch (data.type) {
+    case "connected":
+      if (data.clientId !== room.party.client.id) {
+        const newPlayer = spawnPlayer(data.clientId, 50, 500);
+        otherPlayers.set(data.clientId, {
+          element: newPlayer,
+          x: 50,
+          y: 500
+        });
+      }
+      break;
+    case "disconnected":
+      if (otherPlayers.has(data.clientId)) {
+        otherPlayers.get(data.clientId).element.remove();
+        otherPlayers.delete(data.clientId);
+      }
+      break;
+    case "playerMove":
+      if (data.clientId !== room.party.client.id && otherPlayers.has(data.clientId)) {
+        const playerData = otherPlayers.get(data.clientId);
+        playerData.x = data.x;
+        playerData.y = data.y;
+        playerData.element.style.left = data.x + 'px';
+        playerData.element.style.top = data.y + 'px';
+      }
+      break;
+    case "playerShoot":
+      if (data.clientId !== room.party.client.id) {
+        const projectile = document.createElement('div');
+        projectile.className = 'projectile';
+        projectile.style.left = data.x + 'px';
+        projectile.style.top = data.y + 'px';
+        gameContainer.appendChild(projectile);
+        projectiles.push({
+          element: projectile,
+          x: data.x,
+          y: data.y,
+          damage: data.damage
+        });
+      }
+      break;
+    case "upgradeSpawn":
+      createUpgradeElement(data.upgrade);
+      break;
+    case "upgradeCollected":
+      const collectedUpgrade = upgrades.find(u => u.id === data.upgradeId);
+      if (collectedUpgrade) {
+        if (data.collectingPlayer !== room.party.client.id) {
+          const collector = otherPlayers.get(data.collectingPlayer);
+          if (collector) {
+            const effect = document.createElement('div');
+            effect.style.position = 'absolute';
+            effect.style.left = collector.x + 'px';
+            effect.style.top = collector.y + 'px';
+            effect.style.width = '50px';
+            effect.style.height = '50px';
+            effect.style.borderRadius = '25px';
+            effect.style.border = '2px solid ' + collectedUpgrade.type.color;
+            effect.style.animation = 'collect-effect 0.5s forwards';
+            gameContainer.appendChild(effect);
+            setTimeout(() => effect.remove(), 500);
+          }
+        }
+        collectedUpgrade.element.remove();
+        upgrades.splice(upgrades.indexOf(collectedUpgrade), 1);
+      }
+      break;
+    case "phaseChange":
+      updatePhase(data.phase);
+      break;
+    case "bossHealthUpdate":
+      bossHealth = data.health;
+      healthFill.style.width = bossHealth + '%';
+      break;
+  }
+};
+function spawnPlayer(clientId, initialX, initialY) {
+  const newPlayer = document.createElement('div');
+  newPlayer.id = `player-${clientId}`;
+  newPlayer.className = 'player';
+  newPlayer.style.left = initialX + 'px';
+  newPlayer.style.top = initialY + 'px';
+  newPlayer.style.backgroundColor = '#00ff00';
+  newPlayer.style.position = 'absolute';
+  newPlayer.style.width = '50px';
+  newPlayer.style.height = '50px';
+  newPlayer.style.borderRadius = '25px';
+  gameContainer.appendChild(newPlayer);
+  return newPlayer;
+}
+function respawnPlayer() {
+  gameActive = true;
+  playerHealth = 100;
+  playerHealthFill.style.width = '100%';
+  playerX = 50;
+  playerY = 500;
+  player.style.left = playerX + 'px';
+  player.style.top = playerY + 'px';
+  gameOver.style.display = 'none';
+  respawnButton.style.display = 'none';
+  hasTripleShot = false;
+  powerupLuckBoosts = 0;
+  room.send({
+    type: "playerRespawn",
+    x: playerX,
+    y: playerY
+  });
+}
+function spawnMinion() {
+  const minion = document.createElement('div');
+  minion.className = 'minion';
+  const x = Math.random() * (gameContainer.clientWidth - 30);
+  const y = Math.random() * (gameContainer.clientHeight - 30);
+  minion.style.left = x + 'px';
+  minion.style.top = y + 'px';
+  gameContainer.appendChild(minion);
+  minions.push({
+    element: minion,
+    x: x,
+    y: y,
+    health: 50,
+    shootCooldown: Math.random() * 60
+  });
+}
+function updateMinions() {
+  for (let i = minions.length - 1; i >= 0; i--) {
+    const minion = minions[i];
+    minion.shootCooldown--;
+    if (minion.shootCooldown <= 0) {
+      shootMinionProjectile(minion);
+      minion.shootCooldown = 60;
+    }
+    const dx = playerX - minion.x;
+    const dy = playerY - minion.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist > 2) {
+      minion.x += dx / dist * 2;
+      minion.y += dy / dist * 2;
+      minion.element.style.left = minion.x + 'px';
+      minion.element.style.top = minion.y + 'px';
+    }
+  }
+}
+function shootMinionProjectile(minion) {
+  const projectile = document.createElement('div');
+  projectile.className = 'minion-projectile';
+  projectile.style.left = minion.x + 15 + 'px';
+  projectile.style.top = minion.y + 15 + 'px';
+  gameContainer.appendChild(projectile);
+  const angle = Math.atan2(playerY - minion.y, playerX - minion.x);
+  bossProjectiles.push({
+    element: projectile,
+    x: minion.x + 15,
+    y: minion.y + 15,
+    angle: angle
+  });
+}
+respawnButton.addEventListener('click', respawnPlayer);
+for (let i = 0; i < 5; i++) {
+  spawnUpgrade();
+}
+function gameLoop() {
+  if (gameActive) {
+    movePlayer();
+    updateProjectiles();
+    bossBehavior();
+    checkUpgradeCollisions();
+    if (Math.random() < 0.005) {
+      spawnUpgrade();
+    }
+  }
+  requestAnimationFrame(gameLoop);
+}
+gameLoop();
+updateStats();</script>
+</body></html>
