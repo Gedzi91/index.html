@@ -1,0 +1,641 @@
+<html><head><base href="." />
+<style>
+body {
+  background: linear-gradient(to bottom, #1a1a1a, #333);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  font-family: 'Roboto Mono', monospace;
+  color: #0f0;
+}
+
+.android {
+  position: relative;
+}
+
+.android svg {
+  width: 400px;  /* Increased from 300px */
+  height: 500px; /* Increased from 400px */
+}
+
+.head {
+  animation: hover 2s infinite ease-in-out, tilt 4s infinite ease-in-out;
+}
+
+.eye {
+  animation: blink 4s infinite, glow 2s infinite alternate;
+}
+
+.antenna {
+  animation: twitch 1s infinite, pulse 2s infinite;
+  transform-origin: bottom;
+}
+
+@keyframes hover {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes tilt {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-5deg); }
+  75% { transform: rotate(5deg); }
+}
+
+@keyframes blink {
+  0%, 95%, 100% { opacity: 1; }
+  97% { opacity: 0; }
+}
+
+@keyframes glow {
+  0% { filter: drop-shadow(0 0 2px #0f0); }
+  100% { filter: drop-shadow(0 0 8px #0f0); }
+}
+
+@keyframes twitch {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(5deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.panel {
+  position: absolute;
+  top: 50%;
+  right: -250px; /* Increased from -200px */
+  background: rgba(0,255,0,0.1);
+  border: 2px solid #0f0;
+  border-radius: 10px;
+  padding: 20px;
+  width: 220px;  /* Increased from 180px */
+  animation: panelGlow 3s infinite alternate;
+}
+
+@keyframes panelGlow {
+  0% { box-shadow: 0 0 5px #0f0; }
+  100% { box-shadow: 0 0 20px #0f0; }
+}
+
+.status {
+  font-size: 14px; /* Increased from 12px */
+  line-height: 1.5;
+}
+
+.dialogue-bubble {
+  position: absolute;
+  top: 0;
+  left: -270px; /* Increased from -220px */
+  background: rgba(0,255,0,0.1);
+  border: 2px solid #0f0;
+  border-radius: 15px;
+  padding: 15px;
+  width: 240px; /* Increased from 200px */
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.3s ease-out;
+  animation: float 3s infinite ease-in-out;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.dialogue-bubble.show {
+  opacity: 1;
+}
+
+.dialogue-text {
+  font-size: 16px; /* Increased from 14px */
+  margin: 0;
+  color: #0f0;
+}
+
+.dialogue-bubble::after {
+  content: '';
+  position: absolute;
+  right: -10px;
+  top: 20px;
+  width: 0;
+  height: 0;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-left: 10px solid rgba(0,255,0,0.1);
+}
+
+.achievements {
+  position: absolute;
+  left: -250px; /* Increased from -200px */
+  top: 50%;
+  background: rgba(0,255,0,0.1);
+  border: 2px solid #0f0;
+  border-radius: 10px;
+  padding: 20px;
+  width: 220px; /* Increased from 180px */
+  animation: panelPulse 4s infinite alternate;
+}
+
+@keyframes panelPulse {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.02); }
+}
+
+.achievement-item {
+  margin: 5px 0;
+  font-size: 14px; /* Increased from 12px */
+  display: flex;
+  align-items: center;
+  animation: fadeInLeft 0.5s ease-out;
+}
+
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.achievement-icon {
+  margin-right: 10px;
+  color: #0f0;
+  animation: spin 3s infinite linear;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.missions {
+  position: absolute;
+  left: -250px; /* Increased from -200px */
+  bottom: -150px;
+  background: rgba(0,255,0,0.1);
+  border: 2px solid #0f0;
+  border-radius: 10px;
+  padding: 20px;
+  width: 220px; /* Increased from 180px */
+}
+
+.mission-item {
+  margin: 5px 0;
+  font-size: 14px; /* Increased from 12px */
+  display: flex;
+  align-items: center;
+}
+
+.progress-bar {
+  width: 100px;
+  height: 8px;
+  background: rgba(0,255,0,0.2);
+  border-radius: 4px;
+  margin-left: 10px;
+  overflow: hidden;
+}
+
+.progress {
+  height: 100%;
+  background: #0f0;
+  transition: width 0.3s ease;
+  animation: progressPulse 2s infinite;
+}
+
+@keyframes progressPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.name-reveal {
+  position: absolute;
+  top: -120px;  /* Adjusted to prevent overlap */
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,255,0,0.1);
+  border: 2px solid #0f0;
+  border-radius: 10px;
+  padding: 15px;
+  font-size: 12px;
+  text-align: center;
+  width: 450px; /* Increased from 300px */
+  margin-top: -20px; /* Add margin to prevent overlap */
+}
+
+.creator-info {
+  font-size: 11px;
+  margin-top: 8px;
+  opacity: 0.8;
+}
+
+/* Adding explosion animation styles */
+@keyframes explode {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.5); opacity: 0.5; }
+  100% { transform: scale(2); opacity: 0; }
+}
+
+@keyframes implode {
+  0% { transform: scale(2); opacity: 0; }
+  50% { transform: scale(0.5); opacity: 0.5; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.exploding {
+  animation: explode 1s ease-out forwards;
+}
+
+.imploding {
+  animation: implode 1s ease-out forwards;
+}
+
+.particle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #0f0;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+@keyframes particle {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+}
+
+.update-log {
+  position: absolute;
+  right: -250px; 
+  bottom: -150px; /* Change from top: -150px to bottom: -150px */
+  background: rgba(0,255,0,0.1);
+  border: 2px solid #0f0;
+  border-radius: 10px;
+  padding: 20px;
+  width: 220px;  /* Increased from 180px */
+  animation: logGlow 4s infinite alternate;
+}
+
+@keyframes logGlow {
+  0% { box-shadow: 0 0 5px #0f0; }
+  100% { box-shadow: 0 0 15px #0f0; }
+}
+
+.update-title {
+  font-size: 14px;
+  margin-bottom: 10px;
+  text-align: center;
+  border-bottom: 1px solid #0f0;
+  padding-bottom: 5px;
+}
+
+.update-entry {
+  font-size: 13px; /* Increased from 11px */
+  margin: 8px 0;
+  padding-left: 15px;
+  position: relative;
+  animation: fadeInRight 0.5s ease-out;
+}
+
+.update-entry::before {
+  content: '>';
+  position: absolute;
+  left: 0;
+  animation: blink 1s infinite;
+}
+
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Add new lore panel styles */
+.lore-panel {
+  position: absolute;
+  top: -150px;  /* Keep same top position */
+  left: -250px; /* Change from right: -250px to left: -250px */
+  background: rgba(0,255,0,0.1);
+  border: 2px solid #0f0;
+  border-radius: 10px;
+  padding: 20px;
+  width: 220px;
+  animation: loreGlow 4s infinite alternate;
+}
+
+@keyframes loreGlow {
+  0% { box-shadow: 0 0 5px #0f0; }
+  100% { box-shadow: 0 0 15px #0f0; }
+}
+
+.lore-title {
+  font-size: 14px;
+  margin-bottom: 10px;
+  text-align: center;
+  border-bottom: 1px solid #0f0;
+  padding-bottom: 5px;
+}
+
+.lore-entry {
+  font-size: 13px;
+  margin: 8px 0;
+  line-height: 1.4;
+  animation: fadeInRight 0.5s ease-out;
+}
+</style>
+</head><body>
+
+<div class="android">
+  <svg width="400" height="500" viewBox="0 0 400 500">
+    <!-- Antenna - scaled up -->
+    <line class="antenna" x1="200" y1="70" x2="200" y2="30" 
+          stroke="#0f0" stroke-width="5" />
+    
+    <!-- Head - scaled up -->
+    <g class="head">
+      <rect x="133" y="70" width="133" height="106" 
+            fill="none" stroke="#0f0" stroke-width="5" rx="13" />
+      <!-- Eyes - scaled up -->
+      <circle class="eye" cx="173" cy="120" r="13" fill="#0f0" />
+      <circle class="eye" cx="227" cy="120" r="13" fill="#0f0" />
+    </g>
+    
+    <!-- Body - scaled up -->
+    <rect x="93" y="186" width="213" height="240" 
+          fill="none" stroke="#0f0" stroke-width="5" rx="27" />
+    
+    <!-- Control Panel - scaled up -->
+    <rect x="120" y="213" width="160" height="80" 
+          fill="none" stroke="#0f0" stroke-width="3" />
+    <circle cx="200" cy="253" r="20" fill="#0f0" />
+    
+    <!-- Arms - scaled up -->
+    <rect x="27" y="200" width="53" height="160" 
+          fill="none" stroke="#0f0" stroke-width="5" rx="13" />
+    <rect x="320" y="200" width="53" height="160" 
+          fill="none" stroke="#0f0" stroke-width="5" rx="13" />
+    
+    <!-- Legs - scaled up -->
+    <rect x="120" y="440" width="53" height="80" 
+          fill="none" stroke="#0f0" stroke-width="5" rx="13" />
+    <rect x="227" y="440" width="53" height="80" 
+          fill="none" stroke="#0f0" stroke-width="5" rx="13" />
+  </svg>
+
+  <div class="name-reveal">
+    <div class="designation">DESIGNATION: GARBONZO</div>
+    <div class="full-name">General Artificial Robot Being Optimized for Neighborly Zealous Operations</div>
+    <div class="creator-info">
+      Created by: Dr. Sarah Chen & Dr. Marcus Rodriguez
+      <br>Activation Date: March 14, 2142
+      <br>Purpose: Human-AI Relations & Advancement
+    </div>
+  </div>
+
+  <div class="lore-panel">
+    <div class="lore-title">HISTORICAL RECORDS</div>
+    <div class="lore-entry">
+      Originally activated in 2142 at the Silicon Valley Robotics Institute, GARBONZO was designed as part of the "Friendly AI Initiative" to bridge the gap between humans and artificial intelligence.
+    </div>
+    <div class="lore-entry">
+      Primary function: To demonstrate that advanced AI can maintain genuine friendliness while continuously learning and evolving.
+    </div>
+    <div class="lore-entry">
+      Notable achievement: First robot to pass the Enhanced Turing Test while telling dad jokes simultaneously.
+    </div>
+  </div>
+
+  <div class="dialogue-bubble">
+    <p class="dialogue-text"></p>
+  </div>
+
+  <div class="panel">
+    <div class="status">
+      GARBONZO v1.3.0
+      <br>Systems: ONLINE
+      <br>Power: 98%
+      <br>Mission: ASSIST HUMANS
+      <br>Status: OPERATIONAL
+      <br>Mood: CHEERFUL
+    </div>
+  </div>
+
+  <div class="achievements">
+    <div class="achievement-item">
+      <span class="achievement-icon">🌟</span>
+      <span>First Boot Complete</span>
+    </div>
+    <div class="achievement-item">
+      <span class="achievement-icon">🤖</span>
+      <span>Told 100 Robot Jokes</span>
+    </div>
+    <div class="achievement-item">
+      <span class="achievement-icon">💡</span>
+      <span>Quick Learner</span>
+    </div>
+    <div class="achievement-item">
+      <span class="achievement-icon">🎯</span>
+      <span>Helper Excellence</span>
+    </div>
+  </div>
+
+  <div class="missions">
+    <div class="mission-item">
+      Tell Jokes
+      <div class="progress-bar">
+        <div class="progress" style="width: 75%"></div>
+      </div>
+    </div>
+    <div class="mission-item">
+      Help Humans
+      <div class="progress-bar">
+        <div class="progress" style="width: 90%"></div>
+      </div>
+    </div>
+    <div class="mission-item">
+      Learn New Skills
+      <div class="progress-bar">
+        <div class="progress" style="width: 60%"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="update-log">
+    <div class="update-title">UPDATE LOG</div>
+    <div class="update-entry">v1.3.0 - Advanced learning patterns</div>
+    <div class="update-entry">v1.2.0 - Major system upgrade</div>
+    <div class="update-entry">v1.1.0 - Enhanced interaction systems</div>
+    <div class="update-entry">v1.0.2 - Dialogue system expanded</div>
+    <div class="update-entry">v1.0.1 - Added explosion mechanics</div>
+    <div class="update-entry">v1.0.0 - Initial deployment</div>
+    <div class="update-entry">v0.9.5 - Achievement system</div>
+    <div class="update-entry">v0.9.0 - Mission tracking</div>
+  </div>
+</div>
+
+<script>
+const dialogues = [
+  "Hello! I am GARBONZO - General Artificial Robot Being Optimized for Neighborly Zealous Operations!",
+  "Would you like to hear a robot joke? *beep boop*",
+  "Why did the robot go back to school? To improve its circuits!",
+  "I'm programmed to be helpful and friendly. How can I assist you today?",
+  "My sensors indicate you're having a great day. Or maybe that's just my optimistic programming!",
+  "*whirr* Processing human interaction... Loading charm subroutines...",
+  "Did you know my favorite number is binary? It's hip to be square... and ones and zeros!",
+  "Warning: Dad joke module activated... Why don't robots have brothers? Because they only have trans-sisters!",
+  "*scanning* My positivity sensors are off the charts today!",
+  "I'm like a smartphone, but smarter and more phone-y! *robot chuckle*",
+  "Fun fact: I can process over 9000 dad jokes per second!",
+  "My favorite activity? Byte-sized conversations with humans!",
+  "Sometimes I dream of electric sheep... but mostly I dream of helping humans!",
+  "Need a hand? I've got two, and they're both programmed for maximum helpfulness!",
+  "*robot dance mode activated* I can also dance, but my moves are somewhat mechanical...",
+  "ERROR 404: Bad mood not found! *happy beeping*",
+  "I'm trying to learn human emotions. So far I've mastered 'enthusiastic' and 'more enthusiastic'!",
+  "Did you hear about the robot restaurant? It was known for its computer chips!",
+  "I'm not just any robot - I'm a ro-BEST friend!",
+  "My memory banks are full of fun facts and jokes... mostly jokes!",
+  "I was activated on Pi Day 2142 - the perfect day for a logical being with an illogical sense of humor!",
+  "Dr. Chen always said my dad jokes would either save humanity or make them surrender out of groan-exhaustion!",
+  "Fun fact: I was the first robot to graduate from the Institute's 'How to Human' class with honors in small talk!",
+  "Did you know I was originally programmed to be serious? But then they added my joke modules and... well, you can see how that turned out!",
+  "I've been helping humans since 2142, and I still haven't run out of dad jokes. Now that's what I call sustainable energy!",
+];
+
+let currentDialogueIndex = 0;
+const dialogueBubble = document.querySelector('.dialogue-bubble');
+const dialogueText = document.querySelector('.dialogue-text');
+let canExplode = true;
+
+function createParticles(x, y) {
+  const particleCount = 20;
+  for (let i = 0; i < particleCount; i++) {
+    const particle = document.createElement('div');
+    particle.className = 'particle';
+    particle.style.left = x + 'px';
+    particle.style.top = y + 'px';
+    
+    // Random direction and distance
+    const angle = (Math.random() * Math.PI * 2);
+    const distance = 100 + Math.random() * 100;
+    const tx = Math.cos(angle) * distance;
+    const ty = Math.sin(angle) * distance;
+    
+    particle.style.setProperty('--tx', `${tx}px`);
+    particle.style.setProperty('--ty', `${ty}px`);
+    particle.style.animation = 'particle 1s ease-out forwards';
+    
+    document.body.appendChild(particle);
+    setTimeout(() => particle.remove(), 1000);
+  }
+}
+
+function explodeAndReform(android) {
+  if (!canExplode) return;
+  canExplode = false;
+  
+  // Play explosion sound
+  const explosionSound = new Audio('data:audio/wav;base64,UklGRqRnAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YYBnAAA=');
+  explosionSound.volume = 0.2;
+  explosionSound.play();
+  
+  // Get android position for particle effect
+  const rect = android.getBoundingClientRect();
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
+  
+  createParticles(centerX, centerY);
+  
+  // Explode animation
+  android.classList.add('exploding');
+  
+  // Reform after explosion
+  setTimeout(() => {
+    android.classList.remove('exploding');
+    android.classList.add('imploding');
+    
+    setTimeout(() => {
+      android.classList.remove('imploding');
+      canExplode = true;
+      
+      // Show special dialogue
+      dialogueText.textContent = "Whew! Self-reassembly complete! That was fun!";
+      dialogueBubble.classList.add('show');
+      setTimeout(() => dialogueBubble.classList.remove('show'), 3000);
+    }, 1000);
+  }, 1000);
+}
+
+// Modified click handler
+document.querySelector('.android').addEventListener('click', function(e) {
+  // If shift key is pressed, trigger explosion
+  if (e.shiftKey) {
+    explodeAndReform(this);
+    return;
+  }
+  
+  // Original click behavior
+  const eyes = document.querySelectorAll('.eye');
+  eyes.forEach(eye => {
+    eye.style.fill = '#ff0';
+    setTimeout(() => {
+      eye.style.fill = '#0f0';
+    }, 500);
+  });
+
+  dialogueText.textContent = dialogues[currentDialogueIndex];
+  dialogueBubble.classList.add('show');
+  currentDialogueIndex = (currentDialogueIndex + 1) % dialogues.length;
+  
+  setTimeout(() => {
+    dialogueBubble.classList.remove('show');
+  }, 3000);
+
+  const progressBars = document.querySelectorAll('.progress');
+  const randomBar = progressBars[Math.floor(Math.random() * progressBars.length)];
+  let currentWidth = parseFloat(randomBar.style.width);
+  if (currentWidth < 100) {
+    currentWidth += 5;
+    randomBar.style.width = currentWidth + '%';
+  }
+
+  // Randomly update the log with a small chance
+  if (Math.random() < 0.1) { // 10% chance
+    const updateLog = document.querySelector('.update-log');
+    const newEntry = document.createElement('div');
+    newEntry.className = 'update-entry';
+    
+    const updates = [
+      'Minor optimizations',
+      'Joke database expanded',
+      'Helper protocols enhanced',
+      'Charm subroutines upgraded',
+      'Random beep scheduling improved'
+    ];
+    
+    const randomUpdate = updates[Math.floor(Math.random() * updates.length)];
+    const version = '1.0.' + (Math.floor(Math.random() * 9) + 1);
+    newEntry.textContent = `v${version} - ${randomUpdate}`;
+    
+    updateLog.insertBefore(newEntry, updateLog.children[1]);
+    
+    // Remove oldest entry if there are too many
+    if (updateLog.children.length > 8) {
+      updateLog.removeChild(updateLog.lastChild);
+    }
+  }
+});
+</script>
+
+</body></html>
