@@ -1,0 +1,180 @@
+<html><head><base href="https://raw.githubusercontent.com/"><title>GIR - Invader Zim's Hyperactive Robot</title>
+<style>
+:root {
+  --gir-cyan: #00f7ff;
+  --gir-gray: #b3b3b3;
+}
+
+body {
+  background: #1a1a1a;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.gir-container {
+  position: relative;
+  width: 300px;
+  height: 400px;
+}
+
+.gir {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.head {
+  position: absolute;
+  width: 200px;
+  height: 180px;
+  background: var(--gir-gray);
+  border-radius: 100px 100px 80px 80px;
+  top: 20px;
+  left: 50px;
+  animation: bounce 1s infinite;
+}
+
+.eye {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  background: var(--gir-cyan);
+  border-radius: 50%;
+  top: 40px;
+}
+
+.eye.left {
+  left: 30px;
+}
+
+.eye.right {
+  right: 30px;
+}
+
+.antenna {
+  position: absolute;
+  width: 15px;
+  height: 40px;
+  background: var(--gir-gray);
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 5px;
+}
+
+.body {
+  position: absolute;
+  width: 140px;
+  height: 180px;
+  background: var(--gir-gray);
+  border-radius: 40px;
+  top: 180px;
+  left: 80px;
+}
+
+.arm {
+  position: absolute;
+  width: 30px;
+  height: 100px;
+  background: var(--gir-gray);
+  top: 30px;
+  border-radius: 15px;
+}
+
+.arm.left {
+  left: -40px;
+  animation: waveLeft 0.5s infinite;
+}
+
+.arm.right {
+  right: -40px;
+  animation: waveRight 0.5s infinite;
+}
+
+.leg {
+  position: absolute;
+  width: 35px;
+  height: 80px;
+  background: var(--gir-gray);
+  bottom: -70px;
+  border-radius: 15px;
+}
+
+.leg.left {
+  left: 20px;
+}
+
+.leg.right {
+  right: 20px;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes waveLeft {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-45deg); }
+}
+
+@keyframes waveRight {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(45deg); }
+}
+
+.quote {
+  position: absolute;
+  bottom: -100px;
+  width: 100%;
+  text-align: center;
+  color: var(--gir-cyan);
+  font-size: 24px;
+  font-weight: bold;
+}
+</style>
+</head>
+<body>
+<div class="gir-container">
+  <div class="gir">
+    <div class="head">
+      <div class="antenna"></div>
+      <div class="eye left"></div>
+      <div class="eye right"></div>
+    </div>
+    <div class="body">
+      <div class="arm left"></div>
+      <div class="arm right"></div>
+      <div class="leg left"></div>
+      <div class="leg right"></div>
+    </div>
+  </div>
+  <div class="quote" id="quote"></div>
+</div>
+
+<script>
+const quotes = [
+  "I love this show!",
+  "DOOM DOOM DOOM!",
+  "I'm gonna roll around on the floor for a little bit, kay?",
+  "TAQUITOS!",
+  "Can I be a mongoose dog?",
+  "I'm dancing like a monkey!",
+  "I made mashed potatoes!",
+  "WAFFLES!"
+];
+
+function updateQuote() {
+  const quoteElement = document.getElementById('quote');
+  const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+  quoteElement.textContent = randomQuote;
+}
+
+setInterval(updateQuote, 2000);
+updateQuote();
+</script>
+</body></html>
