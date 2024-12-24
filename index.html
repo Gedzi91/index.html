@@ -1,0 +1,171 @@
+<html><head><base href="https://interactive-ai.com" target="_blank">
+<style>
+:root {
+  --glow-blue: #00f6ff;
+  --metal-silver: #c0c0c0;
+  --matte-black: #1a1a1a;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #090915;
+  font-family: 'Orbitron', sans-serif;
+}
+
+.suit-container {
+  position: relative;
+  width: 800px;
+  height: 900px;
+}
+
+.base-layer {
+  fill: var(--matte-black);
+  filter: url(#texture);
+}
+
+.nanowire-pattern {
+  stroke: var(--metal-silver);
+  stroke-width: 0.5;
+  fill: none;
+  opacity: 0.3;
+  animation: pulse 3s infinite;
+}
+
+.piezo-panel {
+  fill: rgba(0, 246, 255, 0.1);
+  stroke: var(--glow-blue);
+  stroke-width: 1;
+  filter: url(#glow);
+}
+
+.exo-frame {
+  fill: none;
+  stroke: var(--metal-silver);
+  stroke-width: 3;
+  filter: url(#metallic);
+}
+
+.energy-node {
+  fill: var(--glow-blue);
+  filter: url(#glow);
+  animation: nodeGlow 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+  100% { opacity: 0.3; }
+}
+
+@keyframes nodeGlow {
+  0% { filter: url(#glow); }
+  50% { filter: url(#brightGlow); }
+  100% { filter: url(#glow); }
+}
+
+.circuit-paths {
+  stroke: var(--glow-blue);
+  stroke-width: 0.5;
+  fill: none;
+  opacity: 0.4;
+  stroke-dasharray: 10;
+  animation: flowPath 3s linear infinite;
+}
+
+@keyframes flowPath {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+</style>
+</head>
+<body>
+
+<svg class="suit-container" viewBox="0 0 800 900">
+  <defs>
+    <!-- Filters -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    
+    <filter id="brightGlow">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    
+    <filter id="metallic">
+      <feGaussianBlur stdDeviation="1" result="blur"/>
+      <feSpecularLighting result="spec" surfaceScale="5" specularConstant="1" specularExponent="20">
+        <fePointLight x="0" y="0" z="200"/>
+      </feSpecularLighting>
+      <feComposite in="SourceGraphic" in2="spec" operator="arithmetic" k1="0" k2="1" k3="1" k4="0"/>
+    </filter>
+    
+    <filter id="texture">
+      <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="2" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="5"/>
+    </filter>
+    
+    <!-- Patterns -->
+    <pattern id="nanowireGrid" patternUnits="userSpaceOnUse" width="20" height="20">
+      <path d="M 0 10 L 20 10 M 10 0 L 10 20" class="nanowire-pattern"/>
+    </pattern>
+  </defs>
+
+  <!-- Base Suit Form -->
+  <path class="base-layer" d="M400 50 C300 100 200 300 200 500 C200 700 300 850 400 850 C500 850 600 700 600 500 C600 300 500 100 400 50"/>
+  
+  <!-- Nanowire Layer -->
+  <path fill="url(#nanowireGrid)" d="M400 60 C310 110 210 300 210 500 C210 700 310 840 400 840 C490 840 590 700 590 500 C590 300 490 110 400 60"/>
+
+  <!-- Piezoelectric Panels -->
+  <g class="piezo-panels">
+    <path class="piezo-panel" d="M300 300 L350 320 L340 380 L290 360Z"/>
+    <path class="piezo-panel" d="M500 300 L450 320 L460 380 L510 360Z"/>
+    <path class="piezo-panel" d="M350 500 L400 520 L390 580 L340 560Z"/>
+    <path class="piezo-panel" d="M450 500 L400 520 L410 580 L460 560Z"/>
+  </g>
+
+  <!-- Exoskeleton Frame -->
+  <g class="exo-frame">
+    <path d="M300 200 C250 300 250 400 300 500"/>
+    <path d="M500 200 C550 300 550 400 500 500"/>
+    <path d="M350 600 C400 650 400 650 450 600"/>
+  </g>
+
+  <!-- Energy Nodes -->
+  <g class="energy-nodes">
+    <circle class="energy-node" cx="300" cy="200" r="5"/>
+    <circle class="energy-node" cx="500" cy="200" r="5"/>
+    <circle class="energy-node" cx="300" cy="500" r="5"/>
+    <circle class="energy-node" cx="500" cy="500" r="5"/>
+    <circle class="energy-node" cx="400" cy="300" r="5"/>
+  </g>
+
+  <!-- Circuit Paths -->
+  <g class="circuit-paths">
+    <path d="M300 200 C350 250 450 250 500 200"/>
+    <path d="M300 500 C350 550 450 550 500 500"/>
+    <path d="M400 300 L400 600"/>
+  </g>
+</svg>
+
+<script>
+document.querySelectorAll('.energy-node').forEach(node => {
+  node.addEventListener('mouseover', () => {
+    node.style.transform = 'scale(1.5)';
+    node.style.transition = 'transform 0.3s';
+  });
+  
+  node.addEventListener('mouseout', () => {
+    node.style.transform = 'scale(1)';
+  });
+});
+</script>
+
+</body></html>
