@@ -1,0 +1,665 @@
+<html><head><base href="/">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <style>
+    body { 
+      margin: 0;
+      overflow: hidden;
+      background: #111;
+      height: 100vh;
+      touch-action: none;
+    }
+    
+    #player {
+      width: 40px;
+      height: 40px;
+      position: fixed;
+      pointer-events: none;
+      z-index: 100;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      filter: drop-shadow(0 0 10px rgba(255,255,255,0.5));
+    }
+    
+    #creature {
+      width: 100px;
+      height: 100px;
+      position: fixed;
+      transition: transform 0.2s;
+      filter: drop-shadow(0 0 10px rgba(255,0,0,0.5));
+    }
+    
+    #robotEnemy {
+      width: 100px;
+      height: 100px;
+      position: fixed;
+      transition: transform 0.2s;
+      filter: drop-shadow(0 0 10px rgba(0,255,0,0.5));
+    }
+    
+    .grabbed {
+      animation: shake 0.1s infinite;
+    }
+    
+    @keyframes shake {
+      0% { transform: translate(-2px, -2px) rotate(0deg); }
+      25% { transform: translate(2px, 2px) rotate(2deg); }
+      50% { transform: translate(-2px, 2px) rotate(-2deg); }
+      75% { transform: translate(2px, -2px) rotate(2deg); }
+      100% { transform: translate(-2px, -2px) rotate(0deg); }
+    }
+    
+    @keyframes redPulse {
+      0% { filter: drop-shadow(0 0 10px rgba(255,255,255,0.5)); }
+      50% { filter: drop-shadow(0 0 20px rgba(255,0,0,0.8)); }
+      100% { filter: drop-shadow(0 0 10px rgba(255,255,255,0.5)); }
+    }
+
+    .damage-pulse {
+      animation: redPulse 0.5s ease-out;
+    }
+    
+    #range-indicator {
+      position: fixed;
+      border: 2px solid red;
+      border-radius: 50%;
+      pointer-events: none;
+      opacity: 0.3;
+    }
+    
+    .game-over {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: red;
+      font-family: Arial, sans-serif;
+      font-size: 48px;
+      display: none;
+      text-align: center;
+    }
+
+    #level-complete {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #0066ff;
+      font-family: Arial, sans-serif;
+      font-size: 48px;
+      display: none;
+      text-align: center;
+    }
+
+    #joystick-area {
+      position: fixed;
+      bottom: 50px;
+      left: 50px;
+      width: 150px;
+      height: 150px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      touch-action: none;
+    }
+
+    #joystick {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      touch-action: none;
+    }
+
+    .machine {
+      width: 60px;
+      height: 100px;
+      background: #333;
+      position: fixed;
+      border: 2px solid #666;
+      border-radius: 10px;
+    }
+
+    .fill-bar {
+      width: 100%;
+      height: 0%;
+      background: #0066ff;
+      position: absolute;
+      bottom: 0;
+      transition: height 0.1s linear;
+    }
+
+    .machine-label {
+      position: absolute;
+      width: 100%;
+      text-align: center;
+      color: #fff;
+      font-family: Arial;
+      font-size: 12px;
+      top: -20px;
+    }
+
+    .wall {
+      position: fixed;
+      background: #444;
+      border: 2px solid #555;
+    }
+
+    .health-container {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      display: flex;
+      gap: 10px;
+      z-index: 1000;
+    }
+
+    .health-heart {
+      width: 40px;
+      height: 40px;
+      transition: opacity 0.3s;
+    }
+
+    .health-heart.lost {
+      opacity: 0;
+      transform: scale(1.5) rotate(180deg);
+      transition: all 0.5s;
+    }
+  </style>
+  <script src="https://unpkg.com/@websim/socket@latest/websim-socket.js"></script>
+</head>
+<body>
+  <audio id="detectionSound" src="dandy's-world-(caught-sound)-made-with-Voicemod.mp3"></audio>
+  <img id="player" src="Pebble_Render.webp" alt="Player">
+  <img id="creature" src="image_downloader_1732751166782.png" alt="Creature">
+  <img id="robotEnemy" src="image_downloader_1731034988730.jpg.png" alt="Robot Enemy" style="display: none">
+  <div id="range-indicator"></div>
+  <div class="game-over">GAME OVER!</div>
+  <div id="level-complete">LEVEL COMPLETE!</div>
+  <div id="joystick-area">
+    <div id="joystick"></div>
+  </div>
+  <div class="health-container">
+    <img src="real heartcore.png" class="health-heart" alt="Health Heart">
+    <img src="real heartcore.png" class="health-heart" alt="Health Heart">
+    <img src="real heartcore.png" class="health-heart" alt="Health Heart">
+  </div>
+
+  <script>
+    const room = new WebsimSocket();
+
+    const player = document.getElementById('player');
+    const creature = document.getElementById('creature');
+    const robotEnemy = document.getElementById('robotEnemy');
+    const rangeIndicator = document.getElementById('range-indicator');
+    const gameOver = document.querySelector('.game-over');
+    const levelComplete = document.getElementById('level-complete');
+    const joystickArea = document.getElementById('joystick-area');
+    const joystick = document.getElementById('joystick');
+    const detectionSound = document.getElementById('detectionSound');
+    
+    let players = {};
+    const hearts = Array.from(document.querySelectorAll('.health-heart'));
+    let health = 3;
+    let invulnerable = false;
+
+    let currentFloor = 1;
+    let robotActive = false;
+    let robotX = 0;
+    let robotY = 0;
+    let soundPlaying = false;
+
+    let playerX = window.innerWidth / 2;
+    let playerY = window.innerHeight / 2;
+    let creatureX = 100;
+    let creatureY = 100;
+    let isGameOver = false;
+    let isTransitioning = false;
+    let joystickActive = false;
+    let joystickX = 0;
+    let joystickY = 0;
+    
+    const CREATURE_SPEED = 3;
+    const DETECTION_RANGE = 200;
+    const GRAB_RANGE = 50;
+    const PLAYER_SPEED = 5;
+    const MACHINE_FILL_TIME = 10000;
+    const FILL_RANGE = 60;
+
+    const walls = [];
+    const wallPositions = [
+      { x: 300, y: 200, width: 200, height: 20 },
+      { x: 600, y: 400, width: 20, height: 200 },
+      { x: 200, y: 500, width: 200, height: 20 },
+      { x: 800, y: 200, width: 20, height: 200 }
+    ];
+
+    wallPositions.forEach(pos => {
+      const wall = document.createElement('div');
+      wall.className = 'wall';
+      wall.style.left = pos.x + 'px';
+      wall.style.top = pos.y + 'px';
+      wall.style.width = pos.width + 'px';
+      wall.style.height = pos.height + 'px';
+      document.body.appendChild(wall);
+      walls.push({
+        element: wall,
+        x: pos.x,
+        y: pos.y,
+        width: pos.width,
+        height: pos.height
+      });
+    });
+
+    function lineIntersectsWall(x1, y1, x2, y2, wall) {
+      const left = wall.x;
+      const right = wall.x + wall.width;
+      const top = wall.y;
+      const bottom = wall.y + wall.height;
+
+      function ccw(A, B, C) {
+        return (C.y - A.y) * (B.x - A.x) > (B.y - A.y) * (C.x - A.x);
+      }
+
+      const lines = [
+        { start: {x: left, y: top}, end: {x: right, y: top} },
+        { start: {x: right, y: top}, end: {x: right, y: bottom} },
+        { start: {x: right, y: bottom}, end: {x: left, y: bottom} },
+        { start: {x: left, y: bottom}, end: {x: left, y: top} }
+      ];
+
+      const point1 = {x: x1, y: y1};
+      const point2 = {x: x2, y: y2};
+
+      for (let line of lines) {
+        if ((ccw(point1, line.start, line.end) != ccw(point2, line.start, line.end)) &&
+            ccw(point1, point2, line.start) != ccw(point1, point2, line.end)) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function moveCreature() {
+      if (isGameOver || isTransitioning) return;
+      
+      const dx = playerX - creatureX;
+      const dy = playerY - creatureY;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      
+      rangeIndicator.style.left = (creatureX - DETECTION_RANGE + 50) + 'px';
+      rangeIndicator.style.top = (creatureY - DETECTION_RANGE + 50) + 'px';
+      
+      let playerDetected = false;
+
+      if (distance < DETECTION_RANGE) {
+        let lineOfSightBlocked = false;
+        for (let wall of walls) {
+          if (lineIntersectsWall(creatureX + 50, creatureY + 50, playerX, playerY, wall)) {
+            lineOfSightBlocked = true;
+            break;
+          }
+        }
+
+        if (!lineOfSightBlocked) {
+          playerDetected = true;
+          const angle = Math.atan2(dy, dx);
+          creatureX += Math.cos(angle) * CREATURE_SPEED;
+          creatureY += Math.sin(angle) * CREATURE_SPEED;
+          
+          const degrees = (angle * 180 / Math.PI) + 90;
+          creature.style.transform = `rotate(${degrees}deg)`;
+          
+          if (distance < GRAB_RANGE && !invulnerable) {
+            loseHealth();
+          }
+        }
+      }
+
+      if (robotActive) {
+        const robotDx = playerX - robotX;
+        const robotDy = playerY - robotY;
+        const robotDistance = Math.sqrt(robotDx * robotDx + robotDy * robotDy);
+
+        if (robotDistance < DETECTION_RANGE) {
+          let robotLineOfSightBlocked = false;
+          for (let wall of walls) {
+            if (lineIntersectsWall(robotX + 50, robotY + 50, playerX, playerY, wall)) {
+              robotLineOfSightBlocked = true;
+              break;
+            }
+          }
+
+          if (!robotLineOfSightBlocked) {
+            playerDetected = true;
+            const angle = Math.atan2(robotDy, robotDx);
+            robotX += Math.cos(angle) * CREATURE_SPEED;
+            robotY += Math.sin(angle) * CREATURE_SPEED;
+            
+            const degrees = (angle * 180 / Math.PI) + 90;
+            robotEnemy.style.transform = `rotate(${degrees}deg)`;
+            
+            if (robotDistance < GRAB_RANGE && !invulnerable) {
+              loseHealth();
+            }
+          }
+        }
+        
+        robotEnemy.style.left = robotX + 'px';
+        robotEnemy.style.top = robotY + 'px';
+      }
+
+      if (playerDetected && !soundPlaying) {
+        detectionSound.play();
+        soundPlaying = true;
+      } else if (!playerDetected && soundPlaying) {
+        detectionSound.pause();
+        detectionSound.currentTime = 0;
+        soundPlaying = false;
+      }
+      
+      creature.style.left = creatureX + 'px';
+      creature.style.top = creatureY + 'px';
+    }
+
+    const machines = [];
+    const machinePositions = [
+      { x: 100, y: 100 },
+      { x: window.innerWidth - 160, y: 100 },
+      { x: 100, y: window.innerHeight - 200 },
+      { x: window.innerWidth - 160, y: window.innerHeight - 200 }
+    ];
+
+    machinePositions.forEach((pos, index) => {
+      const machine = document.createElement('div');
+      machine.className = 'machine';
+      machine.style.left = pos.x + 'px';
+      machine.style.top = pos.y + 'px';
+      
+      const fillBar = document.createElement('div');
+      fillBar.className = 'fill-bar';
+      
+      const label = document.createElement('div');
+      label.className = 'machine-label';
+      label.textContent = `Machine ${index + 1}`;
+      
+      machine.appendChild(fillBar);
+      machine.appendChild(label);
+      document.body.appendChild(machine);
+      
+      machines.push({
+        element: machine,
+        fillBar: fillBar,
+        progress: 0,
+        x: pos.x,
+        y: pos.y,
+        isComplete: false
+      });
+    });
+
+    creature.style.left = creatureX + 'px';
+    creature.style.top = creatureY + 'px';
+    
+    rangeIndicator.style.width = (DETECTION_RANGE * 2) + 'px';
+    rangeIndicator.style.height = (DETECTION_RANGE * 2) + 'px';
+    
+    function handleJoystickStart(e) {
+      joystickActive = true;
+      updateJoystickPosition(e);
+    }
+
+    function handleJoystickMove(e) {
+      if (joystickActive) {
+        updateJoystickPosition(e);
+      }
+    }
+
+    function handleJoystickEnd() {
+      joystickActive = false;
+      joystick.style.transform = 'translate(-50%, -50%)';
+      joystickX = 0;
+      joystickY = 0;
+    }
+
+    function updateJoystickPosition(e) {
+      const touch = e.touches ? e.touches[0] : e;
+      const rect = joystickArea.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      
+      let dx = touch.clientX - centerX;
+      let dy = touch.clientY - centerY;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      const maxDistance = rect.width / 2 - joystick.offsetWidth / 2;
+
+      if (distance > maxDistance) {
+        const angle = Math.atan2(dy, dx);
+        dx = Math.cos(angle) * maxDistance;
+        dy = Math.sin(angle) * maxDistance;
+      }
+
+      joystick.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+      joystickX = dx / maxDistance;
+      joystickY = dy / maxDistance;
+    }
+    
+    function updatePlayerPosition() {
+      if (!isGameOver && !isTransitioning) {
+        playerX += joystickX * PLAYER_SPEED;
+        playerY += joystickY * PLAYER_SPEED;
+
+        playerX = Math.max(20, Math.min(window.innerWidth - 20, playerX));
+        playerY = Math.max(20, Math.min(window.innerHeight - 20, playerY));
+
+        player.style.left = playerX + 'px';
+        player.style.top = playerY + 'px';
+
+        // Send position update
+        room.send({
+          type: 'playerMove',
+          x: playerX,
+          y: playerY
+        });
+
+        updateMachines();
+      }
+    }
+
+    function createPlayerElement(clientId, username) {
+      const playerEl = document.createElement('img');
+      playerEl.src = 'Pebble_Render.webp';
+      playerEl.style.width = '40px';
+      playerEl.style.height = '40px';
+      playerEl.style.position = 'fixed';
+      playerEl.style.pointerEvents = 'none';
+      playerEl.style.zIndex = '100';
+      playerEl.style.filter = 'drop-shadow(0 0 10px rgba(255,255,255,0.5))';
+      document.body.appendChild(playerEl);
+      return playerEl;
+    }
+
+    // Add websocket message handling
+    room.onmessage = (event) => {
+      const data = event.data;
+      
+      switch(data.type) {
+        case 'connected':
+          if (data.clientId !== room.party.client.id) {
+            players[data.clientId] = {
+              element: createPlayerElement(data.clientId, data.username),
+              x: window.innerWidth / 2,
+              y: window.innerHeight / 2
+            };
+          }
+          break;
+          
+        case 'disconnected':
+          if (players[data.clientId]) {
+            players[data.clientId].element.remove();
+            delete players[data.clientId];
+          }
+          break;
+          
+        case 'playerMove':
+          if (players[data.clientId]) {
+            players[data.clientId].x = data.x;
+            players[data.clientId].y = data.y;
+            players[data.clientId].element.style.left = data.x + 'px';
+            players[data.clientId].element.style.top = data.y + 'px';
+          }
+          break;
+          
+        case 'machineUpdate':
+          const machine = machines[data.machineIndex];
+          if (machine && !machine.isComplete) {
+            machine.progress = data.progress;
+            machine.isComplete = data.isComplete;
+            machine.fillBar.style.height = machine.progress + '%';
+          }
+          break;
+      }
+    };
+
+    // Modify updateMachines() to sync machine state
+    function updateMachines() {
+      let completedMachines = 0;
+      
+      machines.forEach((machine, index) => {
+        if (!machine.isComplete) {
+          const dx = playerX - (machine.x + 30);
+          const dy = playerY - (machine.y + 50);
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          
+          if (distance < FILL_RANGE) {
+            machine.progress += 16 / MACHINE_FILL_TIME * 100;
+            if (machine.progress >= 100) {
+              machine.progress = 100;
+              machine.isComplete = true;
+            }
+            machine.fillBar.style.height = machine.progress + '%';
+            
+            // Send machine update
+            room.send({
+              type: 'machineUpdate',
+              machineIndex: index,
+              progress: machine.progress,
+              isComplete: machine.isComplete
+            });
+          }
+        }
+        if (machine.isComplete) {
+          completedMachines++;
+        }
+      });
+
+      if (completedMachines === 4 && !isTransitioning) {
+        isTransitioning = true;
+        levelComplete.style.display = 'block';
+        setTimeout(() => {
+          nextLevel();
+        }, 2000);
+      }
+    }
+
+    // Initialize players for existing peers
+    for (const clientId in room.party.peers) {
+      if (clientId !== room.party.client.id) {
+        players[clientId] = {
+          element: createPlayerElement(clientId, room.party.peers[clientId].username),
+          x: window.innerWidth / 2,
+          y: window.innerHeight / 2
+        };
+      }
+    }
+
+    function loseHealth() {
+      if (invulnerable) return;
+      
+      health--;
+      hearts[health].classList.add('lost');
+      
+      player.classList.add('damage-pulse');
+      setTimeout(() => {
+        player.classList.remove('damage-pulse');
+      }, 500);
+      
+      if (health <= 0) {
+        gameOver.style.display = 'block';
+        isGameOver = true;
+        creature.classList.add('grabbed');
+      } else {
+        invulnerable = true;
+        player.style.opacity = '0.5';
+        
+        setTimeout(() => {
+          invulnerable = false;
+          player.style.opacity = '1';
+        }, 2000);
+      }
+    }
+
+    function nextLevel() {
+      levelComplete.style.display = 'none';
+      currentFloor++;
+      
+      if (currentFloor % 3 === 0) {
+        robotActive = true;
+        robotEnemy.style.display = 'block';
+        robotX = Math.random() * (window.innerWidth - 100);
+        robotY = Math.random() * (window.innerHeight - 100);
+      }
+      
+      machines.forEach(machine => {
+        machine.progress = 0;
+        machine.isComplete = false;
+        machine.fillBar.style.height = '0%';
+      });
+      
+      health = 3;
+      hearts.forEach(heart => heart.classList.remove('lost'));
+      
+      creatureX = Math.random() * (window.innerWidth - 100);
+      creatureY = Math.random() * (window.innerHeight - 100);
+      isTransitioning = false;
+    }
+    
+    joystickArea.addEventListener('touchstart', handleJoystickStart);
+    joystickArea.addEventListener('touchmove', handleJoystickMove);
+    joystickArea.addEventListener('touchend', handleJoystickEnd);
+    joystickArea.addEventListener('touchcancel', handleJoystickEnd);
+
+    setInterval(() => {
+      updatePlayerPosition();
+      moveCreature();
+    }, 16);
+    
+    document.addEventListener('touchstart', () => {
+      if (isGameOver) {
+        isGameOver = false;
+        gameOver.style.display = 'none';
+        creature.classList.remove('grabbed');
+        currentFloor = 1;
+        robotActive = false;
+        robotEnemy.style.display = 'none';
+        
+        creatureX = Math.random() * (window.innerWidth - 100);
+        creatureY = Math.random() * (window.innerHeight - 100);
+        
+        health = 3;
+        hearts.forEach(heart => heart.classList.remove('lost'));
+        player.style.opacity = '1';
+        invulnerable = false;
+        
+        machines.forEach(machine => {
+          machine.progress = 0;
+          machine.isComplete = false;
+          machine.fillBar.style.height = '0%';
+        });
+      }
+    });
+  </script>
+</body></html>
