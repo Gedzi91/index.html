@@ -1,0 +1,721 @@
+<html><head><base href="https://fishysnuggles.example.com/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chatty Fish Snuggle Hunt</title>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        font-family: 'Comic Sans MS', cursive, sans-serif;
+    }
+    #game-container {
+        width: 100vw;
+        height: 100vh;
+        position: relative;
+        background-image: url('https://static.vecteezy.com/system/resources/previews/016/559/167/non_2x/underwater-scene-ocean-coral-reef-underwater-sea-world-under-water-background-free-photo.jpg');
+        background-size: cover;
+        background-position: center;
+        overflow: hidden;
+    }
+    .shark {
+        position: absolute;
+        width: 300px;
+        height: auto;
+        pointer-events: none;
+        will-change: transform;
+        transition: transform 0.3s ease-out;
+        filter: brightness(1.1);
+    }
+    .shark.selected {
+        filter: brightness(1.3) drop-shadow(0 0 10px #fff);
+    }
+    .fish {
+        position: absolute;
+        width: 60px;
+        height: auto;
+        will-change: transform;
+        transition: transform 0.2s ease-out, filter 0.3s ease-out;
+    }
+    .heart {
+        position: absolute;
+        color: pink;
+        font-size: 24px;
+        pointer-events: none;
+        opacity: 0;
+    }
+    .speech-bubble {
+        position: absolute;
+        background: white;
+        border-radius: 20px;
+        padding: 10px 15px;
+        max-width: 200px;
+        min-width: 80px;
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+        font-size: 14px;
+        pointer-events: none;
+        opacity: 0;
+        transform-origin: bottom center;
+        z-index: 1000;
+    }
+    .speech-bubble::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 10px 10px 0;
+        border-style: solid;
+        border-color: white transparent transparent;
+    }
+    .shark-bubble {
+        background: #e6f7ff;
+    }
+    .fish-bubble {
+        background: #fff5e6;
+    }
+    .shark-bubble::after {
+        border-top-color: #e6f7ff;
+    }
+    .fish-bubble::after {
+        border-top-color: #fff5e6;
+    }
+    .waldo-fish {
+        filter: brightness(1.2) saturate(1.2);
+        cursor: pointer;
+        transform-origin: center;
+    }
+    .waldo-fish:hover {
+        animation: wiggle 0.5s ease-in-out infinite;
+    }
+    @keyframes wiggle {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(-5deg); }
+        75% { transform: rotate(5deg); }
+    }
+    .philosophy-bubble {
+        background: #f0f0f0 !important;
+        border: 2px solid #4a4a4a;
+        font-family: 'Georgia', serif;
+        font-style: italic;
+        max-width: 300px !important;
+        padding: 15px 20px;
+    }
+    .philosophy-bubble::after {
+        border-top-color: #f0f0f0 !important;
+    }
+</style>
+</head>
+<body>
+<div id="game-container">
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+<script>
+const gameContainer = document.getElementById('game-container');
+
+let selectedShark = null;
+const schools = [];
+const sharks = [];
+const SONGS = [
+    "A playful song about fish heads",
+    "A jazzy tune about a shark",
+    "A song about shark patrols",
+    "A whimsical fishing tale"
+];
+
+const fishImages = [
+    "https://static.vecteezy.com/system/resources/previews/027/125/688/original/nemo-sea-fish-isolated-on-transparent-background-aquarium-ornamental-fish-generative-ai-png.png",
+    "https://pngimg.com/d/fish_PNG25124.png",
+    "https://static.vecteezy.com/system/resources/previews/024/509/647/original/tropical-fish-isolated-on-transparent-background-created-with-generative-ai-png.png",
+    "https://pngimg.com/d/fish_PNG25118.png"
+];
+
+const sharkPhrases = [
+    "Wait, you want to snuggle?",
+    "Aww, you're so sweet!",
+    "Group hug time!",
+    "Anyone want to give belly rubs?", 
+    "Belly rubs please! *wiggles*",
+    "*happy shark noises*",
+    "That tickles! Keep going!",
+    "I love belly rubs!",
+    "You're all the best!",
+    "Purrrrrrr... yes right there!",
+    "I'm not scary, I promise!",
+    "*gentle shark wiggling*",
+    "Friends! Come snuggle!",
+    "Who wants shark cuddles?",
+    "I'm just a big water puppy!",
+    "Snuggles make me so happy!",
+    "D'aww, you're all so cute!",
+    "Best fish friends forever!",
+    "My heart is full of joy!",
+    "You make me feel so loved!",
+    "Do fish dream of aquatic sheep?",
+    "Is the ocean half full or half empty?",
+    "We're all just swimming in the great cosmic soup...",
+    "What if this whole reef is just a simulation?",
+    "Does anyone else ponder the meaning of fish life?",
+    "Are we not all just waves in the universal current?",
+    "To swim, or not to swim - that is the question!",
+    "I think, therefore I shark!",
+    "Is beauty objective, or is it in the eye of the fish-holder?",
+    "What is the sound of one fin clapping?",
+    "Can one ever truly swim in the same water twice?",
+    "Perhaps the real treasure was the schools we joined along the way",
+    "Does free will exist under the sea?",
+    "What lies beyond the great barrier reef?",
+    "If a shark swims alone, does it make a ripple?"
+];
+
+const fishPhrases = [
+    "Come here, sharky!",
+    "Let's be friends!",
+    "Snuggle time!",
+    "You're so huggable!",
+    "We love you, shark!",
+    "Chase and cuddle!",
+    "Best shark ever!",
+    "Friendship squad!",
+    "Snuggle patrol incoming!",
+    "You're our favorite shark!",
+    "Group hug formation!",
+    "Shark spotted! Time for love!",
+    "Who's a good shark? You are!",
+    "Ready for cuddles!",
+    "Shark friend! Shark friend!",
+    "Let's make shark happy!",
+    "*excited fish noises*",
+    "Friendship dance party!",
+    "Time for shark appreciation!",
+    "Cuddle squad, assemble!",
+    "Perhaps the real snuggles were the thoughts we shared!",
+    "Do sharks dream of electric fish?",
+    "I swim, therefore I am!",
+    "Is not all of life but one great school?",
+    "What if we're all just living in a giant fishbowl?",
+    "The unexamined swim is not worth swimming!",
+    "Are we not all children of the great ocean?",
+    "When is a coral reef not a coral reef?",
+    "Does the ocean think about us too?",
+    "If a seahorse had hands, would it still be a seahorse?",
+    "Is happiness just swimming with purpose?",
+    "What lies beyond the surface ripples?",
+    "Can any fish truly know another fish's mind?",
+    "Are we not all just seeking our own current?",
+    "The wise fish knows that it knows nothing!"
+];
+
+const philosophicalPhrases = [
+    "Emerson says 'Nature is the symbol of spirit' - but what does the ocean symbolize?",
+    "Is the shark truly beyond good and evil, as Nietzsche suggests?",
+    "Emerson speaks of self-reliance, but aren't we stronger as a school?",
+    "The eternal return of the tide - Nietzsche would approve!",
+    "Per Emerson: 'Every natural fact is a symbol of some spiritual fact.' What do we symbolize?",
+    "The Überfish must create their own values!",
+    "Does Emerson's transparent eyeball work underwater?",
+    "The will to power vs. transcendentalist unity - discuss!",
+    "Nietzsche never learned to swim - how tragic!",
+    "Emerson would love our spontaneous gathering for wisdom-sharing",
+    "Is our school a herd, as Nietzsche would say?",
+    "Individual divinity or will to power - why not both?",
+    "The ocean teaches us what Emerson meant by 'conscious self-reliance'",
+    "Would Nietzsche approve of our coffee discussions?",
+    "Emerson said 'adopt the pace of nature' - we live it!",
+    "Are we dancing stars born of chaotic seas?"
+];
+
+function getRandomSchoolSize() {
+    return Math.floor(Math.random() * (33 - 10 + 1)) + 10;
+}
+
+function createShark() {
+    const newShark = document.createElement('img');
+    newShark.className = 'shark';
+    newShark.src = "https://pngimg.com/d/shark_PNG18821.png";
+    newShark.alt = "Friendly shark with gray body";
+    newShark.style.width = "300px";
+    newShark.style.transform = `translate(${Math.random() * gameContainer.clientWidth}px, ${Math.random() * gameContainer.clientHeight}px)`;
+    newShark.style.pointerEvents = 'auto';
+    gameContainer.appendChild(newShark);
+    
+    newShark.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (selectedShark) {
+            selectedShark.element.classList.remove('selected');
+        }
+        const sharkObj = sharks.find(s => s.element === newShark);
+        selectedShark = sharkObj;
+        newShark.classList.add('selected');
+    });
+    
+    return {
+        element: newShark,
+        x: Math.random() * gameContainer.clientWidth,
+        y: Math.random() * gameContainer.clientHeight,
+        direction: Math.random() * Math.PI * 2,
+        wantsBellyRubs: false,
+        isGettingBellyRubs: false,
+        isBeingSnuggled: false,
+        lastBellyRubRequest: 0,
+        bellyRubStartTime: 0,
+        isInDiscussion: false
+    };
+}
+
+function createFishSchool() {
+    const schoolSize = getRandomSchoolSize();
+    const school = {
+        x: Math.random() * gameContainer.clientWidth,
+        y: Math.random() * gameContainer.clientHeight,
+        direction: Math.random() * Math.PI * 2,
+        speed: Math.random() * 2 + 1.5,
+        fishes: [],
+        isSnuggling: false,
+        targetShark: null,
+        isInDiscussion: false
+    };
+
+    const a = 250;
+    const b = 150;
+
+    for (let i = 0; i < schoolSize; i++) {
+        const r = Math.sqrt(Math.random());
+        const angle = Math.random() * 2 * Math.PI;
+        const fish = document.createElement('img');
+        fish.className = 'fish';
+        fish.src = fishImages[Math.floor(Math.random() * fishImages.length)];
+        fish.alt = "Enthusiastic snuggling fish";
+        fish.style.transform = `translate(${school.x}px, ${school.y}px)`;
+        gameContainer.appendChild(fish);
+        school.fishes.push({
+            element: fish,
+            relativeX: a * r * Math.cos(angle) + (Math.random() - 0.5) * 100,
+            relativeY: b * r * Math.sin(angle) + (Math.random() - 0.5) * 100,
+            isSnuggling: false,
+            isWaldo: false
+        });
+    }
+
+    schools.push(school);
+}
+
+function arrangeInGrid(school) {
+    const gridSize = Math.ceil(Math.sqrt(school.fishes.length));
+    const spacing = 50;
+    const startX = (gameContainer.clientWidth - gridSize * spacing) / 2;
+    const startY = (gameContainer.clientHeight - gridSize * spacing) / 2;
+    
+    school.fishes.forEach((fish, index) => {
+        const row = Math.floor(index / gridSize);
+        const col = index % gridSize;
+        fish.originalX = fish.relativeX;
+        fish.originalY = fish.relativeY;
+        fish.relativeX = startX + col * spacing - school.x;
+        fish.relativeY = startY + row * spacing - school.y;
+    });
+
+    const songIndex = Math.floor(Math.random() * SONGS.length);
+    showSpeechBubble(school.x, school.y, `♪ ${SONGS[songIndex]} ♪`, false);
+
+    setTimeout(() => {
+        school.fishes.forEach(fish => {
+            fish.relativeX = fish.originalX;
+            fish.relativeY = fish.originalY;
+        });
+    }, 5000);
+}
+
+function createSpeechBubble(text, isShark = false) {
+    const bubble = document.createElement('div');
+    bubble.className = `speech-bubble ${isShark ? 'shark-bubble' : 'fish-bubble'}`;
+    bubble.textContent = text;
+    gameContainer.appendChild(bubble);
+    return bubble;
+}
+
+function showSpeechBubble(x, y, text, isShark = false) {
+    const bubble = createSpeechBubble(text, isShark);
+    bubble.style.left = `${x}px`;
+    bubble.style.top = `${y - 80}px`;
+
+    if (philosophicalPhrases.includes(text)) {
+        bubble.classList.add('philosophy-bubble');
+    }
+
+    gsap.to(bubble, {
+        duration: 0.3,
+        opacity: 1,
+        scale: 1,
+        ease: "back.out(1.7)",
+        onComplete: () => {
+            setTimeout(() => {
+                gsap.to(bubble, {
+                    duration: 0.2,
+                    opacity: 0,
+                    scale: 0.8,
+                    onComplete: () => {
+                        gameContainer.removeChild(bubble);
+                    }
+                });
+            }, 2000);
+        }
+    });
+}
+
+function createSnuggleEffect(x, y) {
+    const heart = document.createElement('div');
+    heart.className = 'heart';
+    heart.innerHTML = '❤';
+    heart.style.left = `${x}px`;
+    heart.style.top = `${y}px`;
+    gameContainer.appendChild(heart);
+
+    if (Math.random() < 0.3) {
+        const randomShark = sharks[Math.floor(Math.random() * sharks.length)];
+        const sharkRect = randomShark.element.getBoundingClientRect();
+        if (Math.random() < 0.5) {
+            showSpeechBubble(
+                sharkRect.left + sharkRect.width/2,
+                sharkRect.top,
+                sharkPhrases[Math.floor(Math.random() * sharkPhrases.length)],
+                true
+            );
+        } else {
+            showSpeechBubble(
+                x,
+                y,
+                fishPhrases[Math.floor(Math.random() * fishPhrases.length)],
+                false
+            );
+        }
+    }
+
+    gsap.to(heart, {
+        duration: 1,
+        y: '-=50',
+        opacity: 1,
+        scale: 1.5,
+        ease: "power1.out",
+        onComplete: () => {
+            gsap.to(heart, {
+                duration: 0.5,
+                opacity: 0,
+                scale: 0.5,
+                onComplete: () => {
+                    gameContainer.removeChild(heart);
+                }
+            });
+        }
+    });
+}
+
+function updateFishPositions() {
+    schools.forEach(school => {
+        
+        const margin = 100; 
+        const repulsionStrength = 2;
+        
+        if (school.x < margin) {
+            school.direction = Math.atan2(Math.sin(school.direction), Math.abs(Math.cos(school.direction)));
+            school.x += repulsionStrength;
+        } else if (school.x > gameContainer.clientWidth - margin) {
+            school.direction = Math.atan2(Math.sin(school.direction), -Math.abs(Math.cos(school.direction)));
+            school.x -= repulsionStrength;
+        }
+        
+        if (school.y < margin) {
+            school.direction = Math.atan2(Math.abs(Math.sin(school.direction)), Math.cos(school.direction));
+            school.y += repulsionStrength;
+        } else if (school.y > gameContainer.clientHeight - margin) {
+            school.direction = Math.atan2(-Math.abs(Math.sin(school.direction)), Math.cos(school.direction));
+            school.y -= repulsionStrength;
+        }
+
+        if (!school.targetShark) {
+            let closestShark = null;
+            let closestDistance = Infinity;
+
+            sharks.forEach(shark => {
+                if (shark.wantsBellyRubs && !shark.isGettingBellyRubs && !shark.isBeingSnuggled) {
+                    const dx = shark.x - school.x;
+                    const dy = shark.y - school.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < closestDistance) {
+                        closestDistance = distance;
+                        closestShark = shark;
+                    }
+                }
+            });
+
+            if (closestShark) {
+                school.targetShark = closestShark;
+                closestShark.isBeingSnuggled = true;
+            }
+        }
+
+        if (school.targetShark) {
+            const dx = school.targetShark.x - school.x;
+            const dy = school.targetShark.y - school.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < 100 && !school.targetShark.isGettingBellyRubs) {
+                school.targetShark.isGettingBellyRubs = true;
+                school.targetShark.wantsBellyRubs = false;
+                school.targetShark.bellyRubStartTime = Date.now(); 
+                createSnuggleEffect(school.x, school.y);
+
+                setTimeout(() => {
+                    school.targetShark.isGettingBellyRubs = false;
+                    school.targetShark.isBeingSnuggled = false;
+                    school.targetShark = null;
+                }, 5000);
+            } else if (distance >= 100 && !school.targetShark.isGettingBellyRubs) {
+                school.targetShark.isBeingSnuggled = false;
+                school.targetShark = null;
+            }
+
+            school.direction = Math.atan2(dy, dx);
+            school.x += Math.cos(school.direction) * school.speed;
+            school.y += Math.sin(school.direction) * school.speed;
+        } else {
+            school.direction += (Math.random() - 0.5) * 0.1;
+            school.x += Math.cos(school.direction) * school.speed;
+            school.y += Math.sin(school.direction) * school.speed;
+        }
+
+        school.fishes.forEach(fish => {
+            const fishX = school.x + fish.relativeX;
+            const fishY = school.y + fish.relativeY;
+            fish.element.style.transform = `translate(${fishX}px, ${fishY}px) rotate(${school.direction}rad)`;
+        });
+    });
+
+    requestAnimationFrame(updateFishPositions);
+}
+
+function updateSharkPositions() {
+    const now = Date.now();
+    sharks.forEach(shark => {
+        // Selected shark movement stays the same
+        if (shark === selectedShark) {
+            const currentTransform = shark.element.style.transform || '';
+            const currentX = parseFloat(currentTransform.split('translate(')[1]) || shark.x;
+            shark.element.style.transform = `translate(${shark.x}px, ${shark.y}px) scaleX(${shark.x > currentX ? -1 : 1})`;
+            return;
+        }
+
+        // Check for belly rub requests
+        if (!shark.wantsBellyRubs && !shark.isGettingBellyRubs && 
+            now - shark.lastBellyRubRequest > 30000 && 
+            Math.random() < 0.002) {
+            shark.wantsBellyRubs = true;
+            shark.lastBellyRubRequest = now;
+            const sharkRect = shark.element.getBoundingClientRect();
+            showSpeechBubble(
+                sharkRect.left + sharkRect.width/2,
+                sharkRect.top,
+                "Anyone want to give belly rubs? *wiggles*",
+                true
+            );
+        }
+
+        // Only stop moving when getting belly rubs
+        if (shark.isGettingBellyRubs) {
+            const wobble = Math.sin(now / 200) * 10;
+            shark.element.style.transform = `translate(${shark.x}px, ${shark.y}px) rotate(180deg) translateY(${wobble}px)`;
+
+            if (Math.random() < 0.03) {
+                const sharkRect = shark.element.getBoundingClientRect();
+                showSpeechBubble(
+                    sharkRect.left + sharkRect.width/2,
+                    sharkRect.top,
+                    "Purrrrrrr... *happy shark*",
+                    true
+                );
+            }
+        } else {
+            // Always move when not getting belly rubs
+            const margin = 150;
+            
+            if (shark.x < margin || shark.x > gameContainer.clientWidth - margin ||
+                shark.y < margin || shark.y > gameContainer.clientHeight - margin) {
+                
+                const centerX = gameContainer.clientWidth / 2;
+                const centerY = gameContainer.clientHeight / 2;
+                const angleToCenter = Math.atan2(centerY - shark.y, centerX - shark.x);
+                const turnSpeed = 0.1;
+                shark.direction = shark.direction * (1 - turnSpeed) + angleToCenter * turnSpeed;
+                shark.direction += 0.05;  // Add slight curve to movement
+            } else {
+                shark.direction += (Math.random() - 0.5) * 0.1;
+            }
+
+            // Increase movement speed
+            shark.x += Math.cos(shark.direction) * 1;
+            shark.y += Math.sin(shark.direction) * 1;
+
+            // Enforce boundaries with larger margins
+            shark.x = Math.max(100, Math.min(shark.x, gameContainer.clientWidth - 400));
+            shark.y = Math.max(100, Math.min(shark.y, gameContainer.clientHeight - 400));
+
+            shark.element.style.transform = `translate(${shark.x}px, ${shark.y}px) scaleX(${Math.cos(shark.direction) > 0 ? -1 : 1})`;
+        }
+    });
+    requestAnimationFrame(updateSharkPositions);
+}
+
+function moveShark(e) {
+    if (selectedShark) {
+        const rect = gameContainer.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        selectedShark.x = Math.max(150, Math.min(x, gameContainer.clientWidth - selectedShark.element.clientWidth / 2 - 150));
+        selectedShark.y = Math.max(150, Math.min(y, gameContainer.clientHeight - selectedShark.element.clientHeight / 2 - 150));
+    }
+}
+
+gameContainer.addEventListener('click', (e) => {
+    if (e.target === gameContainer) {
+        if (selectedShark) {
+            selectedShark.element.classList.remove('selected');
+            selectedShark = null;
+        }
+    }
+});
+
+for (let i = 0; i < 3; i++) {
+    createFishSchool();
+}
+
+for (let i = 0; i < 2; i++) {
+    sharks.push(createShark());
+}
+
+setInterval(() => {
+    if (Math.random() < 0.5 && sharks.length > 0) {
+        const randomShark = sharks[Math.floor(Math.random() * sharks.length)];
+        const sharkRect = randomShark.element.getBoundingClientRect();
+        showSpeechBubble(
+            sharkRect.left + sharkRect.width/2,
+            sharkRect.top,
+            sharkPhrases[Math.floor(Math.random() * sharkPhrases.length)],
+            true
+        );
+    }
+}, 1000);
+
+setInterval(() => {
+    if (Math.random() < 0.5 && schools.length > 0) {
+        const randomSchool = schools[Math.floor(Math.random() * schools.length)];
+        if (randomSchool && !randomSchool.isSnuggling) {
+            showSpeechBubble(
+                randomSchool.x,
+                randomSchool.y,
+                fishPhrases[Math.floor(Math.random() * fishPhrases.length)],
+                false
+            );
+        }
+    }
+}, 1000);
+
+setInterval(() => {
+    if (schools.length < 4) {
+        createFishSchool();
+    }
+}, 5000);
+
+setInterval(() => {
+    if (Math.random() < 0.01) {
+        const randomSchool = schools[Math.floor(Math.random() * schools.length)];
+        if (randomSchool) {
+            const randomFish = randomSchool.fishes[Math.floor(Math.random() * randomSchool.fishes.length)];
+            if (randomFish && !randomFish.isWaldo) {
+                transformToWaldo(randomFish);
+            }
+        }
+    }
+}, 10000);
+
+setInterval(() => {
+    if (Math.random() < 0.05) {
+        const randomShark = sharks[Math.floor(Math.random() * sharks.length)];
+        if (!randomShark.isInDiscussion) {
+            const nearestSchool = findNearestSchool(randomShark);
+            if (nearestSchool && !nearestSchool.isInDiscussion) {
+                startPhilosophicalDiscussion(randomShark, nearestSchool);
+            }
+        }
+    }
+}, 15000);
+
+setInterval(() => {
+    if (Math.random() < 0.01 && schools.length > 0) {
+        const randomSchool = schools[Math.floor(Math.random() * schools.length)];
+        if (!randomSchool.isSnuggling && !randomSchool.isInDiscussion) {
+            arrangeInGrid(randomSchool);
+        }
+    }
+}, 30000);
+
+function startPhilosophicalDiscussion(shark, school) {
+    shark.isInDiscussion = true;
+    school.isInDiscussion = true;
+
+    const coffee = document.createElement('div');
+    coffee.innerHTML = '☕';
+    coffee.style.position = 'absolute';
+    coffee.style.fontSize = '24px';
+    coffee.style.left = `${shark.x}px`;
+    coffee.style.top = `${shark.y - 40}px`;
+    gameContainer.appendChild(coffee);
+
+    showSpeechBubble(
+        shark.x + 150,
+        shark.y,
+        philosophicalPhrases[Math.floor(Math.random() * philosophicalPhrases.length)],
+        true
+    );
+
+    setTimeout(() => {
+        showSpeechBubble(
+            school.x,
+            school.y,
+            philosophicalPhrases[Math.floor(Math.random() * philosophicalPhrases.length)],
+            false
+        );
+    }, 2000);
+
+    setTimeout(() => {
+        shark.isInDiscussion = false;
+        school.isInDiscussion = false;
+        gameContainer.removeChild(coffee);
+    }, 8000);
+}
+
+function findNearestSchool(shark) {
+    let nearest = null;
+    let minDistance = Infinity;
+    
+    schools.forEach(school => {
+        if (!school.isInDiscussion) {
+            const dx = school.x - shark.x;
+            const dy = school.y - shark.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance < minDistance) {
+                minDistance = distance;
+                nearest = school;
+            }
+        }
+    });
+    
+    return nearest;
+}
+
+gameContainer.addEventListener('mousemove', moveShark);
+updateFishPositions();
+updateSharkPositions();
+</script>
+</body>
+</html>
