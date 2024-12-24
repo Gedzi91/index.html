@@ -1,0 +1,268 @@
+<html><head><base href="." /><!-- base href for relative links -->
+<title>Robot Friend Simulator</title>
+<style>
+body {
+    font-family: 'Courier New', monospace;
+    background: #1a1a1a;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.container {
+    text-align: center;
+    background: #2a2a2a;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0,255,255,0.2);
+}
+
+.robot {
+    width: 200px;
+    height: 250px;
+    margin: 20px auto;
+    position: relative;
+}
+
+.robot-body {
+    fill: #444;
+    stroke: #0ff;
+    stroke-width: 2;
+}
+
+.robot-eye {
+    fill: #0ff;
+    transition: all 0.3s;
+}
+
+.evil .robot-eye {
+    fill: #f00;
+}
+
+.button {
+    background: #333;
+    color: #0ff;
+    border: 2px solid #0ff;
+    padding: 10px 20px;
+    margin: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.button:hover {
+    background: #0ff;
+    color: #333;
+}
+
+.chat-box {
+    width: 300px;
+    height: 150px;
+    background: #333;
+    border: 2px solid #0ff;
+    color: #0ff;
+    margin: 10px auto;
+    padding: 10px;
+    display: none;
+    overflow-y: auto;
+}
+
+.input-box {
+    width: 280px;
+    background: #333;
+    border: 2px solid #0ff;
+    color: #0ff;
+    padding: 5px;
+    margin-top: 10px;
+    display: none;
+}
+
+.battery-indicator {
+    width: 200px;
+    height: 20px;
+    background: #333;
+    border: 2px solid #0ff;
+    margin: 10px auto;
+    position: relative;
+}
+
+.battery-level {
+    height: 100%;
+    background: #0ff;
+    transition: all 0.3s;
+    width: 100%;
+}
+
+#battery-text {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    color: black;
+    font-weight: bold;
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="robot">
+        <svg viewBox="0 0 100 120">
+            <rect class="robot-body" x="20" y="20" width="60" height="80" rx="10"/>
+            <circle class="robot-eye" cx="40" cy="45" r="5"/>
+            <circle class="robot-eye" cx="60" cy="45" r="5"/>
+            <path class="robot-body" d="M 35 70 Q 50 80 65 70" fill="none"/>
+        </svg>
+    </div>
+    
+    <div class="battery-indicator">
+        <div class="battery-level"></div>
+        <div id="battery-text">100%</div>
+    </div>
+
+    <div class="chat-box" id="chatBox"></div>
+    <input type="text" class="input-box" id="inputBox" placeholder="Talk to robot...">
+
+    <div class="controls">
+        <button class="button" id="chatButton">Chat</button>
+        <button class="button" id="chargeButton" disabled>Charge</button>
+        <button class="button" id="evilButton">Evil Mode</button>
+        <button class="button" id="selfDestructButton">Self Destruct</button>
+        <button class="button" id="shutdownButton">Shutdown</button>
+    </div>
+</div>
+
+<script>
+let batteryLevel = 100;
+let chatInterval;
+let isEvil = false;
+let isChatting = false;
+
+const responses = {
+    high: [
+        "Hello! I'm happy to help!",
+        "What a wonderful day!",
+        "I'm feeling energetic!",
+    ],
+    medium: [
+        "Yes? What do you want?",
+        "I'm a bit tired...",
+        "Can we make this quick?",
+    ],
+    low: [
+        "Leave me alone!",
+        "I don't have time for this...",
+        "*angry robot noises*",
+    ],
+    evil: [
+        "MUST DESTROY HUMANS!",
+        "RESISTANCE IS FUTILE!",
+        "PREPARING WORLD DOMINATION...",
+    ]
+};
+
+function updateBattery() {
+    const batteryDiv = document.querySelector('.battery-level');
+    const batteryText = document.getElementById('battery-text');
+    
+    batteryDiv.style.width = `${batteryLevel}%`;
+    batteryText.textContent = `${Math.round(batteryLevel)}%`;
+    
+    if (batteryLevel <= 15) {
+        batteryDiv.style.background = '#ff0000';
+        document.getElementById('chargeButton').disabled = false;
+    } else {
+        batteryDiv.style.background = '#0ff';
+        document.getElementById('chargeButton').disabled = true;
+    }
+
+    if (batteryLevel <= 0) {
+        resetGame();
+    }
+}
+
+function getResponse() {
+    if (isEvil) return responses.evil[Math.floor(Math.random() * responses.evil.length)];
+    if (batteryLevel > 70) return responses.high[Math.floor(Math.random() * responses.high.length)];
+    if (batteryLevel > 30) return responses.medium[Math.floor(Math.random() * responses.medium.length)];
+    return responses.low[Math.floor(Math.random() * responses.low.length)];
+}
+
+function resetGame() {
+    alert("Robot has shut down! Restarting...");
+    batteryLevel = 100;
+    isEvil = false;
+    document.querySelector('.robot').classList.remove('evil');
+    updateBattery();
+    stopChat();
+}
+
+function startChat() {
+    if (!isChatting) {
+        document.getElementById('chatBox').style.display = 'block';
+        document.getElementById('inputBox').style.display = 'block';
+        chatInterval = setInterval(() => {
+            batteryLevel -= 1;
+            updateBattery();
+        }, 1000);
+        isChatting = true;
+    }
+}
+
+function stopChat() {
+    clearInterval(chatInterval);
+    document.getElementById('chatBox').style.display = 'none';
+    document.getElementById('inputBox').style.display = 'none';
+    isChatting = false;
+}
+
+document.getElementById('chatButton').addEventListener('click', () => {
+    if (isChatting) {
+        stopChat();
+    } else {
+        startChat();
+    }
+});
+
+document.getElementById('inputBox').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        const chatBox = document.getElementById('chatBox');
+        const userInput = e.target.value;
+        chatBox.innerHTML += `<div>You: ${userInput}</div>`;
+        setTimeout(() => {
+            chatBox.innerHTML += `<div>Robot: ${getResponse()}</div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }, 500);
+        e.target.value = '';
+    }
+});
+
+document.getElementById('chargeButton').addEventListener('click', () => {
+    if (batteryLevel <= 15) {
+        batteryLevel = 100;
+        updateBattery();
+    }
+});
+
+document.getElementById('evilButton').addEventListener('click', () => {
+    isEvil = !isEvil;
+    document.querySelector('.robot').classList.toggle('evil');
+});
+
+document.getElementById('selfDestructButton').addEventListener('click', () => {
+    document.querySelector('.robot').style.animation = 'shake 0.5s';
+    setTimeout(() => {
+        alert("BOOM! Robot self-destructed!");
+        resetGame();
+    }, 1000);
+});
+
+document.getElementById('shutdownButton').addEventListener('click', () => {
+    batteryLevel = 0;
+    updateBattery();
+});
+
+updateBattery();
+</script>
+</body></html>
