@@ -1,0 +1,162 @@
+<html><head><base href=""><title>Android Dream - The First Android Story</title>
+<style>
+  body {
+    margin: 0;
+    font-family: 'Roboto', sans-serif;
+    background: #000;
+    color: #0f0;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .hero {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .android-svg {
+    width: 300px;
+    height: 300px;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+  }
+
+  .circuit-bg {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0.1;
+    z-index: -1;
+  }
+
+  h1 {
+    font-size: 3.5rem;
+    text-align: center;
+    text-shadow: 0 0 10px #0f0;
+    margin-bottom: 2rem;
+  }
+
+  .timeline {
+    position: relative;
+    padding: 2rem 0;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    width: 2px;
+    height: 100%;
+    background: #0f0;
+  }
+
+  .event {
+    margin: 2rem 0;
+    padding: 1rem;
+    border: 1px solid #0f0;
+    border-radius: 8px;
+    background: rgba(0, 255, 0, 0.1);
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <svg class="circuit-bg" viewBox="0 0 100 100">
+    <pattern id="circuit" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M 0 10 L 10 10 M 10 10 L 10 0" stroke="#0f0" stroke-width="0.5" fill="none"/>
+      <circle cx="10" cy="10" r="2" fill="#0f0"/>
+    </pattern>
+    <rect width="100" height="100" fill="url(#circuit)"/>
+  </svg>
+
+  <svg class="android-svg" viewBox="0 0 100 100">
+    <circle cx="50" cy="30" r="20" fill="#0f0"/>
+    <rect x="30" y="50" width="40" height="40" fill="#0f0"/>
+    <line x1="30" y1="60" x2="20" y2="80" stroke="#0f0" stroke-width="4"/>
+    <line x1="70" y1="60" x2="80" y2="80" stroke="#0f0" stroke-width="4"/>
+    <circle cx="43" cy="25" r="3" fill="#000"/>
+    <circle cx="57" cy="25" r="3" fill="#000"/>
+  </svg>
+</div>
+
+<div class="container">
+  <h1>The First Android: A Journey Through Time</h1>
+  
+  <div class="timeline">
+    <div class="event">
+      <h2>1495: Leonardo da Vinci's Mechanical Knight</h2>
+      <p>While not strictly an android, this mechanical knight is considered one of the earliest designs for a humanoid robot. Leonardo's detailed sketches showed a complex system of pulleys and gears that could make the knight stand, sit, and move its arms.</p>
+    </div>
+
+    <div class="event">
+      <h2>1738: The Digesting Duck</h2>
+      <p>Jacques de Vaucanson created this mechanical duck that could eat and appear to digest food. While not humanoid, it represented a significant step in automaton development.</p>
+    </div>
+
+    <div class="event">
+      <h2>1810: Friedrich Kauffman's Trumpeter</h2>
+      <p>One of the first humanoid automatons capable of playing music, this mechanical trumpeter could play several military marches.</p>
+    </div>
+
+    <div class="event">
+      <h2>1927: Westinghouse's Herbert Televox</h2>
+      <p>Often considered the first true android, Televox was an automated phone operator that could respond to voice commands and perform simple tasks.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Add scroll animation for timeline events
+  const events = document.querySelectorAll('.event');
+  
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.animation = 'fadeIn 1s ease forwards';
+      }
+    });
+  });
+
+  events.forEach(event => {
+    observer.observe(event);
+  });
+});
+
+// Add keyframe animation
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+`;
+document.head.appendChild(style);
+</script>
+
+</body></html>
