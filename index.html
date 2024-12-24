@@ -1,0 +1,279 @@
+<html><head><base href="https://websim.io/animal-spinner/customize%20%E9%83%BD%E4%BB%A5%E4%B8%AD%E6%96%87%E7%B9%81%E9%AB%94%E5%91%88%E7%8F%BE%20%20%20%E6%88%91%E8%A6%81%E4%BB%96%E6%88%90%E5%8A%9F%E4%BB%A5%E5%BE%8C%20%E8%83%BD%E5%A4%A0%E5%9B%9E%E5%88%B0%E8%BD%89%E7%9B%A4%E8%AE%93%E6%88%91%E5%8F%AF%E4%BB%A5%E6%8C%89%E5%95%9F%E5%8B%95%E4%BE%86%E6%97%8B%E8%BD%89%20%20%E6%9C%80%E5%BE%8C%E6%8C%87%E9%87%9D%E5%8F%AF%E4%BB%A5%E5%81%9C%E5%9C%A8%E6%9F%90%E4%B8%80%E5%80%8B%E5%8B%95%E7%89%A9%E5%89%8D%20%E6%94%B9%E6%88%90%E5%8F%AF%E4%BB%A5%E9%81%B812%E7%A8%AE%E5%8B%95%E7%89%A9%20%E7%95%B6%E6%88%91%E9%81%B8%E6%93%87%E5%A5%BD%E4%BB%A5%E5%BE%8C%20%E8%BF%94%E5%9B%9E%E8%BD%89%E7%9B%A4%20%E9%80%9912%E7%A8%AE%E5%8B%95%E7%89%A9%E5%8F%AF%E4%BB%A5%E5%B9%B3%E5%9D%87%E5%9D%90%E5%9C%A8%E8%BD%89%E7%9B%A4%E6%97%81%20%E5%8B%95%E7%89%A9%E4%B8%8D%E6%9C%83%E5%8B%95%20%20%20%E6%98%AF%E6%8C%87%E9%87%9D%E8%BD%89%20%20%E6%97%81%E9%82%8A%E5%8F%AF%E4%BB%A5%E8%AA%BF%E6%95%B4%E6%8C%87%E9%87%9D%E7%9A%84%E9%80%9F%E5%BA%A61%E5%88%B05%E5%8F%AF%E4%BB%A5%E9%81%B8%E7%9A%84%E6%8B%89%E6%A1%BF(%E4%BD%8D%E7%BD%AE%E5%9C%A8%E9%A0%81%E9%9D%A2%E5%B7%A6%E4%B8%8B%E6%96%B9)%E4%B8%A6%E9%A1%AF%E7%A4%BA%E9%80%9F%E5%BA%A6%E7%9A%84%E6%95%B8%E5%AD%97%20%E4%B8%AD%E9%96%93%E6%9C%89%E4%B8%80%E5%80%8B%E5%8F%AF%E4%BB%A5%E6%8C%89%E9%96%8B%E5%A7%8B%E7%9A%84%E6%89%AD%20%20%20%E9%96%8B%E5%A7%8B%E7%9A%84%E6%8C%89%E9%88%95%E8%A6%81%E5%9C%A8%E5%9C%93%E5%9C%88%E7%9A%84%E6%AD%A3%E4%B8%8B%E6%96%B9">
+<title>自定義動物運勢轉盤</title>
+<style>
+body {
+    font-family: "Microsoft JhengHei", Arial, sans-serif;
+    background-color: #f0f8ff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+.container {
+    background-color: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    max-width: 800px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+}
+h1 {
+    color: #4a4a4a;
+    margin-bottom: 30px;
+}
+.customize-section, .spinner-section {
+    margin-bottom: 30px;
+}
+.animal-selection {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+.animal-option {
+    font-size: 40px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+.animal-option:hover {
+    transform: scale(1.2);
+}
+.selected-animals {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+.selected-animal {
+    font-size: 30px;
+    background-color: #e6f3ff;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+button {
+    padding: 15px 30px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin: 10px;
+}
+button:hover {
+    background-color: #45a049;
+}
+.message {
+    margin-top: 20px;
+    color: #4a4a4a;
+}
+.spinner {
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    position: relative;
+    border: 10px solid #333;
+    margin: 0 auto;
+}
+.slot {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 30px;
+}
+.pointer {
+    width: 10px;
+    height: 150px;
+    background-color: red;
+    position: absolute;
+    top: 0;
+    left: calc(50% - 5px);
+    transform-origin: bottom center;
+    z-index: 10;
+}
+.speed-control {
+    position: absolute;
+    bottom: 30px;
+    left: 30px;
+    display: flex;
+    align-items: center;
+}
+.speed-control input {
+    margin: 0 10px;
+}
+#start {
+    position: absolute;
+    bottom: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>自定義動物運勢轉盤</h1>
+    
+    <div class="customize-section">
+        <div class="animal-selection">
+            <div class="animal-option">🐶</div>
+            <div class="animal-option">🐱</div>
+            <div class="animal-option">🐭</div>
+            <div class="animal-option">🐰</div>
+            <div class="animal-option">🦊</div>
+            <div class="animal-option">🐻</div>
+            <div class="animal-option">🐼</div>
+            <div class="animal-option">🐨</div>
+            <div class="animal-option">🐯</div>
+            <div class="animal-option">🦁</div>
+            <div class="animal-option">🐸</div>
+            <div class="animal-option">🐒</div>
+            <div class="animal-option">🦉</div>
+            <div class="animal-option">🦄</div>
+            <div class="animal-option">🐷</div>
+            <div class="animal-option">🐙</div>
+            <div class="animal-option">🦋</div>
+            <div class="animal-option">🐢</div>
+        </div>
+        
+        <div class="selected-animals"></div>
+        
+        <button id="save-customization">儲存自定義設置</button>
+        
+        <p class="message">點擊動物圖示來新增或移除轉盤上的動物。您必須選擇剛好12種動物。</p>
+    </div>
+    
+    <div class="spinner-section" style="display:none;">
+        <div class="spinner">
+            <div class="pointer"></div>
+        </div>
+        <button id="start">開始</button>
+        <div class="speed-control">
+            <span>速度：</span>
+            <input type="range" id="speed" min="1" max="5" value="3" step="1">
+            <span id="speed-value">3</span>
+        </div>
+        <button id="back-to-customize">返回自定義</button>
+        <p class="result"></p>
+    </div>
+</div>
+
+<script>
+const animalOptions = document.querySelectorAll('.animal-option');
+const selectedAnimals = document.querySelector('.selected-animals');
+const saveButton = document.getElementById('save-customization');
+const message = document.querySelector('.message');
+const customizeSection = document.querySelector('.customize-section');
+const spinnerSection = document.querySelector('.spinner-section');
+const spinner = document.querySelector('.spinner');
+const startButton = document.getElementById('start');
+const backButton = document.getElementById('back-to-customize');
+const result = document.querySelector('.result');
+const speedControl = document.getElementById('speed');
+const speedValue = document.getElementById('speed-value');
+
+let currentSelection = ['🐶', '🐱', '🐭', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐸', '🐒'];
+
+function updateSelectedAnimals() {
+    selectedAnimals.innerHTML = '';
+    currentSelection.forEach(animal => {
+        const div = document.createElement('div');
+        div.className = 'selected-animal';
+        div.textContent = animal;
+        div.addEventListener('click', () => removeAnimal(animal));
+        selectedAnimals.appendChild(div);
+    });
+}
+
+function addAnimal(animal) {
+    if (currentSelection.length < 12 && !currentSelection.includes(animal)) {
+        currentSelection.push(animal);
+        updateSelectedAnimals();
+    }
+}
+
+function removeAnimal(animal) {
+    const index = currentSelection.indexOf(animal);
+    if (index > -1) {
+        currentSelection.splice(index, 1);
+        updateSelectedAnimals();
+    }
+}
+
+animalOptions.forEach(option => {
+    option.addEventListener('click', () => addAnimal(option.textContent));
+});
+
+saveButton.addEventListener('click', () => {
+    if (currentSelection.length === 12) {
+        message.textContent = '自定義設置儲存成功！轉盤準備就緒。';
+        message.style.color = 'green';
+        customizeSection.style.display = 'none';
+        spinnerSection.style.display = 'block';
+        updateSpinner();
+    } else {
+        message.textContent = '請在儲存前選擇剛好12種動物。';
+        message.style.color = 'red';
+    }
+});
+
+function updateSpinner() {
+    spinner.innerHTML = '<div class="pointer"></div>';
+    currentSelection.forEach((animal, index) => {
+        const slot = document.createElement('div');
+        slot.className = 'slot';
+        slot.textContent = animal;
+        const angle = index * 30;
+        const radius = 120;
+        const x = Math.cos(angle * Math.PI / 180) * radius + 150;
+        const y = Math.sin(angle * Math.PI / 180) * radius + 150;
+        slot.style.left = `${x - 30}px`;
+        slot.style.top = `${y - 30}px`;
+        spinner.appendChild(slot);
+    });
+}
+
+startButton.addEventListener('click', () => {
+    const speed = parseInt(speedControl.value);
+    const duration = 6 - speed; // 速度越快，持續時間越短
+    const rotations = 5 + Math.random() * 5;
+    const totalRotation = rotations * 360 + Math.floor(Math.random() * 360);
+    
+    const pointer = spinner.querySelector('.pointer');
+    pointer.style.transition = `transform ${duration}s cubic-bezier(0.25, 0.1, 0.25, 1)`;
+    pointer.style.transform = `rotate(${totalRotation}deg)`;
+    
+    setTimeout(() => {
+        const index = Math.floor(((360 - (totalRotation % 360)) % 360) / 30);
+        result.textContent = `您的幸運動物是：${currentSelection[index]}`;
+    }, duration * 1000);
+});
+
+backButton.addEventListener('click', () => {
+    customizeSection.style.display = 'block';
+    spinnerSection.style.display = 'none';
+    const pointer = spinner.querySelector('.pointer');
+    pointer.style.transition = 'none';
+    pointer.style.transform = 'rotate(0deg)';
+    result.textContent = '';
+});
+
+speedControl.addEventListener('input', () => {
+    speedValue.textContent = speedControl.value;
+});
+
+updateSelectedAnimals();
+</script>
+</body></html>
