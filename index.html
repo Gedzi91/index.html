@@ -1,0 +1,1071 @@
+<html><head><base href=".">
+<style>
+body {
+    background: #f0f7ff;
+    background-image: 
+        linear-gradient(120deg, rgba(255,255,255, 0.8) 25%, transparent 25%),
+        linear-gradient(240deg, rgba(255,255,255, 0.8) 25%, transparent 25%);
+    background-size: 60px 60px;
+    background-position: 0 0;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+    position: relative;
+}
+
+.container::before,
+.container::after {
+    content: '';
+    position: fixed;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(45deg, rgba(255,255,255,0.7), rgba(255,255,255,0.3));
+    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+    animation: float 10s infinite alternate;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.container::before {
+    top: 10%;
+    left: 5%;
+    animation-delay: -2s;
+}
+
+.container::after {
+    bottom: 10%;
+    right: 5%;
+    animation-delay: -5s;
+}
+
+@keyframes float {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    100% { transform: translate(20px, 20px) rotate(360deg); }
+}
+
+.penguin-container {
+    width: 400px;
+    height: 500px;
+    margin: 20px auto;
+    position: relative;
+    background: transparent; /* Updated to make default background transparent */
+    border: 3px solid rgba(255,255,255,0.8);
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.penguin-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 25px rgba(0,0,0,0.25);
+}
+
+.controls {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin: 30px auto;
+    max-width: 700px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+button {
+    background: linear-gradient(45deg, #ff4081, #f50057);
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.9em;
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+}
+
+button:hover {
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1) translateY(-2px); }
+    50% { transform: scale(1.05) translateY(-2px); }
+    100% { transform: scale(1) translateY(-2px); }
+}
+
+button::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, 
+        transparent, 
+        rgba(255,255,255,0.2), 
+        transparent);
+    transform: rotate(45deg);
+    animation: sparkle 2s infinite;
+}
+
+@keyframes sparkle {
+    0% { transform: rotate(45deg) translateX(-100%); }
+    100% { transform: rotate(45deg) translateX(100%); }
+}
+
+button:hover {
+    background: linear-gradient(45deg, #f50057, #c51162);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(245, 0, 87, 0.3);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+.color-picker, .background-picker {
+    margin: 10px;
+    padding: 5px;
+}
+
+h1 {
+    color: #1976d2;
+    font-size: 2em;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+
+h1:hover {
+    background: linear-gradient(to right, 
+        #ff0000, #ff8000, #ffff00, #80ff00, #00ff00, #00ff80, 
+        #00ffff, #0080ff, #0000ff, #8000ff, #ff00ff, #ff0080);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    transition: all 0.3s ease;
+}
+
+.picker-label {
+    display: block;
+    font-size: 0.9em;
+    color: #666;
+    margin: 5px 0;
+}
+
+select, input[type="text"] {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    margin: 5px;
+    width: 150px;
+    transition: all 0.3s;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+select:focus, input[type="text"]:focus {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(25, 118, 210, 0.2);
+    outline: none;
+    border-color: #1976d2;
+}
+
+#scenerySelect {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    margin: 5px;
+    width: 150px;
+}
+
+.penguin-name {
+    font-size: 1.5em;
+    color: #1976d2;
+    margin: 10px 0;
+    font-weight: bold;
+}
+
+.header-decoration {
+    font-size: 24px;
+    margin: 0 10px;
+    animation: bounce 1s infinite alternate;
+}
+
+@keyframes bounce {
+    from { transform: translateY(0); }
+    to { transform: translateY(-10px); }
+}
+
+.name-container {
+    margin: 20px 0;
+    padding: 10px;
+    background: linear-gradient(45deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7));
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    position: relative;
+    border: 2px solid rgba(25, 118, 210, 0.3);
+}
+
+.name-container::before,
+.name-container::after {
+    content: '❄️';
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.5em;
+    opacity: 0.7;
+}
+
+.name-container::before {
+    left: 20px;
+}
+
+.name-container::after {
+    right: 20px;
+}
+
+.penguin-name {
+    background: linear-gradient(45deg, #1976d2, #2196f3);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: none;
+    font-size: 2em;
+    margin: 15px 0;
+}
+
+.loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #f0f7ff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+}
+
+.loading svg {
+    width: 100px;
+    height: 100px;
+    animation: loadingBounce 1s infinite alternate ease-in-out;
+}
+
+.loading.hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+@keyframes loadingBounce {
+    from { transform: translateY(0); }
+    to { transform: translateY(-20px); }
+}
+
+.penguin svg {
+    filter: drop-shadow(3px 3px 5px rgba(0,0,0,0.2));
+}
+
+.header-decoration:nth-child(1) {
+    animation-delay: 0.2s;
+}
+
+.header-decoration:nth-child(2) {
+    animation-delay: 0.4s;
+}
+
+@keyframes blink {
+    0%, 90%, 100% { 
+        transform: scaleY(1);
+    }
+    95% {
+        transform: scaleY(0.1);
+    }
+}
+
+@keyframes wave {
+    0%, 100% {
+        transform: rotate(0deg) translateX(0);
+    }
+    25% {
+        transform: rotate(-20deg) translateX(-5px);
+    }
+    75% {
+        transform: rotate(20deg) translateX(5px);
+    }
+}
+
+.blinking .eye {
+    animation: blink 2s;
+    transform-origin: center;
+}
+
+.waving .left-wing {
+    animation: wave 1s;
+    transform-origin: bottom center;
+}
+
+.quote-container {
+    background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.8));
+    border: 2px solid rgba(25, 118, 210, 0.3);
+    padding: 20px;
+    border-radius: 15px;
+    margin: 20px auto;
+    max-width: 600px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transition: transform 0.3s;
+    backdrop-filter: blur(5px);
+}
+
+.quote-container:hover {
+    transform: translateY(-5px) rotate(1deg);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+}
+
+.quote-container h3 {
+    color: #1976d2;
+    font-size: 1.4em;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    margin-bottom: 15px;
+}
+
+.quote-text {
+    font-size: 1.2em;
+    color: #1976d2;
+    font-style: italic;
+    margin: 10px 0;
+    line-height: 1.6;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.new-quote-btn {
+    background: linear-gradient(45deg, #1976d2, #2196f3);
+    margin-top: 10px;
+}
+
+.new-quote-btn:hover {
+    background: linear-gradient(45deg, #2196f3, #64b5f6);
+}
+
+.container {
+    position: relative;
+}
+
+.snowflake {
+    position: fixed;
+    color: white;
+    opacity: 0.8;
+    font-size: 1em;
+    animation: snowfall linear infinite;
+}
+
+@keyframes snowfall {
+    0% { transform: translateY(-100%) rotate(0deg); }
+    100% { transform: translateY(1000%) rotate(360deg); }
+}
+
+#savePenguin {
+    background: linear-gradient(45deg, #2196f3, #64b5f6);
+    color: white;
+}
+
+#savePenguin:hover {
+    background: linear-gradient(45deg, #64b5f6, #90caf9);
+}
+
+/* Confetti animation */
+@keyframes confetti {
+    to {
+        transform: translate(${Math.random() * 500 - 250}px, ${Math.random() * 500 - 250}px) rotate(${Math.random() * 720}deg);
+        opacity: 0;
+    }
+}
+
+/* Sound effect animation */
+@keyframes float-up {
+    0% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(-100px); opacity: 0; }
+}
+
+/* Sparkle elements */
+.penguin-container::before,
+.penguin-container::after {
+    content: '✨';
+    position: absolute;
+    font-size: 20px;
+    animation: twinkle 1.5s infinite alternate;
+}
+
+.penguin-container::before {
+    top: 10px;
+    left: 10px;
+}
+
+.penguin-container::after {
+    bottom: 10px;
+    right: 10px;
+}
+
+@keyframes twinkle {
+    0% { opacity: 0.3; transform: scale(0.8) rotate(-10deg); }
+    100% { opacity: 1; transform: scale(1.2) rotate(10deg); }
+}
+
+@keyframes wiggle {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(-5deg); }
+    75% { transform: rotate(5deg); }
+    100% { transform: rotate(0deg); }
+}
+
+/* Add styles to make the transparent background visible */
+.penguin-container {
+    background-image: none; /* Removed the default checkerboard background */
+}
+
+#addSunglasses {
+    background: linear-gradient(45deg, #FFD700, #FFA500);
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+    border: 2px solid rgba(255, 215, 0, 0.5);
+    position: relative;
+    overflow: hidden;
+}
+
+#addSunglasses:hover {
+    background: linear-gradient(45deg, #FFA500, #FF8C00);
+    transform: scale(1.05) translateY(-2px);
+    box-shadow: 
+        0 5px 15px rgba(255, 165, 0, 0.3),
+        0 0 20px rgba(255, 215, 0, 0.5);
+}
+
+#addSunglasses::before {
+    content: '😎';
+    position: absolute;
+    left: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.2em;
+    animation: sunglassesSparkle 2s infinite;
+}
+
+@keyframes sunglassesSparkle {
+    0% { opacity: 0.8; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.1); }
+    100% { opacity: 0.8; transform: scale(1); }
+}
+
+#sunglassesColorPicker {
+    padding: 0;
+    width: 50px;
+    height: 30px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+#sunglassesColorPicker:hover {
+    transform: scale(1.05);
+}
+
+.loading {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+}
+
+.loading-message {
+    color: #1976d2;
+    font-size: 1.2em;
+    font-weight: bold;
+    text-align: center;
+    opacity: 0;
+    animation: fadeIn 0.5s forwards 0.5s;
+    margin: 0;
+    padding: 0 20px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+</style>
+
+<script>class Penguin {
+  constructor(container, containerElement) {
+    this.container = container;
+    this.containerElement = containerElement;
+    this.accessories = {
+      hats: ['🎩', '👒', '🎓', '⛑️', '🪖', '🧢', '👑'],
+      items: ['🎸', '📱', '🎮', '📚', '🎨', '🎪', '🎭', '🎪'],
+      decorations: ['🌟', '⭐', '💫', '✨', '🌈', '🎵', '💝', '💎'],
+      bowties: ['🎀'],
+      badges: ['🏅', '🎖️', '⚜️', '🔰', '📛'],
+      sunglasses: ['😎', '🕶️', '🔥', '⚡', '🌟', '✨', '💫'],
+      necklaces: ['📿', '⚜️', '💎', '🔮', '♦️', '💍']
+    };
+    this.species = 'emperor';
+    this.name = 'My Penguin';
+    this.scenery = 'arctic';
+    this.currentOutfit = {
+      bodyColor: '#000000',
+      backgroundColor: '#f5f5f5',
+      hat: '',
+      decoration: '',
+      item: '',
+      badge: '',
+      bowtie: '',
+      necklace: '',
+      sunglasses: false,
+      sunglassesColor: '#000000'
+    };
+    this.speciesStyles = {
+      emperor: {
+        bodyScale: {
+          x: 70,
+          y: 90
+        },
+        headScale: 50,
+        crownPath: '',
+        whiteHead: true
+      },
+      rockhopper: {
+        bodyScale: {
+          x: 65,
+          y: 85
+        },
+        headScale: 45,
+        crownPath: 'M65 90 Q60 80 65 70 M60 85 Q55 75 60 65 M55 80 Q50 70 55 60 M135 90 Q140 80 135 70 M140 85 Q145 75 140 65 M145 80 Q150 70 145 60',
+        whiteHead: true
+      },
+      gentoo: {
+        bodyScale: {
+          x: 60,
+          y: 95
+        },
+        headScale: 48,
+        whitePatch: 'M85 70 Q100 60 115 70 Q100 65 85 70',
+        whiteHead: true
+      },
+      adelie: {
+        bodyScale: {
+          x: 55,
+          y: 80
+        },
+        headScale: 45,
+        eyeRings: true,
+        whiteHead: false
+      },
+      little: {
+        bodyScale: {
+          x: 50,
+          y: 70
+        },
+        headScale: 40,
+        blueTint: true,
+        whiteHead: true
+      }
+    };
+    this.sceneryStyles = {
+      none: {
+        sky: 'transparent',
+        ground: 'transparent',
+        elements: []
+      },
+      arctic: {
+        sky: '#E0F7FF',
+        ground: '#FFFFFF',
+        elements: ['<circle cx="40" cy="40" r="15" fill="#FFD700" />', '<path d="M20 100 Q 30 90 40 100 L 35 100 Z" fill="#FFFFFF" opacity="0.7" />', '<path d="M160 80 Q 170 70 180 80 L 175 80 Z" fill="#FFFFFF" opacity="0.7" />', '<path d="M70 50 Q 80 40 90 50 L 85 50 Z" fill="#FFFFFF" opacity="0.7" />']
+      },
+      underwater: {
+        sky: '#0077BE',
+        ground: '#005C99',
+        elements: ['<path d="M30 80 Q 40 85 50 80" stroke="#80C5DE" fill="none" stroke-width="2" />', '<path d="M150 120 Q 160 125 170 120" stroke="#80C5DE" fill="none" stroke-width="2" />', '<circle cx="160" cy="60" r="3" fill="#80C5DE" />', '<circle cx="40" cy="140" r="3" fill="#80C5DE" />', '<circle cx="120" cy="40" r="3" fill="#80C5DE" />']
+      },
+      beach: {
+        sky: '#87CEEB',
+        ground: '#F4D03F',
+        elements: ['<circle cx="40" cy="40" r="15" fill="#FFD700" />', '<path d="M160 60 Q 170 50 180 60" stroke="#FFFFFF" fill="none" stroke-width="3" />', '<path d="M140 40 Q 150 30 160 40" stroke="#FFFFFF" fill="none" stroke-width="3" />', '<circle cx="30" cy="120" r="4" fill="#F4D03F" />', '<circle cx="160" cy="180" r="4" fill="#F4D03F" />']
+      }
+    };
+    this.particles = [];
+    this.initParticles();
+    this.draw();
+  }
+  initParticles() {
+    this.particles = Array(20).fill().map(() => ({
+      x: Math.random() * 200,
+      y: Math.random() * 300,
+      size: Math.random() * 3 + 1,
+      speed: Math.random() * 0.5 + 0.1
+    }));
+  }
+  drawParticles(scenery) {
+    if (scenery === 'none') return '';
+    return this.particles.map(p => {
+      p.y -= p.speed;
+      if (p.y < 0) p.y = 300;
+      const color = scenery === 'underwater' ? '#80C5DE' : scenery === 'beach' ? '#FFD700' : '#FFFFFF';
+      return `<circle cx="${p.x}" cy="${p.y}" r="${p.size}" 
+                    fill="${color}" opacity="${scenery === 'underwater' ? 0.6 : 0.4}" />`;
+    }).join('');
+  }
+  setName(newName) {
+    this.name = newName;
+    document.querySelector('.penguin-name').textContent = this.name;
+  }
+  draw() {
+    const style = this.speciesStyles[this.species];
+    const scenery = this.sceneryStyles[this.scenery];
+    const bodyColor = this.species === 'little' ? '#000080' : this.currentOutfit.bodyColor;
+    const svg = `
+            <svg width="200" height="300" viewBox="0 0 200 300">
+                ${this.scenery !== 'none' ? `
+                    <defs>
+                        <linearGradient id="skyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:${scenery.sky};stop-opacity:0.8" />
+                            <stop offset="100%" style="stop-color:${scenery.sky};stop-opacity:0.5" />
+                        </linearGradient>
+                    </defs>
+                    <rect x="0" y="0" width="200" height="300" fill="url(#skyGradient)" fill-opacity="0.6" />
+                    ${this.drawParticles(this.scenery)}
+                    ${scenery.elements.join('\n')}
+                    <path d="M0 250 Q 50 230 100 250 Q 150 270 200 250 L 200 300 L 0 300 Z" fill="${scenery.ground}" fill-opacity="0.7" />
+                ` : ''}
+                
+                <ellipse cx="100" cy="200" rx="${style.bodyScale.x}" ry="${style.bodyScale.y}" fill="${bodyColor}"/>
+                <ellipse cx="100" cy="200" rx="${style.bodyScale.x * 0.7}" ry="${style.bodyScale.y * 0.7}" fill="white"/>
+                
+                <path class="wing left-wing" d="M${100 - style.bodyScale.x} 180 
+                    Q ${100 - style.bodyScale.x - 20} 200 ${100 - style.bodyScale.x - 10} 160 
+                    Q ${100 - style.bodyScale.x + 10} 170 ${100 - style.bodyScale.x} 180" 
+                    fill="${bodyColor}"/>
+                <path class="wing right-wing" d="M${100 + style.bodyScale.x} 180 
+                    Q ${100 + style.bodyScale.x + 20} 200 ${100 + style.bodyScale.x + 10} 160 
+                    Q ${100 + style.bodyScale.x - 10} 170 ${100 + style.bodyScale.x} 180" 
+                    fill="${bodyColor}"/>
+                
+                <circle cx="100" cy="100" r="${style.headScale}" fill="${bodyColor}"/>
+                ${style.whiteHead ? `<ellipse cx="100" cy="110" rx="${style.headScale * 0.7}" ry="${style.headScale * 0.6}" fill="white"/>` : ''}
+                
+                ${style.crownPath ? `<path d="${style.crownPath}" stroke="yellow" stroke-width="3" fill="none"/>` : ''}
+                ${style.whitePatch ? `<path d="${style.whitePatch}" fill="white"/>` : ''}
+                
+                ${style.eyeRings ? `
+                    <circle cx="80" cy="90" r="12" fill="white"/>
+                    <circle cx="120" cy="90" r="12" fill="white"/>
+                ` : ''}
+                
+                <circle cx="80" cy="90" r="8" fill="${this.species === 'rockhopper' ? 'red' : 'black'}"/>
+                <circle cx="120" cy="90" r="8" fill="${this.species === 'rockhopper' ? 'red' : 'black'}"/>
+                <circle cx="83" cy="87" r="3" fill="white"/>
+                <circle cx="123" cy="87" r="3" fill="white"/>
+                
+                <path d="M90 110 L110 110 L100 125 Z" fill="orange"/>
+                <circle cx="75" cy="115" r="8" fill="#FFB6C1" opacity="0.4"/>
+                <circle cx="125" cy="115" r="8" fill="#FFB6C1" opacity="0.4"/>
+                
+                <path d="M70 280 L90 280 L80 290 L70 280" fill="orange"/>
+                <path d="M110 280 L130 280 L120 290 L110 280" fill="orange"/>
+                
+                ${this.currentOutfit.sunglasses ? `
+                    <g class="sunglasses">
+                        <!-- Left lens with black fill and colored frame -->
+                        <path d="M70 85 Q78 80 86 85 Q89 90 86 95 Q78 100 70 95 Q67 90 70 85" 
+                            fill="#000000" stroke="${this.currentOutfit.sunglassesColor}" stroke-width="2"/>
+                        <!-- Right lens with black fill and colored frame -->
+                        <path d="M114 85 Q122 80 130 85 Q133 90 130 95 Q122 100 114 95 Q111 90 114 85" 
+                            fill="#000000" stroke="${this.currentOutfit.sunglassesColor}" stroke-width="2"/>
+                        <!-- Bridge with colored frame -->
+                        <path d="M86 90 L114 90" 
+                            stroke="${this.currentOutfit.sunglassesColor}" stroke-width="2"/>
+                        <!-- Temple pieces with colored frame -->
+                        <path d="M70 90 L60 87" stroke="${this.currentOutfit.sunglassesColor}" stroke-width="2"/>
+                        <path d="M130 90 L140 87" stroke="${this.currentOutfit.sunglassesColor}" stroke-width="2"/>
+                        <!-- Lens reflections -->
+                        <path d="M72 87 L77 87" stroke="#FFFFFF" stroke-width="1.5" opacity="0.7"/>
+                        <path d="M116 87 L121 87" stroke="#FFFFFF" stroke-width="1.5" opacity="0.7"/>
+                    </g>
+                ` : ''}
+                
+                ${this.currentOutfit.decoration ? `<text x="150" y="50" font-size="30">${this.currentOutfit.decoration}</text>` : ''}
+                ${this.currentOutfit.hat ? `<text x="70" y="60" font-size="40">${this.currentOutfit.hat}</text>` : ''}
+                ${this.currentOutfit.item ? `<text x="150" y="200" font-size="40">${this.currentOutfit.item}</text>` : ''}
+                ${this.currentOutfit.badge ? `<text x="70" y="190" font-size="25">${this.currentOutfit.badge}</text>` : ''}
+                ${this.currentOutfit.bowtie ? `<text x="85" y="160" font-size="25">${this.currentOutfit.bowtie}</text>` : ''}
+                ${this.currentOutfit.necklace ? `
+                    <!-- Necklace chain/string - Updated path for better circular curve and visibility -->
+                    <path d="M70 140 Q85 150 100 145 Q115 150 130 140" 
+                          stroke="#808080" 
+                          fill="none" 
+                          stroke-width="4"
+                          stroke-linecap="round"/>
+                    <!-- Necklace emoji - Adjusted position to sit better on the curved string -->
+                    <text x="85" y="153" font-size="25">${this.currentOutfit.necklace}</text>
+                ` : ''}
+            </svg>
+        `;
+    this.container.innerHTML = svg;
+    if (this.scenery === 'none') {
+      this.containerElement.style.background = 'transparent';
+      this.containerElement.style.backgroundImage = 'none';
+    } else {
+      this.containerElement.style.background = this.currentOutfit.backgroundColor;
+    }
+  }
+  blink() {
+    const svg = this.container.querySelector('svg');
+    const eyes = svg.querySelectorAll('circle[cx="80"][cy="90"][r="8"], circle[cx="120"][cy="90"][r="8"]');
+    eyes.forEach(eye => {
+      eye.classList.add('eye');
+      svg.classList.add('blinking');
+    });
+    setTimeout(() => {
+      svg.classList.remove('blinking');
+      eyes.forEach(eye => eye.classList.remove('eye'));
+    }, 2000);
+  }
+  wave() {
+    const svg = this.container.querySelector('svg');
+    const leftWing = svg.querySelector('.left-wing');
+    if (leftWing) {
+      leftWing.classList.add('left-wing');
+      svg.classList.add('waving');
+      setTimeout(() => {
+        svg.classList.remove('waving');
+        leftWing.classList.remove('left-wing');
+      }, 1000);
+    }
+  }
+  changeSpecies(species) {
+    this.species = species;
+    this.draw();
+  }
+  changeColor(color) {
+    this.currentOutfit.bodyColor = color;
+    this.draw();
+  }
+  changeBackground(color) {
+    this.currentOutfit.backgroundColor = color;
+    this.draw();
+  }
+  changeScenery(newScenery) {
+    this.scenery = newScenery;
+    this.draw();
+  }
+  addAccessory(type) {
+    const accessories = this.accessories[type];
+    const randomIndex = Math.floor(Math.random() * accessories.length);
+    this.currentOutfit[type.slice(0, -1)] = accessories[randomIndex];
+    this.draw();
+  }
+  addSunglasses(color = '#000000') {
+    this.currentOutfit.sunglasses = true;
+    this.currentOutfit.sunglassesColor = color;
+    this.draw();
+    const sparkles = ['✨', '⚡', '💫', '🌟'];
+    const numberOfSparkles = 5;
+    for (let i = 0; i < numberOfSparkles; i++) {
+      const sparkle = document.createElement('div');
+      sparkle.style.position = 'absolute';
+      sparkle.style.left = `${Math.random() * 100}%`;
+      sparkle.style.top = `${Math.random() * 100}%`;
+      sparkle.style.fontSize = '20px';
+      sparkle.style.animation = `sunglassesSparkle 1s ${i * 0.2}s`;
+      sparkle.textContent = sparkles[Math.floor(Math.random() * sparkles.length)];
+      this.container.appendChild(sparkle);
+      setTimeout(() => sparkle.remove(), 1000);
+    }
+  }
+  reset() {
+    this.currentOutfit = {
+      bodyColor: '#000000',
+      backgroundColor: '#f5f5f5',
+      hat: '',
+      decoration: '',
+      item: '',
+      badge: '',
+      bowtie: '',
+      necklace: '',
+      sunglasses: false,
+      sunglassesColor: '#000000'
+    };
+    document.querySelector('#sunglassesColorPicker').value = '#000000';
+    this.species = 'emperor';
+    this.scenery = 'arctic';
+    this.name = 'My Penguin';
+    document.querySelector('#penguinName').value = this.name;
+    document.querySelector('.penguin-name').textContent = this.name;
+    this.draw();
+  }
+}
+const loadingMessages = ["Getting your penguin ready for adventure!", "Warming up those happy feet...", "Preparing something special just for you!", "Spreading joy one penguin at a time...", "Creating a little magic...", "Your penguin friend is almost here!", "Collecting virtual fish treats...", "Polishing the perfect penguin...", "Adding extra sparkles to your day...", "Making sure everything is extra cozy..."];
+function makeRandomPenguinSound() {
+  const minDelay = 120000;
+  const maxDelay = 300000;
+  const randomDelay = Math.floor(Math.random() * (maxDelay - minDelay)) + minDelay;
+  playPenguinSound();
+  setTimeout(makeRandomPenguinSound, randomDelay);
+}
+function celebrateSave() {
+  const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+  for (let i = 0; i < 100; i++) {
+    const confetti = document.createElement('div');
+    confetti.style.position = 'fixed';
+    confetti.style.width = '10px';
+    confetti.style.height = '10px';
+    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+    confetti.style.left = Math.random() * 100 + 'vw';
+    confetti.style.top = '50%';
+    confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+    confetti.style.animation = `confetti ${Math.random() * 3 + 1}s forwards`;
+    document.body.appendChild(confetti);
+    setTimeout(() => confetti.remove(), 3000);
+  }
+}
+function savePenguinAsImage() {
+  const svgElement = document.querySelector('.penguin svg');
+  const svgData = new XMLSerializer().serializeToString(svgElement);
+  const canvas = document.createElement('canvas');
+  canvas.width = 400;
+  canvas.height = 500;
+  const ctx = canvas.getContext('2d');
+  const img = new Image();
+  img.onload = function () {
+    const containerStyle = getComputedStyle(document.querySelector('.penguin-container'));
+    ctx.fillStyle = containerStyle.background;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, 400, 500);
+    const link = document.createElement('a');
+    link.download = `${document.querySelector('.penguin-name').textContent.trim()}-penguin.png`;
+    link.href = canvas.toDataURL('image/png');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+  const encodedData = window.btoa(unescape(encodeURIComponent(svgData)));
+  img.src = `data:image/svg+xml;base64,${encodedData}`;
+}
+const penguinQuotes = ["If penguins wore pants, would they wear them on all legs or just the back ones?", "I asked my penguin for homework help but he just ate my calculator.", "Do penguins dream of frozen sheep?", "Yesterday my penguin told me that clouds taste like cotton candy lies.", "What if penguins are just formal chickens?", "My penguin says that ice is just water trying to be fancy.", "Penguins don't need WiFi because they're already connected to the ice-cloud.", "If a penguin wore shoes, would they be flipper flops?", "My penguin thinks global warming is just the Earth doing hot yoga.", "Penguins don't dance, they debug the matrix in tuxedos.", "I traded my penguin for three snow cones, but he came back with a beach umbrella.", "Penguins are just birds who decided fashion was more important than flying.", "My penguin says that fish are just water sausages with fins.", "When penguins get married, do they have ice cream cake or wedding fish?", "Sometimes I think penguins are just secret agents testing gravity."];
+function getRandomQuote() {
+  const randomIndex = Math.floor(Math.random() * penguinQuotes.length);
+  return penguinQuotes[randomIndex];
+}
+function createSnowflakes() {
+  const snowflakes = ['❄', '❅', '❆', '•', '*'];
+  for (let i = 0; i < 30; i++) {
+    const snowflake = document.createElement('div');
+    snowflake.className = 'snowflake';
+    snowflake.style.left = Math.random() * 100 + 'vw';
+    snowflake.style.animationDuration = Math.random() * 10 + 5 + 's';
+    snowflake.style.opacity = Math.random() * 0.5 + 0.2;
+    snowflake.style.fontSize = Math.random() * 10 + 10 + 'px';
+    snowflake.innerText = snowflakes[Math.floor(Math.random() * snowflakes.length)];
+    document.body.appendChild(snowflake);
+  }
+}
+window.onload = function () {
+  const loadingScreen = document.querySelector('.loading');
+  const loadingMessage = document.querySelector('.loading-message');
+  loadingMessage.textContent = loadingMessages[Math.floor(Math.random() * loadingMessages.length)];
+  setTimeout(() => {
+    loadingScreen.classList.add('hidden');
+  }, 1500);
+  const penguinContainer = document.querySelector('.penguin');
+  const containerElement = document.querySelector('.penguin-container');
+  const penguin = new Penguin(penguinContainer, containerElement);
+  document.querySelector('#penguinName').addEventListener('input', e => {
+    penguin.setName(e.target.value);
+  });
+  document.querySelector('#speciesSelect').addEventListener('change', e => {
+    penguin.changeSpecies(e.target.value);
+  });
+  document.querySelector('#colorPicker').addEventListener('input', e => {
+    penguin.changeColor(e.target.value);
+  });
+  document.querySelector('#backgroundPicker').addEventListener('input', e => {
+    penguin.changeBackground(e.target.value);
+  });
+  document.querySelector('#scenerySelect').addEventListener('change', e => {
+    penguin.changeScenery(e.target.value);
+  });
+  document.querySelector('#addHat').addEventListener('click', () => penguin.addAccessory('hats'));
+  document.querySelector('#addDecoration').addEventListener('click', () => penguin.addAccessory('decorations'));
+  document.querySelector('#addItem').addEventListener('click', () => penguin.addAccessory('items'));
+  document.querySelector('#addBadge').addEventListener('click', () => penguin.addAccessory('badges'));
+  document.querySelector('#addBowtie').addEventListener('click', () => penguin.addAccessory('bowties'));
+  document.querySelector('#addNecklace').addEventListener('click', () => penguin.addAccessory('necklaces'));
+  document.querySelector('#addSunglasses').addEventListener('click', () => {
+    penguin.addSunglasses();
+    playPenguinSound();
+    const coolPhrases = ["*puts on shades* Deal with it", "*looks super cool*", "*epic sunglasses moment*", "*transforms into cool penguin*", "*radiates awesomeness*"];
+    const phrase = coolPhrases[Math.floor(Math.random() * coolPhrases.length)];
+    const bubble = document.createElement('div');
+    bubble.style.position = 'absolute';
+    bubble.style.background = 'linear-gradient(45deg, #FFD700, #FFA500)';
+    bubble.style.padding = '10px 20px';
+    bubble.style.borderRadius = '20px';
+    bubble.style.boxShadow = '0 2px 10px rgba(255, 165, 0, 0.3)';
+    bubble.style.animation = 'float-up 2s forwards';
+    bubble.style.left = '50%';
+    bubble.style.transform = 'translateX(-50%)';
+    bubble.style.top = '200px';
+    bubble.style.zIndex = '1000';
+    bubble.style.fontStyle = 'italic';
+    bubble.style.color = '#000';
+    bubble.textContent = phrase;
+    document.querySelector('.penguin-container').appendChild(bubble);
+    setTimeout(() => bubble.remove(), 2000);
+  });
+  document.querySelector('#reset').addEventListener('click', () => penguin.reset());
+  document.querySelector('#makeBlink').addEventListener('click', () => {
+    penguin.blink();
+    playPenguinSound();
+  });
+  document.querySelector('#makeWave').addEventListener('click', () => {
+    penguin.wave();
+    playPenguinSound();
+  });
+  document.querySelector('#newQuote').addEventListener('click', () => {
+    const quoteElement = document.querySelector('#penguinQuote');
+    quoteElement.style.opacity = '0';
+    setTimeout(() => {
+      quoteElement.textContent = getRandomQuote();
+      quoteElement.style.opacity = '1';
+    }, 300);
+  });
+  document.querySelector('#savePenguin').addEventListener('click', () => {
+    savePenguinAsImage();
+    celebrateSave();
+  });
+  document.querySelectorAll('select, input[type="text"]').forEach(element => {
+    element.addEventListener('focus', () => {
+      element.style.transform = 'translateY(-2px)';
+    });
+    element.addEventListener('blur', () => {
+      element.style.transform = 'translateY(0)';
+    });
+  });
+  document.querySelector('#sunglassesColorPicker').addEventListener('input', e => {
+    penguin.addSunglasses(e.target.value);
+  });
+  setTimeout(makeRandomPenguinSound, 5000);
+  createSnowflakes();
+};
+function playPenguinSound() {
+  const sounds = ["*squeak*", "*waddle waddle*", "*happy feet*", "*penguin noises*", "*noot noot*", "*cheerful chirp*", "*excited flap*", "*cozy penguin sounds*", "*ice slide whee!*", "*fish please*", "*content penguin sigh*"];
+  const bubble = document.createElement('div');
+  bubble.style.position = 'absolute';
+  bubble.style.background = 'rgba(255, 255, 255, 0.9)';
+  bubble.style.padding = '10px 20px';
+  bubble.style.borderRadius = '20px';
+  bubble.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+  bubble.style.animation = 'float-up 2s forwards';
+  bubble.style.left = Math.random() * 300 + 50 + 'px';
+  bubble.style.top = '200px';
+  bubble.style.zIndex = '1000';
+  bubble.style.fontStyle = 'italic';
+  bubble.style.color = '#1976d2';
+  bubble.textContent = sounds[Math.floor(Math.random() * sounds.length)];
+  document.querySelector('.penguin-container').appendChild(bubble);
+  const penguinSVG = document.querySelector('.penguin svg');
+  penguinSVG.style.animation = 'wiggle 0.5s ease-in-out';
+  setTimeout(() => {
+    bubble.remove();
+    penguinSVG.style.animation = '';
+  }, 2000);
+}</script>
+</head>
+<body>
+    <div class="loading">
+        <svg viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="40" fill="#1976d2"/>
+            <circle cx="35" cy="40" r="5" fill="white"/>
+            <circle cx="65" cy="40" r="5" fill="white"/>
+            <path d="M45 50 L55 50 L50 60 Z" fill="orange"/>
+            <path d="M30 60 Q40 70 30 80" stroke="white" fill="none" stroke-width="3"/>
+            <path d="M70 60 Q60 70 70 80" stroke="white" fill="none" stroke-width="3"/>
+        </svg>
+        <p class="loading-message"></p>
+    </div>
+    <div class="container">
+        <h1><span class="header-decoration">&#x1f427;</span> Penguin Generator <span class="header-decoration">&#x1f427;</span></h1>
+        <div class="name-container">
+            <span class="picker-label">Name your penguin:</span>
+            <input type="text" id="penguinName" value="My Penguin" maxlength="20">
+            <div class="penguin-name">My Penguin</div>
+        </div>
+        <div class="penguin-container">
+            <div class="penguin"></div>
+        </div>
+        <div class="controls">
+            <div>
+                <span class="picker-label">Species:</span>
+                <select id="speciesSelect">
+                    <option value="emperor">Emperor Penguin</option>
+                    <option value="rockhopper">Rockhopper Penguin</option>
+                    <option value="gentoo">Gentoo Penguin</option>
+                    <option value="adelie">Adelie Penguin</option>
+                    <option value="little">Little Blue Penguin</option>
+                </select>
+            </div>
+            <div>
+                <span class="picker-label">Penguin Color:</span>
+                <input type="color" id="colorPicker" class="color-picker" value="#000000">
+            </div>
+            <div>
+                <span class="picker-label">Background Color:</span>
+                <input type="color" id="backgroundPicker" class="background-picker" value="#f5f5f5">
+            </div>
+            <div>
+                <span class="picker-label">Scenery:</span>
+                <select id="scenerySelect">
+                    <option value="arctic">Arctic</option>
+                    <option value="underwater">Underwater</option>
+                    <option value="beach">Beach</option>
+                    <option value="none">No Background</option>
+                </select>
+            </div>
+            <button id="addHat">Add Hat</button>
+            <button id="addDecoration">Add Decoration</button>
+            <button id="addItem">Add Item</button>
+            <button id="addBadge">Add Badge</button>
+            <button id="addBowtie">Add Bowtie</button>
+            <button id="addNecklace">Add Necklace</button> <!-- Add necklace button to controls div -->
+            <button id="addSunglasses">Add Epic Sunglasses</button> <!-- Add sunglasses button -->
+            <div>
+                <span class="picker-label">Sunglasses Color:</span>
+                <input type="color" id="sunglassesColorPicker" class="color-picker" value="#000000">
+            </div>
+            <button id="reset">Reset Penguin</button>
+            <button id="makeBlink">Make Blink</button>
+            <button id="makeWave">Make Wave</button>
+            <button id="savePenguin">Save Penguin</button>
+        </div>
+        <div class="quote-container">
+            <h3>Penguin Wisdom</h3>
+            <p class="quote-text" id="penguinQuote">If penguins wore pants, would they wear them on all legs or just the back ones?</p>
+            <button class="new-quote-btn" id="newQuote">New Quote</button>
+        </div>
+    </div>
+</body>
+</html>
