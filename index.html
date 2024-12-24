@@ -1,0 +1,106 @@
+<html><head><base href="/" />
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(45deg, #90EE90, #98FB98);
+    font-family: 'Comic Sans MS', cursive;
+  }
+
+  .container {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .character {
+    width: 200px;
+    height: 200px;
+    margin: 20px;
+    animation: robotDance 2s infinite;
+  }
+
+  .lyrics {
+    font-size: 24px;
+    color: #333;
+    margin: 20px;
+    animation: colorChange 3s infinite;
+  }
+
+  .heart {
+    display: inline-block;
+    animation: pulse 1s infinite;
+    color: #00FF00;
+  }
+
+  @keyframes robotDance {
+    0% { transform: translateY(0) rotate(0deg); }
+    25% { transform: translateY(-20px) rotate(-5deg); }
+    50% { transform: translateY(0) rotate(0deg); }
+    75% { transform: translateY(-20px) rotate(5deg); }
+    100% { transform: translateY(0) rotate(0deg); }
+  }
+
+  @keyframes colorChange {
+    0% { color: #228B22; }
+    50% { color: #32CD32; }
+    100% { color: #228B22; }
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+  }
+
+  .circuit-line {
+    font-size: 24px;
+    animation: flow 3s infinite linear;
+    position: absolute;
+    color: #00FF00;
+    opacity: 0.5;
+  }
+
+  @keyframes flow {
+    0% { transform: translateY(0) translateX(0); opacity: 1; }
+    100% { transform: translateY(-100px) translateX(100px); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <img src="Vee_full_icon.png" alt="Vee Robot" class="character">
+    <div class="lyrics">
+      🤖 My name is Vee! <br>
+      🤖 Without the tee! <br>
+      <span class="heart">💚</span>
+    </div>
+  </div>
+
+  <script>
+    function createCircuitEffects() {
+      const circuits = ['⌬', '◈', '⌘', '⌥'];
+      const container = document.querySelector('.container');
+      
+      setInterval(() => {
+        const circuit = document.createElement('div');
+        circuit.className = 'circuit-line';
+        circuit.textContent = circuits[Math.floor(Math.random() * circuits.length)];
+        circuit.style.left = Math.random() * window.innerWidth + 'px';
+        circuit.style.top = window.innerHeight + 'px';
+        document.body.appendChild(circuit);
+
+        setTimeout(() => {
+          circuit.remove();
+        }, 3000);
+      }, 500);
+    }
+
+    createCircuitEffects();
+  </script>
+</body></html>
