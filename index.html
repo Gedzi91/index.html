@@ -1,0 +1,479 @@
+<html><head><base href="." /><title>Interactive Robotics Lab</title>
+<style>
+:root {
+  --robot-color: #3498db;
+  --accent: #e74c3c;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #1a1a1a;
+  color: #fff;
+  font-family: 'Arial', sans-serif;
+}
+
+.robot-container {
+  position: relative;
+  width: 300px;
+  height: 400px;
+  margin: 50px auto;
+}
+
+.robot {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.head {
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  background: var(--robot-color);
+  border-radius: 25px;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  animation: hover 2s infinite ease-in-out;
+}
+
+.eye {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  background: var(--accent);
+  border-radius: 50%;
+  top: 40px;
+  animation: blink 4s infinite;
+}
+
+.eye.left { left: 30px; }
+.eye.right { right: 30px; }
+
+.body {
+  position: absolute;
+  width: 200px;
+  height: 250px;
+  background: var(--robot-color);
+  top: 160px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 40px;
+}
+
+.arm {
+  position: absolute;
+  width: 40px;
+  height: 180px;
+  background: var(--robot-color);
+  top: 50px;
+}
+
+.arm.left {
+  left: -50px;
+  transform-origin: top center;
+  animation: waveLeft 3s infinite;
+}
+
+.arm.right {
+  right: -50px;
+  transform-origin: top center;
+  animation: waveRight 3s infinite;
+}
+
+.control-panel {
+  margin-top: 20px;
+  padding: 20px;
+  background: #2c3e50;
+  border-radius: 10px;
+}
+
+button {
+  padding: 10px 20px;
+  margin: 5px;
+  background: var(--accent);
+  border: none;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+button:hover {
+  transform: scale(1.1);
+}
+
+@keyframes hover {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-10px); }
+}
+
+@keyframes blink {
+  0%, 48%, 52%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(0.1); }
+}
+
+@keyframes waveLeft {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(45deg); }
+}
+
+@keyframes waveRight {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-45deg); }
+}
+
+/* Add new explosion animation styles */
+@keyframes explode {
+  0% { 
+    transform: scale(1); 
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0.5;
+  }
+  100% { 
+    transform: scale(2); 
+    opacity: 0;
+  }
+}
+
+.exploding .robot-part {
+  animation: explode 1s forwards;
+}
+
+/* Add robot part class for explosion animation */
+.head, .body, .arm, .eye {
+  transition: all 0.3s ease;
+}
+
+.exploding .head { animation-delay: 0s; }
+.exploding .eye.left { animation-delay: 0.1s; }
+.exploding .eye.right { animation-delay: 0.1s; }
+.exploding .body { animation-delay: 0.2s; }
+.exploding .arm.left { animation-delay: 0.3s; }
+.exploding .arm.right { animation-delay: 0.3s; }
+
+/* Particle styles for explosion effect */
+.particle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: var(--robot-color);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Styles for the dead robot */
+.dead .eye::before,
+.dead .eye::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 4px;
+  background: var(--accent);
+  top: 50%;
+  left: 0;
+  transform-origin: center;
+}
+.dead .eye::before {
+  transform: rotate(45deg);
+}
+.dead .eye::after {
+  transform: rotate(-45deg);
+}
+
+/* Add harm effect styles */
+.harmed {
+  animation: shake 0.5s ease-in-out;
+}
+
+.harmed .eye {
+  background: #ff0000;
+  animation: painBlink 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px) rotate(-5deg); }
+  75% { transform: translateX(10px) rotate(5deg); }
+}
+
+@keyframes painBlink {
+  0%, 100% { transform: scaleY(1); background: #ff0000; }
+  50% { transform: scaleY(0.1); background: #ff6666; }
+}
+
+/* Add damage marks */
+.damage-mark {
+  position: absolute;
+  background: #ff0000;
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+.harmed .damage-mark {
+  opacity: 0.5;
+}
+
+</style>
+</head>
+<body>
+  <h1>Interactive Robot Lab</h1>
+  
+  <div class="robot-container">
+    <div class="robot">
+      <div class="head robot-part">
+        <div class="eye left robot-part"></div>
+        <div class="eye right robot-part"></div>
+      </div>
+      <div class="body robot-part">
+        <div class="arm left robot-part"></div>
+        <div class="arm right robot-part"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="control-panel">
+    <button id="colorBtn">Change Color</button>
+    <button id="danceBtn">Dance Mode</button>
+    <button id="resetBtn">Reset</button>
+    <button id="explodeBtn">Explode!</button>
+    <button id="killBtn">Kill Robot</button>
+    <button id="harmBtn">Harm Robot</button>
+  </div>
+
+<script>
+const robot = document.querySelector('.robot');
+const robotContainer = document.querySelector('.robot-container');
+const root = document.documentElement;
+let isDancing = false;
+let danceInterval;
+let isExploding = false;
+let isDead = false;
+let damageCount = 0;
+const maxDamage = 5;
+
+function changeColor() {
+  const colors = ['#3498db', '#e67e22', '#2ecc71', '#9b59b6', '#f1c40f'];
+  const randomColor = colors[Math.floor(Math.random() * colors.length)];
+  root.style.setProperty('--robot-color', randomColor);
+}
+
+function danceMode() {
+  if (!isDancing) {
+    isDancing = true;
+    danceInterval = setInterval(() => {
+      robot.style.transform = `rotate(${Math.random() * 20 - 10}deg)`;
+      changeColor();
+    }, 500);
+  } else {
+    resetRobot();
+  }
+}
+
+function resetRobot() {
+  isDancing = false;
+  isExploding = false;
+  isDead = false;
+  damageCount = 0;
+  clearInterval(danceInterval);
+  robot.style.transform = 'rotate(0deg)';
+  root.style.setProperty('--robot-color', '#3498db');
+  root.style.setProperty('--accent', '#e74c3c');
+  robot.classList.remove('exploding', 'dead', 'harmed');
+  
+  // Reset arm positions
+  const leftArm = document.querySelector('.arm.left');
+  const rightArm = document.querySelector('.arm.right');
+  leftArm.style.transform = '';
+  rightArm.style.transform = '';
+  
+  // Remove damage marks
+  document.querySelectorAll('.damage-mark').forEach(mark => mark.remove());
+
+  // Restore animations
+  document.querySelectorAll('.robot-part').forEach(part => {
+    part.style.animation = '';
+  });
+  
+  // Remove any existing particles
+  const particles = document.querySelectorAll('.particle');
+  particles.forEach(particle => particle.remove());
+}
+
+function createParticle(x, y) {
+  const particle = document.createElement('div');
+  particle.className = 'particle';
+  particle.style.left = x + 'px';
+  particle.style.top = y + 'px';
+  
+  const angle = Math.random() * Math.PI * 2;
+  const velocity = 5 + Math.random() * 5;
+  const dx = Math.cos(angle) * velocity;
+  const dy = Math.sin(angle) * velocity;
+  
+  robotContainer.appendChild(particle);
+  
+  let posX = x;
+  let posY = y;
+  
+  const animate = () => {
+    if (isExploding) {
+      posX += dx;
+      posY += dy;
+      particle.style.left = posX + 'px';
+      particle.style.top = posY + 'px';
+      particle.style.opacity = parseFloat(particle.style.opacity || 1) - 0.02;
+      
+      if (parseFloat(particle.style.opacity) > 0) {
+        requestAnimationFrame(animate);
+      } else {
+        particle.remove();
+      }
+    }
+  };
+  
+  animate();
+}
+
+function explodeRobot() {
+  if (!isExploding) {
+    isExploding = true;
+    robot.classList.add('exploding');
+    
+    // Create explosion particles
+    const robotRect = robot.getBoundingClientRect();
+    for (let i = 0; i < 50; i++) {
+      const x = robotRect.left + Math.random() * robotRect.width;
+      const y = robotRect.top + Math.random() * robotRect.height;
+      createParticle(x - robotRect.left, y - robotRect.top);
+    }
+    
+    // Reset after explosion animation
+    setTimeout(resetRobot, 1500);
+  }
+}
+
+function killRobot() {
+  if (!isDead) {
+    isDead = true;
+    root.style.setProperty('--robot-color', '#34343c');
+    root.style.setProperty('--accent', '#cc0000');
+    
+    // Make eyes X shapes using pseudo elements
+    const style = document.createElement('style');
+    style.textContent = `
+      .dead .eye::before,
+      .dead .eye::after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 4px;
+        background: var(--accent);
+        top: 50%;
+        left: 0;
+        transform-origin: center;
+      }
+      .dead .eye::before {
+        transform: rotate(45deg);
+      }
+      .dead .eye::after {
+        transform: rotate(-45deg);
+      }
+    `;
+    document.head.appendChild(style);
+    
+    robot.classList.add('dead');
+    
+    // Slump the robot
+    robot.style.transform = 'rotate(15deg)';
+    
+    // Drop arms
+    const leftArm = document.querySelector('.arm.left');
+    const rightArm = document.querySelector('.arm.right');
+    leftArm.style.transform = 'rotate(-70deg)';
+    rightArm.style.transform = 'rotate(70deg)';
+    
+    // Stop all animations
+    document.querySelectorAll('.robot-part').forEach(part => {
+      part.style.animation = 'none';
+    });
+  }
+}
+
+function harmRobot() {
+  if (!isDead && !isExploding) {
+    damageCount++;
+    robot.classList.add('harmed');
+    
+    // Create random damage mark
+    const damageSize = Math.random() * 20 + 10;
+    const mark = document.createElement('div');
+    mark.className = 'damage-mark';
+    mark.style.width = damageSize + 'px';
+    mark.style.height = damageSize + 'px';
+    
+    // Random position on robot
+    const robotRect = robot.getBoundingClientRect();
+    const x = Math.random() * robotRect.width;
+    const y = Math.random() * robotRect.height;
+    mark.style.left = x + 'px';
+    mark.style.top = y + 'px';
+    
+    robot.appendChild(mark);
+    
+    // Flash robot red
+    root.style.setProperty('--robot-color', '#ff6666');
+    setTimeout(() => {
+      root.style.setProperty('--robot-color', '#3498db');
+      robot.classList.remove('harmed');
+    }, 500);
+    
+    // If damage threshold reached, kill robot
+    if (damageCount >= maxDamage) {
+      setTimeout(killRobot, 600);
+    }
+  }
+}
+
+// Add event listeners
+document.getElementById('colorBtn').addEventListener('click', changeColor);
+document.getElementById('danceBtn').addEventListener('click', danceMode);
+document.getElementById('resetBtn').addEventListener('click', resetRobot);
+document.getElementById('explodeBtn').addEventListener('click', explodeRobot);
+document.getElementById('killBtn').addEventListener('click', killRobot);
+document.getElementById('harmBtn').addEventListener('click', harmRobot);
+
+// Update keyboard controls
+document.addEventListener('keydown', (e) => {
+  switch(e.key) {
+    case 'c':
+      changeColor();
+      break;
+    case 'd':
+      danceMode();
+      break;
+    case 'r':
+      resetRobot();
+      break;
+    case 'e':
+      explodeRobot();
+      break;
+    case 'k':
+      killRobot();
+      break;
+    case 'h':
+      harmRobot();
+      break;
+  }
+});
+</script>
+</body></html>
