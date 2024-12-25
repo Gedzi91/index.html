@@ -1,0 +1,191 @@
+<html><head><base href="." />
+<style>
+body {
+    margin: 0;
+    overflow: hidden;
+    background: black;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: "Courier New", monospace;
+}
+
+.message {
+    position: fixed;
+    color: #ff0000;
+    font-size: 48px;
+    text-align: center;
+    text-shadow: 0 0 10px #ff0000;
+    z-index: 100;
+    animation: pulse 2s infinite;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+}
+
+.sliding-header {
+    position: fixed;
+    color: #ff0000;
+    font-size: 48px;
+    font-weight: bold;
+    text-align: center;
+    text-shadow: 0 0 20px #ff0000, 0 0 30px #ff0000, 0 0 40px #ff0000;
+    z-index: 100;
+    top: 5%;
+    white-space: nowrap;
+    animation: slideAcross 20s linear infinite, headerPulse 2s infinite;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.header-image {
+    width: 128px;
+    height: 128px;
+    vertical-align: middle;
+    filter: drop-shadow(0 0 15px #ff0000);
+    object-fit: contain;
+    animation: glowPulse 2s infinite;
+}
+
+.scyther-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    position: fixed;
+    top: 40%;
+    padding: 0 50px;
+    z-index: 100;
+}
+
+.scyther-image {
+    width: 600px;
+    height: auto;
+    animation: float 3s ease-in-out infinite;
+}
+
+.scyther-image.left {
+    transform: scaleX(-1);
+}
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+    100% { transform: translateY(0px); }
+}
+
+@keyframes pulse {
+    0% { text-shadow: 0 0 10px #ff0000; }
+    50% { text-shadow: 0 0 30px #ff0000, 0 0 40px #ff0000; }
+    100% { text-shadow: 0 0 10px #ff0000; }
+}
+
+@keyframes headerPulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+@keyframes glowPulse {
+    0% { filter: drop-shadow(0 0 15px #ff0000); }
+    50% { filter: drop-shadow(0 0 25px #ff0000); }
+    100% { filter: drop-shadow(0 0 15px #ff0000); }
+}
+
+@keyframes slideAcross {
+    0% { transform: translateX(100vw); }
+    45% { transform: translateX(-100vw); }
+    50% { transform: translateX(-100vw); }
+    95% { transform: translateX(100vw); }
+    100% { transform: translateX(100vw); }
+}
+
+canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+</style>
+</head>
+<body>
+<audio id="bgAudio" autoplay loop>
+    <source src="spotifydown.com - ALIEN DEATH.mp3" type="audio/mp3">
+</audio>
+<canvas id="matrix"></canvas>
+<div class="sliding-header">
+    <img src="scyther.png" alt="A stylized image of the Grim Reaper outlined in red against a black background with SCYTHE GANG text" class="header-image" width="128" height="128">
+    Straight From 2022
+    <img src="scyther.png" alt="A stylized image of the Grim Reaper outlined in red against a black background with SCYTHE GANG text" class="header-image" width="128" height="128">
+</div>
+<div class="message">SCYTHE GANG SENDS THEIR REGARDS</div>
+<div class="scyther-container">
+    <img src="scyther.png" alt="A stylized image of the Grim Reaper outlined in red against a black background with SCYTHE GANG text" class="scyther-image left" width="600" height="600">
+    <img src="scyther.png" alt="A stylized image of the Grim Reaper outlined in red against a black background with SCYTHE GANG text" class="scyther-image" width="600" height="600">
+</div>
+
+<script>
+// Auto-play audio when page loads
+window.onload = function() {
+    const audio = document.getElementById('bgAudio');
+    audio.play();
+}
+
+const canvas = document.getElementById('matrix');
+const ctx = canvas.getContext('2d');
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()';
+const fontSize = 14;
+const columns = canvas.width/fontSize;
+const drops = [];
+
+// Initialize the drops
+for (let i = 0; i < columns; i++) {
+    drops[i] = 1;
+}
+
+function draw() {
+    // Add semi-transparent black rectangle to create fade effect
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Set text properties
+    ctx.fillStyle = '#0F0';
+    ctx.font = fontSize + 'px monospace';
+
+    // Loop through drops
+    for (let i = 0; i < drops.length; i++) {
+        // Generate random character
+        const text = chars[Math.floor(Math.random() * chars.length)];
+        
+        // Draw the character
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+        // Reset drop to top when it reaches bottom
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+            drops[i] = 0;
+        }
+
+        drops[i]++;
+    }
+}
+
+// Resize canvas when window is resized
+window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+});
+
+// Animation loop
+setInterval(draw, 33);
+</script>
+</body>
+</html>
