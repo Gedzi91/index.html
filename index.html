@@ -1,0 +1,95 @@
+<html><head><base href="https://cursed-destiny.net/">
+<meta charset="UTF-8">
+<title>САЙТ ОБРЕЧЁННЫХ</title>
+<style>
+  body {
+    background-color: #000;
+    color: #ff0000;
+    font-family: 'Courier New', monospace;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+  
+  #container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    position: relative;
+  }
+  
+  .floating-text {
+    position: absolute;
+    font-size: 24px;
+    animation: float 10s infinite ease-in-out;
+    text-shadow: 0 0 10px #ff0000;
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(50px, 50px); }
+    50% { transform: translate(-50px, 100px); }
+    75% { transform: translate(-100px, -50px); }
+  }
+  
+  #main-image {
+    width: 300px;
+    height: 300px;
+    border: 5px solid #ff0000;
+    box-shadow: 0 0 20px #ff0000;
+    animation: pulse 2s infinite alternate;
+  }
+  
+  @keyframes pulse {
+    from { filter: brightness(1); }
+    to { filter: brightness(1.5); }
+  }
+  
+  #title {
+    font-size: 48px;
+    margin-top: 20px;
+    text-align: center;
+    animation: glitch 1s infinite;
+  }
+  
+  @keyframes glitch {
+    0% { transform: translate(0) }
+    20% { transform: translate(-5px, 5px) }
+    40% { transform: translate(-5px, -5px) }
+    60% { transform: translate(5px, 5px) }
+    80% { transform: translate(5px, -5px) }
+    100% { transform: translate(0) }
+  }
+</style>
+</head>
+<body>
+  <div id="container">
+    <img id="main-image" src="https://sun9-10.userapi.com/impf/c851128/v851128959/c799d/2bap5EsiGWw.jpg?size=983x983&quality=96&sign=0f1bc7189638adbc633c5633a9b59d19&c_uniq_tag=edHZLxCbzK9RCfF0Fe63kCxhQObg79bGFUEp22l5xLg&type=album" alt="Creepy image of a distorted face">
+    <h1 id="title">САЙТ ОБРЕЧЁННЫХ</h1>
+  </div>
+
+  <script>
+    const phrases = [
+      'Glaza', 'polzet', 'Glaza polzet', 'ОБРЕЧЕН', 'Бинауральный Бегемот',
+      'Судьба предрешена', 'Нет выхода', 'Тьма поглощает', 'Шепот в тишине'
+    ];
+    
+    function createFloatingText() {
+      const text = document.createElement('div');
+      text.classList.add('floating-text');
+      text.textContent = phrases[Math.floor(Math.random() * phrases.length)];
+      text.style.left = `${Math.random() * window.innerWidth}px`;
+      text.style.top = `${Math.random() * window.innerHeight}px`;
+      document.body.appendChild(text);
+      
+      setTimeout(() => {
+        document.body.removeChild(text);
+      }, 10000);
+    }
+    
+    setInterval(createFloatingText, 2000);
+  </script>
+</body>
+</html>
