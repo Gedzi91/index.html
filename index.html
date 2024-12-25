@@ -1,0 +1,279 @@
+<html><head><base href="/" />
+<title>Extraterrestrial Exchange Student Dating Sim</title>
+<style>
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: url('/a/bd24a23a-10dc-418c-b314-39f58a0e9ef3') no-repeat center center fixed;
+    background-size: cover;
+    color: #fff;
+    margin: 0;
+    padding: 20px;
+    line-height: 1.6;
+}
+
+#game-container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: rgba(42, 42, 42, 0.9);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+#dialogue-box {
+    background: rgba(0,0,0,0.7);
+    padding: 20px;
+    margin: 20px 0;
+    border-radius: 5px;
+    min-height: 100px;
+}
+
+#character-image {
+    width: 400px;
+    height: 400px;
+    margin: 0 auto;
+    display: block;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.choice-btn {
+    background: #4a4a4a;
+    border: none;
+    padding: 10px 20px;
+    margin: 5px;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+    text-align: left;
+}
+
+.choice-btn:hover {
+    background: #666;
+    transform: translateY(-2px);
+}
+
+#stats {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(0,0,0,0.8);
+    padding: 10px;
+    border-radius: 5px;
+}
+
+#affection {
+    color: #ff69b4;
+    font-weight: bold;
+}
+
+.ending {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.9);
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+}
+</style>
+</head>
+<body>
+
+<div id="game-container">
+    <h1>Extraterrestrial Exchange Student Dating Sim</h1>
+    <div id="stats">
+        Affection Level: <span id="affection">0</span>♥<br>
+        Time Remaining: <span id="time">30:00</span>
+    </div>
+    <img id="character-image" src="/a/50bc1a28-5a31-414f-8233-2750762c31df" alt="Retro-styled alien character smoking against a green background">
+    <div id="dialogue-box">
+        Welcome to your first day of college! You're about to meet your mysterious new roommate...
+    </div>
+    <div id="choices"></div>
+</div>
+
+<div id="good-ending" class="ending">
+    <h2>True Love!</h2>
+    <p>You've found love beyond the stars! Your alien companion trusts you completely with their secret, and you've decided to face the future together.</p>
+    <button onclick="restartGame()">Play Again</button>
+</div>
+
+<div id="bad-ending" class="ending">
+    <h2>Just Friends</h2>
+    <p>While you've made a good friend, the romantic connection never quite developed...</p>
+    <button onclick="restartGame()">Try Again</button>
+</div>
+
+<script>
+const gameState = {
+    affection: 0,
+    timeRemaining: 1800,
+    currentScene: 0,
+    timerInterval: null
+};
+
+const scenes = [
+    {
+        text: "Hi there! I'm Zyx- I mean, Zack! I'm your new roommate! *adjusts human disguise nervously* I really like Earth... uh, I mean, this town!",
+        image: "/a/50bc1a28-5a31-414f-8233-2750762c31df",
+        choices: [
+            {
+                text: "You're kind of cute when you're nervous!",
+                affection: 10,
+                nextText: "Oh! My face pigmentation is changing color... is this what humans call blushing? It's a peculiar sensation!"
+            },
+            {
+                text: "Are you feeling okay? You seem a bit... different.",
+                affection: 5,
+                nextText: "Different? No, no! I am perfectly normal! See? *attempts to whistle but makes spaceship noises instead*"
+            },
+            {
+                text: "Nice to meet you! Want to get coffee and get to know each other?",
+                affection: 15,
+                nextText: "Coffee! Yes! The bitter bean juice that humans are so fond of! I would love to participate in this ritual!"
+            }
+        ]
+    },
+    {
+        text: "*At the campus café* So, tell me about your... family?",
+        image: "/a/bd672358-f40f-4701-8e16-7103eba2e3c5",
+        choices: [
+            {
+                text: "Your eyes are really unique... they almost seem to glow.",
+                affection: 15,
+                nextText: "*Blushes purple* Oh! That's because... good genes? Yes, good Earth genes from my Earth parents!"
+            },
+            {
+                text: "What's your favorite thing about Earth- I mean, about living here?",
+                affection: 10,
+                nextText: "The way your species- I mean, we humans have developed such fascinating ways to communicate and show affection!"
+            },
+            {
+                text: "You don't have to pretend with me. I like you just as you are.",
+                affection: 20,
+                nextText: "*Looks surprised and touched* You... you mean that? No one's ever said something so kind to me before..."
+            }
+        ]
+    },
+    {
+        text: "*During lunch* Oh no, how do I operate this 'sandwich' device?",
+        image: "/a/5900770f-fcce-4c3e-9a21-66913973cdbf",
+        choices: [
+            {
+                text: "Here, let me show you. *Gently demonstrates*",
+                affection: 20,
+                nextText: "Your kindness and patience make my hearts- I mean, heart flutter!"
+            },
+            {
+                text: "You're adorably clueless sometimes, you know that?",
+                affection: 15,
+                nextText: "Is that a good thing? Your smile suggests it is... I like making you smile!"
+            },
+            {
+                text: "Maybe we should try something easier, like soup?",
+                affection: 10,
+                nextText: "Ah yes! Liquid sustenance! Much more familiar... I mean, comfortable!"
+            }
+        ]
+    },
+    {
+        text: "*Study session in the library* These Earth customs are so complex... but I'm glad I'm learning them with you.",
+        image: "/a/9c500bac-16de-4c19-9cf6-63deb61973a4",
+        choices: [
+            {
+                text: "I think I'm falling for you, even if you're not from around here...",
+                affection: 25,
+                nextText: "*Tears of joy float upward* You've made me the happiest being in this galaxy!"
+            },
+            {
+                text: "Want to go stargazing tonight? I bet you know all about the stars.",
+                affection: 20,
+                nextText: "I would love that! I can show you where I'm... I mean, tell you all about constellations!"
+            },
+            {
+                text: "You're the most interesting person I've ever met.",
+                affection: 15,
+                nextText: "And you're the reason I'm so glad I chose Ea- this university!"
+            }
+        ]
+    }
+];
+
+function updateTime() {
+    gameState.timeRemaining--;
+    const minutes = Math.floor(gameState.timeRemaining / 60);
+    const seconds = gameState.timeRemaining % 60;
+    document.getElementById('time').textContent = 
+        `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    
+    if (gameState.timeRemaining <= 0) {
+        endGame();
+    }
+}
+
+function updateAffection(amount) {
+    gameState.affection += amount;
+    document.getElementById('affection').textContent = gameState.affection;
+}
+
+function displayScene(sceneIndex) {
+    if (sceneIndex >= scenes.length) {
+        endGame();
+        return;
+    }
+    
+    const scene = scenes[sceneIndex];
+    document.getElementById('dialogue-box').textContent = scene.text;
+    document.getElementById('character-image').src = scene.image;
+    
+    const choicesDiv = document.getElementById('choices');
+    choicesDiv.innerHTML = '';
+    
+    scene.choices.forEach((choice, index) => {
+        const button = document.createElement('button');
+        button.className = 'choice-btn';
+        button.textContent = choice.text;
+        button.onclick = () => makeChoice(index, choice);
+        choicesDiv.appendChild(button);
+    });
+}
+
+function makeChoice(choiceIndex, choice) {
+    updateAffection(choice.affection);
+    document.getElementById('dialogue-box').textContent = choice.nextText;
+    setTimeout(() => {
+        gameState.currentScene++;
+        displayScene(gameState.currentScene);
+    }, 2000);
+}
+
+function endGame() {
+    clearInterval(gameState.timerInterval);
+    if (gameState.affection >= 50) {
+        document.getElementById('good-ending').style.display = 'block';
+    } else {
+        document.getElementById('bad-ending').style.display = 'block';
+    }
+}
+
+function restartGame() {
+    gameState.affection = 0;
+    gameState.timeRemaining = 1800;
+    gameState.currentScene = 0;
+    document.getElementById('good-ending').style.display = 'none';
+    document.getElementById('bad-ending').style.display = 'none';
+    document.getElementById('affection').textContent = '0';
+    gameState.timerInterval = setInterval(updateTime, 1000);
+    displayScene(0);
+}
+
+// Start the game
+gameState.timerInterval = setInterval(updateTime, 1000);
+displayScene(0);
+</script>
+</body></html>
