@@ -1,0 +1,407 @@
+<html><head><base href="./"><title>Dangerous Monster Containment Facility - HIGH SECURITY</title><style>
+:root {
+    --warning-red: #ff0000;
+    --alert-yellow: #ffff00;
+    --secure-green: #00ff00;
+    --dark-bg: #111;
+}
+
+body {
+    background: #000;
+    color: #fff;
+    font-family: monospace;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.cell {
+    border: 3px solid var(--warning-red);
+    padding: 15px;
+    background: var(--dark-bg);
+    position: relative;
+    overflow: hidden;
+}
+
+.cell::before {
+    content: "⚠ WARNING ⚠";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: var(--warning-red);
+    text-align: center;
+    padding: 5px;
+    animation: pulse 2s infinite;
+}
+
+.monster-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border: 2px solid var(--alert-yellow);
+    margin: 10px 0;
+    cursor: pointer;
+}
+
+.status {
+    color: var(--warning-red);
+    font-weight: bold;
+    margin-top: 10px;
+    text-transform: uppercase;
+}
+
+.danger-meter {
+    width: 100%;
+    height: 20px;
+    background: #333;
+    margin: 10px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.danger-fill {
+    height: 100%;
+    background: var(--warning-red);
+    animation: dangerPulse 3s infinite;
+}
+
+.sound-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 10px;
+}
+
+.sound-button {
+    background: var(--warning-red);
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-family: monospace;
+    font-size: 0.8em;
+    transition: all 0.3s ease;
+}
+
+.sound-button:hover {
+    background: var(--alert-yellow);
+    color: black;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+@keyframes dangerPulse {
+    0% { width: 75%; }
+    50% { width: 90%; }
+    100% { width: 75%; }
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+    border-bottom: 2px solid var(--warning-red);
+    padding-bottom: 20px;
+}
+
+.security-level {
+    color: var(--alert-yellow);
+    font-size: 1.2em;
+    margin: 10px 0;
+}
+
+/* New styles for presentation mode */
+.presentation-mode {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: black;
+    z-index: 1000;
+    display: none;
+}
+
+.presentation-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    width: 80%;
+}
+
+.presentation-image {
+    max-width: 400px;
+    max-height: 400px;
+    margin-bottom: 20px;
+}
+
+.sound-name {
+    color: white;
+    font-size: 24px;
+    margin: 20px;
+    opacity: 0;
+    transition: opacity 0.5s;
+}
+
+.play-all-button {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--warning-red);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-family: monospace;
+    font-size: 1em;
+    z-index: 1001;
+}
+
+.play-all-button:hover {
+    background: var(--alert-yellow);
+    color: black;
+}
+
+.close-presentation {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: var(--warning-red);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-family: monospace;
+    font-size: 1em;
+    z-index: 1001;
+    display: none;
+}
+</style></head><body>
+<div class="header">
+    <h1>SECURE MONSTER CONTAINMENT FACILITY</h1>
+    <div class="security-level">MAXIMUM SECURITY - AUTHORIZED PERSONNEL ONLY</div>
+</div>
+
+<div class="container">
+    <div class="cell" id="cell17">
+        <h2>CELL 17 - TWISTED CRAB MONSTER</h2>
+        <img src="Untitled35_20241218035630.png" alt="Dangerous Crab Monster" class="monster-image">
+        <div class="status">Status: CONTAINED - HIGHLY AGGRESSIVE</div>
+        <div class="danger-meter"><div class="danger-fill"></div></div>
+        <p>Subject exhibits extreme aggression. Blue-red mutation. Heart-shaped optical sensors. Requires reinforced containment.</p>
+        <div class="sound-buttons">
+            <button class="sound-button" data-sound="poppop.ai - An angry monster lets out a loud, bone-chilling scream that echoes through the darkness. The sound is deep, guttural, and filled_0.wav">Scream</button>
+            <button class="sound-button" data-sound="poppop.ai - The sound of a crab monster deep clicking is like the rhythmic snapping or popping noises echoing in a dark and eerie underwater_0.wav">Arrival</button>
+            <button class="sound-button" data-sound="poppop.ai - The sound of deep footsteps resonates through the quiet forest, each step echoing with power and purpose._0.wav">Footsteps</button>
+            <button class="sound-button" data-sound="dandy&apos;s-world-(death)-made-with-Voicemod.mp3">Death</button>
+            <button class="sound-button" data-sound="dandy&apos;s-world-(hit)-made-with-Voicemod.mp3">Hit</button>
+            <button class="sound-button" data-sound="dandy&apos;s-world-(caught-sound)-made-with-Voicemod.mp3">Caught</button>
+        </div>
+    </div>
+
+    <div class="cell" id="cell002">
+        <h2>CELL 002 - CURSED SUNBEAM</h2>
+        <img src="IMG_20241005_024134_998.jpg" alt="Cursed Sunbeam Monster" class="monster-image">
+        <div class="status">Status: CONTAINED - UNSTABLE</div>
+        <div class="danger-meter"><div class="danger-fill"></div></div>
+        <p>Humanoid anomaly. Appears docile but extremely dangerous. Do not make direct eye contact.</p>
+        <div class="sound-buttons">
+            <button class="sound-button" data-sound="dandy&apos;s-world-(caught-sound)-made-with-Voicemod.mp3">Caught</button>
+            <button class="sound-button" data-sound="dandy&apos;s-world-(hit)-made-with-Voicemod.mp3">Hit</button>
+            <button class="sound-button" data-sound="dandy&apos;s-world-(death)-made-with-Voicemod.mp3">Death</button>
+        </div>
+    </div>
+
+    <div class="cell" id="cell13">
+        <h2>CELL 13 - TWISTED PIBBLE</h2>
+        <img src="2024121200031696.png" alt="Twisted Pibble" class="monster-image">
+        <div class="status">Status: CONTAINED - VIOLENT</div>
+        <div class="danger-meter"><div class="danger-fill"></div></div>
+        <p>White entity with pink mutations. Extremely aggressive behavior. Keep behind reinforced barriers.</p>
+        <div class="sound-buttons">
+            <button class="sound-button" data-sound="PebbleBarkNew.mp3 (1).mpeg.ogg">Bark</button>
+            <button class="sound-button" data-sound="poppop.ai - The sound of a dangerous dog with aggressive and intimidating growling, ready to pounce and scare listeners._0 (1).wav">Jumpscare</button>
+            <button class="sound-button" data-sound="poppop.ai - The sound is a low, rumbling growl increasing in intensity, followed by a sudden loud growl that lasts for 7 seconds._0.wav">Growl</button>
+            <button class="sound-button" data-sound="myedit_ai_sfx_1211234623.mp3">Break</button>
+            <button class="sound-button" data-sound="dandy&apos;s-world-(caught-sound)-made-with-Voicemod.mp3">Found</button>
+            <button class="sound-button" data-sound="dandy&apos;s-world-(hit)-made-with-Voicemod.mp3">Hit</button>
+            <button class="sound-button" data-sound="dandy&apos;s-world-(death)-made-with-Voicemod.mp3">Kill</button>
+            <button class="sound-button" data-sound="lol.wav">Steps</button>
+        </div>
+    </div>
+
+    <div class="cell" id="cell006">
+        <h2>CELL 006 - FYTRE DEMON</h2>
+        <img src="IMG_20241206_001638_766.jpg" alt="Fytre Demon" class="monster-image">
+        <div class="status">Status: CONTAINED - EXTREME HEAT WARNING</div>
+        <div class="danger-meter"><div class="danger-fill"></div></div>
+        <p>Fire-based entity. Temperature exceeds 1000&#xb0;C. Extreme caution advised. Fire suppression systems active.</p>
+        <div class="sound-buttons">
+            <button class="sound-button" data-sound="DIE.mp3">Die</button>
+            <button class="sound-button" data-sound="fireball.wav">Fireball</button>
+            <button class="sound-button" data-sound="foots.mp4">Steps</button>
+            <button class="sound-button" data-sound="dandy&apos;s-world-(caught-sound)-made-with-Voicemod.mp3">Found</button>
+            <button class="sound-button" data-sound="dandy&apos;s-world-(hit)-made-with-Voicemod.mp3">Hit</button>
+            <button class="sound-button" data-sound="dandy&apos;s-world-(death)-made-with-Voicemod.mp3">Death</button>
+        </div>
+    </div>
+
+    <div class="cell" id="cell003">
+        <h2>CELL 003 - SPIKEOSTON</h2>
+        <img src="IMG_20241204_004119_137.jpg" alt="Spikeoston Monster" class="monster-image">
+        <div class="status">Status: CONTAINED - BIOLOGICAL HAZARD</div>
+        <div class="danger-meter"><div class="danger-fill"></div></div>
+        <p>Amorphous entity with rapid shape-shifting abilities. Highly toxic. Bio-containment protocols in effect.</p>
+        <div class="sound-buttons">
+            <button class="sound-button" data-sound="dandy&apos;s-world-(caught-sound)-made-with-Voicemod.mp3">Found</button>
+            <button class="sound-button" data-sound="dandy&apos;s-world-(hit)-made-with-Voicemod.mp3">Hit</button>
+            <button class="sound-button" data-sound="dandy&apos;s-world-(death)-made-with-Voicemod.mp3">Death</button>
+        </div>
+    </div>
+
+    <div class="cell" id="cell004">
+        <h2>CELL 004 - MUSHROOMO (CLASS: EUCLID)</h2>
+        <img src="IMG_20241206_001652_478.jpg" alt="Mushroomo Entity" class="monster-image">
+        <div class="status">Status: CONTAINED - REALITY BENDER</div>
+        <div class="danger-meter"><div class="danger-fill"></div></div>
+        <p>Reality-altering fungoid entity. Euclid class threat. Psychic shielding required for all personnel.</p>
+        <div class="sound-buttons">
+            <button class="sound-button" data-sound="dandy&apos;s-world-(caught-sound)-made-with-Voicemod.mp3">Found</button>
+            <button class="sound-button" data-sound="dandy&apos;s-world-(hit)-made-with-Voicemod.mp3">Hit</button>
+            <button class="sound-button" data-sound="dandy&apos;s-world-(death)-made-with-Voicemod.mp3">Death</button>
+        </div>
+    </div>
+
+    <div class="cell" id="cell007">
+        <h2>CELL 007 - EMBERLON</h2>
+        <img src="Untitled5_20241212160124.png" alt="Emberlon Monster" class="monster-image">
+        <div class="status">Status: CONTAINED - SONIC HAZARD</div>
+        <div class="danger-meter"><div class="danger-fill"></div></div>
+        <p>Orange-hued entity with sonic manipulation abilities. Multiple vocalization patterns detected. Auditory protection required.</p>
+        <div class="sound-buttons">
+            <button class="sound-button" data-sound="voice-changer-2024-12-12-16-08.mp3">Hiss 1</button>
+            <button class="sound-button" data-sound="voice-changer-2024-12-12-16-10.mp3">Hiss 2</button>
+            <button class="sound-button" data-sound="voice-changer-2024-12-12-16-07.mp3">Growl 1</button>
+            <button class="sound-button" data-sound="voice-changer-2024-12-12-16-10_1.mp3">Growl 2</button>
+            <button class="sound-button" data-sound="LCP-5000 2.wav">Scream 1</button>
+            <button class="sound-button" data-sound="LCP-5000 .wav">Scream 2</button>
+            <button class="sound-button" data-sound="LCP 5000 horror sounds (1).wav">Scream 3</button>
+        </div>
+    </div>
+    
+    <div class="cell" id="cell24">
+        <h2>CELL 24 - FASTY</h2>
+        <img src="a distorted white happy face with exaggerated proportions, a monstrous, abnormally large oval mouth lined with three rows of inner teeth, large, round, black hollow eyes with gray-green bags under them, emitting a.png" alt="Fasty Monster" class="monster-image">
+        <div class="status">Status: CONTAINED - EXTREMELY FAST</div>
+        <div class="danger-meter"><div class="danger-fill"></div></div>
+        <p>High-speed hostile entity. Multiple vocal patterns detected. Extreme caution advised during containment.</p>
+        <div class="sound-buttons">
+            <button class="sound-button" data-sound="a_scary_arrival_soun.mp3">Arrival 1</button>
+            <button class="sound-button" data-sound="a_scary_arrival_soun (1).mp3">Arrival 2</button>
+            <button class="sound-button" data-sound="a_scary_jumpscare_so.mp3">Rebound</button>
+            <button class="sound-button" data-sound="a_scary_jumpscare_so (1).mp3">Jumpscare 1</button>
+            <button class="sound-button" data-sound="a_scary_jumpscare_so (2).mp3">Jumpscare 2</button>
+            <button class="sound-button" data-sound="a_scary_jumpscare_so (3).mp3">Jumpscare 3</button>
+        </div>
+    </div>
+</div>
+
+<button class="play-all-button">PLAY ALL SOUNDS SEQUENCE</button>
+<div class="presentation-mode">
+    <button class="close-presentation">EXIT PRESENTATION</button>
+    <div class="presentation-content">
+        <img class="presentation-image">
+        <div class="sound-name"></div>
+    </div>
+</div>
+
+<script>document.addEventListener('DOMContentLoaded', function () {
+  const cells = document.querySelectorAll('.cell');
+  let currentAudio = null;
+  cells.forEach(cell => {
+    cell.addEventListener('mouseover', function () {
+      this.style.transform = 'scale(1.02)';
+      this.style.transition = 'transform 0.3s ease';
+    });
+    cell.addEventListener('mouseout', function () {
+      this.style.transform = 'scale(1)';
+    });
+  });
+  document.querySelectorAll('.sound-button').forEach(button => {
+    button.addEventListener('click', function () {
+      const soundFile = this.getAttribute('data-sound');
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+      }
+      currentAudio = new Audio(soundFile);
+      currentAudio.play();
+    });
+  });
+  const presentationMode = document.querySelector('.presentation-mode');
+  const presentationImage = document.querySelector('.presentation-image');
+  const soundName = document.querySelector('.sound-name');
+  const playAllButton = document.querySelector('.play-all-button');
+  const closeButton = document.querySelector('.close-presentation');
+  function getAllMonsterData() {
+    const monsters = [];
+    cells.forEach(cell => {
+      const monster = {
+        name: cell.querySelector('h2').textContent,
+        image: cell.querySelector('img').src,
+        sounds: Array.from(cell.querySelectorAll('.sound-button')).map(button => ({
+          name: button.textContent,
+          file: button.getAttribute('data-sound')
+        }))
+      };
+      monsters.push(monster);
+    });
+    return monsters;
+  }
+  async function playSequence() {
+    const monsters = getAllMonsterData();
+    presentationMode.style.display = 'block';
+    closeButton.style.display = 'block';
+    for (const monster of monsters) {
+      presentationImage.src = monster.image;
+      for (const sound of monster.sounds) {
+        soundName.style.opacity = '0';
+        await new Promise(resolve => setTimeout(resolve, 500));
+        soundName.textContent = `${monster.name}\n${sound.name}`;
+        soundName.style.opacity = '1';
+        const audio = new Audio(sound.file);
+        await new Promise(resolve => {
+          audio.play();
+          audio.onended = resolve;
+        });
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    }
+    presentationMode.style.display = 'none';
+    closeButton.style.display = 'none';
+  }
+  playAllButton.addEventListener('click', playSequence);
+  closeButton.addEventListener('click', () => {
+    presentationMode.style.display = 'none';
+    closeButton.style.display = 'none';
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+    }
+  });
+});</script>
+
+</body></html>
