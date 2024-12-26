@@ -1,0 +1,477 @@
+<html><head><base href="https://websim.ai/c/shoegaze-kelp-forest-oxbow-bitmap-semiotic-market">
+<title>ShoegazeKelpForest - Oxbow Bitmap & Semiotic Market</title>
+<style>
+  body { 
+    margin: 0;
+    padding: 0;
+    background-color: #000;
+    color: #0f0;
+    font-family: 'Courier New', monospace;
+    overflow: hidden;
+  }
+  #canvas {
+    width: 100vw;
+    height: 100vh;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  #webgl-canvas {
+    width: 100vw;
+    height: 100vh;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0.7;
+    mix-blend-mode: screen;
+  }
+  #ascii {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    white-space: pre;
+    overflow: hidden;
+    opacity: 0.5;
+    mix-blend-mode: screen;
+  }
+</style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<canvas id="webgl-canvas"></canvas>
+<div id="ascii"></div>
+
+<script type="x-shader/x-vertex" id="vertexShader">
+  attribute vec4 aVertexPosition;
+  void main() {
+    gl_Position = aVertexPosition;
+  }
+</script>
+
+<script type="x-shader/x-fragment" id="fragmentShader">
+  precision highp float;
+  
+  uniform float uTime;
+  uniform vec2 uResolution;
+  
+  float random(vec2 st) {
+    return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
+  }
+
+  float noise(vec2 st) {
+    vec2 i = floor(st);
+    vec2 f = fract(st);
+    float a = random(i);
+    float b = random(i + vec2(1.0, 0.0));
+    float c = random(i + vec2(0.0, 1.0));
+    float d = random(i + vec2(1.0, 1.0));
+    vec2 u = f * f * (3.0 - 2.0 * f);
+    return mix(a, b, u.x) + (c - a)* u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
+  }
+
+  float fbm(vec2 st) {
+    float value = 0.0;
+    float amplitude = 0.5;
+    float frequency = 0.;
+    for (int i = 0; i < 6; i++) {
+      value += amplitude * noise(st);
+      st *= 2.0;
+      amplitude *= 0.5;
+    }
+    return value;
+  }
+
+  vec3 kelp(vec2 st, float time) {
+    float y = st.y;
+    float x = st.x + sin(y * 10.0 + time) * 0.1;
+    float k = fbm(vec2(x * 3.0, y * 0.5 + time * 0.1));
+    return vec3(0.0, k * 0.5, k * 0.3);
+  }
+
+  vec2 rotate2D(vec2 _st, float _angle) {
+    _st -= 0.5;
+    _st =  mat2(cos(_angle),-sin(_angle),
+                sin(_angle),cos(_angle)) * _st;
+    _st += 0.5;
+    return _st;
+  }
+
+  float grid(vec2 st, float res) {
+    vec2 grid = fract(st*res);
+    return (step(res,grid.x) * step(res,grid.y));
+  }
+
+  void main() {
+    vec2 st = gl_FragCoord.xy/uResolution.xy;
+    st.x *= uResolution.x/uResolution.y;
+    
+    // Maxed out reverb effect
+    vec2 reverbOffset = vec2(
+      sin(uTime * 0.5 + st.y * 10.0),
+      cos(uTime * 0.7 + st.x * 8.0)
+    ) * 0.1;
+    st += reverbOffset;
+    
+    // Maxed out distortion effect
+    vec2 distortOffset = vec2(
+      sin(st.y * 20.0 + uTime),
+      cos(st.x * 15.0 + uTime * 1.2)
+    ) * 0.2;
+    st += distortOffset;
+    
+    // Maxed out dreaminess effect
+    float dream = fbm(st * 3.0 + uTime * 0.1);
+    
+    // Maxed out feedback effect
+    float feedback = fract(st.x * 10.0 + uTime) * fract(st.y * 8.0 - uTime * 0.7);
+    
+    // Kelp forest
+    vec3 kelpColor = kelp(st, uTime);
+    
+    // Underwater color palette
+    vec3 color1 = vec3(0.0, 0.2, 0.4);  // Deep blue
+    vec3 color2 = vec3(0.0, 0.5, 0.3);  // Teal
+    vec3 color3 = vec3(0.1, 0.3, 0.2);  // Dark green
+    
+    vec3 color = mix(
+      mix(color1, color2, dream),
+      color3,
+      feedback
+    );
+    
+    // Add kelp
+    color += kelpColor;
+    
+    // Add subtle pulsing and light rays
+    color += vec3(sin(uTime + st.x * 5.0), cos(uTime + st.y * 7.0), sin(uTime * 0.8)) * 0.2;
+    color += pow(1.0 - st.y, 4.0) * vec3(0.2, 0.3, 0.4) * (0.5 + 0.5 * sin(uTime * 0.2));
+    
+    // Underwater particles
+    float particles = step(0.98, random(st * 1000.0 + uTime * 0.1));
+    color += particles * vec3(1.0, 1.0, 0.8) * 0.5;
+    
+    // 3D Grid
+    vec2 grid_st = st;
+    grid_st = rotate2D(grid_st, uTime * 0.1);  // Rotate grid
+    
+    // Create multiple layers of grids
+    float grid1 = grid(grid_st, 10.0);
+    float grid2 = grid(grid_st, 20.0);
+    float grid3 = grid(grid_st, 40.0);
+    
+    // Combine grids with depth effect
+    float finalGrid = mix(grid1, grid2, 0.5) + grid3 * 0.25;
+    
+    // Apply grid with depth and motion
+    finalGrid *= smoothstep(0.2, 0.8, sin(st.x * 10.0 + uTime) * 0.5 + 0.5);
+    finalGrid *= smoothstep(0.2, 0.8, cos(st.y * 10.0 + uTime) * 0.5 + 0.5);
+    
+    // Add grid to the scene
+    color = mix(color, vec3(1.0), finalGrid * 0.2);
+    
+    gl_FragColor = vec4(color, 1.0);
+  }
+</script>
+
+<script>
+// Bitmap Oxbow Renderer
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+let width, height;
+const pixelSize = 4;
+let pixels;
+
+function resizeCanvas() {
+  width = Math.floor(window.innerWidth / pixelSize);
+  height = Math.floor(window.innerHeight / pixelSize);
+  canvas.width = width * pixelSize;
+  canvas.height = height * pixelSize;
+  pixels = new Uint8ClampedArray(width * height * 4);
+}
+
+function createNoise() {
+  for (let i = 0; i < pixels.length; i += 4) {
+    const value = Math.random() > 0.5 ? 255 : 0;
+    pixels[i] = pixels[i + 1] = pixels[i + 2] = value;
+    pixels[i + 3] = 255;
+  }
+}
+
+function createOxbowPattern(time) {
+  const frequency = 0.02;
+  const amplitude = height / 4;
+  const speed = 0.5;
+
+  for (let x = 0; x < width; x++) {
+    const yOffset = Math.sin((x * frequency + time * speed) * Math.PI * 2) * amplitude;
+    const centerY = height / 2 + yOffset;
+
+    for (let y = 0; y < height; y++) {
+      const index = (y * width + x) * 4;
+      const distanceFromCenter = Math.abs(y - centerY);
+      const threshold = 20 + 10 * Math.sin((x * 0.1 + time * 0.3) * Math.PI * 2);
+
+      if (distanceFromCenter < threshold) {
+        pixels[index] = pixels[index + 1] = pixels[index + 2] = 255;
+      } else {
+        pixels[index] = pixels[index + 1] = pixels[index + 2] = 0;
+      }
+      pixels[index + 3] = 255;
+    }
+  }
+}
+
+function applyKelpForest(time) {
+  const kelpFrequency = 0.05;
+  const kelpAmplitude = 10;
+  const kelpSpeed = 0.3;
+
+  for (let x = 0; x < width; x++) {
+    const kelpOffset = Math.sin((x * kelpFrequency + time * kelpSpeed) * Math.PI * 2) * kelpAmplitude;
+    
+    for (let y = 0; y < height; y++) {
+      const index = (y * width + x) * 4;
+      if (pixels[index] > 0) {
+        const kelpY = y + Math.floor(kelpOffset);
+        if (kelpY >= 0 && kelpY < height) {
+          const kelpIndex = (kelpY * width + x) * 4;
+          pixels[kelpIndex] = 0;
+          pixels[kelpIndex + 1] = 255;
+          pixels[kelpIndex + 2] = 0;
+        }
+      }
+    }
+  }
+}
+
+function applyShoegazeEffect(time) {
+  const blurRadius = 3;
+  const tempPixels = new Uint8ClampedArray(pixels);
+
+  for (let x = 0; x < width; x++) {
+    for (let y = 0; y < height; y++) {
+      let r = 0, g = 0, b = 0, count = 0;
+
+      for (let dx = -blurRadius; dx <= blurRadius; dx++) {
+        for (let dy = -blurRadius; dy <= blurRadius; dy++) {
+          const nx = x + dx;
+          const ny = y + dy;
+
+          if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+            const index = (ny * width + nx) * 4;
+            r += tempPixels[index];
+            g += tempPixels[index + 1];
+            b += tempPixels[index + 2];
+            count++;
+          }
+        }
+      }
+
+      const index = (y * width + x) * 4;
+      pixels[index] = r / count;
+      pixels[index + 1] = g / count;
+      pixels[index + 2] = b / count;
+    }
+  }
+
+  // Add some chromatic aberration
+  const aberrationStrength = 2;
+  for (let x = 0; x < width; x++) {
+    for (let y = 0; y < height; y++) {
+      const index = (y * width + x) * 4;
+      const rIndex = (y * width + Math.min(x + aberrationStrength, width - 1)) * 4;
+      const bIndex = (y * width + Math.max(x - aberrationStrength, 0)) * 4;
+
+      pixels[index] = tempPixels[rIndex];
+      pixels[index + 2] = tempPixels[bIndex + 2];
+    }
+  }
+}
+
+function renderBitmap(time) {
+  createOxbowPattern(time);
+  applyKelpForest(time);
+  applyShoegazeEffect(time);
+
+  const imageData = new ImageData(pixels, width, height);
+  ctx.putImageData(imageData, 0, 0);
+
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(canvas, 0, 0, width, height, 0, 0, canvas.width, canvas.height);
+}
+
+// WebGL Renderer
+const webglCanvas = document.getElementById('webgl-canvas');
+const gl = webglCanvas.getContext('webgl');
+
+if (!gl) {
+  console.error('WebGL not supported');
+  document.body.innerHTML = 'WebGL is not supported in your browser.';
+}
+
+function createShader(gl, type, source) {
+  const shader = gl.createShader(type);
+  gl.shaderSource(shader, source);
+  gl.compileShader(shader);
+  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    console.error('An error occurred compiling the shaders: ' + gl.getShaderInfoLog(shader));
+    gl.deleteShader(shader);
+    return null;
+  }
+  return shader;
+}
+
+const vertexShader = createShader(gl, gl.VERTEX_SHADER, document.getElementById('vertexShader').textContent);
+const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, document.getElementById('fragmentShader').textContent);
+
+const program = gl.createProgram();
+gl.attachShader(program, vertexShader);
+gl.attachShader(program, fragmentShader);
+gl.linkProgram(program);
+
+if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+  console.error('Unable to initialize the shader program: ' + gl.getProgramInfoLog(program));
+}
+
+const positionBuffer = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+const positions = [
+  -1.0,  1.0,
+   1.0,  1.0,
+  -1.0, -1.0,
+   1.0, -1.0,
+];
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+
+const positionAttributeLocation = gl.getAttribLocation(program, 'aVertexPosition');
+gl.enableVertexAttribArray(positionAttributeLocation);
+gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
+
+const timeUniformLocation = gl.getUniformLocation(program, 'uTime');
+const resolutionUniformLocation = gl.getUniformLocation(program, 'uResolution');
+
+function resizeWebGLCanvas() {
+  webglCanvas.width = window.innerWidth;
+  webglCanvas.height = window.innerHeight;
+  gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+}
+
+function renderWebGL(time) {
+  gl.clearColor(0.0, 0.0, 0.0,  1.0);
+  gl.clear(gl.COLOR_BUFFER_BIT);
+
+  gl.useProgram(program);
+  
+  gl.uniform1f(timeUniformLocation, time);
+  gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
+
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+}
+
+// Sparse Semiotic Market simulation
+const semioticChars = '☰☱☲☳☴☵☶☷ᚠᚡᚢᚣᚤᚥᚦᚧᚨᚩᚪᚫᚬᚭᚮᚯᚰᚱᚲᚳᚴᚵᚶᚷᚸᚹᚺᚻᚼᚽᚾᚿᛀᛁᛂᛃᛄᛅᛆᛇᛈᛉᛊᛋᛌᛍᛎᛏᛐᛑᛒᛓᛔᛕᛖᛗᛘᛙᛚᛛᛜᛝᛞᛟᛠᛡᛢᛣᛤᛥᛦᛧᛨᛩᛪ᛫᛬᛭ᛮᛯᛰ';
+const marketItems = ['✿', '☯', '⚛', '☮', '☪', '☸', '✡', '☥', '☫', '☬', '☽', '☼', '♠', '♥', '♦', '♣', '🜀', '🜁', '🜂', '🜃', '🜄', '🜅', '🜆', '🜇', '🜈', '🜉', '🜊', '🜋', '🜌', '🜍', '🜎', '🜏'];
+let asciiWidth, asciiHeight;
+let marketState = [];
+const asciiElement = document.getElementById('ascii');
+
+function updateAsciiDimensions() {
+  asciiWidth = Math.floor(window.innerWidth / 16);  // Increased density
+  asciiHeight = Math.floor(window.innerHeight / 32);
+  asciiElement.style.fontSize = `${window.innerHeight / asciiHeight}px`;
+  asciiElement.style.lineHeight = `${window.innerHeight / asciiHeight}px`;
+  
+  marketState = Array(asciiWidth * asciiHeight).fill().map(() => ({
+    item: marketItems[Math.floor(Math.random() * marketItems.length)],
+    value: Math.random(),
+    trend: Math.random() - 0.5,
+    rune: semioticChars[Math.floor(Math.random() * semioticChars.length)]
+  }));
+}
+
+function updateMarket() {
+  marketState = marketState.map(item => {
+    item.value += item.trend * 0.05;
+    item.value = Math.max(0, Math.min(1, item.value));
+    item.trend += (Math.random() - 0.5) * 0.05;
+    if (Math.random() < 0.01) {  // 1% chance to change rune
+      item.rune = semioticChars[Math.floor(Math.random() * semioticChars.length)];
+    }
+    return item;
+  });
+}
+
+function getSemioticChar(value) {
+  return semioticChars[Math.floor(value * (semioticChars.length - 1))];
+}
+
+let lastAsciiUpdateTime = 0;
+const asciiUpdateInterval = 250;  // Update ASCII every 250ms (4 times per second)
+
+function renderSparseSemioticMarket(time) {
+  if (time - lastAsciiUpdateTime < asciiUpdateInterval) {
+    return;  // Skip this update if not enough time has passed
+  }
+  
+  lastAsciiUpdateTime = time;
+  
+  let marketDisplay = '';
+  
+  updateMarket();
+  
+  for (let y = 0; y < asciiHeight; y++) {
+    for (let x = 0; x < asciiWidth; x++) {
+      const index = y * asciiWidth + x;
+      const item = marketState[index];
+      
+      if (Math.random() < 0.4) {  // Increased density
+        const displayValue = Math.sin(x * 0.2 + y * 0.1 + time * 0.001);
+        if (displayValue > 0.3) {
+          marketDisplay += item.item;
+        } else if (displayValue > -0.3) {
+          marketDisplay += item.rune;
+        } else {
+          marketDisplay += getSemioticChar(item.value);
+        }
+      } else {
+        marketDisplay += ' ';
+      }
+    }
+    marketDisplay += '\n';
+  }
+  
+  asciiElement.textContent = marketDisplay;
+}
+
+function render(time) {
+  resizeCanvas();
+  resizeWebGLCanvas();
+  updateAsciiDimensions();
+
+  renderBitmap(time * 0.001);
+  renderWebGL(time * 0.001);
+  renderSparseSemioticMarket(time);
+
+  requestAnimationFrame(render);
+}
+
+window.addEventListener('resize', () => {
+  resizeCanvas();
+  resizeWebGLCanvas();
+  updateAsciiDimensions();
+});
+
+resizeCanvas();
+resizeWebGLCanvas();
+updateAsciiDimensions();
+createNoise();
+requestAnimationFrame(render);
+</script>
+
+</body></html>
