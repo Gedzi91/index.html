@@ -1,0 +1,291 @@
+<html><head><base href="./"><title>Mini Clicker Adventure</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #1a1a1a;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    overflow: hidden;
+}
+
+.game-container {
+    display: flex;
+    gap: 20px;
+    max-width: 1200px;
+    z-index: 2;
+}
+
+.click-area {
+    background: #2a2a2a;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.main-button {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    border: none;
+    background: url('pou cute.png') center/cover;
+    cursor: pointer;
+    transition: transform 0.1s;
+    margin: 20px;
+}
+
+.main-button:active {
+    transform: scale(0.95);
+}
+
+.upgrades {
+    background: #2a2a2a;
+    padding: 20px;
+    border-radius: 10px;
+    min-width: 300px;
+}
+
+.upgrade-button {
+    background: #4a4a4a;
+    border: none;
+    color: white;
+    padding: 10px;
+    margin: 5px;
+    border-radius: 5px;
+    width: 100%;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.upgrade-button:hover {
+    background: #5a5a5a;
+}
+
+.upgrade-button:disabled {
+    background: #3a3a3a;
+    cursor: not-allowed;
+}
+
+.stats {
+    font-size: 1.2em;
+    margin: 10px 0;
+}
+
+.floating-number {
+    position: absolute;
+    animation: float-up 1s ease-out;
+    pointer-events: none;
+    color: gold;
+    font-weight: bold;
+    z-index: 3;
+}
+
+@keyframes float-up {
+    0% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-100px);
+        opacity: 0;
+    }
+}
+
+.character {
+    width: 100px;
+    height: 100px;
+    position: absolute;
+    transition: all 0.5s;
+    pointer-events: none;
+    z-index: 1;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.spinning {
+    animation: spin 4s linear infinite;
+}
+
+@keyframes diagonal {
+    0% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+    100% {
+        transform: translate(100vw, 100vh) rotate(360deg);
+    }
+}
+
+.diagonal {
+    animation: diagonal 8s linear infinite;
+}
+</style>
+</head>
+<body>
+    <h1>Mini Clicker Adventure</h1>
+    <div class="game-container">
+        <div class="click-area">
+            <div class="stats">
+                Points: <span id="points">0</span><br>
+                Points per Click: <span id="pointsPerClick">1</span><br>
+                Auto-clicks per second: <span id="autoClickRate">0</span>
+            </div>
+            <button class="main-button" id="mainButton"></button>
+        </div>
+        <div class="upgrades">
+            <h2>Upgrades</h2>
+            <button class="upgrade-button" id="clickUpgrade">
+                Upgrade Click (Cost: 10)
+            </button>
+            <button class="upgrade-button" id="autoClickerUpgrade">
+                Buy Auto-Clicker (Cost: 50)
+            </button>
+            <button class="upgrade-button" id="multiplyUpgrade">
+                Multiply Points (Cost: 100)
+            </button>
+        </div>
+    </div>
+
+<script>
+let gameState = {
+    points: 0,
+    pointsPerClick: 1,
+    autoClickRate: 0,
+    upgradeCosts: {
+        click: 10,
+        autoClicker: 50,
+        multiply: 100
+    }
+};
+
+function updateDisplay() {
+    document.getElementById('points').textContent = Math.floor(gameState.points);
+    document.getElementById('pointsPerClick').textContent = gameState.pointsPerClick;
+    document.getElementById('autoClickRate').textContent = gameState.autoClickRate;
+    
+    document.getElementById('clickUpgrade').textContent = 
+        `Upgrade Click (Cost: ${gameState.upgradeCosts.click})`;
+    document.getElementById('autoClickerUpgrade').textContent = 
+        `Buy Auto-Clicker (Cost: ${gameState.upgradeCosts.autoClicker})`;
+    document.getElementById('multiplyUpgrade').textContent = 
+        `Multiply Points (Cost: ${gameState.upgradeCosts.multiply})`;
+    
+    document.getElementById('clickUpgrade').disabled = 
+        gameState.points < gameState.upgradeCosts.click;
+    document.getElementById('autoClickerUpgrade').disabled = 
+        gameState.points < gameState.upgradeCosts.autoClicker;
+    document.getElementById('multiplyUpgrade').disabled = 
+        gameState.points < gameState.upgradeCosts.multiply;
+}
+
+function createFloatingNumber(x, y, amount) {
+    const element = document.createElement('div');
+    element.className = 'floating-number';
+    element.textContent = `+${amount}`;
+    element.style.left = `${x}px`;
+    element.style.top = `${y}px`;
+    document.body.appendChild(element);
+    
+    setTimeout(() => element.remove(), 1000);
+}
+
+function click(x, y) {
+    gameState.points += gameState.pointsPerClick;
+    if (x !== undefined && y !== undefined) {
+        createFloatingNumber(x, y, gameState.pointsPerClick);
+    }
+    updateDisplay();
+}
+
+document.getElementById('mainButton').addEventListener('click', (e) => {
+    click(e.pageX, e.pageY);
+});
+
+document.getElementById('clickUpgrade').addEventListener('click', () => {
+    if (gameState.points >= gameState.upgradeCosts.click) {
+        gameState.points -= gameState.upgradeCosts.click;
+        gameState.pointsPerClick += 1;
+        gameState.upgradeCosts.click = Math.floor(gameState.upgradeCosts.click * 1.5);
+        updateDisplay();
+    }
+});
+
+document.getElementById('autoClickerUpgrade').addEventListener('click', () => {
+    if (gameState.points >= gameState.upgradeCosts.autoClicker) {
+        gameState.points -= gameState.upgradeCosts.autoClicker;
+        gameState.autoClickRate += 1;
+        gameState.upgradeCosts.autoClicker = Math.floor(gameState.upgradeCosts.autoClicker * 1.5);
+        updateDisplay();
+    }
+});
+
+document.getElementById('multiplyUpgrade').addEventListener('click', () => {
+    if (gameState.points >= gameState.upgradeCosts.multiply) {
+        gameState.points -= gameState.upgradeCosts.multiply;
+        gameState.pointsPerClick *= 2;
+        gameState.upgradeCosts.multiply = Math.floor(gameState.upgradeCosts.multiply * 2);
+        updateDisplay();
+    }
+});
+
+setInterval(() => {
+    if (gameState.autoClickRate > 0) {
+        gameState.points += gameState.pointsPerClick * gameState.autoClickRate;
+        updateDisplay();
+    }
+}, 1000);
+
+updateDisplay();
+
+const characters = [
+    'Peter_Griffin.png',
+    'pou cute.png',
+    'Book Character.webp',
+    'Matpat.jpeg',
+    'ksi.jpg',
+    'simple_cartoon_face.png',
+    'goomba_meme.jpg',
+    'toilet_head.jpeg'
+];
+
+function createFloatingCharacter() {
+    const character = document.createElement('img');
+    character.className = 'character';
+    
+    // Randomly choose animation style
+    const animationStyle = Math.floor(Math.random() * 3);
+    if (animationStyle === 0) {
+        character.classList.add('spinning');
+    } else if (animationStyle === 1) {
+        character.classList.add('diagonal');
+    }
+    
+    character.src = characters[Math.floor(Math.random() * characters.length)];
+    character.style.left = `${Math.random() * window.innerWidth}px`;
+    character.style.top = `${Math.random() * window.innerHeight}px`;
+    character.style.transform = `scale(${0.5 + Math.random()})`;
+    document.body.appendChild(character);
+
+    if (animationStyle === 2) {
+        setInterval(() => {
+            character.style.left = `${Math.random() * window.innerWidth}px`;
+            character.style.top = `${Math.random() * window.innerHeight}px`;
+        }, 2000);
+    }
+
+    setTimeout(() => character.remove(), 8000);
+}
+
+// Create characters more frequently
+setInterval(createFloatingCharacter, 1000);
+
+// Create multiple characters initially
+for(let i = 0; i < 5; i++) {
+    createFloatingCharacter();
+}
+</script>
+</body></html>
