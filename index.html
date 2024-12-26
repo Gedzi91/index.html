@@ -1,0 +1,324 @@
+<html><head><base href="/">
+<title>AI Text-to-Shader Generator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+body {
+    margin: 0;
+    background: #111;
+    color: #fff;
+    font-family: 'Arial', sans-serif;
+    overflow: hidden;
+}
+
+.container {
+    display: flex;
+    height: 100vh;
+}
+
+.sidebar {
+    width: 300px;
+    padding: 20px;
+    background: #1a1a1a;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+    overflow-y: auto;
+}
+
+.main {
+    flex: 1;
+    position: relative;
+}
+
+#shaderCanvas {
+    width: 100%;
+    height: 100%;
+}
+
+.input-group {
+    margin-bottom: 20px;
+}
+
+textarea {
+    width: 100%;
+    height: 100px;
+    background: #2a2a2a;
+    border: 1px solid #444;
+    color: #fff;
+    padding: 10px;
+    font-family: monospace;
+    resize: vertical;
+}
+
+button {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.3s;
+}
+
+button:hover {
+    background: #45a049;
+}
+
+.style-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.style-btn {
+    background: #333;
+    padding: 8px;
+    border-radius: 4px;
+}
+
+.style-btn.active {
+    background: #4CAF50;
+}
+
+#currentCode {
+    font-family: monospace;
+    font-size: 12px;
+    white-space: pre-wrap;
+    margin-top: 20px;
+    padding: 10px;
+    background: #2a2a2a;
+    border-radius: 4px;
+}
+
+.zoom-controls {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.zoom-btn {
+    background: rgba(0,0,0,0.5);
+    color: white;
+    border: 1px solid white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.zoom-btn:hover {
+    background: rgba(0,0,0,0.7);
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="sidebar">
+        <div class="input-group">
+            <h3>Enter Your Shader Prompt</h3>
+            <textarea id="prompt" placeholder="Describe the shader effect you want to create...">draw a happy smiley face bouncing around with a rainbow trail</textarea>
+        </div>
+        
+        <div class="input-group">
+            <h3>Style Presets</h3>
+            <div class="style-buttons">
+                <button class="style-btn" data-style="cosmic">Cosmic</button>
+                <button class="style-btn" data-style="geometric">Geometric</button>
+                <button class="style-btn" data-style="organic">Organic</button>
+                <button class="style-btn" data-style="glitch">Glitch Art</button>
+                <button class="style-btn" data-style="fractal">Fractal</button>
+                <button class="style-btn" data-style="liquid">Liquid</button>
+                <button class="style-btn" data-style="realistic-trippy">Realistic Trippy</button>
+                <button class="style-btn" data-style="very-trippy">VERY TRIPPY</button>
+                <button class="style-btn" data-style="pixelated">Pixelated</button>
+                <button class="style-btn" data-style="windows-slight-pixelated">Windows Slight Pixelated</button>
+                <button class="style-btn" data-style="very-glitchy">VERY GLITCHY</button>
+                <button class="style-btn" data-style="all-styles">ALL STYLES COMBINED</button>
+                <button class="style-btn" data-style="red-trippy">RED TRIPPY</button>
+            </div>
+        </div>
+        
+        <button id="generate">Generate Shader</button>
+        
+        <div id="currentCode"></div>
+    </div>
+    <div class="main">
+        <canvas id="shaderCanvas"></canvas>
+        <div class="zoom-controls">
+            <button class="zoom-btn" id="zoomIn">+</button>
+            <button class="zoom-btn" id="zoomOut">-</button>
+        </div>
+    </div>
+</div>
+
+<script>let camera, scene, renderer;
+let uniforms;
+let currentStyle = 'cosmic';
+let zoomLevel = 1.0;
+function init() {
+  scene = new THREE.Scene();
+  camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+  renderer = new THREE.WebGLRenderer({
+    canvas: document.getElementById('shaderCanvas')
+  });
+  renderer.setSize(window.innerWidth - 300, window.innerHeight);
+  const geometry = new THREE.PlaneGeometry(2, 2);
+  uniforms = {
+    time: {
+      value: 1.0
+    },
+    resolution: {
+      value: new THREE.Vector2()
+    },
+    zoom: {
+      value: zoomLevel
+    }
+  };
+  const material = new THREE.ShaderMaterial({
+    uniforms: uniforms,
+    vertexShader: getVertexShader(),
+    fragmentShader: getDefaultFragmentShader()
+  });
+  const mesh = new THREE.Mesh(geometry, material);
+  scene.add(mesh);
+  animate();
+}
+function animate() {
+  requestAnimationFrame(animate);
+  uniforms.time.value += 0.05;
+  renderer.render(scene, camera);
+}
+function getVertexShader() {
+  return `
+        void main() {
+            gl_Position = vec4(position, 1.0);
+        }
+    `;
+}
+function getDefaultFragmentShader() {
+  return `
+        uniform float time;
+        uniform vec2 resolution;
+        uniform float zoom;
+
+        float circle(vec2 uv, vec2 pos, float size) {
+            return step(length(uv - pos), size);
+        }
+        
+        void main() {
+            vec2 uv = (gl_FragCoord.xy * 2.0 - resolution.xy) / min(resolution.x, resolution.y);
+            
+            // Apply zoom
+            uv = uv * (1.0 / zoom);
+            
+            // Bouncing position
+            vec2 pos = vec2(
+                cos(time * 2.0) * 0.5,
+                sin(time * 1.5) * 0.5
+            );
+            
+            // Draw face
+            float face = circle(uv, pos, 0.3);
+            
+            // Eyes
+            float leftEye = circle(uv, pos + vec2(-0.1, 0.05), 0.05);
+            float rightEye = circle(uv, pos + vec2(0.1, 0.05), 0.05);
+            
+            // Smile (simple curved line)
+            vec2 smileUv = uv - pos;
+            float smile = smoothstep(0.15, 0.14, length(smileUv - vec2(0.0, -0.1))) 
+                       * smoothstep(-0.1, 0.1, smileUv.x) 
+                       * smoothstep(0.2, -0.2, length(smileUv));
+            
+            // Rainbow trail
+            vec3 rainbow = 0.5 + 0.5 * cos(time + uv.xyx + vec3(0,2,4));
+            vec3 color = rainbow * (0.5 + 0.5 * sin(length(uv - pos) * 10.0 - time * 3.0));
+            
+            // Combine everything
+            vec3 finalColor = mix(color, vec3(1,1,0), face);
+            finalColor = mix(finalColor, vec3(0), leftEye + rightEye);
+            finalColor = mix(finalColor, vec3(0), smile);
+            
+            gl_FragColor = vec4(finalColor, 1.0);
+        }
+    `;
+}
+async function generateShader(prompt, style) {
+  try {
+    const response = await fetch('/api/ai_completion', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        prompt: `Generate a GLSL fragment shader based on this description: "${prompt}" 
+                in the style of "${style}". The shader should be able to create complex shapes, patterns, and even characters or objects.
+                Include functions for basic shapes like circles, rectangles, and lines that can be combined to create more complex objects.
+                Support drawing characters, faces, or any requested objects using shader techniques.
+                If any specific shapes or characters are requested, implement them using distance functions and geometric primitives.
+                Include zoom functionality using the zoom uniform.
+                
+                For the "VERY GLITCHY" style, incorporate intense digital artifacts, random noise, color shifting, and screen tearing effects.
+                For the "ALL STYLES COMBINED" style, blend elements from cosmic, geometric, organic, glitch, fractal, liquid, realistic-trippy, very-trippy, pixelated, and glitchy styles.
+                For the "red-trippy" style, create intense red-dominated psychedelic patterns with swirling, morphing shapes and visual effects. Everything should have a strong red tint while still maintaining trippy animated patterns. Include color shifts between different shades of red, pink, and burgundy with occasional contrasting colors for emphasis. Add wave distortions, kaleidoscopic effects, and pulsing patterns that create a hypnotic red-themed visual experience.
+                
+                interface Response {
+                    fragmentShader: string;
+                    description: string;
+                }
+                
+                {
+                    "fragmentShader": "uniform float time;\\nuniform vec2 resolution;\\nuniform float zoom;\\n\\nfloat circle(vec2 uv, vec2 pos, float size) {\\n    return step(length(uv - pos), size);\\n}\\n\\nvoid main() {\\n    vec2 uv = (gl_FragCoord.xy/resolution.xy * 2.0 - 1.0) * (1.0/zoom);\\n    vec3 col = vec3(circle(uv, vec2(0.5), 0.3));\\n    gl_FragColor = vec4(col,1.0);\\n}",
+                    "description": "A simple circle shape shader with zoom"
+                }
+                `,
+        data: {
+          prompt,
+          style
+        }
+      })
+    });
+    const data = await response.json();
+    const material = scene.children[0].material;
+    material.fragmentShader = data.fragmentShader;
+    material.needsUpdate = true;
+    document.getElementById('currentCode').textContent = data.fragmentShader;
+  } catch (error) {
+    console.error('Error generating shader:', error);
+  }
+}
+document.getElementById('generate').addEventListener('click', () => {
+  const prompt = document.getElementById('prompt').value;
+  generateShader(prompt, currentStyle);
+});
+document.querySelectorAll('.style-btn').forEach(btn => {
+  btn.addEventListener('click', e => {
+    document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentStyle = btn.dataset.style;
+    const prompt = document.getElementById('prompt').value;
+    generateShader(prompt, currentStyle);
+  });
+});
+document.getElementById('zoomIn').addEventListener('click', () => {
+  zoomLevel = Math.min(zoomLevel * 1.2, 5.0);
+  uniforms.zoom.value = zoomLevel;
+});
+document.getElementById('zoomOut').addEventListener('click', () => {
+  zoomLevel = Math.max(zoomLevel / 1.2, 0.2);
+  uniforms.zoom.value = zoomLevel;
+});
+window.addEventListener('resize', () => {
+  renderer.setSize(window.innerWidth - 300, window.innerHeight);
+  uniforms.resolution.value.x = renderer.domElement.width;
+  uniforms.resolution.value.y = renderer.domElement.height;
+});
+init();
+uniforms.resolution.value.x = renderer.domElement.width;
+uniforms.resolution.value.y = renderer.domElement.height;</script>
+</body></html>
