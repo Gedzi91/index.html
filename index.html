@@ -1,0 +1,885 @@
+<html><head><base href="https://shader-explorer-36xk.onrender.com/" target="_blank">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hypercomplexity Ethereal Dream Sphere GLSL Shader Experience</title>
+<style>
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #000;
+    font-family: 'Roboto', Arial, sans-serif;
+}
+canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+#controls {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 20px;
+    border-radius: 15px;
+    max-height: 80vh;
+    overflow-y: auto;
+    transition: opacity 0.3s ease-in-out;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+.control-group {
+    margin-bottom: 15px;
+}
+.control-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+input[type="range"] {
+    width: 100%;
+    -webkit-appearance: none;
+    background: linear-gradient(to right, #4CAF50, #FFA500);
+    outline: none;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    border-radius: 10px;
+    height: 10px;
+}
+input[type="range"]:hover {
+    opacity: 1;
+}
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #4CAF50;
+    cursor: pointer;
+    border-radius: 50%;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: #4CAF50;
+    cursor: pointer;
+    border-radius: 50%;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+button {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 25px;
+    transition: all 0.3s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+button:hover {
+    background-color: #45a049;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+#screenshotButton {
+    background-color: #e74c3c;
+}
+#screenshotButton:hover {
+    background-color: #c0392b;
+}
+#multiscreenshotButton {
+    background-color: #9b59b6;
+}
+#multiscreenshotButton:hover {
+    background-color: #8e44ad;
+}
+#toggleControls {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 1000;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 20px;
+    transition: all 0.3s;
+}
+#toggleControls:hover {
+    background-color: rgba(0, 0, 0, 0.7);
+}
+#colorShiftContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.color-input {
+    width: 30%;
+    height: 30px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+</style>
+</head>
+<body>
+<canvas id="glCanvas"></canvas>
+<button id="toggleControls">☰</button>
+<div id="controls">
+    <div class="control-group">
+        <label for="intensity">Intensity</label>
+        <input type="range" id="intensity" min="0.15" max="2" step="0.01" value="1">
+    </div>
+    <div class="control-group">
+        <label for="speed">Speed</label>
+        <input type="range" id="speed" min="0.1" max="5" step="0.1" value="1">
+    </div>
+    <div class="control-group">
+        <label for="colorShift">Color Shift</label>
+        <div id="colorShiftContainer">
+            <input type="color" id="colorShift1" class="color-input" value="#FF0000">
+            <input type="color" id="colorShift2" class="color-input" value="#00FF00">
+            <input type="color" id="colorShift3" class="color-input" value="#0000FF">
+        </div>
+    </div>
+    <div class="control-group">
+        <label for="zoom">Zoom</label>
+        <input type="range" id="zoom" min="0.3" max="5" step="0.1" value="1">
+    </div>
+    <div class="control-group">
+        <label for="distortion">Distortion</label>
+        <input type="range" id="distortion" min="0" max="1" step="0.01" value="0.5">
+    </div>
+    <div class="control-group">
+        <label for="geometricDecay">Geometric Decay</label>
+        <input type="range" id="geometricDecay" min="0" max="1" step="0.01" value="0.5">
+    </div>
+    <div class="control-group">
+        <label for="hyperDynamism">Hyper Dynamism</label>
+        <input type="range" id="hyperDynamism" min="0" max="1" step="0.01" value="0.5">
+    </div>
+    <div class="control-group">
+        <label for="fractalIterations">Fractal Iterations</label>
+        <input type="range" id="fractalIterations" min="1" max="10" step="1" value="5">
+    </div>
+    <div class="control-group">
+        <label for="dimensionWarp">Dimension Warp</label>
+        <input type="range" id="dimensionWarp" min="0" max="1" step="0.01" value="0.5">
+    </div>
+    <div class="control-group">
+        <label for="tesseractRotation">Tesseract Rotation</label>
+        <input type="range" id="tesseractRotation" min="0" max="1" step="0.01" value="0.5">
+    </div>
+    <div class="control-group">
+        <label for="quantumFluctuation">Quantum Fluctuation</label>
+        <input type="range" id="quantumFluctuation" min="0" max="1" step="0.01" value="0.5">
+    </div>
+    <div class="control-group">
+        <label for="unholyLight">Light of the Unholy</label>
+        <input type="range" id="unholyLight" min="0" max="1" step="0.01" value="0.5">
+    </div>
+    <div class="control-group">
+        <label for="malaiseTearing">Malaise Tearing</label>
+        <input type="range" id="malaiseTearing" min="0" max="1" step="0.01" value="0.5">
+    </div>
+    <div class="control-group">
+        <label for="slugCreep">Slug Creep</label>
+        <input type="range" id="slugCreep" min="0" max="1" step="0.01" value="0.5">
+    </div>
+    <div class="control-group">
+        <label for="rotationX">Rotation X</label>
+        <input type="range" id="rotationX" min="0" max="6.28" step="0.01" value="0">
+    </div>
+    <div class="control-group">
+        <label for="rotationY">Rotation Y</label>
+        <input type="range" id="rotationY" min="0" max="6.28" step="0.01" value="0">
+    </div>
+    <button id="randomize">Randomize</button>
+    <button id="screenshotButton">Screenshot</button>
+    <button id="multiscreenshotButton">Multiscreenshot</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"></script>
+<script type="x-shader/x-vertex" id="vertex-shader">
+    attribute vec4 aVertexPosition;
+    attribute vec3 aNormal;
+    uniform mat4 uModelViewMatrix;
+    uniform mat4 uProjectionMatrix;
+    varying vec3 vNormal;
+    varying vec3 vPosition;
+
+    void main() {
+        vNormal = aNormal;
+        vPosition = aVertexPosition.xyz;
+        gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
+    }
+</script>
+
+<script type="x-shader/x-fragment" id="fragment-shader">
+    precision highp float;
+    varying vec3 vNormal;
+    varying vec3 vPosition;
+    uniform vec2 uResolution;
+    uniform float uTime;
+    uniform float uIntensity;
+    uniform float uSpeed;
+    uniform vec3 uColorShift1;
+    uniform vec3 uColorShift2;
+    uniform vec3 uColorShift3;
+    uniform float uZoom;
+    uniform float uDistortion;
+    uniform float uGeometricDecay;
+    uniform float uHyperDynamism;
+    uniform float uFractalIterations;
+    uniform float uDimensionWarp;
+    uniform float uTesseractRotation;
+    uniform float uQuantumFluctuation;
+    uniform float uUnholyLight;
+    uniform float uMalaiseTearing;
+    uniform float uSlugCreep;
+
+    #define PI 3.14159265359
+
+    float random(vec2 st) {
+        return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
+    }
+
+    vec2 rotate(vec2 v, float a) {
+        float s = sin(a);
+        float c = cos(a);
+        mat2 m = mat2(c, -s, s, c);
+        return m * v;
+    }
+
+    float noise(in vec2 st) {
+        vec2 i = floor(st);
+        vec2 f = fract(st);
+
+        float a = random(i);
+        float b = random(i + vec2(1.0, 0.0));
+        float c = random(i + vec2(0.0, 1.0));
+        float d = random(i + vec2(1.0, 1.0));
+
+        vec2 u = f * f * (3.0 - 2.0 * f);
+
+        return mix(a, b, u.x) +
+                (c - a)* u.y * (1.0 - u.x) +
+                (d - b) * u.x * u.y;
+    }
+
+    float fbm(in vec2 st) {
+        float value = 0.0;
+        float amplitude = 0.5;
+        float frequency = 0.;
+        float geometricDecayFactor = mix(0.5, 0.8, uGeometricDecay);
+        
+        for (int i = 0; i < 10; i++) {
+            if (float(i) >= uFractalIterations) break;
+            value += amplitude * noise(st);
+            st *= 2.0 + sin(uTime * 0.1) * uHyperDynamism;
+            st = rotate(st, uTesseractRotation * PI * 2.0);
+            amplitude *= geometricDecayFactor;
+            frequency += uHyperDynamism * 0.1;
+            st = rotate(st, frequency);
+        }
+        return value;
+    }
+
+    vec2 distort(vec2 p) {
+        float distortionStrength = 0.05 + uDistortion * 0.2;
+        float angle = noise(p * 5.0 + uTime * 0.1) * PI * 2.0;
+        vec2 offset = vec2(cos(angle), sin(angle)) * distortionStrength;
+        
+        offset *= 1.0 + sin(uTime * uDimensionWarp) * 0.5;
+        
+        return p + offset;
+    }
+
+    float mandelbulb(vec3 pos) {
+        vec3 z = pos;
+        float dr = 1.0;
+        float r = 0.0;
+        int iterations = 0;
+        int maxIterations = int(uFractalIterations * 2.0);
+        
+        for (int i = 0; i < 15; i++) {
+            iterations = i;
+            if (iterations >= maxIterations) break;
+            
+            r = length(z);
+            if (r > 2.0) break;
+            
+            float theta = acos(z.z / r) + uTime * 0.1;
+            float phi = atan(z.y, z.x) + uTime * 0.15;
+            float zr = pow(r, 8.0);
+            
+            dr = zr * 8.0 * pow(r, 7.0) * dr + 1.0;
+            
+            z = zr * vec3(sin(theta) * cos(phi), sin(phi) * sin(theta), cos(theta));
+            z += pos;
+        }
+        return 0.5 * log(r) * r / dr;
+    }
+
+    float unholyLightPattern(vec2 st) {
+        float intensity = fbm(st * 10.0 + uTime * 0.5) * uUnholyLight;
+        float rays = pow(abs(sin(atan(st.y, st.x) * 8.0 + uTime)), 10.0) * uUnholyLight;
+        return intensity * rays;
+    }
+
+    vec2 tearMalaise(vec2 st) {
+        vec2 tear = vec2(
+            sin(st.y * 10.0 + uTime) * uMalaiseTearing * 0.1,
+            cos(st.x * 10.0 + uTime) * uMalaiseTearing * 0.1
+        );
+        return st + tear;
+    }
+
+    float slugPattern(vec2 st) {
+        float slugNoise = fbm(st * 5.0 + uTime * 0.2);
+        float edge = smoothstep(0.4, 0.6, slugNoise);
+        return edge * uSlugCreep;
+    }
+
+    void main() {
+        vec2 st = vPosition.xy / (1.0 - vPosition.z * vPosition.z);
+        st *= uZoom;
+
+        st = distort(st);
+        st = tearMalaise(st);
+        st *= 1.0 + sin(uTime * uDimensionWarp * 2.0) * 0.2;
+
+        vec3 color = vec3(0.0);
+
+        float pattern = fbm(st * 3.0 + uTime * 0.1 * uSpeed);
+        
+        vec2 q = vec2(0.);
+        q.x = fbm(st + 0.1 * uTime * uSpeed);
+        q.y = fbm(st + vec2(1.0));
+
+        vec2 r = vec2(0.);
+        r.x = fbm(st + 1.0 * q + vec2(1.7, 9.2) + 0.15 * uTime * uSpeed);
+        r.y = fbm(st + 1.0 * q + vec2(8.3, 2.8) + 0.126 * uTime * uSpeed);
+
+        float f = fbm(st + r);
+
+        vec3 color1 = mix(uColorShift1, uColorShift2, sin(uTime * 0.1));
+        vec3 color2 = mix(uColorShift2, uColorShift3, cos(uTime * 0.15));
+        vec3 color3 = mix(uColorShift3, uColorShift1, sin(uTime * 0.2));
+
+        color = mix(color1, color2, pattern);
+        color = mix(color, color2, f * f * f * 2.0);
+        color = mix(color, color3, dot(q, q) * 4.0);
+
+        vec3 tesseractPos = vec3(st * 2.0, sin(uTime * uTesseractRotation));
+        float tesseractPattern = mandelbulb(tesseractPos * 2.0) * 0.5 + 0.5;
+        color = mix(color, 1.0 - color, tesseractPattern * uTesseractRotation);
+
+        float quantum = fbm(st * 10.0 + uTime * 5.0) * uQuantumFluctuation;
+        color = mix(color, 1.0 - color, quantum);
+
+        float glow = smoothstep(0.8, 1.0, fbm(st * 4.0 + uTime * 0.05 * uSpeed));
+        color += glow * vec3(0.8, 0.7, 1.0) * 0.2;
+
+        // Add the light of the unholy
+        float unholyLight = unholyLightPattern(st);
+        color += vec3(1.0, 0.5, 0.2) * unholyLight;
+
+        // Tear the malaise apart
+        color *= 1.0 + fbm(tearMalaise(st * 5.0)) * uMalaiseTearing;
+
+        // Add slug creep effect
+        float slug = slugPattern(st);
+        vec3 slugColor = vec3(0.5, 0.5, 0.2);  // Slimy greenish-brown color
+        color = mix(color, slugColor, slug);
+
+        // Add slug trails
+        float trail = fbm(st * 10.0 + uTime * 0.05) * uSlugCreep;
+        color += vec3(0.8, 0.8, 0.6) * trail * 0.2;  // Shimmering trail effect
+
+        color *= uIntensity;
+
+        // Apply simple lighting based on sphere normal
+        float diffuse = max(dot(vNormal, normalize(vec3(1.0, 1.0, 1.0))), 0.0);
+        color *= 0.2 + 0.8 * diffuse;
+
+        gl_FragColor = vec4(color, 1.0);
+    }
+</script>
+
+<script>
+let gl;
+let programInfo;
+let buffers;
+let then = 0;
+let intensity = 1;
+let speed = 1;
+let colorShift1 = [1, 0, 0];
+let colorShift2 = [0, 1, 0];
+let colorShift3 = [0, 0, 1];
+let zoom = 1;
+let distortion = 0.5;
+let geometricDecay = 0.5;
+let hyperDynamism = 0.5;
+let fractalIterations = 5;
+let dimensionWarp = 0.5;
+let tesseractRotation = 0.5;
+let quantumFluctuation = 0.5;
+let unholyLight = 0.5;
+let malaiseTearing = 0.5;
+let slugCreep = 0.5;
+let rotationX = 0;
+let rotationY = 0;
+
+let lastInteractionTime = Date.now();
+let controlsVisible = true;
+
+function initGL() {
+    const canvas = document.getElementById("glCanvas");
+    gl = canvas.getContext("webgl", { preserveDrawingBuffer: true });
+
+    if (!gl) {
+        alert("Unable to initialize WebGL. Your browser may not support it.");
+        return;
+    }
+
+    const vertexShader = loadShader(gl, gl.VERTEX_SHADER, document.getElementById("vertex-shader").text);
+    const fragmentShader = loadShader(gl, gl.FRAGMENT_SHADER, document.getElementById("fragment-shader").text);
+
+    const shaderProgram = gl.createProgram();
+    gl.attachShader(shaderProgram, vertexShader);
+    gl.attachShader(shaderProgram, fragmentShader);
+    gl.linkProgram(shaderProgram);
+
+    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+        alert('Unable to initialize the shader program: ' + gl.getProgramInfoLog(shaderProgram));
+        return null;
+    }
+
+    programInfo = {
+        program: shaderProgram,
+        attribLocations: {
+            vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
+            normal: gl.getAttribLocation(shaderProgram, 'aNormal'),
+        },
+        uniformLocations: {
+            projectionMatrix: gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
+            modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
+            resolution: gl.getUniformLocation(shaderProgram, 'uResolution'),
+            time: gl.getUniformLocation(shaderProgram, 'uTime'),
+            intensity: gl.getUniformLocation(shaderProgram, 'uIntensity'),
+            speed: gl.getUniformLocation(shaderProgram, 'uSpeed'),
+            colorShift1: gl.getUniformLocation(shaderProgram, 'uColorShift1'),
+            colorShift2: gl.getUniformLocation(shaderProgram, 'uColorShift2'),
+            colorShift3: gl.getUniformLocation(shaderProgram, 'uColorShift3'),
+            zoom: gl.getUniformLocation(shaderProgram, 'uZoom'),
+            distortion: gl.getUniformLocation(shaderProgram, 'uDistortion'),
+            geometricDecay: gl.getUniformLocation(shaderProgram, 'uGeometricDecay'),
+            hyperDynamism: gl.getUniformLocation(shaderProgram, 'uHyperDynamism'),
+            fractalIterations: gl.getUniformLocation(shaderProgram, 'uFractalIterations'),
+            dimensionWarp: gl.getUniformLocation(shaderProgram, 'uDimensionWarp'),
+            tesseractRotation: gl.getUniformLocation(shaderProgram, 'uTesseractRotation'),
+            quantumFluctuation: gl.getUniformLocation(shaderProgram, 'uQuantumFluctuation'),
+            unholyLight: gl.getUniformLocation(shaderProgram, 'uUnholyLight'),
+            malaiseTearing: gl.getUniformLocation(shaderProgram, 'uMalaiseTearing'),
+            slugCreep: gl.getUniformLocation(shaderProgram, 'uSlugCreep'),
+        },
+    };
+
+    buffers = initBuffers(gl);
+    
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+}
+
+function loadShader(gl, type, source) {
+    const shader = gl.createShader(type);
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        alert('An error occurred compiling the shaders: ' + gl.getShaderInfoLog(shader));
+        gl.deleteShader(shader);
+        return null;
+    }
+
+    return shader;
+}
+
+function initBuffers(gl) {
+    const positions = [];
+    const indices = [];
+    const normals = [];
+
+    const latitudeBands = 30;
+    const longitudeBands = 30;
+    const radius = 1.0;
+
+    for (let latNumber = 0; latNumber <= latitudeBands; latNumber++) {
+        const theta = latNumber * Math.PI / latitudeBands;
+        const sinTheta = Math.sin(theta);
+        const cosTheta = Math.cos(theta);
+
+        for (let longNumber = 0; longNumber <= longitudeBands; longNumber++) {
+            const phi = longNumber * 2 * Math.PI / longitudeBands;
+            const sinPhi = Math.sin(phi);
+            const cosPhi = Math.cos(phi);
+
+            const x = cosPhi * sinTheta;
+            const y = cosTheta;
+            const z = sinPhi * sinTheta;
+
+            positions.push(radius * x);
+            positions.push(radius * y);
+            positions.push(radius * z);
+
+            normals.push(x);
+            normals.push(y);
+            normals.push(z);
+        }
+    }
+
+    for (let latNumber = 0; latNumber < latitudeBands; latNumber++) {
+        for (let longNumber = 0; longNumber < longitudeBands; longNumber++) {
+            const first = (latNumber * (longitudeBands + 1)) + longNumber;
+            const second = first + longitudeBands + 1;
+            indices.push(first);
+            indices.push(second);
+            indices.push(first + 1);
+
+            indices.push(second);
+            indices.push(second + 1);
+            indices.push(first + 1);
+        }
+    }
+
+    const positionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+
+    const normalBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
+
+    const indexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
+
+    return {
+        position: positionBuffer,
+        normal: normalBuffer,
+        indices: indexBuffer,
+        count: indices.length,
+    };
+}
+
+function resizeCanvas() {
+    const canvas = document.getElementById("glCanvas");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    gl.viewport(0, 0, canvas.width, canvas.height);
+}
+
+function drawScene(now) {
+    now *= 0.001;  // convert to seconds
+    const deltaTime = now - then;
+    then = now;
+
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.clearDepth(1.0);
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthFunc(gl.LEQUAL);
+
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    const fieldOfView = 45 * Math.PI / 180;
+    const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+    const zNear = 0.1;
+    const zFar = 100.0;
+    const projectionMatrix = mat4.create();
+
+    mat4.perspective(projectionMatrix, fieldOfView, aspect, zNear, zFar);
+
+    const modelViewMatrix = mat4.create();
+
+    mat4.translate(modelViewMatrix, modelViewMatrix, [0.0, 0.0, -4.0]);
+    mat4.rotate(modelViewMatrix, modelViewMatrix, rotationX, [1, 0, 0]);
+    mat4.rotate(modelViewMatrix, modelViewMatrix, rotationY, [0, 1, 0]);
+
+    {
+        const numComponents = 3;
+        const type = gl.FLOAT;
+        const normalize = false;
+        const stride = 0;
+        const offset = 0;
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position);
+        gl.vertexAttribPointer(
+            programInfo.attribLocations.vertexPosition,
+            numComponents,
+            type,
+            normalize,
+            stride,
+            offset);
+        gl.enableVertexAttribArray(programInfo.attribLocations.vertexPosition);
+    }
+
+    {
+        const numComponents = 3;
+        const type = gl.FLOAT;
+        const normalize = false;
+        const stride = 0;
+        const offset = 0;
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffers.normal);
+        gl.vertexAttribPointer(
+            programInfo.attribLocations.normal,
+            numComponents,
+            type,
+            normalize,
+            stride,
+            offset);
+        gl.enableVertexAttribArray(programInfo.attribLocations.normal);
+    }
+
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers.indices);
+
+    gl.useProgram(programInfo.program);
+
+    gl.uniformMatrix4fv(programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
+    gl.uniformMatrix4fv(programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
+
+    gl.uniform2f(programInfo.uniformLocations.resolution, gl.canvas.width, gl.canvas.height);
+    gl.uniform1f(programInfo.uniformLocations.time, now);
+    gl.uniform1f(programInfo.uniformLocations.intensity, intensity);
+    gl.uniform1f(programInfo.uniformLocations.speed, speed);
+    gl.uniform3fv(programInfo.uniformLocations.colorShift1, colorShift1);
+    gl.uniform3fv(programInfo.uniformLocations.colorShift2, colorShift2);
+    gl.uniform3fv(programInfo.uniformLocations.colorShift3, colorShift3);
+    gl.uniform1f(programInfo.uniformLocations.zoom, zoom);
+    gl.uniform1f(programInfo.uniformLocations.distortion, distortion);
+    gl.uniform1f(programInfo.uniformLocations.geometricDecay, geometricDecay);
+    gl.uniform1f(programInfo.uniformLocations.hyperDynamism, hyperDynamism);
+    gl.uniform1f(programInfo.uniformLocations.fractalIterations, fractalIterations);
+    gl.uniform1f(programInfo.uniformLocations.dimensionWarp, dimensionWarp);
+    gl.uniform1f(programInfo.uniformLocations.tesseractRotation, tesseractRotation);
+    gl.uniform1f(programInfo.uniformLocations.quantumFluctuation, quantumFluctuation);
+    gl.uniform1f(programInfo.uniformLocations.unholyLight, unholyLight);
+    gl.uniform1f(programInfo.uniformLocations.malaiseTearing, malaiseTearing);
+    gl.uniform1f(programInfo.uniformLocations.slugCreep, slugCreep);
+
+    {
+        const vertexCount = buffers.count;
+        const type = gl.UNSIGNED_SHORT;
+        const offset =
+ 0;
+        gl.drawElements(gl.TRIANGLES, vertexCount, type, offset);
+    }
+
+    requestAnimationFrame(drawScene);
+}
+
+function initControls() {
+    document.getElementById('intensity').addEventListener('input', (e) => {
+        intensity = parseFloat(e.target.value);
+    });
+
+    document.getElementById('speed').addEventListener('input', (e) => {
+        speed = parseFloat(e.target.value);
+    });
+
+    document.getElementById('colorShift1').addEventListener('input', (e) => {
+        const color = e.target.value;
+        colorShift1 = [
+            parseInt(color.substr(1,2), 16) / 255,
+            parseInt(color.substr(3,2), 16) / 255,
+            parseInt(color.substr(5,2), 16) / 255
+        ];
+    });
+
+    document.getElementById('colorShift2').addEventListener('input', (e) => {
+        const color = e.target.value;
+        colorShift2 = [
+            parseInt(color.substr(1,2), 16) / 255,
+            parseInt(color.substr(3,2), 16) / 255,
+            parseInt(color.substr(5,2), 16) / 255
+        ];
+    });
+
+    document.getElementById('colorShift3').addEventListener('input', (e) => {
+        const color = e.target.value;
+        colorShift3 = [
+            parseInt(color.substr(1,2), 16) / 255,
+            parseInt(color.substr(3,2), 16) / 255,
+            parseInt(color.substr(5,2), 16) / 255
+        ];
+    });
+
+    document.getElementById('zoom').addEventListener('input', (e) => {
+        zoom = parseFloat(e.target.value);
+    });
+
+    document.getElementById('distortion').addEventListener('input', (e) => {
+        distortion = parseFloat(e.target.value);
+    });
+
+    document.getElementById('geometricDecay').addEventListener('input', (e) => {
+        geometricDecay = parseFloat(e.target.value);
+    });
+
+    document.getElementById('hyperDynamism').addEventListener('input', (e) => {
+        hyperDynamism = parseFloat(e.target.value);
+    });
+
+    document.getElementById('fractalIterations').addEventListener('input', (e) => {
+        fractalIterations = parseInt(e.target.value);
+    });
+
+    document.getElementById('dimensionWarp').addEventListener('input', (e) => {
+        dimensionWarp = parseFloat(e.target.value);
+    });
+
+    document.getElementById('tesseractRotation').addEventListener('input', (e) => {
+        tesseractRotation = parseFloat(e.target.value);
+    });
+
+    document.getElementById('quantumFluctuation').addEventListener('input', (e) => {
+        quantumFluctuation = parseFloat(e.target.value);
+    });
+
+    document.getElementById('unholyLight').addEventListener('input', (e) => {
+        unholyLight = parseFloat(e.target.value);
+    });
+
+    document.getElementById('malaiseTearing').addEventListener('input', (e) => {
+        malaiseTearing = parseFloat(e.target.value);
+    });
+
+    document.getElementById('slugCreep').addEventListener('input', (e) => {
+        slugCreep = parseFloat(e.target.value);
+    });
+
+    document.getElementById('rotationX').addEventListener('input', (e) => {
+        rotationX = parseFloat(e.target.value);
+    });
+
+    document.getElementById('rotationY').addEventListener('input', (e) => {
+        rotationY = parseFloat(e.target.value);
+    });
+
+    document.getElementById('randomize').addEventListener('click', randomizeParams);
+
+    document.getElementById('screenshotButton').addEventListener('click', takeScreenshot);
+    document.getElementById('multiscreenshotButton').addEventListener('click', takeMultiScreenshot);
+
+    document.getElementById('toggleControls').addEventListener('click', toggleControls);
+
+    const controls = document.querySelectorAll('#controls input, #controls button');
+    controls.forEach(control => {
+        control.addEventListener('input', updateLastInteractionTime);
+        control.addEventListener('click', updateLastInteractionTime);
+    });
+}
+
+function randomizeParams() {
+    intensity = Math.random() * 1.85 + 0.15;
+    speed = Math.random() * 4.9 + 0.1;
+    colorShift1 = [Math.random(), Math.random(), Math.random()];
+    colorShift2 = [Math.random(), Math.random(), Math.random()];
+    colorShift3 = [Math.random(), Math.random(), Math.random()];
+    zoom = Math.random() * 4.7 + 0.3;
+    distortion = Math.random();
+    geometricDecay = Math.random();
+    hyperDynamism = Math.random();
+    fractalIterations = Math.floor(Math.random() * 10) + 1;
+    dimensionWarp = Math.random();
+    tesseractRotation = Math.random();
+    quantumFluctuation = Math.random();
+    unholyLight = Math.random();
+    malaiseTearing = Math.random();
+    slugCreep = Math.random();
+    rotationX = Math.random() * Math.PI * 2;
+    rotationY = Math.random() * Math.PI * 2;
+
+    updateControlValues();
+}
+
+function updateControlValues() {
+    document.getElementById('intensity').value = intensity;
+    document.getElementById('speed').value = speed;
+    document.getElementById('colorShift1').value = rgbToHex(colorShift1[0], colorShift1[1], colorShift1[2]);
+    document.getElementById('colorShift2').value = rgbToHex(colorShift2[0], colorShift2[1], colorShift2[2]);
+    document.getElementById('colorShift3').value = rgbToHex(colorShift3[0], colorShift3[1], colorShift3[2]);
+    document.getElementById('zoom').value = zoom;
+    document.getElementById('distortion').value = distortion;
+    document.getElementById('geometricDecay').value = geometricDecay;
+    document.getElementById('hyperDynamism').value = hyperDynamism;
+    document.getElementById('fractalIterations').value = fractalIterations;
+    document.getElementById('dimensionWarp').value = dimensionWarp;
+    document.getElementById('tesseractRotation').value = tesseractRotation;
+    document.getElementById('quantumFluctuation').value = quantumFluctuation;
+    document.getElementById('unholyLight').value = unholyLight;
+    document.getElementById('malaiseTearing').value = malaiseTearing;
+    document.getElementById('slugCreep').value = slugCreep;
+    document.getElementById('rotationX').value = rotationX;
+    document.getElementById('rotationY').value = rotationY;
+}
+
+function rgbToHex(r, g, b) {
+    return "#" + ((1 << 24) + (Math.floor(r * 255) << 16) + (Math.floor(g * 255) << 8) + Math.floor(b * 255)).toString(16).slice(1);
+}
+
+function takeScreenshot() {
+    const canvas = document.getElementById('glCanvas');
+    const dataURL = canvas.toDataURL('image/png');
+    const link = document.createElement('a');
+    link.href = dataURL;
+    link.download = 'hypercomplexity_dream_sphere.png';
+    link.click();
+}
+
+function takeMultiScreenshot() {
+    const numScreenshots = 5;
+    const delay = 500; // milliseconds
+
+    let screenshotsTaken = 0;
+    
+    function takeDelayedScreenshot() {
+        if (screenshotsTaken < numScreenshots) {
+            takeScreenshot();
+            screenshotsTaken++;
+            setTimeout(takeDelayedScreenshot, delay);
+        }
+    }
+
+    takeDelayedScreenshot();
+}
+
+function toggleControls() {
+    const controls = document.getElementById('controls');
+    controlsVisible = !controlsVisible;
+    controls.style.display = controlsVisible ? 'block' : 'none';
+}
+
+function updateLastInteractionTime() {
+    lastInteractionTime = Date.now();
+}
+
+function main() {
+    initGL();
+    initControls();
+    requestAnimationFrame(drawScene);
+}
+
+window.onload = main;
+</script>
+</body>
+</html>
