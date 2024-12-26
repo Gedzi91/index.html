@@ -1,0 +1,150 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Intricate Pulsating Wiremesh Cubes with Gradient Surfaces</title>
+<style>
+  body { margin: 0; overflow: hidden; }
+</style>
+</head>
+<body>
+<script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.155.0/examples/js/controls/OrbitControls.js"></script>
+
+<script id="vertexShader" type="x-shader/x-vertex">
+uniform float time;
+varying vec3 vNormal;
+varying vec3 vPosition;
+void main() {
+    vNormal = normal;
+    vPosition = position;
+    
+    float displacement = sin(time * 5.0 + position.x * 10.0) * 110.1;
+    vec3 newPosition = position + normal * displacement;
+ 
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
+}
+</script>
+
+<script id="fragmentShader" type="x-shader/x-fragment">
+uniform float time;
+varying vec3 vNormal;
+varying vec3 vPosition;
+
+vec3 getGradientColor(vec3 colors[5], float t) {
+    float scaledT = t * 4.0;
+    int idx = int(floor(scaledT));
+    idx = clamp(idx, 0, 3);
+    float alpha = fract(scaledT);
+    return mix(colors[idx], colors[idx+1], alpha);
+}
+
+void main() {
+    vec3 colors[5];
+    colors[0] = vec3(1.0, 0.0, 0.0);
+    colors[1] = vec3(1.0, 1.0, 0.0);
+    colors[2] = vec3(0.0, 1.0, 0.0);
+    colors[3] = vec3(0.0, 1.0, 1.0);
+    colors[4] = vec3(0.0, 0.0, 1.0);
+
+    float t = abs(sin(time + length(vPosition)));
+
+    vec3 baseColor = getGradientColor(colors, t);
+    
+    float intensity = abs(sin(time * 2.0 + length(vPosition)));
+    vec3 color = baseColor * intensity;
+    
+    float shock = step(0.95, fract(time * 0.2)) * (1.0 - smoothstep(0.0, 0.5, length(vPosition)));
+    color += vec3(1.0, 0.5, 0.0) * shock;
+    
+    gl_FragColor = vec4(color, 1.0);
+}
+</script>
+
+<script>
+const scene = new THREE.Scene();
+
+const camera = new THREE.PerspectiveCamera(
+  45,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  1000
+);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+camera.position.z = 5;
+
+const uniforms = {
+  time: { value: 0.0 }
+};
+
+const geometry = new THREE.BoxGeometry(1, 1, 1, 50, 50, 50);
+const material = new THREE.ShaderMaterial({
+  uniforms: uniforms,
+  vertexShader: document.getElementById('vertexShader').textContent,
+  fragmentShader: document.getElementById('fragmentShader').textContent,
+  wireframe: true
+});
+
+const cube = new THREE.Mesh(geometry, material);
+scene.add(cube);
+
+const cornerCubes = [];
+const positions = [
+  [-5, 5, -5],
+  [5, 5, -5],
+  [-5, -5, -5],
+  [5, -5, -5],
+];
+
+positions.forEach((pos) => {
+  const bigGeometry = new THREE.BoxGeometry(3, 3, 3, 50, 50, 50);
+  const bigCube = new THREE.Mesh(bigGeometry, material);
+  bigCube.position.set(pos[0], pos[1], pos[2]);
+  scene.add(bigCube);
+  cornerCubes.push(bigCube);
+});
+
+// Add gigantic background cube
+const backgroundGeometry = new THREE.BoxGeometry(50, 50, 50, 100, 100, 100);
+const backgroundCube = new THREE.Mesh(backgroundGeometry, material);
+scene.add(backgroundCube);
+
+window.addEventListener("resize", onWindowResize, false);
+
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+
+  uniforms.time.value += 0.01;
+
+  cube.rotation.x += 0.005;
+  cube.rotation.y += 0.01;
+  cube.rotation.z += 0.005;
+
+  cornerCubes.forEach((bigCube, index) => {
+    bigCube.rotation.x += 0.001 * (index + 1);
+    bigCube.rotation.y += 0.001 * (index + 1);
+    bigCube.rotation.z += 0.001 * (index + 1);
+  });
+
+  backgroundCube.rotation.x += 0.0005;
+  backgroundCube.rotation.y += 0.0005;
+  backgroundCube.rotation.z += 0.0005;
+
+  renderer.render(scene, camera);
+}
+
+animate();
+</script>
+
+</body>
+</html>
