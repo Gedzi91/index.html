@@ -1,0 +1,277 @@
+<html><head><base href="https://quantumbrowser.io"><title>Quantum Browser - Fractal Consciousness Explorer Menu</title>
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Biopixel', sans-serif;
+    background-color: #000;
+    color: #00ff00;
+    overflow: hidden;
+  }
+  @font-face {
+    font-family: 'Biopixel';
+    src: url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+  }
+  #fractal-container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    background: radial-gradient(circle, #001a00, #000000);
+  }
+  #top-menu-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 25px;
+    background-color: rgba(0, 51, 0, 0.8);
+    color: #00ff00;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+  }
+  #side-menu {
+    position: absolute;
+    top: 25px;
+    left: 0;
+    width: 250px;
+    bottom: 0;
+    background-color: rgba(0, 25, 0, 0.9);
+    padding: 20px;
+    box-shadow: 2px 0 10px rgba(0, 255, 0, 0.3);
+    overflow-y: auto;
+    backdrop-filter: blur(5px);
+    z-index: 1001;
+  }
+  .menu-item {
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: rgba(0, 102, 0, 0.5);
+    border: 1px solid #00ff00;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .menu-item:hover {
+    background-color: rgba(0, 153, 0, 0.7);
+    box-shadow: 0 0 10px #00ff00;
+  }
+  #fractal-canvas {
+    position: absolute;
+    top: 25px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+  }
+  #consciousness-level, #fractal-info, #control-panel {
+    z-index: 2;
+  }
+  #consciousness-level {
+    position: absolute;
+    top: 35px;
+    left: 270px;
+    font-size: 14px;
+    background-color: rgba(0, 51, 0, 0.8);
+    padding: 5px 10px;
+    border-radius: 5px;
+  }
+  #fractal-info {
+    position: absolute;
+    top: 35px;
+    right: 10px;
+    font-size: 14px;
+    background-color: rgba(0, 51, 0, 0.8);
+    padding: 5px 10px;
+    border-radius: 5px;
+    text-align: right;
+  }
+  #control-panel {
+    position: absolute;
+    bottom: 20px;
+    left: 270px;
+    right: 20px;
+    background-color: rgba(0, 51, 0, 0.8);
+    padding: 10px;
+    border-radius: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+  .bio-button {
+    background-color: rgba(0, 102, 0, 0.7);
+    border: 2px solid #00ff00;
+    color: #00ff00;
+    padding: 10px 20px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .bio-button:hover {
+    background-color: rgba(0, 153, 0, 0.7);
+    box-shadow: 0 0 10px #00ff00;
+  }
+</style>
+</head>
+<body>
+<div id="fractal-container">
+  <div id="top-menu-bar">
+    <span style="margin-right: 20px;">☰</span>
+    <span>Biogenic Expanse - Fractal Consciousness Explorer</span>
+    <span style="margin-left: auto;">🧬 DNA Integrity: 99.8% | 🔋 Bio-Energy: 95% | 🕒 12:28 PM</span>
+  </div>
+  
+  <div id="side-menu">
+    <div class="menu-item" onclick="navigateTo('dna-lab')">💠 DNA Recombination Lab</div>
+    <div class="menu-item" onclick="navigateTo('biosphere-comm')">🌐 Biosphere Communication Hub</div>
+    <div class="menu-item" onclick="navigateTo('quantum-evolution')">🌀 Quantum Evolution Simulator</div>
+    <div class="menu-item" onclick="navigateTo('fractal-consciousness')">🧠 Fractal Consciousness Explorer</div>
+    <div class="menu-item" onclick="navigateTo('hyperdimensional-library')">📚 Hyperdimensional Library</div>
+    <div class="menu-item" onclick="navigateTo('biophotonic-nexus')">💡 Biophotonic Nexus</div>
+    <div class="menu-item" onclick="navigateTo('temporal-flux')">⏳ Temporal Flux Observatory</div>
+    <div class="menu-item" onclick="navigateTo('nano-wormhole')">🕳️ Nano-Wormhole Research Center</div>
+  </div>
+
+  <canvas id="fractal-canvas"></canvas>
+  
+  <div id="consciousness-level">Consciousness Level: 1</div>
+  
+  <div id="fractal-info">
+    Fractal Dimension: 1.6180<br>
+    Iteration Depth: 8<br>
+    Quantum Coherence: 87%
+  </div>
+  
+  <div id="control-panel">
+    <button class="bio-button" id="evolve">Evolve Consciousness</button>
+    <button class="bio-button" id="meditate">Deep Meditation</button>
+    <button class="bio-button" id="connect">Connect to Collective</button>
+    <button class="bio-button" id="reset">Reset Fractal</button>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('fractal-canvas');
+const ctx = canvas.getContext('2d');
+let consciousnessLevel = 1;
+let meditationActive = false;
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+function drawFractal(x, y, size, angle, depth) {
+  if (depth === 0) return;
+  
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(angle);
+  
+  const newSize = size * 0.7;
+  const hue = (depth * 30 + consciousnessLevel * 10) % 360;
+  ctx.strokeStyle = `hsl(${hue}, 100%, 50%)`;
+  ctx.lineWidth = depth;
+  
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(size, 0);
+  ctx.stroke();
+  
+  drawFractal(size, 0, newSize, Math.PI / 4, depth - 1);
+  drawFractal(size, 0, newSize, -Math.PI / 4, depth - 1);
+  
+  ctx.restore();
+}
+
+function animate() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const centerX = canvas.width / 2;
+  const centerY = canvas.height / 2;
+  const size = Math.min(canvas.width, canvas.height) * 0.4;
+  const depth = 8 + Math.floor(consciousnessLevel / 2);
+  
+  for (let i = 0; i < 6; i++) {
+    const angle = (i / 6) * Math.PI * 2 + performance.now() * 0.001;
+    drawFractal(centerX, centerY, size, angle, depth);
+  }
+  
+  requestAnimationFrame(animate);
+}
+
+animate();
+
+document.getElementById('evolve').addEventListener('click', () => {
+  consciousnessLevel++;
+  document.getElementById('consciousness-level').textContent = `Consciousness Level: ${consciousnessLevel}`;
+  updateFractalInfo();
+});
+
+document.getElementById('meditate').addEventListener('click', () => {
+  meditationActive = !meditationActive;
+  if (meditationActive) {
+    document.getElementById('meditate').textContent = 'End Meditation';
+    startMeditation();
+  } else {
+    document.getElementById('meditate').textContent = 'Deep Meditation';
+    endMeditation();
+  }
+});
+
+document.getElementById('connect').addEventListener('click', () => {
+  alert('Connecting to the collective consciousness. Prepare for a surge of shared knowledge and experiences.');
+  consciousnessLevel += 3;
+  document.getElementById('consciousness-level').textContent = `Consciousness Level: ${consciousnessLevel}`;
+  updateFractalInfo();
+});
+
+document.getElementById('reset').addEventListener('click', () => {
+  consciousnessLevel = 1;
+  document.getElementById('consciousness-level').textContent = `Consciousness Level: ${consciousnessLevel}`;
+  updateFractalInfo();
+});
+
+function startMeditation() {
+  canvas.style.filter = 'hue-rotate(0deg)';
+  let hueRotation = 0;
+  function rotateFractal() {
+    if (meditationActive) {
+      hueRotation = (hueRotation + 1) % 360;
+      canvas.style.filter = `hue-rotate(${hueRotation}deg)`;
+      requestAnimationFrame(rotateFractal);
+    }
+  }
+  rotateFractal();
+}
+
+function endMeditation() {
+  canvas.style.filter = 'none';
+}
+
+function updateFractalInfo() {
+  const fractalDimension = 1.6180 + (consciousnessLevel * 0.01);
+  const iterationDepth = 8 + Math.floor(consciousnessLevel / 2);
+  const quantumCoherence = Math.min(100, 87 + (consciousnessLevel * 2));
+  
+  document.getElementById('fractal-info').innerHTML = `
+    Fractal Dimension: ${fractalDimension.toFixed(4)}<br>
+    Iteration Depth: ${iterationDepth}<br>
+    Quantum Coherence: ${quantumCoherence}%
+  `;
+}
+
+function navigateTo(destination) {
+  console.log('Navigating to:', destination);
+  alert(`Initiating quantum leap to ${destination}. Recalibrating consciousness harmonics...`);
+}
+
+window.addEventListener('resize', () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+</script>
+
+</body></html>
