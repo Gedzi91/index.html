@@ -1,0 +1,170 @@
+<html><head><base href="https://websim.ai/c/3ZAZYcNlS3VBHKwV9"><style>
+    body, html {
+        margin: 0;
+        padding: 0;
+        font-family: 'Arial', sans-serif;
+        background-color: #000033;
+        color: #00ffff;
+        overflow: hidden;
+        height: 100vh;
+    }
+    .container {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+    }
+    .header {
+        background: rgba(0, 0, 51, 0.8);
+        padding: 20px;
+        text-align: center;
+    }
+    .content {
+        display: flex;
+        flex: 1;
+    }
+    .dna-viewer {
+        flex: 3;
+        position: relative;
+        overflow: hidden;
+    }
+    .control-panel {
+        flex: 1;
+        background: rgba(0, 0, 51, 0.8);
+        padding: 20px;
+        overflow-y: auto;
+    }
+    .dna-strand {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 2px;
+        height: 80%;
+        background: linear-gradient(to bottom, 
+            #ff0000, #00ff00, #0000ff, #ffff00);
+        animation: rotate 10s linear infinite;
+    }
+    .nucleotide {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: radial-gradient(circle, #ffffff, #00ffff);
+    }
+    .base-pair {
+        position: absolute;
+        width: 100px;
+        height: 2px;
+        background: #ffffff;
+    }
+    @keyframes rotate {
+        0% { transform: translate(-50%, -50%) rotateY(0deg); }
+        100% { transform: translate(-50%, -50%) rotateY(360deg); }
+    }
+    .control-btn {
+        background: rgba(0, 255, 255, 0.2);
+        border: 1px solid #00ffff;
+        color: #00ffff;
+        padding: 10px;
+        margin: 5px 0;
+        cursor: pointer;
+        width: 100%;
+    }
+    .control-btn:hover {
+        background: rgba(0, 255, 255, 0.4);
+    }
+    #sequenceDisplay {
+        margin-top: 20px;
+        font-family: monospace;
+        word-wrap: break-word;
+    }
+</style></head><body>
+<div class="container">
+    <div class="header">
+        <h1>Interactive DNA Double Helix Explorer</h1>
+    </div>
+    <div class="content">
+        <div class="dna-viewer">
+            <div class="dna-strand" id="dnaStrand"></div>
+        </div>
+        <div class="control-panel">
+            <button class="control-btn" onclick="toggleRotation()">Toggle Rotation</button>
+            <button class="control-btn" onclick="changeColor()">Change Color</button>
+            <button class="control-btn" onclick="addMutation()">Add Mutation</button>
+            <button class="control-btn" onclick="generateSequence()">Generate Sequence</button>
+            <div id="sequenceDisplay"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+let isRotating = true;
+const dnaStrand = document.getElementById('dnaStrand');
+const sequenceDisplay = document.getElementById('sequenceDisplay');
+const basePairs = ['AT', 'GC', 'TA', 'CG'];
+let dnaSequence = '';
+
+function createDNAStructure() {
+    const strandHeight = dnaStrand.offsetHeight;
+    const basePairCount = 20;
+    const gapBetweenPairs = strandHeight / basePairCount;
+
+    for (let i = 0; i < basePairCount; i++) {
+        const basePair = document.createElement('div');
+        basePair.className = 'base-pair';
+        basePair.style.top = `${(i * gapBetweenPairs) + (gapBetweenPairs / 2)}px`;
+        basePair.style.transform = `rotateY(${i * (360 / basePairCount)}deg)`;
+        
+        const leftNucleotide = document.createElement('div');
+        leftNucleotide.className = 'nucleotide';
+        leftNucleotide.style.left = '-10px';
+        
+        const rightNucleotide = document.createElement('div');
+        rightNucleotide.className = 'nucleotide';
+        rightNucleotide.style.right = '-10px';
+        
+        basePair.appendChild(leftNucleotide);
+        basePair.appendChild(rightNucleotide);
+        dnaStrand.appendChild(basePair);
+    }
+}
+
+function toggleRotation() {
+    isRotating = !isRotating;
+    dnaStrand.style.animationPlayState = isRotating ? 'running' : 'paused';
+}
+
+function changeColor() {
+    const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+    dnaStrand.style.background = `linear-gradient(to bottom, ${randomColor}, #ffffff)`;
+}
+
+function addMutation() {
+    const nucleotides = document.querySelectorAll('.nucleotide');
+    const randomNucleotide = nucleotides[Math.floor(Math.random() * nucleotides.length)];
+    randomNucleotide.style.background = 'radial-gradient(circle, #ff0000, #ff00ff)';
+    randomNucleotide.style.boxShadow = '0 0 10px #ff00ff';
+}
+
+function generateSequence() {
+    dnaSequence = '';
+    for (let i = 0; i < 50; i++) {
+        dnaSequence += basePairs[Math.floor(Math.random() * basePairs.length)];
+    }
+    displaySequence();
+}
+
+function displaySequence() {
+    let formattedSequence = '';
+    for (let i = 0; i < dnaSequence.length; i += 2) {
+        formattedSequence += dnaSequence.substr(i, 2) + ' ';
+        if ((i + 2) % 20 === 0) formattedSequence += '<br>';
+    }
+    sequenceDisplay.innerHTML = formattedSequence;
+}
+
+createDNAStructure();
+generateSequence();
+</script>
+</body></html>
