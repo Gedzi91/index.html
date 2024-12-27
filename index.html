@@ -1,0 +1,165 @@
+<html><head><base href="https://healeycodes.com/lab">
+<style>
+body {
+  background-color: #000;
+  color: #ff0000;
+  font-family: 'Courier New', monospace;
+  margin: 0;
+  overflow: hidden;
+}
+
+.container {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.glitch-text {
+  font-size: 3em;
+  position: relative;
+  animation: glitch 3s infinite;
+  text-shadow: 2px 2px #00ff00;
+}
+
+@keyframes glitch {
+  0% { transform: translate(0) }
+  20% { transform: translate(-3px, 3px) }
+  40% { transform: translate(-3px, -3px) }
+  60% { transform: translate(3px, 3px) }
+  80% { transform: translate(3px, -3px) }
+  100% { transform: translate(0) }
+}
+
+.destructive-element {
+  position: absolute;
+  background: rgba(255, 0, 0, 0.2);
+  pointer-events: none;
+  animation: destroy 4s linear infinite;
+}
+
+@keyframes destroy {
+  0% { transform: rotate(0deg) scale(1); opacity: 0.8; }
+  100% { transform: rotate(360deg) scale(0); opacity: 0; }
+}
+
+#virus-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: -1;
+}
+
+.content {
+  background: rgba(0, 0, 0, 0.8);
+  padding: 20px;
+  border: 2px solid #ff0000;
+  margin-top: 20px;
+}
+</style>
+</head>
+<body>
+
+<canvas id="virus-canvas"></canvas>
+
+<div class="container">
+  <h1 class="glitch-text">SYSTEM DESTRUCTION PROTOCOL</h1>
+  
+  <div class="content">
+    <h2>Most Destructive Websites in History</h2>
+    <ul>
+      <li>ILOVEYOU Virus Website (2000)</li>
+      <li>CIH/Chernobyl Virus Distribution Point (1998)</li>
+      <li>MyDoom Origin Server (2004)</li>
+      <li>Zeus Botnet Command Center</li>
+      <li>WannaCry Ransomware Hub (2017)</li>
+    </ul>
+  </div>
+
+  <div class="content">
+    <h2>Damage Statistics</h2>
+    <p>Total Estimated Damage: $100+ Billion</p>
+    <p>Affected Systems: 1+ Billion</p>
+    <p>Recovery Time: Decades</p>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('virus-canvas');
+const ctx = canvas.getContext('2d');
+
+// Set canvas size
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+// Binary rain effect
+class BinaryDrop {
+  constructor() {
+    this.reset();
+  }
+
+  reset() {
+    this.x = Math.random() * canvas.width;
+    this.y = 0;
+    this.speed = 2 + Math.random() * 5;
+    this.value = Math.random() > 0.5 ? "1" : "0";
+  }
+
+  draw() {
+    ctx.fillStyle = '#0f0';
+    ctx.font = '12px Courier New';
+    ctx.fillText(this.value, this.x, this.y);
+    
+    this.y += this.speed;
+    if (this.y > canvas.height) {
+      this.reset();
+    }
+  }
+}
+
+const drops = Array(100).fill(null).map(() => new BinaryDrop());
+
+function animate() {
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+  drops.forEach(drop => drop.draw());
+  requestAnimationFrame(animate);
+}
+
+// Create destructive elements
+function createDestructiveElement() {
+  const elem = document.createElement('div');
+  elem.className = 'destructive-element';
+  elem.style.width = Math.random() * 100 + 'px';
+  elem.style.height = Math.random() * 100 + 'px';
+  elem.style.left = Math.random() * window.innerWidth + 'px';
+  elem.style.top = Math.random() * window.innerHeight + 'px';
+  document.body.appendChild(elem);
+  
+  setTimeout(() => {
+    elem.remove();
+  }, 4000);
+}
+
+// Start animations
+animate();
+setInterval(createDestructiveElement, 1000);
+
+// Add glitch effect to content periodically
+setInterval(() => {
+  const contents = document.querySelectorAll('.content');
+  contents.forEach(content => {
+    content.style.transform = `translate(${Math.random() * 10 - 5}px, ${Math.random() * 10 - 5}px)`;
+    setTimeout(() => {
+      content.style.transform = 'translate(0, 0)';
+    }, 100);
+  });
+}, 3000);
+</script>
+
+</body></html>
