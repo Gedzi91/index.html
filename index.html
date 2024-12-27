@@ -1,0 +1,161 @@
+<html><head><base href="/analyze?concept=Godzilla%2520existing&danger=27"><style>
+body {
+    font-family: 'Cinzel', serif;
+    background-color: #0c0c1d;
+    color: #e0e0e0;
+    margin: 0;
+    padding: 20px;
+    min-height: 100vh;
+}
+
+.analysis-container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: rgba(23, 20, 38, 0.9);
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(138, 43, 226, 0.3);
+}
+
+.danger-rating {
+    font-size: 2.5em;
+    color: #4dff4d;
+    text-align: center;
+    margin: 20px 0;
+    text-shadow: 0 0 10px rgba(77, 255, 77, 0.5);
+}
+
+.meter {
+    height: 30px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 3px;
+    margin: 20px 0;
+}
+
+.meter > span {
+    display: block;
+    height: 100%;
+    width: 27%;
+    background: linear-gradient(90deg, #4dff4d, #00cc00);
+    border-radius: 15px;
+    transition: width 1.5s ease-in-out;
+}
+
+.concept-title {
+    color: #8a2be2;
+    text-align: center;
+    font-size: 2em;
+    margin-bottom: 30px;
+}
+
+.analysis-section {
+    margin: 20px 0;
+    padding: 20px;
+    background: rgba(138, 43, 226, 0.1);
+    border-radius: 10px;
+}
+
+.button {
+    display: inline-block;
+    padding: 12px 24px;
+    background: #8a2be2;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    margin: 10px;
+    transition: all 0.3s ease;
+}
+
+.button:hover {
+    background: #9b4dff;
+    transform: translateY(-2px);
+}
+
+.actions {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.godzilla-animation {
+    text-align: center;
+    margin: 20px 0;
+}
+
+@keyframes roar {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.roaring {
+    animation: roar 2s infinite;
+}
+</style>
+</head>
+<body>
+    <div class="analysis-container">
+        <h1 class="concept-title">Concept Analysis: Godzilla Existing</h1>
+        
+        <div class="danger-rating">Danger Level: 27%</div>
+        <div class="meter">
+            <span style="width: 27%"></span>
+        </div>
+
+        <div class="godzilla-animation">
+            <svg width="200" height="200" viewBox="0 0 200 200" class="roaring">
+                <path d="M100 20 L120 40 L140 30 L160 40 L140 60 L120 50 L100 60 L80 50 L60 60 L40 40 L60 30 L80 40 Z" 
+                      fill="#4dff4d" opacity="0.8"/>
+                <path d="M70 70 L130 70 L140 90 L120 100 L80 100 L60 90 Z" 
+                      fill="#4dff4d" opacity="0.8"/>
+                <path d="M90 100 L110 100 L110 150 L90 150 Z" 
+                      fill="#4dff4d" opacity="0.8"/>
+                <path d="M70 150 L130 150 L140 170 L60 170 Z" 
+                      fill="#4dff4d" opacity="0.8"/>
+            </svg>
+        </div>
+
+        <div class="analysis-section">
+            <h2>Analysis Summary</h2>
+            <p>A Godzilla-like creature existing in our reality presents a relatively low danger level of 27%. Here's why:</p>
+            <ul>
+                <li>Square-cube law makes the existence of such a massive creature physically improbable</li>
+                <li>Modern military capabilities would likely be effective against such a large target</li>
+                <li>Early detection systems would provide ample warning of approach</li>
+                <li>Limited ecological impact due to singular nature of the threat</li>
+            </ul>
+        </div>
+
+        <div class="analysis-section">
+            <h2>Mitigating Factors</h2>
+            <p>Several factors contribute to the relatively low danger assessment:</p>
+            <ul>
+                <li>Existing evacuation protocols for natural disasters would be applicable</li>
+                <li>Satellite monitoring systems could track movement</li>
+                <li>International cooperation would be likely in containing the threat</li>
+                <li>Urban infrastructure has improved significantly since the concept's inception</li>
+            </ul>
+        </div>
+
+        <div class="actions">
+            <a href="https://IsYourConceptDangerous.com/" class="button">Analyze Another Concept</a>
+            <a href="https://IsYourConceptDangerous.com/history?concept=Kaiju-Threats" class="button">View Similar Analyses</a>
+        </div>
+    </div>
+
+    <script>
+        // Add subtle movement to the Godzilla SVG
+        document.addEventListener('DOMContentLoaded', () => {
+            const godzilla = document.querySelector('.godzilla-animation');
+            
+            godzilla.addEventListener('mouseover', () => {
+                godzilla.style.transform = 'scale(1.1)';
+            });
+            
+            godzilla.addEventListener('mouseout', () => {
+                godzilla.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>
