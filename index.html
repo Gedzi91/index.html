@@ -1,0 +1,733 @@
+<html><head><base href="." />
+<style>
+:root {
+  --console-bg: #1a1a1a;
+  --warning-red: #ff0000;
+  --safe-green: #00ff00;
+  --alert-yellow: #ffff00;
+}
+
+body {
+  margin: 0;
+  padding: 20px;
+  background: #000;
+  font-family: monospace;
+  color: var(--safe-green);
+}
+
+.reactor-console {
+  background: var(--console-bg);
+  border: 4px solid #333;
+  border-radius: 10px;
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+  box-shadow: 0 0 20px rgba(0,255,0,0.2);
+  transition: opacity 0.5s ease;
+  opacity: 0.3; /* Start powered off */
+}
+
+.status-display {
+  background: #000;
+  border: 2px solid #444;
+  padding: 10px;
+  margin: 10px 0;
+  font-family: "Courier New", monospace;
+  height: 150px;
+  overflow-y: scroll;
+}
+
+.warning-light {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin: 10px;
+  display: inline-block;
+  border: 3px solid #444;
+  transition: all 0.3s ease;
+}
+
+.warning-light.active {
+  animation: pulse 1s infinite;
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin: 20px 0;
+}
+
+.button {
+  background: #333;
+  border: none;
+  color: var(--safe-green);
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.button:hover {
+  background: #444;
+  box-shadow: 0 0 10px rgba(0,255,0,0.3);
+}
+
+.self-destruct {
+  background: var(--warning-red);
+  color: white;
+  font-weight: bold;
+}
+
+.code-input {
+  background: #000;
+  border: 2px solid #444;
+  color: var(--safe-green);
+  padding: 10px;
+  font-family: monospace;
+  margin: 10px 0;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.3; }
+  100% { opacity: 1; }
+}
+
+.temperature-gauge {
+  width: 100%;
+  height: 30px;
+  background: #333;
+  margin: 10px 0;
+  position: relative;
+}
+
+.temperature-fill {
+  height: 100%;
+  background: var(--safe-green);
+  transition: all 0.3s ease;
+  width: 50%;
+}
+
+.temperature-controls {
+  display: flex;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.reactor-display {
+  display: flex;
+  justify-content: space-between;
+  margin: 20px 0;
+}
+
+.reactor-screen {
+  width: 48%;
+  border: 2px solid var(--safe-green);
+  padding: 10px;
+}
+
+.reactor-screen img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.screen-label {
+  text-align: center;
+  margin-top: 10px;
+  color: var(--safe-green);
+}
+
+.button[onclick="emergencyShutdown()"] {
+    grid-column: span 3;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.button[onclick="emergencyShutdown()"]:hover {
+    background: #dd0000 !important;
+    box-shadow: 0 0 20px rgba(255,0,0,0.5);
+}
+
+.reactor-info {
+  background: rgba(0, 255, 0, 0.1);
+  border: 2px solid var(--safe-green);
+  border-radius: 5px;
+  padding: 15px;
+  margin: 20px 0;
+}
+
+.reactor-info h2 {
+  margin: 0 0 15px 0;
+  color: var(--safe-green);
+  font-size: 1.2em;
+  text-transform: uppercase;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+.info-item {
+  padding: 8px;
+  border-left: 2px solid var(--safe-green);
+  font-size: 0.9em;
+}
+
+.info-item strong {
+  color: var(--safe-green);
+  margin-right: 5px;
+}
+
+.protocol-borealis {
+  background: var(--warning-red);
+  color: white;
+  font-weight: bold;
+}
+
+.power-button {
+    background: #444 !important;
+    border: 2px solid var(--safe-green) !important;
+    font-weight: bold;
+}
+
+.button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Initial state for all buttons except power */
+.button:not([onclick="toggleDevicePower()"]) {
+    opacity: 0.5;
+}
+</style>
+</head>
+<body>
+
+<div class="reactor-console">
+  <h1>Project Union Fusion Reactor Control Console</h1>
+  
+  <div class="reactor-display">
+    <div class="reactor-screen" id="front-view">
+      <img id="front-screen" src="P-UNION Off Front.png" alt="reactor front view in black and green" width="400" height="300">
+      <div class="screen-label">Front View</div>
+    </div>
+    <div class="reactor-screen" id="back-view">
+      <img id="back-screen" src="P-UNION Off Back.png" alt="reactor back view in black and green" width="400" height="300">
+      <div class="screen-label">Back View</div>
+    </div>
+  </div>
+
+  <div class="reactor-info">
+    <h2>Reactor Specifications</h2>
+    <div class="info-grid">
+      <div class="info-item">
+        <strong>Model:</strong> P-UNION Prototype Fusion Reactor
+      </div>
+      <div class="info-item">
+        <strong>Commissioned:</strong> May 26th, 2005
+      </div>
+      <div class="info-item">
+        <strong>Location:</strong> Mountain Energy Facility Complex B-7
+      </div>
+      <div class="info-item">
+        <strong>Power Systems:</strong> 10 High-Energy Fusion Lasers (PL1-PL10)
+      </div>
+      <div class="info-item">
+        <strong>Stabilization:</strong> 3 Quantum Stabilization Lasers (SL1-SL3)
+      </div>
+      <div class="info-item">
+        <strong>Depth:</strong> 300m Below Ground Level
+      </div>
+    </div>
+  </div>
+  
+  <div class="warning-lights">
+    <div class="warning-light" id="core-status"></div>
+    <div class="warning-light" id="containment-status"></div>
+    <div class="warning-light" id="radiation-status"></div>
+  </div>
+  
+  <div class="temperature-gauge">
+    <div class="temperature-fill" id="temp-gauge"></div>
+  </div>
+
+  <div class="temperature-controls">
+    <button class="button" onclick="coolReactor()">Decrease Power</button>
+    <button class="button" onclick="heatReactor()">Increase Power</button>
+  </div>
+  
+  <div class="status-display" id="status-log">
+    System initialized. Awaiting commands...
+  </div>
+  
+  <div class="controls">
+    <button class="button power-button" onclick="toggleDevicePower()">Power On/Off</button>
+    <button class="button" onclick="toggleReactor()">Toggle Reactor Power</button>
+    <button class="button" onclick="adjustContainment()">Adjust Containment Field</button>
+    <button class="button" onclick="ventRadiation()">Vent Excess Radiation</button>
+    <button class="button" onclick="testAlarms()">Test Warning Systems</button>
+    <button class="button" onclick="toggleTempFluctuations()">Toggle Temperature Fluctuations</button>
+    <button class="button" style="background: #aa0000; color: white;" onclick="emergencyShutdown()">EMERGENCY SHUTDOWN</button>
+  </div>
+  
+  <div class="protocol-borealis-panel">
+    <input type="password" class="code-input" id="destruct-code" placeholder="Enter Protocol Borealis Code">
+    <button class="button protocol-borealis" onclick="initiateDestruct()">INITIATE PROTOCOL BOREALIS</button>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const DESTRUCT_CODE = "03091981";
+    let alarmActive = false;
+    let alarmSound = new Audio('sd alarm.wav');
+    let meltdownAlarm = new Audio('meltdown alarm.wav'); 
+    let phase2Sound = new Audio('sd phase 2.wav');
+    let sdBoomSound = new Audio('sd boom.wav');
+    let mdPhase2Sound = new Audio('md-phase2.wav');
+    let mdPhase3Sound = new Audio('md-phase3.wav');
+    let meltdownBoomSound = new Audio('meltdown boom.wav');
+    let stallAlarmSound = new Audio('stall alarm.wav');
+    let coreStallSound = new Audio('core stall.wav');
+    let startupSound = new Audio('startup.wav'); // Add startup sound
+    let isDevicePowered = false; // Add this new state variable
+    
+    let reactorActive = false;
+    let currentTemp = 50;
+    let tempFluctuationsEnabled = false;
+    let tempInterval;
+    let systemLocked = false;
+    let isStalled = false;
+    let stallWarningInterval;
+
+    function updateScreens(state) {
+        const frontScreen = document.getElementById('front-screen');
+        const backScreen = document.getElementById('back-screen');
+        
+        switch(state) {
+            case 'off':
+                frontScreen.src = 'P-UNION Off Front.png';
+                backScreen.src = 'P-UNION Off Back.png';
+                break;
+            case 'on':
+                frontScreen.src = 'P-UNION On Front.png';
+                backScreen.src = 'P-UNION On Back.png';
+                break;
+            case 'phase1':
+                frontScreen.src = 'P-UNION SD Phase 1 Front.png';
+                backScreen.src = 'P-UNION SD Phase 1 Back.png';
+                break;
+            case 'phase2':
+                frontScreen.src = 'P-UNION SD Phase 2 Front.png';
+                backScreen.src = 'P-UNION SD Phase 2 Back.png';
+                break;
+            case 'mdphase3':
+                frontScreen.src = 'P-UNION MD Phase 3 Front.png';
+                backScreen.src = 'P-UNION MD Phase 3 Back.png';
+                break;
+            case 'error':
+                frontScreen.src = 'P-UNION Error.png';
+                backScreen.src = 'P-UNION Error.png';
+                break;
+        }
+    }
+
+    function log(message) {
+        const statusLog = document.getElementById('status-log');
+        statusLog.innerHTML += `\n[${new Date().toLocaleTimeString()}] ${message}`;
+        statusLog.scrollTop = statusLog.scrollHeight;
+    }
+
+    function updateTempGauge() {
+        const tempGauge = document.getElementById('temp-gauge');
+        if (tempGauge) {
+            tempGauge.style.width = `${currentTemp}%`;
+            tempGauge.style.background = currentTemp > 80 ? 'var(--warning-red)' : 
+                                       currentTemp > 60 ? 'var(--alert-yellow)' : 
+                                       'var(--safe-green)';
+
+            if (currentTemp >= 100) {
+                initiateMeltdown();
+            }
+        }
+    }
+
+    function coolReactor() {
+        if (!isDevicePowered) {
+            log('Device power is off. Please turn on the device first.');
+            return;
+        }
+        if (systemLocked) {
+            log('System locked - Emergency shutdown only');
+            return;
+        }
+        if (reactorActive && currentTemp > 0) {
+            currentTemp = Math.max(0, currentTemp - 10);
+            log('Decreasing reactor power...');
+            updateTempGauge();
+            
+            // Check for stall condition
+            if (currentTemp === 0) {
+                reactorStall();
+            }
+        }
+    }
+
+    function heatReactor() {
+        if (!isDevicePowered) {
+            log('Device power is off. Please turn on the device first.');
+            return;
+        }
+        if (systemLocked) {
+            log('System locked - Emergency shutdown only');
+            return;
+        }
+        if (reactorActive && currentTemp < 100) {
+            currentTemp = Math.min(100, currentTemp + 10);
+            log('Increasing reactor power...');
+            updateTempGauge();
+        }
+    }
+
+    function reactorStall() {
+        if (!isStalled) {
+            isStalled = true;
+            systemLocked = true;
+            log('⚠️ WARNING: REACTOR STALL DETECTED - CORE TEMPERATURE CRITICALLY LOW ⚠️');
+            
+            document.querySelectorAll('.warning-light').forEach(light => {
+                light.style.background = 'var(--warning-red)';
+                light.classList.add('active');
+            });
+            
+            stallAlarmSound.loop = true;
+            stallAlarmSound.play();
+            
+            let stallCountdown = 180; // 3 minutes until total failure
+            stallWarningInterval = setInterval(() => {
+                log(`WARNING: Reactor stall - Core failure in ${stallCountdown} seconds. Emergency restart required.`);
+                stallCountdown--;
+                
+                if (stallCountdown === 10) {
+                    updateScreens('error');
+                    log('⚠️ CRITICAL: VISUALIZATION SYSTEMS FAILING ⚠️');
+                }
+                
+                if (stallCountdown < 0) {
+                    clearInterval(stallWarningInterval);
+                    stallAlarmSound.pause();
+                    stallAlarmSound.currentTime = 0;
+                    coreStallSound.play();
+                    document.body.innerHTML = '<h1 style="color: red; text-align: center; margin-top: 40vh;">💥 REACTOR CORE CRYSTALLIZED - FACILITY DESTROYED 💥</h1>';
+                }
+            }, 1000);
+        }
+    }
+
+    function emergencyShutdown() {
+        if (!reactorActive && !isStalled) {
+            log('System already offline.');
+            return;
+        }
+        
+        log('🚨 EMERGENCY SHUTDOWN INITIATED 🚨');
+        reactorActive = false;
+        systemLocked = false;
+        isStalled = false;
+        clearInterval(tempInterval);
+        clearInterval(stallWarningInterval);
+        
+        // Stop all alarms including new ones
+        [alarmSound, meltdownAlarm, phase2Sound, mdPhase2Sound, mdPhase3Sound, stallAlarmSound].forEach(sound => {
+            sound.pause();
+            sound.currentTime = 0;
+        });
+        
+        document.querySelectorAll('.warning-light').forEach(light => {
+            light.style.background = '#333';
+            light.classList.remove('active');
+        });
+        
+        currentTemp = 50;
+        updateTempGauge();
+        updateScreens('off');
+        log('Emergency shutdown complete. System reset.');
+    }
+
+    function initiateMeltdown() {
+        systemLocked = true;
+        log('⚠️ CRITICAL WARNING: REACTOR MELTDOWN IMMINENT ⚠️');
+        document.querySelectorAll('.warning-light').forEach(light => {
+            light.style.background = 'var(--warning-red)';
+            light.classList.add('active');
+        });
+        
+        // Phase 1
+        meltdownAlarm.loop = true;
+        meltdownAlarm.play();
+        
+        let countdown = 300; // 5 minutes
+        const countdownInterval = setInterval(() => {
+            // Phase 2 at 3 minutes
+            if (countdown === 180) {
+                log('⚠️ MELTDOWN PHASE 2 - CORE INTEGRITY CRITICAL ⚠️');
+                mdPhase2Sound.loop = true;
+                mdPhase2Sound.play();
+            }
+            
+            // Phase 3 at 1 minute
+            if (countdown === 60) {
+                log('⚠️ MELTDOWN PHASE 3 - CORE COLLAPSE IMMINENT ⚠️');
+                mdPhase3Sound.loop = true;
+                mdPhase3Sound.play();
+                updateScreens('mdphase3');
+            }
+
+            // Error screen at 10 seconds
+            if (countdown === 10) {
+                updateScreens('error');
+                log('⚠️ CRITICAL: VISUALIZATION SYSTEMS FAILING ⚠️');
+            }
+            
+            log(`Meltdown in ${countdown} seconds...`);
+            countdown--;
+            
+            if (countdown < 0) {
+                clearInterval(countdownInterval);
+                meltdownAlarm.pause();
+                meltdownAlarm.currentTime = 0;
+                mdPhase2Sound.pause();
+                mdPhase2Sound.currentTime = 0;
+                mdPhase3Sound.pause();
+                mdPhase3Sound.currentTime = 0;
+                meltdownBoomSound.play();
+                document.body.innerHTML = '<h1 style="color: red; text-align: center; margin-top: 40vh;">💥 REACTOR MELTDOWN - FACILITY DESTROYED 💥</h1>';
+            }
+        }, 1000);
+    }
+
+    function initiateDestruct() {
+        const code = document.getElementById('destruct-code').value;
+        if (code === DESTRUCT_CODE) {
+            systemLocked = true;
+            log('⚠️ PROTOCOL BOREALIS INITIATED - PHASE 1 ⚠️');
+            updateScreens('phase1');
+            document.querySelectorAll('.warning-light').forEach(light => {
+                light.style.background = 'var(--warning-red)';
+                light.classList.add('active');
+            });
+            
+            // Start playing alarm sound on loop
+            alarmSound.loop = true;
+            alarmSound.play();
+            
+            let countdown = 120; // 2 minutes
+            const countdownInterval = setInterval(() => {
+                if (countdown === 60) {
+                    log('⚠️ PROTOCOL BOREALIS PHASE 2 - FINAL COUNTDOWN ⚠️');
+                    updateScreens('phase2');
+                    phase2Sound.loop = true;
+                    phase2Sound.play();
+                }
+                
+                log(`Protocol Borealis executing in ${countdown} seconds...`);
+
+                countdown--;
+              
+                if (countdown < 0) {
+                    clearInterval(countdownInterval);
+                    alarmSound.pause();
+                    alarmSound.currentTime = 0;
+                    phase2Sound.pause();
+                    phase2Sound.currentTime = 0;
+                    sdBoomSound.play();
+                    document.body.innerHTML = '<h1 style="color: red; text-align: center; margin-top: 40vh;">💥 REACTOR DESTROYED 💥</h1>';
+                }
+            }, 1000);
+        } else {
+            log('Invalid Protocol Borealis code. Access denied.');
+        }
+    }
+
+    // Control functions modified to check device power
+    function toggleDevicePower() {
+        isDevicePowered = !isDevicePowered;
+        
+        if (isDevicePowered) {
+            startupSound.play();
+            log('Initializing device power...');
+            document.querySelector('.reactor-console').style.opacity = '1';
+            
+            // Enable all buttons after startup sound finishes
+            setTimeout(() => {
+                log('Device power online. All systems operational.');
+                document.querySelectorAll('.button').forEach(btn => {
+                    btn.disabled = false;
+                });
+            }, 2000);
+        } else {
+            log('Powering down device...');
+            document.querySelector('.reactor-console').style.opacity = '0.3';
+            // Disable all buttons except power
+            document.querySelectorAll('.button:not([onclick="toggleDevicePower()"])').forEach(btn => {
+                btn.disabled = true;
+            });
+            
+            // Reset everything
+            emergencyShutdown();
+        }
+    }
+
+    function toggleReactor() {
+        if (!isDevicePowered) {
+            log('Device power is off. Please turn on the device first.');
+            return;
+        }
+        if (systemLocked) {
+            log('System locked - Emergency shutdown only');
+            return;
+        }
+        reactorActive = !reactorActive;
+        updateScreens(reactorActive ? 'on' : 'off');
+        log(`Reactor power ${reactorActive ? 'ENABLED' : 'DISABLED'}`);
+        const coreStatus = document.getElementById('core-status');
+        coreStatus.style.background = reactorActive ? 'var(--safe-green)' : '#333';
+        if (reactorActive && tempFluctuationsEnabled) {
+            startTempFluctuations();
+        } else {
+            clearInterval(tempInterval);
+        }
+    }
+
+    function adjustContainment() {
+        if (!isDevicePowered) {
+            log('Device power is off. Please turn on the device first.');
+            return;
+        }
+        if (systemLocked) {
+            log('System locked - Emergency shutdown only');
+            return;
+        }
+        const containmentLight = document.getElementById('containment-status');
+        containmentLight.style.background = 'var(--alert-yellow)';
+        log('Adjusting containment field parameters...');
+        
+        setTimeout(() => {
+            containmentLight.style.background = 'var(--safe-green)';
+            log('Containment field stabilized');
+        }, 3000);
+    }
+
+    function ventRadiation() {
+        if (!isDevicePowered) {
+            log('Device power is off. Please turn on the device first.');
+            return;
+        }
+        if (systemLocked) {
+            log('System locked - Emergency shutdown only');
+            return;
+        }
+        const radiationLight = document.getElementById('radiation-status');
+        radiationLight.style.background = 'var(--warning-red)';
+        radiationLight.classList.add('active');
+        log('WARNING: Venting excess radiation...');
+        
+        setTimeout(() => {
+            radiationLight.style.background = 'var(--safe-green)';
+            radiationLight.classList.remove('active');
+            log('Radiation levels normalized');
+        }, 5000);
+    }
+
+    function testAlarms() {
+        if (!isDevicePowered) {
+            log('Device power is off. Please turn on the device first.');
+            return;
+        }
+        if (systemLocked) {
+            log('System locked - Emergency shutdown only');
+            return;
+        }
+        alarmActive = true;
+        const lights = document.querySelectorAll('.warning-light');
+        lights.forEach(light => {
+            light.style.background = 'var(--warning-red)';
+            light.classList.add('active');
+        });
+        
+        log('🚨 TESTING ALARM SYSTEMS 🚨');
+        
+        setTimeout(() => {
+            alarmActive = false;
+            lights.forEach(light => {
+                light.style.background = 'var(--safe-green)';
+                light.classList.remove('active');
+            });
+            log('Alarm test complete');
+        }, 3000);
+    }
+
+    function toggleTempFluctuations() {
+        if (!isDevicePowered) {
+            log('Device power is off. Please turn on the device first.');
+            return;
+        }
+        if (systemLocked) {
+            log('System locked - Emergency shutdown only');
+            return;
+        }
+        tempFluctuationsEnabled = !tempFluctuationsEnabled;
+        log(`Temperature fluctuations ${tempFluctuationsEnabled ? 'enabled' : 'disabled'}`);
+        
+        if (tempFluctuationsEnabled && reactorActive) {
+            startTempFluctuations();
+        } else {
+            clearInterval(tempInterval);
+        }
+    }
+
+    function startTempFluctuations() {
+        clearInterval(tempInterval);
+        tempInterval = setInterval(() => {
+            if (reactorActive && tempFluctuationsEnabled) {
+                // Random temperature change between -5 and +5
+                const change = Math.floor(Math.random() * 11) - 5;
+                currentTemp = Math.max(0, Math.min(100, currentTemp + change));
+                updateTempGauge();
+                
+                if (currentTemp <= 0) {
+                    reactorStall();
+                }
+            }
+        }, 2000);
+    }
+
+    // Initialize all buttons as disabled except power
+    document.querySelectorAll('.button:not([onclick="toggleDevicePower()"])').forEach(btn => {
+        btn.disabled = true;
+    });
+
+    // Expose functions to window object
+    window.toggleDevicePower = toggleDevicePower;
+    window.toggleReactor = toggleReactor;
+    window.adjustContainment = adjustContainment;
+    window.ventRadiation = ventRadiation;
+    window.testAlarms = testAlarms;
+    window.initiateDestruct = initiateDestruct;
+    window.coolReactor = coolReactor;
+    window.heatReactor = heatReactor;
+    window.toggleTempFluctuations = toggleTempFluctuations;
+    window.initiateMeltdown = initiateMeltdown;
+    window.emergencyShutdown = emergencyShutdown;
+
+    log('System online. Welcome, operator.');
+    updateTempGauge();
+    updateScreens('off');
+});
+</script>
+
+</body></html>
