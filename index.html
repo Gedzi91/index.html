@@ -1,0 +1,196 @@
+<html><head><base href="https://example.com/">
+<style>
+body {
+  margin: 0;
+  height: 100vh;
+  background: #000;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: Arial, sans-serif;
+}
+
+.canvas-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+}
+
+.floating-shape {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(5px);
+  mix-blend-mode: screen;
+  animation: float 20s infinite linear;
+  transform-origin: center;
+}
+
+@keyframes float {
+  0% { transform: rotate(0deg) translateY(0px); }
+  50% { transform: rotate(180deg) translateY(20px); }
+  100% { transform: rotate(360deg) translateY(0px); }
+}
+
+.control-panel {
+  position: fixed;
+  bottom: 20px;
+  background: rgba(255,255,255,0.1);
+  padding: 15px;
+  border-radius: 10px;
+  color: white;
+  backdrop-filter: blur(5px);
+  z-index: 100;
+}
+
+.dna-helix {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100px;
+  height: 400px;
+  animation: rotate3D 10s infinite linear;
+}
+
+@keyframes rotate3D {
+  from { transform: translate(-50%, -50%) rotateY(0deg); }
+  to { transform: translate(-50%, -50%) rotateY(360deg); }
+}
+
+.strand {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.nucleotide {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: white;
+  filter: blur(2px);
+}
+
+</style>
+</head>
+<body>
+
+<div class="canvas-container">
+  <div class="dna-helix"></div>
+</div>
+
+<div class="control-panel">
+  Click to add particles | Scroll to zoom | Drag to rotate
+</div>
+
+<script>
+const container = document.querySelector('.canvas-container');
+const dnaHelix = document.querySelector('.dna-helix');
+let scale = 1;
+let rotation = { x: 0, y: 0 };
+let isDragging = false;
+let lastMousePos = { x: 0, y: 0 };
+
+// Create DNA strands
+function createDNAStructure() {
+  const numberOfPoints = 20;
+  const colors = ['#ff0066', '#00ffff', '#ffff00', '#00ff66'];
+  
+  for (let i = 0; i < numberOfPoints; i++) {
+    const height = (i / numberOfPoints) * 100;
+    const angle = (i / numberOfPoints) * Math.PI * 4;
+    
+    // Create first strand
+    const nucleotide1 = document.createElement('div');
+    nucleotide1.className = 'nucleotide';
+    nucleotide1.style.left = `${Math.cos(angle) * 30 + 40}px`;
+    nucleotide1.style.top = `${height}%`;
+    nucleotide1.style.background = colors[i % 4];
+    dnaHelix.appendChild(nucleotide1);
+    
+    // Create second strand
+    const nucleotide2 = document.createElement('div');
+    nucleotide2.className = 'nucleotide';
+    nucleotide2.style.left = `${Math.cos(angle + Math.PI) * 30 + 40}px`;
+    nucleotide2.style.top = `${height}%`;
+    nucleotide2.style.background = colors[(i + 2) % 4];
+    dnaHelix.appendChild(nucleotide2);
+    
+    // Create connecting line
+    if (i < numberOfPoints - 1) {
+      const line = document.createElement('div');
+      line.style.position = 'absolute';
+      line.style.width = '60px';
+      line.style.height = '2px';
+      line.style.background = 'rgba(255,255,255,0.2)';
+      line.style.left = '20px';
+      line.style.top = `${height}%`;
+      line.style.transform = `rotate(${angle * 57.3}deg)`;
+      dnaHelix.appendChild(line);
+    }
+  }
+}
+
+// Add floating particles on click
+container.addEventListener('click', (e) => {
+  const particle = document.createElement('div');
+  particle.className = 'floating-shape';
+  particle.style.width = Math.random() * 50 + 20 + 'px';
+  particle.style.height = particle.style.width;
+  particle.style.left = e.clientX + 'px';
+  particle.style.top = e.clientY + 'px';
+  particle.style.background = `hsl(${Math.random() * 360}, 100%, 50%)`;
+  container.appendChild(particle);
+  
+  // Remove particle after animation
+  setTimeout(() => particle.remove(), 20000);
+});
+
+// Handle zoom
+window.addEventListener('wheel', (e) => {
+  scale = Math.max(0.5, Math.min(2, scale + (e.deltaY > 0 ? -0.1 : 0.1)));
+  dnaHelix.style.transform = `translate(-50%, -50%) scale(${scale}) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`;
+});
+
+// Handle rotation
+container.addEventListener('mousedown', (e) => {
+  isDragging = true;
+  lastMousePos = { x: e.clientX, y: e.clientY };
+});
+
+window.addEventListener('mousemove', (e) => {
+  if (isDragging) {
+    const deltaX = e.clientX - lastMousePos.x;
+    const deltaY = e.clientY - lastMousePos.y;
+    
+    rotation.x += deltaY * 0.5;
+    rotation.y += deltaX * 0.5;
+    
+    dnaHelix.style.transform = `translate(-50%, -50%) scale(${scale}) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`;
+    
+    lastMousePos = { x: e.clientX, y: e.clientY };
+  }
+});
+
+window.addEventListener('mouseup', () => {
+  isDragging = false;
+});
+
+// Initialize DNA structure
+createDNAStructure();
+
+// Add some initial particles
+for (let i = 0; i < 10; i++) {
+  const particle = document.createElement('div');
+  particle.className = 'floating-shape';
+  particle.style.width = Math.random() * 50 + 20 + 'px';
+  particle.style.height = particle.style.width;
+  particle.style.left = Math.random() * window.innerWidth + 'px';
+  particle.style.top = Math.random() * window.innerHeight + 'px';
+  particle.style.background = `hsl(${Math.random() * 360}, 100%, 50%)`;
+  container.appendChild(particle);
+}
+</script>
+</body></html>
