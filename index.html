@@ -1,0 +1,397 @@
+<html><head><base href="." />
+<title>3D Character Dialog Generator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+    body { 
+        margin: 0;
+        background: #fff;
+        color: #000;
+        font-family: Arial, sans-serif;
+    }
+    #container {
+        width: 100vw;
+        height: 100vh;
+        position: relative;
+    }
+    #scene {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+    #prompt-input {
+        position: absolute;
+        top: 60px; /* Changed from 100px to move it higher */
+        left: 50%;
+        transform: translateX(-50%);
+        width: 300px;
+        padding: 10px;
+        font-size: 16px;
+        border-radius: 5px;
+        border: 2px solid #333;
+    }
+    .speech-bubble {
+        position: absolute;
+        background: white;
+        padding: 10px;
+        max-width: 250px; /* Limit maximum width */
+        min-width: 120px; /* Ensure minimum width */
+        min-height: 50px; /* Add minimum height to ensure content fits */
+        text-align: center;
+        opacity: 0;
+        transition: all 0.5s ease;
+        border-radius: 10px;
+        z-index: 1000;
+        margin-bottom: 20px; /* Ensure minimum spacing between bubbles */
+    }
+    #character1-bubble {
+        top: 120px; /* Keep blue bubble high */
+        left: 35%;
+        border: 2px solid #4444ff;
+    }
+    #character2-bubble {
+        top: 250px; /* Significantly increase distance from first bubble */
+        left: 35%;
+        border: 2px solid #ff4444;
+    }
+    .speech-bubble.show {
+        opacity: 1;
+    }
+    .speech-bubble::after {
+        content: '';
+        position: absolute;
+        left: 20px;
+        border: 10px solid transparent;
+    }
+    #character1-bubble::after {
+        bottom: -20px;
+        border-top-color: #4444ff;
+    }
+    #character2-bubble::after {
+        bottom: -20px;
+        border-top-color: #ff4444;
+    }
+    #topic-sense {
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 10px 20px;
+        font-size: 16px;
+        background: #333;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    #topic-sense:hover {
+        background: #444;
+    }
+    #topic-sense:disabled {
+        background: #999;
+        cursor: not-allowed;
+    }
+    /* Add media query for mobile devices */
+    @media screen and (max-width: 768px) {
+        #character1-bubble {
+            top: 140px;
+            left: 20%;
+            max-width: 160px; /* Slightly smaller on mobile */
+        }
+        
+        #character2-bubble {
+            top: 300px; /* Even more separation on mobile */
+            left: 20%;
+            max-width: 160px; /* Slightly smaller on mobile */
+        }
+
+        #prompt-input {
+            width: 80%; /* Make input more responsive on mobile */
+            max-width: 300px;
+        }
+    }
+</style>
+</head>
+<body>
+<div id="container">
+    <canvas id="scene"></canvas>
+    <button id="topic-sense">Get Topic Sense</button>
+    <input type="text" id="prompt-input" placeholder="Enter conversation topic..." />
+    <div id="character1-bubble" class="speech-bubble"></div>
+    <div id="character2-bubble" class="speech-bubble"></div>
+</div>
+
+<script>
+let scene, camera, renderer, character1, character2;
+
+function init() {
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xffffff);
+    
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.z = 5;
+
+    renderer = new THREE.WebGLRenderer({
+        canvas: document.getElementById('scene'),
+        antialias: true
+    });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
+    
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+    directionalLight.position.set(0, 1, 1);
+    scene.add(directionalLight);
+
+    createCharacters();
+    animate();
+
+    window.addEventListener('resize', onWindowResize, false);
+}
+
+function createCharacters() {
+    // Character 1 - Blue
+    const group1 = new THREE.Group();
+    
+    // Body
+    const body1 = new THREE.CylinderGeometry(0.3, 0.3, 1.2, 32);
+    const bodyMesh1 = new THREE.Mesh(body1, new THREE.MeshPhongMaterial({ color: 0x4444ff }));
+    group1.add(bodyMesh1);
+    
+    // Arms
+    const arm1 = new THREE.CylinderGeometry(0.1, 0.1, 0.8, 16);
+    const leftArm1 = new THREE.Mesh(arm1, new THREE.MeshPhongMaterial({ color: 0x4444ff }));
+    leftArm1.position.set(-0.4, 0, 0);
+    leftArm1.rotation.z = Math.PI / 3;
+    group1.add(leftArm1);
+    
+    const rightArm1 = new THREE.Mesh(arm1, new THREE.MeshPhongMaterial({ color: 0x4444ff }));
+    rightArm1.position.set(0.4, 0, 0);
+    rightArm1.rotation.z = -Math.PI / 3;
+    group1.add(rightArm1);
+    
+    // Legs
+    const leg1 = new THREE.CylinderGeometry(0.1, 0.1, 0.8, 16);
+    const leftLeg1 = new THREE.Mesh(leg1, new THREE.MeshPhongMaterial({ color: 0x4444ff }));
+    leftLeg1.position.set(-0.2, -1, 0);
+    group1.add(leftLeg1);
+    
+    const rightLeg1 = new THREE.Mesh(leg1, new THREE.MeshPhongMaterial({ color: 0x4444ff }));
+    rightLeg1.position.set(0.2, -1, 0);
+    group1.add(rightLeg1);
+    
+    // Eyes (white part)
+    const eye1 = new THREE.SphereGeometry(0.08, 32, 32);
+    const leftEye1 = new THREE.Mesh(eye1, new THREE.MeshPhongMaterial({ color: 0xffffff }));
+    leftEye1.position.set(-0.15, 0.3, 0.3);
+    group1.add(leftEye1);
+    
+    const rightEye1 = new THREE.Mesh(eye1, new THREE.MeshPhongMaterial({ color: 0xffffff }));
+    rightEye1.position.set(0.15, 0.3, 0.3);
+    group1.add(rightEye1);
+
+    // Pupils (black part)
+    const pupil1 = new THREE.SphereGeometry(0.04, 32, 32);
+    const leftPupil1 = new THREE.Mesh(pupil1, new THREE.MeshPhongMaterial({ color: 0x000000 }));
+    leftPupil1.position.set(-0.15, 0.3, 0.35);
+    group1.add(leftPupil1);
+    
+    const rightPupil1 = new THREE.Mesh(pupil1, new THREE.MeshPhongMaterial({ color: 0x000000 }));
+    rightPupil1.position.set(0.15, 0.3, 0.35);
+    group1.add(rightPupil1);
+    
+    group1.position.x = -1.5; // Moved closer
+    character1 = group1;
+    scene.add(group1);
+
+    // Character 2 - Red
+    const group2 = new THREE.Group();
+    
+    // Body
+    const body2 = new THREE.CylinderGeometry(0.3, 0.3, 1.2, 32);
+    const bodyMesh2 = new THREE.Mesh(body2, new THREE.MeshPhongMaterial({ color: 0xff4444 }));
+    group2.add(bodyMesh2);
+    
+    // Arms
+    const leftArm2 = new THREE.Mesh(arm1, new THREE.MeshPhongMaterial({ color: 0xff4444 }));
+    leftArm2.position.set(-0.4, 0, 0);
+    leftArm2.rotation.z = Math.PI / 3;
+    group2.add(leftArm2);
+    
+    const rightArm2 = new THREE.Mesh(arm1, new THREE.MeshPhongMaterial({ color: 0xff4444 }));
+    rightArm2.position.set(0.4, 0, 0);
+    rightArm2.rotation.z = -Math.PI / 3;
+    group2.add(rightArm2);
+    
+    // Legs
+    const leftLeg2 = new THREE.Mesh(leg1, new THREE.MeshPhongMaterial({ color: 0xff4444 }));
+    leftLeg2.position.set(-0.2, -1, 0);
+    group2.add(leftLeg2);
+    
+    const rightLeg2 = new THREE.Mesh(leg1, new THREE.MeshPhongMaterial({ color: 0xff4444 }));
+    rightLeg2.position.set(0.2, -1, 0);
+    group2.add(rightLeg2);
+    
+    // Eyes (white part)
+    const leftEye2 = new THREE.Mesh(eye1, new THREE.MeshPhongMaterial({ color: 0xffffff }));
+    leftEye2.position.set(-0.15, 0.3, 0.3);
+    group2.add(leftEye2);
+    
+    const rightEye2 = new THREE.Mesh(eye1, new THREE.MeshPhongMaterial({ color: 0xffffff }));
+    rightEye2.position.set(0.15, 0.3, 0.3);
+    group2.add(rightEye2);
+
+    // Pupils (black part)
+    const leftPupil2 = new THREE.Mesh(pupil1, new THREE.MeshPhongMaterial({ color: 0x000000 }));
+    leftPupil2.position.set(-0.15, 0.3, 0.35);
+    group2.add(leftPupil2);
+    
+    const rightPupil2 = new THREE.Mesh(pupil1, new THREE.MeshPhongMaterial({ color: 0x000000 }));
+    rightPupil2.position.set(0.15, 0.3, 0.35);
+    group2.add(rightPupil2);
+    
+    group2.position.x = 1.5; // Moved closer
+    character2 = group2;
+    scene.add(group2);
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    
+    const time = Date.now() * 0.001;
+    character1.position.y = Math.sin(time * 2) * 0.2;
+    character2.position.y = Math.sin(time * 2 + Math.PI) * 0.2;
+    
+    renderer.render(scene, camera);
+}
+
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+async function generateDialog(prompt) {
+    try {
+        const response = await fetch('/api/ai_completion', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+                prompt: `Generate a funny, witty dialog between two characters about: ${prompt}. Make it humorous and entertaining, with clever wordplay or jokes.
+                
+                <typescript-interface>
+                interface Response {
+                    character1: string;
+                    character2: string;
+                }
+                </typescript-interface>
+                <example>
+                {
+                    "character1": "Did you know vegetables are having a party? The turnip is really turning up the beet!",
+                    "character2": "Oh lettuce not start with the vegetable puns, they're corny enough to make me cry!"
+                }
+                </example>`,
+                data: prompt
+            }),
+        });
+        const data = await response.json();
+        
+        const bubble1 = document.getElementById('character1-bubble');
+        const bubble2 = document.getElementById('character2-bubble');
+        
+        // Reset bubbles
+        bubble1.classList.remove('show');
+        bubble2.classList.remove('show');
+        bubble1.textContent = '';  // Clear content
+        bubble2.textContent = '';  // Clear content
+        
+        // Show first bubble with delay
+        setTimeout(() => {
+            bubble1.textContent = data.character1;
+            bubble1.classList.add('show');
+            
+            // Show second bubble after first one with longer delay
+            setTimeout(() => {
+                bubble2.textContent = data.character2;
+                bubble2.classList.add('show');
+            }, 1000);  // Increased delay to 1000ms
+        }, 500);
+    } catch (error) {
+        console.error('Error generating dialog:', error);
+    }
+}
+
+async function getTopicSense() {
+    const prompt = document.getElementById('prompt-input').value;
+    try {
+        const response = await fetch('/api/ai_completion', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+                prompt: `Generate a quick funny exchange between two characters about this topic: ${prompt}. Make it witty and humorous, with character1 starting the conversation.
+                
+                <typescript-interface>
+                interface Response {
+                    character1: string;
+                    character2: string;
+                }
+                </typescript-interface>
+                <example>
+                {
+                    "character1": "You know what's funny about pizza? The way it always promises to diet tomorrow!",
+                    "character2": "Yeah, just like my gym membership - full of good intentions but covered in cheese!"
+                }
+                </example>`,
+                data: prompt
+            }),
+        });
+        const data = await response.json();
+        
+        const bubble1 = document.getElementById('character1-bubble');
+        const bubble2 = document.getElementById('character2-bubble');
+        
+        // Reset bubbles
+        bubble1.classList.remove('show');
+        bubble2.classList.remove('show');
+        bubble1.textContent = '';  // Clear content
+        bubble2.textContent = '';  // Clear content
+        
+        // Show first bubble with delay
+        setTimeout(() => {
+            bubble1.textContent = data.character1;
+            bubble1.classList.add('show');
+            
+            // Show second bubble after first one with longer delay
+            setTimeout(() => {
+                bubble2.textContent = data.character2;
+                bubble2.classList.add('show');
+            }, 1000);  // Increased delay to 1000ms
+        }, 500);
+    } catch (error) {
+        console.error('Error getting topic sense:', error);
+    }
+}
+
+document.getElementById('topic-sense').addEventListener('click', function() {
+    this.disabled = true;
+    getTopicSense().finally(() => {
+        this.disabled = false;
+    });
+});
+
+init();
+
+document.getElementById('prompt-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        generateDialog(this.value);
+    }
+});
+</script>
+</body>
+</html>
