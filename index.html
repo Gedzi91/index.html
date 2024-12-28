@@ -1,0 +1,89 @@
+<html><head><base href="Endless.horse"><style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    background: white;
+    min-height: 100vh;
+    overflow-y: scroll;
+    font-family: monospace;
+}
+
+.horse {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 50px;
+}
+
+.head {
+    font-size: 24px;
+    white-space: pre;
+    line-height: 1;
+    margin-bottom: 0;
+}
+
+.neck {
+    font-size: 24px;
+    white-space: pre;
+    line-height: 1;
+    margin-top: -1px;
+}
+</style>
+</head>
+<body>
+
+<div class="horse">
+<pre class="head">
+_,,)\.~,,._
+(()`  ``)\))),,_
+ |     \ ''((\)))),,_          ____
+ |6`   |   ''((\())) "-.____.-"    `-.-,
+ |    .'\    ''))))'                  \)))
+ |   |   `.     ''                     ((((
+ \, _)     \/                          |))))
+  `'        |                          (((((
+            \                  |       ))))))
+             `|    |           ,\     /((((((
+              |   / `-.______.<  \   |  )))))
+              |   |  /         `. \  \  ((((
+              |  / \ |           `.\  | (((
+              \  | | |             )| |  ))
+</pre>
+<pre class="neck" id="neck">
+| | | |             || |
+| | | |             || |
+| | | |             || |
+| | | |             || |
+| | | |             || |
+</pre>
+</div>
+
+<script>
+let neckHeight = 5;
+const neck = document.getElementById('neck');
+
+// When scrolling, add more neck segments
+window.addEventListener('scroll', () => {
+    const scrollPosition = window.scrollY;
+    const documentHeight = document.documentElement.scrollHeight;
+    const windowHeight = window.innerHeight;
+    
+    // If we're near the bottom, add more neck
+    if (documentHeight - (scrollPosition + windowHeight) < 500) {
+        let newSegments = '';
+        for (let i = 0; i < 10; i++) {
+            newSegments += '| | | |             || |\n';
+            neckHeight++;
+        }
+        neck.innerHTML += newSegments;
+    }
+});
+
+// Initial neck extension to make it scrollable
+for (let i = 0; i < 20; i++) {
+    neck.innerHTML += '| | | |             || |\n';
+    neckHeight++;
+}
+</script>
+
+</body></html>
