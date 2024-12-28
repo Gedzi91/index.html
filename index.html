@@ -1,0 +1,703 @@
+<html><head><base href="." /><title>Audioogle - Audio Search Engine</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.3.4/axios.min.js"></script>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #fff;
+}
+
+.main {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: -100px;
+}
+
+.logo {
+  margin-bottom: 30px;
+  font-size: 90px;
+  font-weight: bold;
+  background: linear-gradient(45deg, #4285f4, #34a853, #fbbc05, #ea4335);
+  -webkit-background-clip: text;
+  color: transparent;
+  position: relative;
+}
+
+.search-container {
+  width: 100%;
+  max-width: 584px;
+  margin: 0 auto;
+}
+
+.search-box {
+  width: 100%;
+  height: 44px;
+  border: 1px solid #dfe1e5;
+  border-radius: 24px;
+  padding: 0 45px;
+  font-size: 16px;
+  position: relative;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transition: box-shadow 0.3s;
+}
+
+.search-box:hover,
+.search-box:focus {
+  box-shadow: 0 1px 6px rgba(0,0,0,0.2);
+  border-color: transparent;
+}
+
+.mic-icon {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+.buttons {
+  margin-top: 30px;
+  display: flex;
+  gap: 12px;
+}
+
+.button {
+  background: #f8f9fa;
+  border: 1px solid #f8f9fa;
+  border-radius: 4px;
+  color: #3c4043;
+  font-size: 14px;
+  padding: 0 16px;
+  height: 36px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.button:hover {
+  box-shadow: 0 1px 1px rgba(0,0,0,.1);
+  background-color: #f8f9fa;
+  border: 1px solid #dadce0;
+  color: #202124;
+}
+
+.wave {
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(45deg, #4285f4, #34a853, #fbbc05, #ea4335);
+  animation: wave 2s infinite linear;
+  transform-origin: left;
+}
+
+@keyframes wave {
+  0% {
+    transform: scaleX(0);
+  }
+  50% {
+    transform: scaleX(1);
+  }
+  100% {
+    transform: scaleX(0);
+  }
+}
+
+.visualizer {
+  position: absolute;
+  bottom: -20px;
+  left: 0;
+  width: 100%;
+  height: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 3px;
+}
+
+.bar {
+  width: 3px;
+  background: #4285f4;
+  animation: bounce 0.5s infinite alternate;
+}
+
+@keyframes bounce {
+  0% {
+    height: 2px;
+  }
+  100% {
+    height: 20px;
+  }
+}
+
+.search-results {
+  width: 100%;
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  display: none;
+}
+
+.result-item {
+  margin-bottom: 20px;
+  padding: 15px;
+  border: 1px solid #dfe1e5;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.result-item:hover {
+  box-shadow: 0 1px 6px rgba(0,0,0,0.2);
+}
+
+.result-title {
+  color: #1a0dab;
+  font-size: 18px;
+  margin-bottom: 5px;
+  cursor: pointer;
+}
+
+.result-source {
+  color: #006621;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.result-description {
+  color: #545454;
+  font-size: 14px;
+}
+
+.audio-player {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.loading {
+  text-align: center;
+  margin: 20px 0;
+  display: none;
+}
+
+/* Adding styles for advanced search panel */
+.advanced-search {
+  position: fixed;
+  top: 0;
+  right: -400px;
+  width: 400px;
+  height: 100vh;
+  background: white;
+  box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+  padding: 20px;
+  transition: right 0.3s ease;
+  overflow-y: auto;
+}
+
+.advanced-search.active {
+  right: 0;
+}
+
+.advanced-search h3 {
+  margin-bottom: 20px;
+  color: #4285f4;
+}
+
+.advanced-search-option {
+  margin-bottom: 15px;
+}
+
+.advanced-search-option label {
+  display: block;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.advanced-search-option input[type="text"],
+.advanced-search-option select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #dfe1e5;
+  border-radius: 4px;
+}
+
+.advanced-search-toggle {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: #4285f4;
+  font-size: 24px;
+  padding: 5px;
+  margin-right: 40px;
+}
+
+.close-advanced-search {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #666;
+}
+
+/* New styles for resources section */
+.resources-section {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #dfe1e5;
+}
+
+.resources-section h3 {
+  margin-bottom: 15px;
+}
+
+.resource-category {
+  margin-bottom: 20px;
+}
+
+.resource-category h4 {
+  color: #4285f4;
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
+.resource-links {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.resource-link {
+  color: #1a0dab;
+  text-decoration: none;
+  font-size: 14px;
+  padding: 5px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.resource-link:hover {
+  text-decoration: underline;
+}
+
+.resource-link svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.resource-description {
+  font-size: 12px;
+  color: #666;
+}
+</style>
+</head>
+<body>
+  <div class="main">
+    <div class="logo">
+      Audioogle
+      <div class="wave"></div>
+      <div class="visualizer">
+        <div class="bar" style="animation-delay: 0s"></div>
+        <div class="bar" style="animation-delay: 0.1s"></div>
+        <div class="bar" style="animation-delay: 0.2s"></div>
+        <div class="bar" style="animation-delay: 0.3s"></div>
+        <div class="bar" style="animation-delay: 0.4s"></div>
+      </div>
+    </div>
+    <div class="search-container">
+      <input type="text" class="search-box" placeholder="Search for any sound, music, or audio...">
+      <button class="advanced-search-toggle" title="Advanced Search">⚙️</button>
+      <svg class="mic-icon" height="24px" width="24px" viewBox="0 0 24 24">
+        <path fill="#4285f4" d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+        <path fill="#4285f4" d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+      </svg>
+    </div>
+    <div class="buttons">
+      <button class="button" onclick="performSearch()">Audioogle Search</button>
+      <button class="button">I'm Feeling Musical</button>
+    </div>
+    <div class="loading">Searching for audio files...</div>
+    <div class="search-results"></div>
+  </div>
+
+  <div class="advanced-search">
+    <button class="close-advanced-search">×</button>
+    <h3>Advanced Search Options</h3>
+    <div class="advanced-search-option">
+      <label for="duration">Duration Range</label>
+      <select id="duration">
+        <option value="">Any length</option>
+        <option value="short">Short (&lt; 30 sec)</option>
+        <option value="medium">Medium (30 sec - 2 min)</option>
+        <option value="long">Long (&gt; 2 min)</option>
+      </select>
+    </div>
+    <div class="advanced-search-option">
+      <label for="fileType">File Type</label>
+      <select id="fileType">
+        <option value="">Any format</option>
+        <option value="mp3">MP3</option>
+        <option value="wav">WAV</option>
+        <option value="ogg">OGG</option>
+      </select>
+    </div>
+    <div class="advanced-search-option">
+      <label for="license">License Type</label>
+      <select id="license">
+        <option value="">Any license</option>
+        <option value="cc0">Creative Commons 0</option>
+        <option value="attribution">Attribution Required</option>
+        <option value="public">Public Domain</option>
+      </select>
+    </div>
+    <div class="advanced-search-option">
+      <label for="quality">Quality</label>
+      <select id="quality">
+        <option value="">Any quality</option>
+        <option value="high">High Quality</option>
+        <option value="medium">Medium Quality</option>
+        <option value="low">Low Quality</option>
+      </select>
+    </div>
+    <div class="advanced-search-option">
+      <label for="tags">Tags (comma separated)</label>
+      <input type="text" id="tags" placeholder="music, ambient, nature">
+    </div>
+    <div class="resources-section">
+      <h3>Audio Resources</h3>
+      
+      <div class="resource-category">
+        <h4>Public Domain Archives</h4>
+        <div class="resource-links">
+          <a href="https://www.si.edu/opensource" class="resource-link">
+            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/></svg>
+            Smithsonian Open Access
+            <div class="resource-description">Historical audio recordings and cultural heritage sounds</div>
+          </a>
+          <a href="https://www.loc.gov/audio/" class="resource-link">
+            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/></svg>
+            Library of Congress Audio Archives
+            <div class="resource-description">Extensive collection of historical recordings</div>
+          </a>
+          <a href="https://archive.org/details/audio" class="resource-link">
+            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/></svg>
+            Internet Archive Audio
+            <div class="resource-description">Massive collection of free audio content</div>
+          </a>
+          <a href="https://www.europeana.eu/en/collections/topic/78-music" class="resource-link">
+            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/></svg>
+            Europeana Music Collection
+            <div class="resource-description">European cultural heritage audio archives</div>
+          </a>
+        </div>
+      </div>
+
+      <div class="resource-category">
+        <h4>Free Audio Software</h4>
+        <div class="resource-links">
+          <a href="https://www.audacityteam.org/" class="resource-link">
+            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+            Audacity
+            <div class="resource-description">Popular free audio editor and recorder</div>
+          </a>
+          <a href="https://lmms.io/" class="resource-link">
+            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+            LMMS
+            <div class="resource-description">Free, open-source digital audio workstation</div>
+          </a>
+          <a href="https://www.ocenaudio.com/" class="resource-link">
+            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+            Ocenaudio
+            <div class="resource-description">Easy-to-use audio editor</div>
+          </a>
+          <a href="https://ardour.org/" class="resource-link">
+            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+            Ardour
+            <div class="resource-description">Professional-grade open source DAW</div>
+          </a>
+        </div>
+      </div>
+
+      <div class="resource-category">
+        <h4>Publications & Learning</h4>
+        <div class="resource-links">
+          <a href="https://www.soundonsound.com/" class="resource-link">
+            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/></svg>
+            Sound On Sound
+            <div class="resource-description">In-depth audio production articles and tutorials</div>
+          </a>
+          <a href="https://www.musicradar.com/tutorials" class="resource-link">
+            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/></svg>
+            MusicRadar Tutorials
+            <div class="resource-description">Free music production tutorials and guides</div>
+          </a>
+          <a href="https://www.attackmagazine.com/" class="resource-link">
+            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/></svg>
+            Attack Magazine
+            <div class="resource-description">Electronic music production techniques</div>
+          </a>
+        </div>
+      </div>
+
+      <div class="resource-category">
+        <h4>Sound Libraries & Samples</h4>
+        <div class="resource-links">
+          <a href="https://freesound.org" class="resource-link">
+            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 3v9.28c-.47-.17-.97-.28-1.5-.28C8.01 12 6 14.01 6 16.5S8.01 21 10.5 21c2.31 0 4.2-1.75 4.45-4H15V6h4V3h-7z"/></svg>
+            Freesound
+            <div class="resource-description">Huge database of Creative Commons licensed sounds</div>
+          </a>
+          <a href="https://www.musicradar.com/news/tech/free-music-samples" class="resource-link">
+            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 3v9.28c-.47-.17-.97-.28-1.5-.28C8.01 12 6 14.01 6 16.5S8.01 21 10.5 21c2.31 0 4.2-1.75 4.45-4H15V6h4V3h-7z"/></svg>
+            SampleRadar
+            <div class="resource-description">Free sample packs from MusicRadar</div>
+          </a>
+          <a href="https://www.looperman.com" class="resource-link">
+            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 3v9.28c-.47-.17-.97-.28-1.5-.28C8.01 12 6 14.01 6 16.5S8.01 21 10.5 21c2.31 0 4.2-1.75 4.45-4H15V6h4V3h-7z"/></svg>
+            Looperman
+            <div class="resource-description">Royalty-free loops and samples</div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+const searchBox = document.querySelector('.search-box');
+const micIcon = document.querySelector('.mic-icon');
+const visualizer = document.querySelector('.visualizer');
+const searchResults = document.querySelector('.search-results');
+const loading = document.querySelector('.loading');
+let isListening = false;
+
+// Freesound API key - This is a demo key and should be replaced with a real one
+const FREESOUND_API_KEY = 'YOUR_FREESOUND_API_KEY';
+
+async function performSearch() {
+  const query = searchBox.value;
+  if (!query) return;
+
+  loading.style.display = 'block';
+  searchResults.style.display = 'none';
+  
+  try {
+    // Search from multiple sources simultaneously
+    const [freesoundResults, archiveResults] = await Promise.all([
+      searchFreesound(query),
+      searchInternetArchive(query)
+    ]);
+    
+    // Combine and display results
+    const combinedResults = [...freesoundResults, ...archiveResults];
+    displayResults(combinedResults);
+  } catch (error) {
+    console.error('Search failed:', error);
+    searchResults.innerHTML = '<p>Sorry, something went wrong with the search. Please try again.</p>';
+  }
+  
+  loading.style.display = 'none';
+  searchResults.style.display = 'block';
+}
+
+async function searchFreesound(query) {
+  try {
+    const duration = document.getElementById('duration').value;
+    const fileType = document.getElementById('fileType').value;
+    const license = document.getElementById('license').value;
+    const quality = document.getElementById('quality').value;
+    const tags = document.getElementById('tags').value;
+
+    let filter = 'license:("Attribution" OR "Creative Commons 0")';
+    
+    if (duration) {
+      filter += ` duration:[${duration === 'short' ? '0 TO 30' : 
+                              duration === 'medium' ? '30 TO 120' : '120 TO *'}]`;
+    }
+    
+    if (fileType) {
+      filter += ` type:${fileType}`;
+    }
+    
+    if (license) {
+      filter += ` license:"${license}"`;
+    }
+
+    if (tags) {
+      const tagArray = tags.split(',').map(tag => tag.trim());
+      filter += ` tag:(${tagArray.join(' OR ')})`;
+    }
+
+    const response = await axios.get(`https://freesound.org/apiv2/search/text/?query=${encodeURIComponent(query)}&fields=name,description,url,preview,duration,license,type,quality&filter=${encodeURIComponent(filter)}`, {
+      headers: {
+        'Authorization': `Token ${FREESOUND_API_KEY}`
+      }
+    });
+    
+    let results = response.data.results;
+    
+    if (quality) {
+      results = results.filter(result => result.quality === quality);
+    }
+
+    return results.map(result => ({
+      title: result.name,
+      source: 'Freesound.org',
+      description: result.description.substring(0, 150) + '...',
+      audioUrl: result.preview,
+      duration: result.duration,
+      license: result.license,
+      fileType: result.type
+    }));
+  } catch (error) {
+    console.error('Freesound search error:', error);
+    return [];
+  }
+}
+
+async function searchInternetArchive(query) {
+  try {
+    const duration = document.getElementById('duration').value;
+    const fileType = document.getElementById('fileType').value;
+    const tags = document.getElementById('tags').value;
+
+    let queryString = query;
+    if (tags) {
+      queryString += ` AND (${tags.split(',').map(tag => tag.trim()).join(' OR ')})`;
+    }
+    if (fileType) {
+      queryString += ` AND format:${fileType}`;
+    }
+
+    const response = await axios.get(
+      `https://archive.org/advancedsearch.php?q=${encodeURIComponent(queryString)}+AND+mediatype:audio&fl[]=title,description,identifier,format,duration&output=json`
+    );
+    
+    let results = response.data.response.docs;
+    
+    if (duration) {
+      results = results.filter(result => {
+        const dur = parseInt(result.duration || 0);
+        return duration === 'short' ? dur <= 30 :
+               duration === 'medium' ? dur > 30 && dur <= 120 :
+               dur > 120;
+      });
+    }
+
+    return results.map(result => ({
+      title: result.title,
+      source: 'Internet Archive',
+      description: result.description ? result.description.substring(0, 150) + '...' : 'No description available',
+      audioUrl: `https://archive.org/download/${result.identifier}/${result.identifier}.mp3`,
+      duration: result.duration,
+      format: result.format
+    }));
+  } catch (error) {
+    console.error('Internet Archive search error:', error);
+    return [];
+  }
+}
+
+function displayResults(results) {
+  if (results.length === 0) {
+    searchResults.innerHTML = '<p>No audio results found. Try a different search term.</p>';
+    return;
+  }
+
+  searchResults.innerHTML = results.map(result => `
+    <div class="result-item">
+      <div class="result-title">${escapeHtml(result.title)}</div>
+      <div class="result-source">${escapeHtml(result.source)}</div>
+      <div class="result-description">${escapeHtml(result.description)}</div>
+      <audio class="audio-player" controls>
+        <source src="${escapeHtml(result.audioUrl)}" type="audio/mpeg">
+        Your browser does not support the audio element.
+      </audio>
+    </div>
+  `).join('');
+}
+
+function escapeHtml(unsafe) {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+micIcon.addEventListener('click', () => {
+  isListening = !isListening;
+  if (isListening) {
+    searchBox.placeholder = "Listening...";
+    micIcon.style.fill = "#ea4335";
+    visualizer.style.display = "flex";
+    
+    // If browser supports speech recognition
+    if ('webkitSpeechRecognition' in window) {
+      const recognition = new webkitSpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        searchBox.value = transcript;
+        performSearch();
+      };
+      
+      recognition.start();
+    }
+  } else {
+    searchBox.placeholder = "Search for any sound, music, or audio...";
+    micIcon.style.fill = "#4285f4";
+    visualizer.style.display = "none";
+  }
+});
+
+searchBox.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    performSearch();
+  }
+});
+
+// Real-time search suggestions
+let searchTimeout;
+searchBox.addEventListener('input', () => {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(performSearch, 500); // Search after 500ms of user stopping typing
+});
+
+document.querySelectorAll('.bar').forEach(bar => {
+  bar.style.animationDuration = (Math.random() * 0.5 + 0.5) + 's';
+});
+
+// Advanced search functionality
+const advancedSearchToggle = document.querySelector('.advanced-search-toggle');
+const advancedSearchPanel = document.querySelector('.advanced-search');
+const closeAdvancedSearch = document.querySelector('.close-advanced-search');
+
+advancedSearchToggle.addEventListener('click', () => {
+  advancedSearchPanel.classList.toggle('active');
+});
+
+closeAdvancedSearch.addEventListener('click', () => {
+  advancedSearchPanel.classList.remove('active');
+});
+</script>
+</body></html>
