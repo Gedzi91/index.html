@@ -1,0 +1,687 @@
+<html><head><base href=".">
+<title>GTA-Style Web Game - Enhanced Graphics</title>
+<style>
+/* Keep existing styles */
+body { margin: 0; overflow: hidden; font-family: Arial, sans-serif; cursor: none; }
+#game-container { position: relative; width: 100vw; height: 100vh; }
+#hud { position: absolute; top: 20px; left: 20px; color: white; font-size: 20px; text-shadow: 2px 2px black; z-index: 100; }
+.car-prompt { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; background: rgba(0,0,0,0.7); padding: 10px; border-radius: 5px; display: none; z-index: 100; }
+#crosshair { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 20px; z-index: 100; pointer-events: none; }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+<div id="game-container">
+    <div id="hud">
+        Health: <span id="health">100</span><br>
+        In Vehicle: <span id="vehicle-status">No</span>
+    </div>
+    <div class="car-prompt" id="car-prompt">
+        Press &apos;E&apos; to enter vehicle
+    </div>
+    <div id="crosshair">+</div>
+</div>
+
+<script>const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x87CEEB);
+scene.fog = new THREE.Fog(0x87CEEB, 100, 500);
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
+const renderer = new THREE.WebGLRenderer({
+  antialias: true,
+  shadowMap: {
+    enabled: true,
+    type: THREE.PCFSoftShadowMap
+  }
+});
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+document.getElementById('game-container').appendChild(renderer.domElement);
+function createDetailedPlayer() {
+  const group = new THREE.Group();
+  const bodyGeometry = new THREE.BoxGeometry(1, 1.2, 0.6);
+  const bodyMaterial = new THREE.MeshPhongMaterial({
+    color: 0x2255aa
+  });
+  const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+  body.position.y = 0.6;
+  group.add(body);
+  const headGeometry = new THREE.SphereGeometry(0.25, 32, 32);
+  const headMaterial = new THREE.MeshPhongMaterial({
+    color: 0xffdbac
+  });
+  const head = new THREE.Mesh(headGeometry, headMaterial);
+  head.position.y = 1.5;
+  group.add(head);
+  const armGeometry = new THREE.CylinderGeometry(0.12, 0.12, 0.8, 16);
+  const armMaterial = new THREE.MeshPhongMaterial({
+    color: 0x2255aa
+  });
+  const leftArm = new THREE.Mesh(armGeometry, armMaterial);
+  leftArm.position.set(0.6, 0.8, 0);
+  leftArm.rotation.z = -0.2;
+  group.add(leftArm);
+  const rightArm = new THREE.Mesh(armGeometry, armMaterial);
+  rightArm.position.set(-0.6, 0.8, 0);
+  rightArm.rotation.z = 0.2;
+  group.add(rightArm);
+  const legGeometry = new THREE.CylinderGeometry(0.15, 0.15, 1, 16);
+  const legMaterial = new THREE.MeshPhongMaterial({
+    color: 0x1a1a1a
+  });
+  const leftLeg = new THREE.Mesh(legGeometry, legMaterial);
+  leftLeg.position.set(0.2, 0, 0);
+  group.add(leftLeg);
+  const rightLeg = new THREE.Mesh(legGeometry, legMaterial);
+  rightLeg.position.set(-0.2, 0, 0);
+  group.add(rightLeg);
+  group.position.y = 0;
+  return group;
+}
+const player = createDetailedPlayer();
+scene.add(player);
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+scene.add(ambientLight);
+const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+directionalLight.position.set(100, 100, 50);
+directionalLight.castShadow = true;
+directionalLight.shadow.mapSize.width = 2048;
+directionalLight.shadow.mapSize.height = 2048;
+scene.add(directionalLight);
+const groundGeometry = new THREE.PlaneGeometry(500, 500, 500, 500);
+const groundMaterial = new THREE.MeshStandardMaterial({
+  color: 0x3a9e3a,
+  roughness: 0.8,
+  metalness: 0.2,
+  side: THREE.DoubleSide
+});
+const vertices = groundGeometry.attributes.position.array;
+for (let i = 0; i < vertices.length; i += 3) {
+  vertices[i + 1] = Math.random() * 0.3;
+}
+groundGeometry.attributes.position.needsUpdate = true;
+groundGeometry.computeVertexNormals();
+const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+ground.rotation.x = Math.PI / 2;
+ground.receiveShadow = true;
+scene.add(ground);
+function createRoads() {
+  const roadGroup = new THREE.Group();
+  const roadMaterial = new THREE.MeshPhongMaterial({
+    color: 0x333333,
+    roughness: 0.8,
+    metalness: 0.2
+  });
+  for (let z = -200; z <= 200; z += 10) {
+    const roadGeometry = new THREE.PlaneGeometry(500, 8);
+    const road = new THREE.Mesh(roadGeometry, roadMaterial);
+    road.rotation.x = -Math.PI / 2;
+    road.position.set(0, 0.01, z);
+    road.receiveShadow = true;
+    roadGroup.add(road);
+    const lineGeometry = new THREE.PlaneGeometry(500, 0.3);
+    const lineMaterial = new THREE.MeshPhongMaterial({
+      color: 0xFFFFFF
+    });
+    const line = new THREE.Mesh(lineGeometry, lineMaterial);
+    line.rotation.x = -Math.PI / 2;
+    line.position.set(0, 0.02, z);
+    roadGroup.add(line);
+  }
+  for (let x = -200; x <= 200; x += 10) {
+    const roadGeometry = new THREE.PlaneGeometry(8, 500);
+    const road = new THREE.Mesh(roadGeometry, roadMaterial);
+    road.rotation.x = -Math.PI / 2;
+    road.position.set(x, 0.01, 0);
+    road.receiveShadow = true;
+    roadGroup.add(road);
+    const lineGeometry = new THREE.PlaneGeometry(0.3, 500);
+    const lineMaterial = new THREE.MeshPhongMaterial({
+      color: 0xFFFFFF
+    });
+    const line = new THREE.Mesh(lineGeometry, lineMaterial);
+    line.rotation.x = -Math.PI / 2;
+    line.position.set(x, 0.02, 0);
+    roadGroup.add(line);
+  }
+  return roadGroup;
+}
+scene.add(createRoads());
+function createDetailedBuilding(x, z) {
+  const group = new THREE.Group();
+  const height = Math.random() * 20 + 15;
+  const buildingGeometry = new THREE.BoxGeometry(5, height, 5);
+  const buildingMaterial = new THREE.MeshPhongMaterial({
+    color: new THREE.Color(0.5 + Math.random() * 0.5, 0.5 + Math.random() * 0.5, 0.5 + Math.random() * 0.5),
+    roughness: 0.7,
+    metalness: 0.2
+  });
+  const building = new THREE.Mesh(buildingGeometry, buildingMaterial);
+  building.castShadow = true;
+  building.receiveShadow = true;
+  group.add(building);
+  const windowGeometry = new THREE.BoxGeometry(0.8, 1.2, 0.1);
+  const windowMaterial = new THREE.MeshPhongMaterial({
+    color: 0x88ccff,
+    shininess: 90
+  });
+  for (let i = 1; i < height - 1; i += 2) {
+    for (let j = -1; j <= 1; j++) {
+      for (let k = -1; k <= 1; k++) {
+        if (Math.random() > 0.3) {
+          const window = new THREE.Mesh(windowGeometry, windowMaterial);
+          window.position.set(j * 1.5, i - height / 2, 2.55);
+          group.add(window);
+          const windowBack = window.clone();
+          windowBack.position.z = -2.55;
+          group.add(windowBack);
+        }
+      }
+    }
+  }
+  const roofGeometry = new THREE.BoxGeometry(5.5, 0.5, 5.5);
+  const roofMaterial = new THREE.MeshPhongMaterial({
+    color: 0x333333
+  });
+  const roof = new THREE.Mesh(roofGeometry, roofMaterial);
+  roof.position.y = height / 2 + 0.25;
+  group.add(roof);
+  group.position.set(x, height / 2, z);
+  return group;
+}
+for (let i = -200; i <= 200; i += 8) {
+  for (let j = -200; j <= 200; j += 8) {
+    if (Math.abs(i % 10) > 4 && Math.abs(j % 10) > 4 && Math.random() > 0.2) {
+      const offsetX = Math.random() * 3 - 1.5;
+      const offsetZ = Math.random() * 3 - 1.5;
+      const building = createDetailedBuilding(i + offsetX, j + offsetZ);
+      scene.add(building);
+    }
+  }
+}
+function createDetailedCar(x, z) {
+  const group = new THREE.Group();
+  const bodyGeometry = new THREE.BoxGeometry(2, 1, 4);
+  const carColor = new THREE.Color(Math.random(), Math.random(), Math.random());
+  const bodyMaterial = new THREE.MeshPhongMaterial({
+    color: carColor,
+    shininess: 100
+  });
+  const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+  group.add(body);
+  const roofGeometry = new THREE.BoxGeometry(1.8, 0.8, 2);
+  const roof = new THREE.Mesh(roofGeometry, bodyMaterial);
+  roof.position.set(0, 0.9, -0.5);
+  group.add(roof);
+  const wheelGeometry = new THREE.CylinderGeometry(0.4, 0.4, 0.3, 32);
+  const wheelMaterial = new THREE.MeshPhongMaterial({
+    color: 0x111111
+  });
+  const wheelPositions = [[-1, -0.4, -1.5], [1, -0.4, -1.5], [-1, -0.4, 1.5], [1, -0.4, 1.5]];
+  wheelPositions.forEach(pos => {
+    const wheel = new THREE.Mesh(wheelGeometry, wheelMaterial);
+    wheel.rotation.z = Math.PI / 2;
+    wheel.position.set(...pos);
+    group.add(wheel);
+  });
+  const windowMaterial = new THREE.MeshPhongMaterial({
+    color: 0x88ccff,
+    opacity: 0.8,
+    transparent: true
+  });
+  const frontWindowGeometry = new THREE.PlaneGeometry(1.7, 0.7);
+  const frontWindow = new THREE.Mesh(frontWindowGeometry, windowMaterial);
+  frontWindow.position.set(0, 0.9, 0.5);
+  frontWindow.rotation.x = Math.PI / 4;
+  group.add(frontWindow);
+  const backWindow = frontWindow.clone();
+  backWindow.position.z = -1.5;
+  backWindow.rotation.x = -Math.PI / 4;
+  group.add(backWindow);
+  const headlightGeometry = new THREE.CircleGeometry(0.2, 32);
+  const headlightMaterial = new THREE.MeshPhongMaterial({
+    color: 0xffffcc
+  });
+  const leftHeadlight = new THREE.Mesh(headlightGeometry, headlightMaterial);
+  leftHeadlight.position.set(-0.8, 0, 2);
+  group.add(leftHeadlight);
+  const rightHeadlight = leftHeadlight.clone();
+  rightHeadlight.position.x = 0.8;
+  group.add(rightHeadlight);
+  group.position.set(x, 0.8, z);
+  return group;
+}
+const cars = [];
+for (let i = 0; i < 10; i++) {
+  const car = createDetailedCar(Math.random() * 80 - 40, Math.random() * 80 - 40);
+  scene.add(car);
+  cars.push(car);
+}
+const aiCars = [];
+const pedestrians = [];
+function createAICar() {
+  const car = createDetailedCar(0, 0);
+  car.userData.targetPoint = new THREE.Vector3();
+  car.userData.speed = 0.2 + Math.random() * 0.3;
+  return car;
+}
+function createPedestrian() {
+  const pedestrian = createDetailedPlayer();
+  pedestrian.scale.set(0.7, 0.7, 0.7);
+  pedestrian.userData.targetPoint = new THREE.Vector3();
+  pedestrian.userData.speed = 0.1 + Math.random() * 0.1;
+  pedestrian.userData.alive = true;
+  return pedestrian;
+}
+for (let i = 0; i < 30; i++) {
+  const aiCar = createAICar();
+  aiCar.position.set(Math.random() * 400 - 200, 0.8, Math.random() * 400 - 200);
+  scene.add(aiCar);
+  aiCars.push(aiCar);
+}
+for (let i = 0; i < 50; i++) {
+  const pedestrian = createPedestrian();
+  pedestrian.position.set(Math.random() * 400 - 200, 0, Math.random() * 400 - 200);
+  scene.add(pedestrian);
+  pedestrians.push(pedestrian);
+}
+let health = 100;
+let inVehicle = false;
+let currentVehicle = null;
+let canEnterVehicle = false;
+const moveSpeed = 0.3;
+const carSpeed = 0.5;
+const bulletSpeed = 2;
+let isAiming = false;
+let normalCameraOffset = new THREE.Vector3(0, 5, 10);
+let aimingCameraOffset = new THREE.Vector3(1, 4, 4);
+function createBloodParticles(position) {
+  const particles = [];
+  const particleCount = 20;
+  const particleGeometry = new THREE.SphereGeometry(0.05, 8, 8);
+  const particleMaterial = new THREE.MeshPhongMaterial({
+    color: 0xff0000,
+    emissive: 0xff0000,
+    emissiveIntensity: 0.3
+  });
+
+  for (let i = 0; i < particleCount; i++) {
+    const particle = new THREE.Mesh(particleGeometry, particleMaterial);
+    particle.position.copy(position);
+    
+    // More realistic spread pattern
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 0.1 + Math.random() * 0.2;
+    particle.velocity = new THREE.Vector3(
+      Math.cos(angle) * speed,
+      Math.random() * 0.3 + 0.2, // More upward initial velocity
+      Math.sin(angle) * speed
+    );
+    
+    particle.gravity = 0.015; // Add gravity property
+    particle.lifetime = 1.0; // Add lifetime property
+    scene.add(particle);
+    particles.push(particle);
+  }
+
+  function updateParticles() {
+    let alive = false;
+    particles.forEach(particle => {
+      // Apply gravity and update position
+      particle.velocity.y -= particle.gravity;
+      particle.position.add(particle.velocity);
+      
+      // Fade out particles
+      particle.lifetime -= 0.02;
+      particle.material.opacity = particle.lifetime;
+      
+      // Keep updating if any particles are still alive
+      if (particle.lifetime > 0 && particle.position.y > 0) alive = true;
+    });
+
+    if (alive) {
+      requestAnimationFrame(updateParticles);
+    } else {
+      // Clean up particles
+      particles.forEach(particle => scene.remove(particle));
+    }
+  }
+
+  updateParticles();
+}
+function shoot() {
+  if (!isAiming) return;
+  const bulletGeometry = new THREE.SphereGeometry(0.1, 16, 16);
+  const bulletMaterial = new THREE.MeshPhongMaterial({
+    color: 0xff0000,
+    emissive: 0xff0000,
+    emissiveIntensity: 0.5
+  });
+  const bullet = new THREE.Mesh(bulletGeometry, bulletMaterial);
+  bullet.position.copy(player.position);
+  bullet.position.y += 1.2;
+
+  // Get direction based on camera/player rotation
+  const direction = new THREE.Vector3(0, 0, -1);
+  direction.applyQuaternion(player.quaternion);
+  
+  const light = new THREE.PointLight(0xff0000, 1, 5);
+  bullet.add(light);
+  scene.add(bullet);
+
+  // Create raycaster for precise collision detection
+  const raycaster = new THREE.Raycaster();
+  
+  function updateBullet() {
+    // Update bullet position
+    bullet.position.add(direction.multiplyScalar(bulletSpeed));
+    
+    // Set up raycaster from bullet's previous position to new position
+    raycaster.set(
+      bullet.position.clone().sub(direction.clone().multiplyScalar(bulletSpeed)), 
+      direction.clone().normalize()
+    );
+    
+    // Check for collisions with pedestrians
+    pedestrians.forEach(ped => {
+      if (ped.userData.alive !== false) {
+        // Create a bounding box for the pedestrian
+        const pedBbox = new THREE.Box3().setFromObject(ped);
+        
+        // Check if bullet intersects with pedestrian's bounding box
+        if (raycaster.ray.intersectsBox(pedBbox)) {
+          // Hit registered!
+          ped.userData.alive = false;
+          
+          // Create blood effect at exact hit point
+          const hitPoint = bullet.position.clone();
+          createBloodParticles(hitPoint);
+          
+          // Remove the bullet
+          scene.remove(bullet);
+          return;
+        }
+      }
+    });
+
+    // Remove bullet if it goes too far
+    if (bullet.position.distanceTo(player.position) > 50) {
+      scene.remove(bullet);
+      return;
+    }
+
+    requestAnimationFrame(updateBullet);
+  }
+  
+  updateBullet();
+}
+document.addEventListener('click', () => {
+  if (!isPointerLocked) {
+    renderer.domElement.requestPointerLock();
+  }
+});
+document.addEventListener('pointerlockchange', () => {
+  isPointerLocked = document.pointerLockElement === renderer.domElement;
+});
+document.addEventListener('mousemove', e => {
+  if (isPointerLocked) {
+    mouseX -= e.movementX * mouseSensitivity;
+    mouseY -= e.movementY * mouseSensitivity;
+    mouseY = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, mouseY));
+    if (!inVehicle) {
+      player.rotation.y = mouseX;
+    }
+  }
+});
+document.addEventListener('mousedown', e => {
+  if (e.button === 2) {
+    isAiming = true;
+  } else if (e.button === 0 && isAiming && !inVehicle) {
+    shoot();
+  }
+});
+document.addEventListener('mouseup', e => {
+  if (e.button === 2) {
+    isAiming = false;
+  }
+});
+document.addEventListener('contextmenu', e => {
+  e.preventDefault();
+});
+document.addEventListener('keydown', e => {
+  switch (e.key.toLowerCase()) {
+    case 'w':
+    case 'arrowup':
+      keys.forward = true;
+      break;
+    case 's':
+    case 'arrowdown':
+      keys.backward = true;
+      break;
+    case 'a':
+    case 'arrowleft':
+      keys.left = true;
+      break;
+    case 'd':
+    case 'arrowright':
+      keys.right = true;
+      break;
+    case 'e':
+      if (canEnterVehicle) {
+        toggleVehicle();
+      }
+      break;
+  }
+});
+document.addEventListener('keyup', e => {
+  switch (e.key.toLowerCase()) {
+    case 'w':
+    case 'arrowup':
+      keys.forward = false;
+      break;
+    case 's':
+    case 'arrowdown':
+      keys.backward = false;
+      break;
+    case 'a':
+    case 'arrowleft':
+      keys.left = false;
+      break;
+    case 'd':
+    case 'arrowright':
+      keys.right = false;
+      break;
+  }
+});
+let mouseX = 0;
+let mouseY = 0;
+const mouseSensitivity = 0.002;
+let isPointerLocked = false;
+const keys = {
+  forward: false,
+  backward: false,
+  left: false,
+  right: false
+};
+function updateAI() {
+  aiCars.forEach(car => {
+    if (car.position.distanceTo(car.userData.targetPoint) < 5) {
+      const nearestRoadX = Math.round(car.position.x / 10) * 10;
+      const nearestRoadZ = Math.round(car.position.z / 10) * 10;
+      car.userData.targetPoint.set(nearestRoadX + (Math.random() < 0.5 ? -100 : 100), 0.8, nearestRoadZ + (Math.random() < 0.5 ? -100 : 100));
+    }
+    const direction = new THREE.Vector3().subVectors(car.userData.targetPoint, car.position).normalize();
+    car.position.add(direction.multiplyScalar(car.userData.speed));
+    car.rotation.y = Math.atan2(direction.x, direction.z);
+  });
+  pedestrians.forEach(ped => {
+    if (!ped.userData.alive) return;
+    if (ped.position.distanceTo(ped.userData.targetPoint) < 2) {
+      const nearestRoadX = Math.round(ped.position.x / 10) * 10;
+      const nearestRoadZ = Math.round(ped.position.z / 10) * 10;
+      ped.userData.targetPoint.set(nearestRoadX + 4 + Math.random() * 2, 0, nearestRoadZ + 4 + Math.random() * 2);
+    }
+    const direction = new THREE.Vector3().subVectors(ped.userData.targetPoint, ped.position).normalize();
+    ped.position.add(direction.multiplyScalar(ped.userData.speed));
+    ped.rotation.y = Math.atan2(-direction.x, -direction.z);
+  });
+}
+function checkVehiclePedestrianCollisions() {
+  // Check both player vehicle and AI vehicles
+  const allVehicles = [...aiCars];
+  if (inVehicle && currentVehicle) {
+    allVehicles.push(currentVehicle);
+  }
+
+  allVehicles.forEach(vehicle => {
+    // Only check moving vehicles
+    const isMoving = keys.forward || keys.backward || (vehicle.userData.speed > 0);
+    if (!isMoving) return;
+
+    pedestrians.forEach(ped => {
+      if (!ped.userData.alive) return;
+
+      // Create bounding boxes
+      const vehicleBbox = new THREE.Box3().setFromObject(vehicle);
+      const pedBbox = new THREE.Box3().setFromObject(ped);
+
+      if (vehicleBbox.intersectsBox(pedBbox)) {
+        // Calculate impact direction
+        const impact = new THREE.Vector3();
+        impact.subVectors(ped.position, vehicle.position).normalize();
+        
+        // Kill pedestrian
+        ped.userData.alive = false;
+        
+        // Create blood effect
+        createBloodParticles(ped.position.clone());
+        
+        // Dramatic death animation
+        ped.userData.deathRotation = new THREE.Vector3(
+          Math.random() * Math.PI * 2, // Random spin on X
+          Math.random() * Math.PI * 2, // Random spin on Y
+          Math.random() * Math.PI * 2  // Random spin on Z
+        );
+        
+        // Add force from vehicle impact
+        ped.userData.deathVelocity = impact.multiplyScalar(0.5);
+        ped.userData.deathVelocity.y = 0.3; // Add some upward force
+        
+        animateDeathPhysics(ped);
+      }
+    });
+  });
+}
+
+function animateDeathPhysics(ped) {
+  const gravity = 0.015;
+  const friction = 0.98;
+
+  function updateDeath() {
+    if (!ped.userData.deathVelocity) return;
+
+    // Apply physics
+    ped.position.add(ped.userData.deathVelocity);
+    ped.userData.deathVelocity.y -= gravity;
+    ped.userData.deathVelocity.multiplyScalar(friction);
+
+    // Apply rotation
+    ped.rotation.x += ped.userData.deathRotation.x * 0.1;
+    ped.rotation.y += ped.userData.deathRotation.y * 0.1;
+    ped.rotation.z += ped.userData.deathRotation.z * 0.1;
+
+    // Stop animation when mostly settled
+    if (ped.userData.deathVelocity.lengthSq() > 0.0001) {
+      requestAnimationFrame(updateDeath);
+    }
+  }
+
+  updateDeath();
+}
+
+function toggleVehicle() {
+  inVehicle = !inVehicle;
+  document.getElementById('vehicle-status').textContent = inVehicle ? 'Yes' : 'No';
+  document.getElementById('car-prompt').style.display = 'none';
+  if (inVehicle) {
+    player.position.copy(currentVehicle.position);
+    player.visible = false;
+    mouseX = currentVehicle.rotation.y;
+  } else {
+    player.position.set(currentVehicle.position.x + 2, currentVehicle.position.y, currentVehicle.position.z);
+    player.visible = true;
+    currentVehicle = null;
+  }
+}
+function animate() {
+  requestAnimationFrame(animate);
+  if (inVehicle && currentVehicle) {
+    if (keys.forward) {
+      currentVehicle.position.z += Math.cos(currentVehicle.rotation.y) * carSpeed;
+      currentVehicle.position.x += Math.sin(currentVehicle.rotation.y) * carSpeed;
+    }
+    if (keys.backward) {
+      currentVehicle.position.z -= Math.cos(currentVehicle.rotation.y) * carSpeed;
+      currentVehicle.position.x -= Math.sin(currentVehicle.rotation.y) * carSpeed;
+    }
+    if (keys.left) currentVehicle.rotation.y += 0.03;
+    if (keys.right) currentVehicle.rotation.y -= 0.03;
+    player.position.copy(currentVehicle.position);
+    player.rotation.copy(currentVehicle.rotation);
+  } else {
+    const moveDir = new THREE.Vector3(0, 0, 0);
+    if (keys.forward) moveDir.z -= 1;
+    if (keys.backward) moveDir.z += 1;
+    if (keys.left) moveDir.x -= 1;
+    if (keys.right) moveDir.x += 1;
+    moveDir.normalize();
+    moveDir.applyAxisAngle(new THREE.Vector3(0, 1, 0), mouseX);
+    player.position.x += moveDir.x * moveSpeed;
+    player.position.z += moveDir.z * moveSpeed;
+    if (!inVehicle) {
+      player.position.y = 0;
+    }
+  }
+  const target = inVehicle ? currentVehicle : player;
+  let cameraOffset = isAiming ? aimingCameraOffset : normalCameraOffset;
+  cameraOffset = cameraOffset.clone();
+  cameraOffset.applyAxisAngle(new THREE.Vector3(0, 1, 0), mouseX);
+  if (isAiming) {
+    const swayX = Math.sin(Date.now() * 0.001) * 0.05;
+    const swayY = Math.cos(Date.now() * 0.001) * 0.05;
+    cameraOffset.x += swayX;
+    cameraOffset.y += swayY;
+  }
+  camera.position.copy(target.position).add(cameraOffset);
+  if (isAiming) {
+    const aimTarget = target.position.clone();
+    const aimDirection = new THREE.Vector3(0, 0, -20);
+    aimDirection.applyAxisAngle(new THREE.Vector3(0, 1, 0), mouseX);
+    aimTarget.add(aimDirection);
+    camera.lookAt(aimTarget);
+  } else {
+    camera.lookAt(target.position);
+  }
+  canEnterVehicle = false;
+  cars.forEach(car => {
+    if (player.position.distanceTo(car.position) < 3) {
+      canEnterVehicle = true;
+      currentVehicle = car;
+      document.getElementById('car-prompt').style.display = 'block';
+    }
+  });
+  if (!canEnterVehicle) {
+    document.getElementById('car-prompt').style.display = 'none';
+  }
+  updateAI();
+  checkVehiclePedestrianCollisions();
+  renderer.render(scene, camera);
+}
+camera.position.y = 5;
+animate();
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+</body></html>
