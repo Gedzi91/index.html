@@ -1,0 +1,130 @@
+<html><head><base href="https://codecreative.io/"><style>
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #000;
+  font-family: monospace;
+  color: #0f0;
+  overflow: hidden;
+}
+
+.terminal {
+  padding: 20px;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.prompt {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.cursor {
+  width: 10px;
+  height: 20px;
+  background-color: #0f0;
+  margin-left: 5px;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.loading {
+  display: inline-block;
+  margin-left: 10px;
+}
+
+.dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 3px;
+  background: #0f0;
+  border-radius: 50%;
+  animation: pulse 1.5s infinite;
+}
+
+.dot:nth-child(2) { animation-delay: 0.3s; }
+.dot:nth-child(3) { animation-delay: 0.6s; }
+
+@keyframes pulse {
+  0%, 100% { transform: scale(0.3); opacity: 0.3; }
+  50% { transform: scale(1); opacity: 1; }
+}
+
+.logo {
+  font-family: monospace;
+  white-space: pre;
+  margin-bottom: 20px;
+}
+</style></head><body>
+
+<div class="terminal">
+<div class="logo">
+███████╗     ██████╗ ██████╗ ██████╗ ██████╗ 
+╚══███╔╝    ██╔════╝██╔═══██╗██╔══██╗██╔══██╗
+  ███╔╝     ██║     ██║   ██║██████╔╝██████╔╝
+ ███╔╝      ██║     ██║   ██║██╔══██╗██╔═══╝ 
+███████╗    ╚██████╗╚██████╔╝██║  ██║██║     
+╚══════╝     ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝     
+                                             
+INITIALIZING SYSTEM...
+</div>
+
+<div class="prompt">
+  Z:\> LOADING ZCORP.EXE
+  <div class="loading">
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </div>
+</div>
+
+<div id="output"></div>
+<div class="prompt">
+  Z:\><span class="cursor"></span>
+</div>
+
+<script>
+const messages = [
+  "Initializing core systems...",
+  "Loading neural networks...",
+  "Establishing quantum connections...",
+  "Calibrating bio-digital interfaces...",
+  "Activating security protocols...",
+  "Systems online. Welcome to ZCORP.",
+];
+
+let messageIndex = 0;
+const output = document.getElementById('output');
+
+function typeMessage(message) {
+  return new Promise((resolve) => {
+    let i = 0;
+    const interval = setInterval(() => {
+      output.innerHTML += message[i];
+      i++;
+      if (i >= message.length) {
+        clearInterval(interval);
+        output.innerHTML += '<br>';
+        resolve();
+      }
+    }, 50);
+  });
+}
+
+async function displayMessages() {
+  for (const message of messages) {
+    await typeMessage(message);
+    await new Promise(resolve => setTimeout(resolve, 800));
+  }
+}
+
+displayMessages();
+</script>
+
+</body></html>
