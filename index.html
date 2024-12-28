@@ -1,0 +1,376 @@
+<html><head><base href="." />
+<style>
+/* Adding dark mode styles */
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    font-family: Arial, sans-serif;
+    background: url('Griffin_Home.jpg') no-repeat center center fixed;
+    background-size: cover;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #fff;
+}
+
+.container {
+    background: rgba(40, 44, 52, 0.95);
+    margin-top: 20px;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.6);
+    max-width: 800px;
+    width: 90%;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.news-segment {
+    text-align: center;
+    margin-bottom: 30px;
+    animation: fadeIn 0.5s ease-in;
+}
+
+.news-segment img {
+    max-width: 400px;
+    border-radius: 10px;
+    margin: 10px 0;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+    transition: transform 0.3s;
+}
+
+.news-segment img:hover {
+    transform: scale(1.02);
+}
+
+.rant-image {
+    max-width: 300px;
+    border-radius: 10px;
+    margin: 15px 0;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+}
+
+.input-section {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    background: rgba(30, 33, 40, 0.9);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+.length-selector {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.length-selector select {
+    padding: 8px;
+    border-radius: 5px;
+    border: 2px solid #444;
+    font-size: 16px;
+    background-color: #2c3038;
+    color: #fff;
+}
+
+textarea {
+    width: 100%;
+    height: 100px;
+    padding: 15px;
+    border: 2px solid #444;
+    border-radius: 10px;
+    font-size: 16px;
+    resize: vertical;
+    transition: border-color 0.3s;
+    background-color: #2c3038;
+    color: #fff;
+}
+
+textarea:focus {
+    border-color: #3f51b5;
+    outline: none;
+    box-shadow: 0 0 5px rgba(63, 81, 181, 0.3);
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: all 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 5px;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+}
+
+button.rant {
+    background-color: #4CAF50;
+}
+
+button.rant:hover {
+    background-color: #45a049;
+}
+
+button.praise {
+    background-color: #9c27b0;
+}
+
+button.praise:hover {
+    background-color: #7b1fa2;
+}
+
+button.stop {
+    background-color: #f44336;
+}
+
+button.stop:hover {
+    background-color: #da190b;
+}
+
+button.speak {
+    background-color: #2196F3;
+}
+
+button.speak:hover {
+    background-color: #0b7dda;
+}
+
+.result {
+    margin-top: 20px;
+    padding: 20px;
+    background-color: #2c3038;
+    border-radius: 10px;
+    display: none;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.segment {
+    opacity: 0;
+    display: none;
+    transition: all 0.5s;
+}
+
+.segment.active {
+    opacity: 1;
+    display: block;
+    animation: fadeIn 0.5s ease-in;
+}
+
+.controls {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+    <div class="container">
+        <div class="news-segment" id="intro-segment">
+            <img src="10403663_521584741276764_1759993222037813942_n.jpg" alt="News Anchors">
+            <h2>Breaking News</h2>
+            <p>And now, what grinds Peter's gears!</p>
+        </div>
+        
+        <div class="input-section">
+            <div class="length-selector">
+                <label for="rant-length">Rant Length:</label>
+                <select id="rant-length">
+                    <option value="short">Short</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="long">Long</option>
+                </select>
+            </div>
+            <textarea id="complaint" placeholder="Enter what grinds your gears here..."></textarea>
+            <div class="button-group">
+                <button class="rant" onclick="generateRant()">Generate Rant</button>
+                <button class="praise" onclick="generatePraise()">Generate Praise</button>
+            </div>
+        </div>
+        
+        <div id="result" class="result">
+            <div id="rant-segment" class="segment">
+                <img src="Grinds-my-gears1.jpg" alt="Peter Griffin - What Really Grinds My Gears" class="rant-image">
+                <p id="rant-text"></p>
+                <div class="controls">
+                    <button class="speak" onclick="speakRant()">Speak Rant</button>
+                    <button class="stop" onclick="stopSpeaking()">Stop Speaking</button>
+                </div>
+            </div>
+            <div id="outro-segment" class="segment">
+                <img src="10403663_521584741276764_1759993222037813942_n.jpg" alt="News Anchors">
+                <p id="outro-text">Back to you in the studio.</p>
+            </div>
+        </div>
+    </div>
+
+<script>
+let currentRant = "";
+let currentUtterance = null;
+
+async function getAIRant(topic, length, isPraise = false) {
+    try {
+        const lengthGuides = {
+            short: "Keep the rant brief, about 2-3 sentences.",
+            medium: "Make the rant about 4-5 sentences long.",
+            long: "Create a detailed rant with 6-8 sentences."
+        };
+
+        const prompt = isPraise ? 
+            `Generate a enthusiastic praise in Peter Griffin's style about the following topic: "${topic}". 
+            ${lengthGuides[length]}
+            The praise should be funny, over-the-top positive, and in Peter's voice. Include an opening phrase and a conclusion.` :
+            `Generate a humorous rant in Peter Griffin's style about the following topic: "${topic}". 
+            ${lengthGuides[length]}
+            The rant should be funny, slightly exaggerated, and in Peter's voice. Include an opening phrase and a conclusion.`;
+
+        const response = await fetch('/api/ai_completion', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+                prompt: prompt + `
+                <typescript-interface>
+                interface Response {
+                    rant: string;
+                }
+                </typescript-interface>
+                
+                <example>
+                {
+                    "rant": "You know what really grinds my gears? People who take up two parking spaces! I mean, come on! Your fancy car isn't so special that it needs its own ZIP code! And that's what grinds my gears!"
+                }
+                </example>`,
+                data: topic
+            }),
+        });
+        const data = await response.json();
+        return data.rant;
+    } catch (error) {
+        console.error('Error fetching AI response:', error);
+        return 'Error generating response. Please try again.';
+    }
+}
+
+function stopSpeaking() {
+    if (speechSynthesis.speaking) {
+        speechSynthesis.cancel();
+    }
+}
+
+function speakOutro() {
+    const outroText = "Back to you in the studio.";
+    const utterance = new SpeechSynthesisUtterance(outroText);
+    utterance.pitch = 1;
+    utterance.rate = 1;
+    utterance.volume = 1;
+    
+    const voices = speechSynthesis.getVoices();
+    const maleVoice = voices.find(voice => voice.name.includes('Male')) || voices[0];
+    if (maleVoice) {
+        utterance.voice = maleVoice;
+    }
+    
+    speechSynthesis.speak(utterance);
+}
+
+function speakRant() {
+    stopSpeaking();
+    
+    const utterance = new SpeechSynthesisUtterance(currentRant);
+    utterance.pitch = 1;
+    utterance.rate = 1;
+    utterance.volume = 1;
+    
+    const voices = speechSynthesis.getVoices();
+    const maleVoice = voices.find(voice => voice.name.includes('Male')) || voices[0];
+    if (maleVoice) {
+        utterance.voice = maleVoice;
+    }
+    
+    utterance.onend = function() {
+        document.getElementById('rant-segment').classList.remove('active');
+        document.getElementById('outro-segment').classList.add('active');
+        setTimeout(speakOutro, 500);
+    };
+    
+    currentUtterance = utterance;
+    speechSynthesis.speak(utterance);
+}
+
+async function generateRant() {
+    const complaint = document.getElementById('complaint').value;
+    if (!complaint) {
+        alert("Please enter what grinds your gears!");
+        return;
+    }
+
+    await generateContent(complaint, false);
+}
+
+async function generatePraise() {
+    const topic = document.getElementById('complaint').value;
+    if (!topic) {
+        alert("Please enter what you want to praise!");
+        return;
+    }
+
+    await generateContent(topic, true);
+}
+
+async function generateContent(topic, isPraise) {
+    const length = document.getElementById('rant-length').value;
+
+    document.getElementById('rant-text').textContent = isPraise ? "Generating praise..." : "Generating rant...";
+    document.getElementById('result').style.display = 'block';
+    
+    currentRant = await getAIRant(topic, length, isPraise);
+    
+    const resultDiv = document.getElementById('result');
+    const rantSegment = document.getElementById('rant-segment');
+    const outroSegment = document.getElementById('outro-segment');
+    const rantText = document.getElementById('rant-text');
+    
+    resultDiv.style.display = 'block';
+    rantText.textContent = currentRant;
+    
+    rantSegment.classList.add('active');
+    outroSegment.classList.remove('active');
+}
+
+// Initialize voices
+speechSynthesis.onvoiceschanged = function() {
+    console.log('Voices loaded');
+};
+</script>
+</body></html>
