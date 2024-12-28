@@ -1,0 +1,411 @@
+<html><head><base href="https://corsanywhere.herokuapp.com/">
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Arial', sans-serif;
+    background-color: #000;
+    cursor: none;
+  }
+  #game-container {
+    position: relative;
+    width: 400%;
+    height: 400%;
+    background: #000033;
+    overflow: hidden;
+  }
+  #viewport {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+  .planet {
+    position: absolute;
+    transition: all 0.3s ease;
+  }
+  #sun {
+    position: absolute;
+    width: 800px;
+    height: 800px;
+    background: url('https://i.ibb.co/9hvfyYy/sun1.png') no-repeat center center;
+    background-size: contain;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  #starship, #starship-clone {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    background: url('https://i.ibb.co/nMqb94H/perso-Vi3-Module2.png') no-repeat center center;
+    background-size: contain;
+    transition: transform 0.1s ease;
+    z-index: 10;
+    pointer-events: none;
+  }
+  .enemy {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    background: url('https://i.ibb.co/q5Dtzcd/pirate-Tentacule-Module1.png') no-repeat center center;
+    background-size: contain;
+    transition: all 0.3s ease;
+  }
+  .laser {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: #ff0000;
+    border-radius: 50%;
+  }
+  #game-over {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 48px;
+    color: red;
+    display: none;
+    z-index: 100;
+  }
+  #score {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    font-size: 24px;
+    color: white;
+    z-index: 100;
+  }
+  #health {
+    position: fixed;
+    top: 40px;
+    left: 10px;
+    font-size: 24px;
+    color: #00ff00;
+    z-index: 100;
+  }
+  #title {
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 36px;
+    color: #FFD700;
+    text-shadow: 2px 2px 4px #000000;
+    z-index: 100;
+  }
+  #volume {
+    position: fixed;
+    top: 70px;
+    left: 10px;
+    font-size: 24px;
+    color: #ffffff;
+    z-index: 100;
+  }
+  #cursor {
+    position: fixed;
+    width: 20px;
+    height: 20px;
+    border: 2px solid white;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+  }
+</style>
+</head>
+<body>
+<div id="viewport">
+  <div id="game-container">
+    <div id="sun"></div>
+    <div id="starship"></div>
+    <div id="starship-clone"></div>
+  </div>
+  <div id="title">Space Millennium</div>
+  <div id="game-over">Game Over!</div>
+  <div id="score">Score: 0</div>
+  <div id="health">Health: 100</div>
+  <div id="volume">Volume: 100%</div>
+  <div id="cursor"></div>
+</div>
+
+<audio id="background-music" loop>
+  <source src="https://soundcloud.com/arthur-besson-342949689/truc?si=98fab425c274480c9a94f2191b29304f&utm_source=clipboard&utm_medium=text&utm_campaign=social_sharing" type="audio/mpeg">
+</audio>
+
+<script>
+const viewport = document.getElementById('viewport');
+const gameContainer = document.getElementById('game-container');
+const starship = document.getElementById('starship');
+const starshipClone = document.getElementById('starship-clone');
+const gameOver = document.getElementById('game-over');
+const scoreElement = document.getElementById('score');
+const healthElement = document.getElementById('health');
+const volumeElement = document.getElementById('volume');
+const cursor = document.getElementById('cursor');
+const backgroundMusic = document.getElementById('background-music');
+
+let score = 0;
+let health = 100;
+let planetCount = 0;
+let enemyCount = 0;
+let gameWidth = window.innerWidth * 4;
+let gameHeight = window.innerHeight * 4;
+let viewportWidth = window.innerWidth;
+let viewportHeight = window.innerHeight;
+let starshipX = gameWidth / 2;
+let starshipY = gameHeight / 2;
+let volume = 100;
+let mouseX = 0;
+let mouseY = 0;
+let velocityX = 0;
+let velocityY = 0;
+let isMouseDown = false;
+
+const planets = [
+  'https://i.ibb.co/QPPDyVH/Planet1.png',
+  'https://i.ibb.co/yVcMyxC/Planet2.png',
+  'https://i.ibb.co/tzc0pWH/Planet3.png',
+  'https://i.ibb.co/RyP7twk/Planet4.png',
+  'https://i.ibb.co/54L7rRc/Planet5.png',
+  'https://i.ibb.co/0npGkRn/Planet6.png',
+  'https://i.ibb.co/nCvnGwT/Planet7.png',
+  'https://i.ibb.co/gThx1Vg/Planet8.png'
+];
+
+function createPlanet() {
+  const planet = document.createElement('div');
+  planet.className = 'planet';
+  planet.style.width = `${Math.random() * 200 + 100}px`;
+  planet.style.height = planet.style.width;
+  planet.style.backgroundImage = `url(${planets[Math.floor(Math.random() * planets.length)]})`;
+  planet.style.backgroundSize = 'contain';
+  planet.style.left = `${Math.random() * gameWidth}px`;
+  planet.style.top = `${Math.random() * gameHeight}px`;
+  gameContainer.appendChild(planet);
+  planetCount++;
+}
+
+function createEnemy() {
+  if (enemyCount >= 10) return;
+  
+  const enemy = document.createElement('div');
+  enemy.className = 'enemy';
+  enemy.style.left = `${Math.random() * gameWidth}px`;
+  enemy.style.top = `${Math.random() * gameHeight}px`;
+  gameContainer.appendChild(enemy);
+  enemyCount++;
+
+  function moveEnemy() {
+    const dx = starshipX - parseInt(enemy.style.left);
+    const dy = starshipY - parseInt(enemy.style.top);
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    
+    if (distance > 5) {
+      enemy.style.left = `${parseInt(enemy.style.left) + dx / distance}px`;
+      enemy.style.top = `${parseInt(enemy.style.top) + dy / distance}px`;
+    }
+
+    checkCollision(enemy);
+
+    if (health > 0) {
+      requestAnimationFrame(moveEnemy);
+    }
+  }
+
+  moveEnemy();
+}
+
+function checkCollision(enemy) {
+  const starshipRect = starship.getBoundingClientRect();
+  const enemyRect = enemy.getBoundingClientRect();
+
+  if (
+    starshipRect.left < enemyRect.right &&
+    starshipRect.right > enemyRect.left &&
+    starshipRect.top < enemyRect.bottom &&
+    starshipRect.bottom > enemyRect.top
+  ) {
+    health -= 1;
+    healthElement.textContent = `Health: ${health}`;
+
+    if (health <= 0) {
+      gameOver.style.display = 'block';
+      starship.style.display = 'none';
+    }
+  }
+}
+
+document.addEventListener('mousemove', (e) => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+  cursor.style.left = `${mouseX - 10}px`;
+  cursor.style.top = `${mouseY - 10}px`;
+});
+
+document.addEventListener('mousedown', () => {
+  isMouseDown = true;
+});
+
+document.addEventListener('mouseup', () => {
+  isMouseDown = false;
+});
+
+function updateStarshipPosition() {
+  const dx = mouseX - viewportWidth / 2;
+  const dy = mouseY - viewportHeight / 2;
+  const acceleration = 0.2;
+  
+  if (isMouseDown) {
+    velocityX += dx * acceleration / 1000;
+    velocityY += dy * acceleration / 1000;
+  } else {
+    velocityX *= 0.98;
+    velocityY *= 0.98;
+  }
+
+  const maxSpeed = 5;
+  const speed = Math.sqrt(velocityX * velocityX + velocityY * velocityY);
+  if (speed > maxSpeed) {
+    const ratio = maxSpeed / speed;
+    velocityX *= ratio;
+    velocityY *= ratio;
+  }
+
+  starshipX += velocityX;
+  starshipY += velocityY;
+
+  // Smooth wrapping
+  if (starshipX < 0) {
+    starshipX = 0;
+    velocityX = Math.abs(velocityX);
+  } else if (starshipX > gameWidth) {
+    starshipX = gameWidth;
+    velocityX = -Math.abs(velocityX);
+  }
+
+  if (starshipY < 0) {
+    starshipY = 0;
+    velocityY = Math.abs(velocityY);
+  } else if (starshipY > gameHeight) {
+    starshipY = gameHeight;
+    velocityY = -Math.abs(velocityY);
+  }
+
+  starship.style.left = `${starshipX - 40}px`;
+  starship.style.top = `${starshipY - 40}px`;
+
+  // Clone position
+  starshipClone.style.left = `${(starshipX + gameWidth) % gameWidth - 40}px`;
+  starshipClone.style.top = `${(starshipY + gameHeight) % gameHeight - 40}px`;
+
+  // Orientation towards the mouse
+  const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+  starship.style.transform = `rotate(${angle + 90}deg)`;
+  starshipClone.style.transform = `rotate(${angle + 90}deg)`;
+
+  gameContainer.style.transform = `translate(${-starshipX + viewportWidth / 2}px, ${-starshipY + viewportHeight / 2}px)`;
+
+  requestAnimationFrame(updateStarshipPosition);
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.code === 'Space') {
+    fireLaser();
+  } else if (e.key === 'm' || e.key === 'M') {
+    toggleVolume();
+  }
+});
+
+function fireLaser() {
+  const laser = document.createElement('div');
+  laser.className = 'laser';
+  laser.style.left = `${starshipX}px`;
+  laser.style.top = `${starshipY}px`;
+  gameContainer.appendChild(laser);
+
+  const angle = Math.atan2(mouseY - viewportHeight / 2, mouseX - viewportWidth / 2);
+  const speed = 15;
+  const dx = Math.cos(angle) * speed;
+  const dy = Math.sin(angle) * speed;
+
+  function moveLaser() {
+    laser.style.left = `${parseFloat(laser.style.left) + dx}px`;
+    laser.style.top = `${parseFloat(laser.style.top) + dy}px`;
+
+    // Wrap around effect for lasers
+    let laserX = parseFloat(laser.style.left);
+    let laserY = parseFloat(laser.style.top);
+
+    if (laserX < 0) laserX = gameWidth;
+    if (laserX > gameWidth) laserX = 0;
+    if (laserY < 0) laserY = gameHeight;
+    if (laserY > gameHeight) laserY = 0;
+
+    laser.style.left = `${laserX}px`;
+    laser.style.top = `${laserY}px`;
+
+    checkLaserCollision(laser);
+    requestAnimationFrame(moveLaser);
+  }
+
+  moveLaser();
+}
+
+function checkLaserCollision(laser) {
+  const laserRect = laser.getBoundingClientRect();
+  const enemies = document.querySelectorAll('.enemy');
+
+  enemies.forEach(enemy => {
+    const enemyRect = enemy.getBoundingClientRect();
+
+    if (
+      laserRect.left < enemyRect.right &&
+      laserRect.right > enemyRect.left &&
+      laserRect.top < enemyRect.bottom &&
+      laserRect.bottom > enemyRect.top
+    ) {
+      gameContainer.removeChild(enemy);
+      gameContainer.removeChild(laser);
+      enemyCount--;
+      score += 10;
+      scoreElement.textContent = `Score: ${score}`;
+    }
+  });
+}
+
+function toggleVolume() {
+  volume = volume === 100 ? 0 : 100;
+  volumeElement.textContent = `Volume: ${volume}%`;
+  backgroundMusic.volume = volume / 100;
+}
+
+function createStars() {
+  for (let i = 0; i < 1000; i++) {
+    const star = document.createElement('div');
+    star.style.position = 'absolute';
+    star.style.width = '2px';
+    star.style.height = '2px';
+    star.style.backgroundColor = 'white';
+    star.style.left = `${Math.random() * gameWidth}px`;
+    star.style.top = `${Math.random() * gameHeight}px`;
+    gameContainer.appendChild(star);
+  }
+}
+
+createStars();
+setInterval(createEnemy, 3000);
+
+for (let i = 0; i < 10; i++) {
+  createPlanet();
+}
+
+updateStarshipPosition();
+
+// Start background music
+backgroundMusic.play();
+</script>
+</body>
+</html>
