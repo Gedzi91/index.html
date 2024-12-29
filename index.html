@@ -1,0 +1,804 @@
+<html><head><base href="https://darmosmurf.com/advanced-face-modes/"><title>Анимированное лицо с насыщенными деталями</title>
+<style>
+body {
+  background: linear-gradient(45deg, #1a1a2e, #16213e, #0f3460);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  overflow: hidden;
+}
+
+.face {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle at 30% 30%, #ffd700, #ffa500);
+  border-radius: 50%;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 20px;
+  box-shadow: 0 0 50px rgba(255,215,0,0.5);
+}
+
+.eyes {
+  display: flex;
+  justify-content: space-around;
+  position: absolute;
+  top: 25%;
+  width: 100%;
+}
+
+.eye {
+  width: 80px;
+  height: 60px;
+  background: radial-gradient(ellipse at center, white 60%, #e0e0e0 100%);
+  border-radius: 50%;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(0,0,0,0.3) inset, 0 0 10px rgba(255,255,255,0.8);
+}
+
+.iris {
+  width: 40px;
+  height: 40px;
+  background: radial-gradient(circle at 40% 40%, #4a4a4a 0%, #000000 100%);
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: iris-movement 5s infinite alternate;
+}
+
+@keyframes iris-movement {
+  0%, 100% { transform: translate(-50%, -50%); }
+  25% { transform: translate(-60%, -40%); }
+  50% { transform: translate(-40%, -60%); }
+  75% { transform: translate(-30%, -50%); }
+}
+
+.pupil {
+  width: 20px;
+  height: 20px;
+  background: #000;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.highlight {
+  width: 15px;
+  height: 15px;
+  background: radial-gradient(circle at center, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 70%);
+  border-radius: 50%;
+  position: absolute;
+  top: 20%;
+  left: 20%;
+  animation: highlight-twinkle 3s infinite alternate;
+}
+
+@keyframes highlight-twinkle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.mouth {
+  width: 160px;
+  height: 80px;
+  background-color: #8B0000;
+  border-radius: 0 0 160px 160px;
+  position: absolute;
+  bottom: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  overflow: hidden;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.2) inset;
+}
+
+.teeth {
+  width: 150px;
+  height: 30px;
+  background: linear-gradient(to bottom, #ffffff 0%, #e6e6e6 100%);
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 0 0 10px 10px;
+  display: flex;
+  justify-content: space-around;
+}
+
+.tooth {
+  width: 20px;
+  height: 25px;
+  background-color: white;
+  border-radius: 0 0 5px 5px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.tongue {
+  width: 80px;
+  height: 40px;
+  background: radial-gradient(ellipse at center, #ff69b4 0%, #ff1493 100%);
+  border-radius: 40px 40px 0 0;
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  animation: tongue-movement 4s infinite alternate;
+}
+
+@keyframes tongue-movement {
+  0%, 100% { transform: translateX(-50%) scaleY(1); }
+  50% { transform: translateX(-50%) scaleY(0.8); }
+}
+
+.eyebrow {
+  width: 80px;
+  height: 20px;
+  background-color: #8B4513;
+  position: absolute;
+  top: 18%;
+  border-radius: 10px;
+}
+
+.eyebrow.left {
+  left: 20%;
+  transform: rotate(0deg);
+}
+
+.eyebrow.right {
+  right: 20%;
+  transform: rotate(0deg);
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: center;
+  max-width: 800px;
+}
+
+button {
+  padding: 12px 24px;
+  font-size: 18px;
+  cursor: pointer;
+  background: linear-gradient(45deg, #4CAF50, #45a049);
+  color: white;
+  border: none;
+  border-radius: 25px;
+  transition: all 0.3s;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+  background: linear-gradient(45deg, #45a049, #4CAF50);
+}
+
+@keyframes blink {
+  0%, 90%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+
+.freckle {
+  width: 4px;
+  height: 4px;
+  background-color: #8B4513;
+  border-radius: 50%;
+  position: absolute;
+}
+
+.wrinkle {
+  width: 30px;
+  height: 2px;
+  background-color: rgba(0,0,0,0.1);
+  position: absolute;
+  border-radius: 1px;
+}
+
+.face::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 30% 30%, transparent 0%, rgba(255,255,255,0.2) 100%);
+  pointer-events: none;
+}
+</style>
+</head>
+<body>
+<div class="face">
+  <div class="eyebrow left"></div>
+  <div class="eyebrow right"></div>
+  <div class="eyes">
+    <div class="eye">
+      <div class="iris">
+        <div class="pupil"></div>
+        <div class="highlight"></div>
+      </div>
+    </div>
+    <div class="eye">
+      <div class="iris">
+        <div class="pupil"></div>
+        <div class="highlight"></div>
+      </div>
+    </div>
+  </div>
+  <div class="mouth">
+    <div class="teeth">
+      <div class="tooth"></div>
+      <div class="tooth"></div>
+      <div class="tooth"></div>
+      <div class="tooth"></div>
+      <div class="tooth"></div>
+    </div>
+    <div class="tongue"></div>
+  </div>
+</div>
+
+<div class="buttons">
+  <button id="normalBtn">Обычный</button>
+  <button id="mysticalBtn">Мистика</button>
+  <button id="robotBtn">Робот</button>
+  <button id="alienBtn">Инопланетянин</button>
+  <button id="cartoonBtn">Мультяшный</button>
+  <button id="zombieBtn">Зомби</button>
+  <button id="ninjaBtn">Ниндзя</button>
+  <button id="pixelBtn">Пиксельный</button>
+  <button id="superHeroBtn">Супергерой</button>
+  <button id="animalBtn">Животное</button>
+  <button id="clownBtn">Клоун</button>
+  <button id="vampireBtn">Вампир</button>
+  <button id="fairyBtn">Фея</button>
+  <button id="wizardBtn">Волшебник</button>
+  <button id="cyborgBtn">Киборг</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+<script>
+const modes = {
+  normal: [
+    { eyeScale: 1, mouthWidth: 160, mouthHeight: 80, eyebrowAngle: 0, tongueHeight: 40, faceColor: '#ffd700', irisColor: '#4a4a4a' },
+    { eyeScale: 1.1, mouthWidth: 170, mouthHeight: 85, eyebrowAngle: 10, tongueHeight: 45, faceColor: '#ffa500', irisColor: '#2a2a2a' },
+    { eyeScale: 0.9, mouthWidth: 150, mouthHeight: 75, eyebrowAngle: -5, tongueHeight: 35, faceColor: '#ffcc00', irisColor: '#3a3a3a' },
+  ],
+  mystical: [
+    { eyeScale: 1.3, mouthWidth: 140, mouthHeight: 70, eyebrowAngle: 20, tongueHeight: 30, faceColor: '#8A2BE2', irisColor: '#FFD700', glowColor: '#9400D3' },
+    { eyeScale: 1.4, mouthWidth: 130, mouthHeight: 65, eyebrowAngle: 25, tongueHeight: 25, faceColor: '#9370DB', irisColor: '#00FFFF', glowColor: '#4B0082' },
+    { eyeScale: 1.2, mouthWidth: 150, mouthHeight: 75, eyebrowAngle: 15, tongueHeight: 35, faceColor: '#BA55D3', irisColor: '#7FFFD4', glowColor: '#800080' },
+  ],
+  robot: [
+    { eyeScale: 1, mouthWidth: 120, mouthHeight: 20, eyebrowAngle: 0, tongueHeight: 0, faceColor: '#C0C0C0', irisColor: '#00FFFF', mouthColor: '#333333' },
+    { eyeScale: 1.1, mouthWidth: 130, mouthHeight: 25, eyebrowAngle: 5, tongueHeight: 0, faceColor: '#A9A9A9', irisColor: '#7FFFD4', mouthColor: '#4A4A4A' },
+    { eyeScale: 0.9, mouthWidth: 110, mouthHeight: 15, eyebrowAngle: -5, tongueHeight: 0, faceColor: '#D3D3D3', irisColor: '#40E0D0', mouthColor: '#1C1C1C' },
+  ],
+  alien: [
+    { eyeScale: 1.5, mouthWidth: 100, mouthHeight: 50, eyebrowAngle: 30, tongueHeight: 60, faceColor: '#00FF00', irisColor: '#FF00FF', antennaHeight: 40 },
+    { eyeScale: 1.6, mouthWidth: 90, mouthHeight: 45, eyebrowAngle: 35, tongueHeight: 65, faceColor: '#32CD32', irisColor: '#FF1493', antennaHeight: 50 },
+    { eyeScale: 1.4, mouthWidth: 110, mouthHeight: 55, eyebrowAngle: 25, tongueHeight: 55, faceColor: '#7CFC00', irisColor: '#FF69B4', antennaHeight: 30 },
+  ],
+  cartoon: [
+    { eyeScale: 1.8, mouthWidth: 190, mouthHeight: 100, eyebrowAngle: 20, tongueHeight: 70, faceColor: '#FFD700', irisColor: '#000000', outlineWidth: 5 },
+    { eyeScale: 2, mouthWidth: 200, mouthHeight: 110, eyebrowAngle: 25, tongueHeight: 75, faceColor: '#FFA500', irisColor: '#0000FF', outlineWidth: 7 },
+    { eyeScale: 1.6, mouthWidth: 180, mouthHeight: 90, eyebrowAngle: 15, tongueHeight: 65, faceColor: '#FF4500', irisColor: '#008000', outlineWidth: 3 },
+  ],
+  zombie: [
+    { eyeScale: 0.8, mouthWidth: 140, mouthHeight: 90, eyebrowAngle: -10, tongueHeight: 80, faceColor: '#556B2F', irisColor: '#FFFF00', scars: true },
+    { eyeScale: 0.7, mouthWidth: 150, mouthHeight: 100, eyebrowAngle: -15, tongueHeight: 85, faceColor: '#6B8E23', irisColor: '#FFD700', scars: true },
+    { eyeScale: 0.9, mouthWidth: 130, mouthHeight: 80, eyebrowAngle: -5, tongueHeight: 75, faceColor: '#808000', irisColor: '#FFA500', scars: true },
+  ],
+  ninja: [
+    { eyeScale: 0.6, mouthWidth: 100, mouthHeight: 30, eyebrowAngle: -20, tongueHeight: 0, faceColor: '#000000', irisColor: '#FFFFFF', mask: true },
+    { eyeScale: 0.5, mouthWidth: 90, mouthHeight: 25, eyebrowAngle: -25, tongueHeight: 0, faceColor: '#1C1C1C', irisColor: '#F0F0F0', mask: true },
+    { eyeScale: 0.7, mouthWidth: 110, mouthHeight: 35, eyebrowAngle: -15, tongueHeight: 0, faceColor: '#2F4F4F', irisColor: '#E0E0E0', mask: true },
+  ],
+  pixel: [
+    { eyeScale: 1, mouthWidth: 160, mouthHeight: 80, eyebrowAngle: 0, tongueHeight: 40, faceColor: '#FFD700', irisColor: '#000000', pixelSize: 10 },
+    { eyeScale: 1.1, mouthWidth: 170, mouthHeight: 85, eyebrowAngle: 10, tongueHeight: 45, faceColor: '#FFA500', irisColor: '#0000FF', pixelSize: 15 },
+    { eyeScale: 0.9, mouthWidth: 150, mouthHeight: 75, eyebrowAngle: -5, tongueHeight: 35, faceColor: '#FF4500', irisColor: '#008000', pixelSize: 20 },
+  ],
+  superHero: [
+    { eyeScale: 1.2, mouthWidth: 180, mouthHeight: 90, eyebrowAngle: 15, tongueHeight: 45, faceColor: '#FF0000', irisColor: '#FFFFFF', mask: true, capeColor: '#0000FF' },
+    { eyeScale: 1.3, mouthWidth: 190, mouthHeight: 95, eyebrowAngle: 20, tongueHeight: 50, faceColor: '#0000FF', irisColor: '#FFFFFF', mask: true, capeColor: '#FF0000' },
+    { eyeScale: 1.1, mouthWidth: 170, mouthHeight: 85, eyebrowAngle: 10, tongueHeight: 40, faceColor: '#008000', irisColor: '#FFFFFF', mask: true, capeColor: '#FFFF00' },
+  ],
+  animal: [
+    { eyeScale: 1.4, mouthWidth: 170, mouthHeight: 100, eyebrowAngle: 10, tongueHeight: 60, faceColor: '#8B4513', irisColor: '#000000', furTexture: true, earShape: 'pointy' },
+    { eyeScale: 1.5, mouthWidth: 180, mouthHeight: 110, eyebrowAngle: 15, tongueHeight: 65, faceColor: '#A52A2A', irisColor: '#3e5d9c', furTexture: true, earShape: 'round' },
+    { eyeScale: 1.3, mouthWidth: 160, mouthHeight: 90, eyebrowAngle: 5, tongueHeight: 55, faceColor: '#D2691E', irisColor: '#1f3b5f', furTexture: true, earShape: 'floppy' },
+  ],
+  clown: [
+    { eyeScale: 1.6, mouthWidth: 200, mouthHeight: 120, eyebrowAngle: 30, tongueHeight: 70, faceColor: '#FFFFFF', irisColor: '#FF0000', noseColor: '#FF0000', hairColor: '#00FF00' },
+    { eyeScale: 1.7, mouthWidth: 210, mouthHeight: 130, eyebrowAngle: 35, tongueHeight: 75, faceColor: '#FFFACD', irisColor: '#0000FF', noseColor: '#FFA500', hairColor: '#FF00FF' },
+    { eyeScale: 1.5, mouthWidth: 190, mouthHeight: 110, eyebrowAngle: 25, tongueHeight: 65, faceColor: '#F0FFF0', irisColor: '#008000', noseColor: '#FFFF00', hairColor: '#FF1493' },
+  ],
+  vampire: [
+    { eyeScale: 1.1, mouthWidth: 150, mouthHeight: 70, eyebrowAngle: -10, tongueHeight: 50, faceColor: '#FFDAB9', irisColor: '#8B0000', fangSize: 20 },
+    { eyeScale: 1.2, mouthWidth: 160, mouthHeight: 75, eyebrowAngle: -15, tongueHeight: 55, faceColor: '#FFE4B5', irisColor: '#B22222', fangSize: 25 },
+    { eyeScale: 1, mouthWidth: 140, mouthHeight: 65, eyebrowAngle: -5, tongueHeight: 45, faceColor: '#F0E68C', irisColor: '#8B4513', fangSize: 15 },
+  ],
+  fairy: [
+    { eyeScale: 1.3, mouthWidth: 130, mouthHeight: 60, eyebrowAngle: 20, tongueHeight: 30, faceColor: '#FFB6C1', irisColor: '#9370DB', wingSpan: 100, glitterAmount: 50 },
+    { eyeScale: 1.4, mouthWidth: 140, mouthHeight: 65, eyebrowAngle: 25, tongueHeight: 35, faceColor: '#FFC0CB', irisColor: '#BA55D3', wingSpan: 120, glitterAmount: 75 },
+    { eyeScale: 1.2, mouthWidth: 120, mouthHeight: 55, eyebrowAngle: 15, tongueHeight: 25, faceColor: '#FFE4E1', irisColor: '#DDA0DD', wingSpan: 80, glitterAmount: 25 },
+  ],
+  wizard: [
+    { eyeScale: 1.2, mouthWidth: 140, mouthHeight: 70, eyebrowAngle: 15, tongueHeight: 40, faceColor: '#F0F8FF', irisColor: '#4B0082', beardLength: 100, hatSize: 80 },
+    { eyeScale: 1.3, mouthWidth: 150, mouthHeight: 75, eyebrowAngle: 20, tongueHeight: 45, faceColor: '#F8F8FF', irisColor: '#483D8B', beardLength: 120, hatSize: 100 },
+    { eyeScale: 1.1, mouthWidth: 130, mouthHeight: 65, eyebrowAngle: 10, tongueHeight: 35, faceColor: '#E6E6FA', irisColor: '#6A5ACD', beardLength: 80, hatSize: 60 },
+  ],
+  cyborg: [
+    { eyeScale: 1.1, mouthWidth: 150, mouthHeight: 60, eyebrowAngle: 0, tongueHeight: 20, faceColor: '#C0C0C0', irisColor: '#FF0000', circuitComplexity: 50, eyePatchSide: 'left' },
+    { eyeScale: 1.2, mouthWidth: 160, mouthHeight: 65, eyebrowAngle: 5, tongueHeight: 25, faceColor: '#A9A9A9', irisColor: '#00FF00', circuitComplexity: 75, eyePatchSide: 'right' },
+    { eyeScale: 1, mouthWidth: 140, mouthHeight: 55, eyebrowAngle: -5, tongueHeight: 15, faceColor: '#D3D3D3', irisColor: '#0000FF', circuitComplexity: 25, eyePatchSide: 'none' },
+  ],
+};
+
+let currentMode = 0;
+let currentModeKey = 'normal';
+let animationInterval;
+
+function addFreckles() {
+  const freckles = document.querySelectorAll('.freckle');
+  freckles.forEach(freckle => freckle.remove());
+  
+  for (let i = 0; i < 20; i++) {
+    const freckle = document.createElement('div');
+    freckle.classList.add('freckle');
+    freckle.style.left = `${Math.random() * 80 + 10}%`;
+    freckle.style.top = `${Math.random() * 60 + 20}%`;
+    document.querySelector('.face').appendChild(freckle);
+  }
+}
+
+function addWrinkles() {
+  const wrinkles = document.querySelectorAll('.wrinkle');
+  wrinkles.forEach(wrinkle => wrinkle.remove());
+  
+  for (let i = 0; i < 5; i++) {
+    const wrinkle = document.createElement('div');
+    wrinkle.classList.add('wrinkle');
+    wrinkle.style.left = `${Math.random() * 60 + 20}%`;
+    wrinkle.style.top = `${Math.random() * 40 + 10}%`;
+    wrinkle.style.transform = `rotate(${Math.random() * 90 - 45}deg)`;
+    document.querySelector('.face').appendChild(wrinkle);
+  }
+}
+
+function changeMode() {
+  const mode = modes[currentModeKey][currentMode];
+  
+  const timeline = gsap.timeline();
+  
+  timeline.to('.eye', {
+    scale: mode.eyeScale,
+    duration: 1
+  }, 0);
+  
+  timeline.to('.mouth', {
+    width: mode.mouthWidth,
+    height: mode.mouthHeight,
+    duration: 1
+  }, 0);
+  
+  timeline.to('.eyebrow.left', {
+    rotation: -mode.eyebrowAngle,
+    duration: 1
+  }, 0);
+  
+  timeline.to('.eyebrow.right', {
+    rotation: mode.eyebrowAngle,
+    duration: 1
+  }, 0);
+  
+  timeline.to('.tongue', {
+    height: mode.tongueHeight,
+    duration: 1
+  }, 0);
+  
+  timeline.to('.iris', {
+    background: mode.irisColor,
+    duration: 1
+  }, 0);
+  
+  timeline.to('.face', {
+    background: `radial-gradient(circle at 30% 30%, ${mode.faceColor}, ${ColorLuminance(mode.faceColor, -0.2)})`,
+    duration: 1
+  }, 0);
+  
+  if (mode.pixelSize) {
+    timeline.to('.face', {
+      filter: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg"><filter id="pixelate"><feFlood x="4" y="4" height="2" width="2"/><feComposite width="${mode.pixelSize}" height="${mode.pixelSize}"/></filter></svg>#pixelate')`,
+      duration: 1
+    }, 0);
+  } else {
+    timeline.to('.face', {
+      filter: 'none',
+      duration: 1
+    }, 0);
+  }
+  
+  if (mode.glowColor) {
+    timeline.to('.face', {
+      boxShadow: `0 0 50px ${mode.glowColor}`,
+      duration: 1
+    }, 0);
+  } else {
+    timeline.to('.face', {
+      boxShadow: '0 0 50px rgba(255,215,0,0.5)',
+      duration: 1
+    }, 0);
+  }
+  
+  if (mode.scars) {
+    addWrinkles();
+  } else {
+    const wrinkles = document.querySelectorAll('.wrinkle');
+    wrinkles.forEach(wrinkle => wrinkle.remove());
+  }
+  
+  if (mode.furTexture) {
+    timeline.to('.face', {
+      backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\' viewBox=\'0 0 100 100\'%3E%3Cpath d=\'M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z\' fill=\'%23ffffff\' fill-opacity=\'0.1\' fill-rule=\'evenodd\'/%3E%3C/svg%3E")',
+      duration: 1
+    }, 0);
+  } else {
+    timeline.to('.face', {
+      backgroundImage: 'none',
+      duration: 1
+    }, 0);
+  }
+  
+  if (mode.mask) {
+    timeline.to('.face::before', {
+      content: '""',
+      position: 'absolute',
+      top: '20%',
+      left: '0',
+      right: '0',
+      bottom: '40%',
+      background: 'rgba(0,0,0,0.8)',
+      borderRadius: '0 0 50% 50% / 0 0 100% 100%',
+      duration: 1
+    }, 0);
+  } else {
+    timeline.to('.face::before', {
+      content: 'none',
+      duration: 1
+    }, 0);
+  }
+  
+  if (mode.capeColor) {
+    const cape = document.querySelector('.cape') || document.createElement('div');
+    cape.classList.add('cape');
+    cape.style.position = 'absolute';
+    cape.style.top = '-20%';
+    cape.style.left = '-10%';
+    cape.style.right = '-10%';
+    cape.style.height = '50%';
+    cape.style.background = mode.capeColor;
+    cape.style.borderRadius = '50% 50% 0 0';
+    cape.style.zIndex = '-1';
+    document.querySelector('.face').appendChild(cape);
+  } else {
+    const cape = document.querySelector('.cape');
+    if (cape) cape.remove();
+  }
+  
+  if (mode.earShape) {
+    const leftEar = document.querySelector('.left-ear') || document.createElement('div');
+    const rightEar = document.querySelector('.right-ear') || document.createElement('div');
+    leftEar.classList.add('left-ear');
+    rightEar.classList.add('right-ear');
+    
+    const earStyle = {
+      position: 'absolute',
+      width: '40px',
+      height: '60px',
+      background: mode.faceColor,
+      top: '-20px',
+    };
+    
+    Object.assign(leftEar.style, earStyle);
+    Object.assign(rightEar.style, earStyle);
+    
+    leftEar.style.left = '-20px';
+    rightEar.style.right = '-20px';
+    
+    if (mode.earShape === 'pointy') {
+      leftEar.style.borderRadius = '50% 50% 20% 20% / 60% 60% 40% 40%';
+      rightEar.style.borderRadius = '50% 50% 20% 20% / 60% 60% 40% 40%';
+    } else if (mode.earShape === 'round') {
+      leftEar.style.borderRadius = '50%';
+      rightEar.style.borderRadius = '50%';
+    } else if (mode.earShape === 'floppy') {
+      leftEar.style.borderRadius = '20% 80% 0 0';
+      rightEar.style.borderRadius = '80% 20% 0 0';
+      leftEar.style.transform = 'rotate(-30deg)';
+      rightEar.style.transform = 'rotate(30deg)';
+    }
+    
+    document.querySelector('.face').appendChild(leftEar);
+    document.querySelector('.face').appendChild(rightEar);
+  } else {
+    const ears = document.querySelectorAll('.left-ear, .right-ear');
+    ears.forEach(ear => ear.remove());
+  }
+  
+  if (mode.noseColor) {
+    const nose = document.querySelector('.nose') || document.createElement('div');
+    nose.classList.add('nose');
+    nose.style.position = 'absolute';
+    nose.style.width = '30px';
+    nose.style.height = '30px';
+    nose.style.background = mode.noseColor;
+    nose.style.borderRadius = '50%';
+    nose.style.top = '40%';
+    nose.style.left = '50%';
+    nose.style.transform = 'translateX(-50%)';
+    document.querySelector('.face').appendChild(nose);
+  } else {
+    const nose = document.querySelector('.nose');
+    if (nose) nose.remove();
+  }
+  
+  if (mode.hairColor) {
+    const hair = document.querySelector('.hair') || document.createElement('div');
+    hair.classList.add('hair');
+    hair.style.position = 'absolute';
+    hair.style.top = '-20%';
+    hair.style.left = '-10%';
+    hair.style.right = '-10%';
+    hair.style.height = '50%';
+    hair.style.background = mode.hairColor;
+    hair.style.borderRadius = '50% 50% 0 0';
+    hair.style.zIndex = '1';
+    document.querySelector('.face').appendChild(hair);
+  } else {
+    const hair = document.querySelector('.hair');
+    if (hair) hair.remove();
+  }
+  
+  if (mode.fangSize) {
+    const leftFang = document.querySelector('.left-fang') || document.createElement('div');
+    const rightFang = document.querySelector('.right-fang') || document.createElement('div');
+    leftFang.classList.add('left-fang');
+    rightFang.classList.add('right-fang');
+    
+    const fangStyle = {
+      position: 'absolute',
+      width: '10px',
+      height: `${mode.fangSize}px`,
+      background: 'white',
+      top: '100%',
+      zIndex: '2',
+    };
+    
+    Object.assign(leftFang.style, fangStyle);
+    Object.assign(rightFang.style, fangStyle);
+    
+    leftFang.style.left = '30%';
+    rightFang.style.right = '30%';
+    
+    document.querySelector('.mouth').appendChild(leftFang);
+    document.querySelector('.mouth').appendChild(rightFang);
+  } else {
+    const fangs = document.querySelectorAll('.left-fang, .right-fang');
+    fangs.forEach(fang => fang.remove());
+  }
+  
+  if (mode.wingSpan) {
+    const leftWing = document.querySelector('.left-wing') || document.createElement('div');
+    const rightWing = document.querySelector('.right-wing') || document.createElement('div');
+    leftWing.classList.add('left-wing');
+    rightWing.classList.add('right-wing');
+    
+    const wingStyle = {
+      position: 'absolute',
+      width: `${mode.wingSpan}px`,
+      height: `${mode.wingSpan * 1.5}px`,
+      background: 'rgba(255, 255, 255, 0.5)',
+      top: '20%',
+      zIndex: '-1',
+    };
+    
+    Object.assign(leftWing.style, wingStyle);
+    Object.assign(rightWing.style, wingStyle);
+    
+    leftWing.style.left = '-80px';
+    rightWing.style.right = '-80px';
+    leftWing.style.transform = 'rotate(20deg)';
+    rightWing.style.transform = 'rotate(-20deg)';
+    
+    document.querySelector('.face').appendChild(leftWing);
+    document.querySelector('.face').appendChild(rightWing);
+    
+    gsap.to([leftWing, rightWing], {
+      rotationY: 40,
+      duration: 2,
+      repeat: -1,
+      yoyo: true,
+      ease: "power1.inOut"
+    });
+  } else {
+    const wings = document.querySelectorAll('.left-wing, .right-wing');
+    wings.forEach(wing => wing.remove());
+  }
+  
+  if (mode.glitterAmount) {
+    const glitterContainer = document.querySelector('.glitter-container') || document.createElement('div');
+    glitterContainer.classList.add('glitter-container');
+    glitterContainer.style.position = 'absolute';
+    glitterContainer.style.top = '0';
+    glitterContainer.style.left = '0';
+    glitterContainer.style.width = '100%';
+    glitterContainer.style.height = '100%';
+    glitterContainer.style.overflow = 'hidden';
+    glitterContainer.style.pointerEvents = 'none';
+    
+    for (let i = 0; i < mode.glitterAmount; i++) {
+      const glitter = document.createElement('div');
+      glitter.classList.add('glitter');
+      glitter.style.position = 'absolute';
+      glitter.style.width = '2px';
+      glitter.style.height = '2px';
+      glitter.style.background = 'white';
+      glitter.style.borderRadius = '50%';
+      glitter.style.left = `${Math.random() * 100}%`;
+      glitter.style.top = `${Math.random() * 100}%`;
+      
+      gsap.to(glitter, {
+        opacity: Math.random(),
+        duration: 1 + Math.random() * 2,
+        repeat: -1,
+        yoyo: true
+      });
+      
+      glitterContainer.appendChild(glitter);
+    }
+    
+    document.querySelector('.face').appendChild(glitterContainer);
+  } else {
+    const glitterContainer = document.querySelector('.glitter-container');
+    if (glitterContainer) glitterContainer.remove();
+  }
+  
+  if (mode.beardLength) {
+    const beard = document.querySelector('.beard') || document.createElement('div');
+    beard.classList.add('beard');
+    beard.style.position = 'absolute';
+    beard.style.width = '80%';
+    beard.style.height = `${mode.beardLength}px`;
+    beard.style.background = 'white';
+    beard.style.borderRadius = '0 0 50% 50%';
+    beard.style.top = '60%';
+    beard.style.left = '10%';
+    beard.style.zIndex = '1';
+    document.querySelector('.face').appendChild(beard);
+  } else {
+    const beard = document.querySelector('.beard');
+    if (beard) beard.remove();
+  }
+  
+  if (mode.hatSize) {
+    const hat = document.querySelector('.hat') || document.createElement('div');
+    hat.classList.add('hat');
+    hat.style.position = 'absolute';
+    hat.style.width = '120%';
+    hat.style.height = `${mode.hatSize}px`;
+    hat.style.background = 'purple';
+    hat.style.borderRadius = '50% 50% 0 0';
+    hat.style.top = `-${mode.hatSize * 0.7}px`;
+    hat.style.left = '-10%';
+    hat.style.zIndex = '2';
+    
+    const hatBrim = document.createElement('div');
+    hatBrim.style.position = 'absolute';
+    hatBrim.style.width = '140%';
+    hatBrim.style.height = '20px';
+    hatBrim.style.background = 'purple';
+    hatBrim.style.borderRadius = '10px';
+    hatBrim.style.bottom = '-10px';
+    hatBrim.style.left = '-20%';
+    
+    hat.appendChild(hatBrim);
+    document.querySelector('.face').appendChild(hat);
+  } else {
+    const hat = document.querySelector('.hat');
+    if (hat) hat.remove();
+  }
+  
+  if (mode.circuitComplexity) {
+    const circuits = document.querySelector('.circuits') || document.createElement('div');
+    circuits.classList.add('circuits');
+    circuits.style.position = 'absolute';
+    circuits.style.top = '0';
+    circuits.style.left = '0';
+    circuits.style.width = '100%';
+    circuits.style.height = '100%';
+    circuits.style.pointerEvents = 'none';
+    
+    for (let i = 0; i < mode.circuitComplexity; i++) {
+      const circuit = document.createElement('div');
+      circuit.style.position = 'absolute';
+      circuit.style.background = 'rgba(0, 255, 0, 0.5)';
+      circuit.style.width = `${Math.random() * 30 + 10}px`;
+      circuit.style.height = '2px';
+      circuit.style.left = `${Math.random() * 100}%`;
+      circuit.style.top = `${Math.random() * 100}%`;
+      circuit.style.transform = `rotate(${Math.random() * 360}deg)`;
+      
+      circuits.appendChild(circuit);
+    }
+    
+    document.querySelector('.face').appendChild(circuits);
+  } else {
+    const circuits = document.querySelector('.circuits');
+    if (circuits) circuits.remove();
+  }
+  
+  if (mode.eyePatchSide) {
+    const eyePatch = document.querySelector('.eye-patch') || document.createElement('div');
+    eyePatch.classList.add('eye-patch');
+    eyePatch.style.position = 'absolute';
+    eyePatch.style.width = '40%';
+    eyePatch.style.height = '30%';
+    eyePatch.style.background = 'black';
+    eyePatch.style.borderRadius = '50%';
+    eyePatch.style.top = '20%';
+    
+    if (mode.eyePatchSide === 'left') {
+      eyePatch.style.left = '10%';
+    } else if (mode.eyePatchSide === 'right') {
+      eyePatch.style.right = '10%';
+    }
+    
+    document.querySelector('.face').appendChild(eyePatch);
+  } else {
+    const eyePatch = document.querySelector('.eye-patch');
+    if (eyePatch) eyePatch.remove();
+  }
+  
+  currentMode = (currentMode + 1) % 3;
+}
+
+function ColorLuminance(hex, lum) {
+  hex = String(hex).replace(/[^0-9a-f]/gi, '');
+  if (hex.length < 6) {
+    hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+  }
+  lum = lum || 0;
+  var rgb = "#", c, i;
+  for (i = 0; i < 3; i++) {
+    c = parseInt(hex.substr(i*2,2), 16);
+    c = Math.round(Math.min(Math.max(0, c + (c * lum)), 255)).toString(16);
+    rgb += ("00"+c).substr(c.length);
+  }
+  return rgb;
+}
+
+document.querySelectorAll('button').forEach(button => {
+  button.addEventListener('click', () => {
+    currentModeKey = button.id.replace('Btn', '');
+    currentMode = 0;
+    clearInterval(animationInterval);
+    animationInterval = setInterval(changeMode, 3000);
+    changeMode();
+  });
+});
+
+animationInterval = setInterval(changeMode, 3000);
+changeMode();
+</script>
+</body>
+</html>
