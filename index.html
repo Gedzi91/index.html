@@ -1,0 +1,428 @@
+<html><head><base href="https://asciiart.studio/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Advanced ASCII Art Animation Studio</title>
+<style>
+body {
+  font-family: 'Courier New', monospace;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #000000;
+  color: #00FF00;
+}
+#video-container, #canvas-container {
+  margin-top: 20px;
+  text-align: center;
+}
+canvas {
+  border: 1px solid #00FF00;
+  max-width: 100%;
+}
+#loading {
+  display: none;
+  text-align: center;
+  margin-top: 20px;
+}
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+input, button, select {
+  margin: 5px;
+  padding: 5px;
+  background-color: #000000;
+  color: #00FF00;
+  border: 1px solid #00FF00;
+}
+#error {
+  color: #FF0000;
+  margin-top: 10px;
+}
+h1 {
+  text-align: center;
+  text-shadow: 0 0 10px #00FF00;
+}
+label {
+  color: #00FF00;
+}
+button {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+button:hover {
+  background-color: #00FF00;
+  color: #000000;
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+#asciiCanvas {
+  background-color: #000000;
+}
+#timeline {
+  width: 100%;
+  height: 100px;
+  background-color: #001100;
+  margin-top: 20px;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+.timeline-frame {
+  display: inline-block;
+  width: 50px;
+  height: 80px;
+  margin: 10px 5px;
+  background-color: #003300;
+  cursor: pointer;
+  font-size: 8px;
+  overflow: hidden;
+}
+.timeline-frame.selected {
+  border: 2px solid #00FF00;
+}
+#frame-editor {
+  display: flex;
+  margin-top: 20px;
+}
+#frame-canvas {
+  border: 1px solid #00FF00;
+}
+#frame-tools {
+  margin-left: 20px;
+}
+</style>
+</head>
+<body>
+<h1>Advanced ASCII Art Animation Studio</h1>
+<input type="file" id="fileInput" accept="video/mp4">
+<div id="video-container"></div>
+<div id="canvas-container">
+  <canvas id="asciiCanvas"></canvas>
+</div>
+<div class="controls">
+  <div>
+    <input type="number" id="fontSizeInput" value="10" min="1" max="20" step="1">
+    <label for="fontSizeInput">Font Size</label>
+  </div>
+  <div>
+    <input type="number" id="fpsInput" value="24" min="1" max="60" step="1">
+    <label for="fpsInput">FPS</label>
+  </div>
+  <div>
+    <input type="checkbox" id="colorCheckbox">
+    <label for="colorCheckbox">Color</label>
+  </div>
+  <div>
+    <select id="asciiCharSet">
+      <option value="standard">Standard</option>
+      <option value="extended">Extended</option>
+      <option value="custom">Custom</option>
+    </select>
+    <label for="asciiCharSet">ASCII Character Set</label>
+  </div>
+  <div>
+    <input type="text" id="customAsciiChars" placeholder="Custom ASCII chars">
+  </div>
+  <div>
+    <button id="convertButton">Convert to ASCII</button>
+    <button id="exportButton" disabled>Export MP4</button>
+    <button id="addFrameButton">Add Blank Frame</button>
+    <button id="deleteFrameButton">Delete Frame</button>
+  </div>
+</div>
+<div id="timeline"></div>
+<div id="frame-editor">
+  <canvas id="frame-canvas"></canvas>
+  <div id="frame-tools">
+    <button id="drawButton">Draw</button>
+    <button id="eraseButton">Erase</button>
+    <input type="color" id="colorPicker" value="#00FF00">
+  </div>
+</div>
+<div id="loading">Processing... Please wait.</div>
+<div id="error"></div>
+
+<script>
+const fileInput = document.getElementById('fileInput');
+const videoContainer = document.getElementById('video-container');
+const canvas = document.getElementById('asciiCanvas');
+const ctx = canvas.getContext('2d');
+const fontSizeInput = document.getElementById('fontSizeInput');
+const fpsInput = document.getElementById('fpsInput');
+const colorCheckbox = document.getElementById('colorCheckbox');
+const asciiCharSetSelect = document.getElementById('asciiCharSet');
+const customAsciiCharsInput = document.getElementById('customAsciiChars');
+const convertButton = document.getElementById('convertButton');
+const exportButton = document.getElementById('exportButton');
+const addFrameButton = document.getElementById('addFrameButton');
+const deleteFrameButton = document.getElementById('deleteFrameButton');
+const loadingDiv = document.getElementById('loading');
+const errorDiv = document.getElementById('error');
+const timeline = document.getElementById('timeline');
+const frameCanvas = document.getElementById('frame-canvas');
+const frameCtx = frameCanvas.getContext('2d');
+const drawButton = document.getElementById('drawButton');
+const eraseButton = document.getElementById('eraseButton');
+const colorPicker = document.getElementById('colorPicker');
+
+let video, asciiFrames, mediaRecorder, recordedChunks;
+let currentFrame = 0;
+let isDrawing = false;
+let isErasing = false;
+
+const ASCII_CHAR_SETS = {
+  standard: ['@', '#', 'S', '%', '?', '*', '+', ';', ':', ',', '.'],
+  extended: ['$', '@', 'B', '%', '8', '&', 'W', 'M', '#', '*', 'o', 'a', 'h', 'k', 'b', 'd', 'p', 'q', 'w', 'm', 'Z', 'O', '0', 'Q', 'L', 'C', 'J', 'U', 'Y', 'X', 'z', 'c', 'v', 'u', 'n', 'x', 'r', 'j', 'f', 't', '/', '\\', '|', '(', ')', '1', '{', '}', '[', ']', '?', '-', '_', '+', '~', '<', '>', 'i', '!', 'l', 'I', ';', ':', ',', '"', '^', '`', '\'', '.', ' ']
+};
+
+fileInput.addEventListener('change', handleFileSelect);
+convertButton.addEventListener('click', convertToAscii);
+exportButton.addEventListener('click', exportMP4);
+asciiCharSetSelect.addEventListener('change', toggleCustomCharsInput);
+addFrameButton.addEventListener('click', addBlankFrame);
+deleteFrameButton.addEventListener('click', deleteCurrentFrame);
+drawButton.addEventListener('click', () => { isDrawing = true; isErasing = false; });
+eraseButton.addEventListener('click', () => { isDrawing = false; isErasing = true; });
+
+frameCanvas.addEventListener('mousedown', startDrawing);
+frameCanvas.addEventListener('mousemove', draw);
+frameCanvas.addEventListener('mouseup', stopDrawing);
+frameCanvas.addEventListener('mouseout', stopDrawing);
+
+function startDrawing(e) {
+  if (isDrawing || isErasing) {
+    const rect = frameCanvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    frameCtx.beginPath();
+    frameCtx.moveTo(x, y);
+  }
+}
+
+function draw(e) {
+  if ((isDrawing || isErasing) && (e.buttons === 1)) {
+    const rect = frameCanvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    frameCtx.lineTo(x, y);
+    frameCtx.strokeStyle = isDrawing ? colorPicker.value : '#000000';
+    frameCtx.lineWidth = 2;
+    frameCtx.lineCap = 'round';
+    frameCtx.stroke();
+    updateAsciiFrame();
+  }
+}
+
+function stopDrawing() {
+  if (isDrawing || isErasing) {
+    frameCtx.closePath();
+    updateAsciiFrame();
+  }
+}
+
+function updateAsciiFrame() {
+  const imageData = frameCtx.getImageData(0, 0, frameCanvas.width, frameCanvas.height);
+  const asciiFrame = videoFrameToAscii(imageData, parseInt(fontSizeInput.value), colorCheckbox.checked, getAsciiChars());
+  asciiFrames[currentFrame] = asciiFrame;
+  updateTimeline();
+}
+
+function toggleCustomCharsInput() {
+  customAsciiCharsInput.style.display = asciiCharSetSelect.value === 'custom' ? 'inline' : 'none';
+}
+
+function handleFileSelect(event) {
+  const file = event.target.files[0];
+  const videoURL = URL.createObjectURL(file);
+  video = document.createElement('video');
+  video.src = videoURL;
+  video.controls = true;
+  videoContainer.innerHTML = '';
+  videoContainer.appendChild(video);
+  convertButton.disabled = false;
+}
+
+async function convertToAscii() {
+  showLoading(true);
+  asciiFrames = [];
+  const fontSize = parseInt(fontSizeInput.value);
+  const fps = parseInt(fpsInput.value);
+  const useColor = colorCheckbox.checked;
+  const asciiChars = getAsciiChars();
+
+  video.currentTime = 0;
+  const frameCount = Math.floor(video.duration * fps);
+  const frameInterval = 1 / fps;
+
+  for (let i = 0; i < frameCount; i++) {
+    video.currentTime = i * frameInterval;
+    await new Promise(resolve => video.onseeked = resolve);
+    const asciiFrame = videoFrameToAscii(video, fontSize, useColor, asciiChars);
+    asciiFrames.push(asciiFrame);
+  }
+
+  showLoading(false);
+  exportButton.disabled = false;
+  updateTimeline();
+}
+
+function getAsciiChars() {
+  const selectedSet = asciiCharSetSelect.value;
+  if (selectedSet === 'custom') {
+    return customAsciiCharsInput.value.split('');
+  }
+  return ASCII_CHAR_SETS[selectedSet];
+}
+
+function videoFrameToAscii(source, fontSize, useColor, asciiChars) {
+  const tempCanvas = document.createElement('canvas');
+  const tempCtx = tempCanvas.getContext('2d');
+  tempCanvas.width = source.videoWidth || source.width;
+  tempCanvas.height = source.videoHeight || source.height;
+  tempCtx.drawImage(source, 0, 0, tempCanvas.width, tempCanvas.height);
+
+  const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+  const asciiFrame = [];
+
+  for (let y = 0; y < tempCanvas.height; y += fontSize) {
+    for (let x = 0; x < tempCanvas.width; x += fontSize / 2) {
+      const pixelIndex = (y * tempCanvas.width + x) * 4;
+      const r = imageData.data[pixelIndex];
+      const g = imageData.data[pixelIndex + 1];
+      const b = imageData.data[pixelIndex + 2];
+      const brightness = (r + g + b) / 3;
+      const charIndex = Math.floor((brightness / 255) * (asciiChars.length - 1));
+      const asciiChar = asciiChars[charIndex];
+      asciiFrame.push({ char: asciiChar, color: useColor ? `rgb(${r},${g},${b})` : '#00FF00' });
+    }
+    asciiFrame.push('\n');
+  }
+
+  return asciiFrame;
+}
+
+async function exportMP4() {
+  showLoading(true);
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const fontSize = parseInt(fontSizeInput.value);
+  const fps = parseInt(fpsInput.value);
+
+  const stream = canvas.captureStream(fps);
+  const options = { mimeType: 'video/webm;codecs=vp9' };
+  mediaRecorder = new MediaRecorder(stream, options);
+  recordedChunks = [];
+
+  mediaRecorder.ondataavailable = (event) => {
+    if (event.data.size > 0) {
+      recordedChunks.push(event.data);
+    }
+  };
+
+  mediaRecorder.onstop = () => {
+    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'ascii_video.webm';
+    a.click();
+    URL.revokeObjectURL(url);
+    showLoading(false);
+  };
+
+  mediaRecorder.start();
+
+  for (const frame of asciiFrames) {
+    drawAsciiFrame(frame, fontSize);
+    await new Promise(resolve => requestAnimationFrame(resolve));
+  }
+
+  mediaRecorder.stop();
+}
+
+function drawAsciiFrame(asciiChars, fontSize) {
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.font = `${fontSize}px 'Courier New', monospace`;
+  ctx.textBaseline = 'top';
+
+  let x = 0;
+  let y = 0;
+
+  for (const char of asciiChars) {
+    if (char === '\n') {
+      x = 0;
+      y += fontSize;
+    } else {
+      ctx.fillStyle = char.color;
+      ctx.fillText(char.char, x, y);
+      x += fontSize / 2;
+    }
+  }
+}
+
+function showLoading(show) {
+  loadingDiv.style.display = show ? 'block' : 'none';
+}
+
+function showError(message) {
+  errorDiv.textContent = message;
+}
+
+function updateTimeline() {
+  timeline.innerHTML = '';
+  asciiFrames.forEach((frame, index) => {
+    const frameElement = document.createElement('div');
+    frameElement.className = 'timeline-frame';
+    frameElement.textContent = frame.filter(char => char !== '\n').map(char => char.char).join('');
+    frameElement.addEventListener('click', () => selectFrame(index));
+    if (index === currentFrame) {
+      frameElement.classList.add('selected');
+    }
+    timeline.appendChild(frameElement);
+  });
+}
+
+function selectFrame(index) {
+  currentFrame = index;
+  updateTimeline();
+  displayCurrentFrame();
+}
+
+function displayCurrentFrame() {
+  const frame = asciiFrames[currentFrame];
+  drawAsciiFrame(frame, parseInt(fontSizeInput.value));
+  
+  frameCanvas.width = canvas.width;
+  frameCanvas.height = canvas.height;
+  frameCtx.drawImage(canvas, 0, 0);
+}
+
+function addBlankFrame() {
+  const blankFrame = new Array(asciiFrames[0].length).fill({ char: ' ', color: '#000000' });
+  asciiFrames.splice(currentFrame + 1, 0, blankFrame);
+  currentFrame++;
+  updateTimeline();
+  displayCurrentFrame();
+}
+
+function deleteCurrentFrame() {
+  if (asciiFrames.length > 1) {
+    asciiFrames.splice(currentFrame, 1);
+    if (currentFrame >= asciiFrames.length) {
+      currentFrame = asciiFrames.length - 1;
+    }
+    updateTimeline();
+    displayCurrentFrame();
+  } else {
+    showError('Cannot delete the last frame');
+  }
+}
+
+toggleCustomCharsInput();
+</script>
+</body></html>
