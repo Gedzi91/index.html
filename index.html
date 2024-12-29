@@ -1,0 +1,347 @@
+<html><head><base href="." /><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enhanced AI ASCII Art Generator</title>
+<style>
+  body {
+    background: #1a1a1a;
+    color: #33ff33;
+    font-family: 'Courier New', monospace;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 800px;
+  }
+
+  .ascii-display {
+    background: #000;
+    padding: 20px;
+    border-radius: 5px;
+    white-space: pre;
+    overflow-x: auto;
+    margin: 20px 0;
+    min-height: 200px;
+    width: 100%;
+    box-sizing: border-box;
+    transition: color 0.3s ease;
+  }
+
+  input, select {
+    width: 100%;
+    padding: 10px;
+    background: #2a2a2a;
+    border: 1px solid #33ff33;
+    color: #33ff33;
+    border-radius: 5px;
+    margin-bottom: 10px;
+  }
+
+  .controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+
+  .controls select, .controls input[type="color"] {
+    width: auto;
+  }
+
+  button {
+    background: #33ff33;
+    color: #000;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  button:hover {
+    background: #66ff66;
+    transform: scale(1.05);
+  }
+
+  .loading {
+    animation: blink 1s infinite;
+  }
+
+  @keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+  }
+
+  .gallery-item {
+    background: #000;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    position: relative;
+  }
+
+  .gallery-item:hover {
+    transform: scale(1.02);
+  }
+
+  .download-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #33ff33;
+    padding: 5px;
+    border-radius: 3px;
+    opacity: 0.7;
+  }
+
+  .download-btn:hover {
+    opacity: 1;
+  }
+
+  input[type="color"] {
+    height: 41px;
+    padding: 2px;
+    background: #2a2a2a;
+    border: 1px solid #33ff33;
+    border-radius: 5px;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>Enhanced AI ASCII Art Generator</h1>
+    <div class="controls">
+      <select id="style">
+        <option value="default">Default Style</option>
+        <option value="minimal">Minimal</option>
+        <option value="detailed">Detailed</option>
+        <option value="3d">3D Effect</option>
+        <option value="dynamic">Dynamic</option>
+        <option value="surreal">Surreal</option>
+        <option value="geometric">Geometric</option>
+      </select>
+      <select id="size">
+        <option value="small">Small</option>
+        <option value="medium">Medium</option>
+        <option value="large">Large</option>
+        <option value="extra-large">Extra Large</option>
+      </select>
+      <input type="color" id="artColor" value="#33ff33" onchange="updateArtColor(this.value)">
+    </div>
+    <input type="text" id="prompt" placeholder="Enter what you want to generate (e.g., 'happy cat playing with yarn', 'majestic dragon breathing fire')">
+    <button onclick="generateAscii()">Generate ASCII Art</button>
+    <button onclick="downloadCurrentArt()">Download Current Art</button>
+    <pre class="ascii-display" id="output">Ready to generate some ASCII art...
+    _____
+   /     \
+  /       \
+ /         \
+(  Welcome! )
+ \         /
+  \       /
+   \_____/</pre>
+    <div class="gallery" id="gallery"></div>
+  </div>
+
+<script>
+let gallery = [];
+let currentColor = '#33ff33';
+
+function updateArtColor(color) {
+    currentColor = color;
+    document.getElementById('output').style.color = color;
+    
+    const currentArt = document.getElementById('output').textContent;
+    
+    document.querySelectorAll('.gallery-item').forEach(item => {
+        const preElement = item.querySelector('pre');
+        if (preElement && preElement.textContent === currentArt) {
+            preElement.style.color = color;
+        }
+    });
+}
+
+function downloadAsImage(element, filename) {
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    
+    const fontSize = 12;
+    context.font = `${fontSize}px 'Courier New'`;
+    
+    const lines = element.textContent.split('\n');
+    const maxLineWidth = Math.max(...lines.map(line => context.measureText(line).width));
+    const lineHeight = fontSize * 1.2;
+    
+    canvas.width = maxLineWidth + 40;
+    canvas.height = lines.length * lineHeight + 40;
+    
+    context.fillStyle = '#000000';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    
+    context.font = `${fontSize}px 'Courier New'`;
+    context.fillStyle = currentColor;
+    context.textBaseline = 'top';
+    
+    lines.forEach((line, index) => {
+        context.fillText(line, 20, 20 + (index * lineHeight));
+    });
+    
+    const link = document.createElement('a');
+    link.download = filename;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+}
+
+function downloadCurrentArt() {
+    const output = document.getElementById('output');
+    const prompt = document.getElementById('prompt').value.trim() || 'ascii-art';
+    downloadAsImage(output, `${prompt.replace(/[^a-z0-9]/gi, '-')}.png`);
+}
+
+async function generateAscii() {
+    const promptInput = document.getElementById('prompt');
+    const output = document.getElementById('output');
+    const style = document.getElementById('style').value;
+    const size = document.getElementById('size').value;
+    const prompt = promptInput.value.trim();
+    
+    if (!prompt) {
+        alert('Please enter a prompt!');
+        return;
+    }
+
+    output.textContent = 'Generating...';
+    output.classList.add('loading');
+
+    try {
+        const response = await fetch('/api/ai_completion', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+                prompt: `Create unique and highly detailed ASCII art based on this description: "${prompt}".
+                Style: ${style}
+                Size: ${size}
+                
+                Enhanced Requirements:
+                - Create a unique interpretation each time, even for the same prompt
+                - Analyze the prompt for emotional content and reflect it in the art
+                - Incorporate advanced shading techniques using multiple ASCII characters
+                - Add subtle details that emerge upon closer inspection
+                - For dynamic style, suggest motion and energy in the composition
+                - For surreal style, blend unexpected elements creatively
+                - For geometric style, use precise patterns and symmetry
+                - Adapt complexity based on the size parameter
+                - Consider perspective and depth in the composition
+                - Include easter eggs and hidden details when appropriate
+                - Use negative space effectively
+                - Ensure balanced composition while maintaining asymmetric interest
+                - Add texture variations using different character densities
+                - Incorporate mathematical patterns where appropriate
+                - Consider the emotional impact of the final piece
+                
+                <typescript-interface>
+                interface Response {
+                    asciiArt: string;
+                    description: string;
+                    suggestedPrompts: string[];
+                    artisticNotes: string;
+                    technicalDetails: {
+                        complexity: string;
+                        characterCount: number;
+                        dominantPatterns: string[];
+                    }
+                }
+                </typescript-interface>
+                
+                <example>
+                {
+                    "asciiArt": "  /\\___/\\\n ( o   o )\n (  =^=  )\n  (____)",
+                    "description": "A unique interpretation with enhanced artistic elements",
+                    "suggestedPrompts": ["add dynamic motion", "explore abstract version", "try different perspective"],
+                    "artisticNotes": "Incorporated layered shading for depth",
+                    "technicalDetails": {
+                        "complexity": "medium",
+                        "characterCount": 156,
+                        "dominantPatterns": ["circular", "geometric"]
+                    }
+                }
+                </example>`,
+                data: prompt + Date.now() + Math.random()
+            }),
+        });
+
+        const data = await response.json();
+        output.textContent = data.asciiArt;
+        output.style.color = currentColor;
+        
+        addToGallery(data.asciiArt, prompt);
+        
+        if (data.suggestedPrompts && data.suggestedPrompts.length > 0) {
+            const suggestions = data.suggestedPrompts
+                .map(suggestion => `<button onclick="setPrompt('${suggestion}')">${suggestion}</button>`)
+                .join(' ');
+            const technicalInfo = data.technicalDetails ? 
+                `<p class="technical-info">Complexity: ${data.technicalDetails.complexity}<br>
+                 Characters: ${data.technicalDetails.characterCount}</p>` : '';
+            document.getElementById('gallery').insertAdjacentHTML('beforeend', 
+                `<div class="gallery-item">
+                    <h3>Artistic Vision:</h3>
+                    <p>${data.artisticNotes || ''}</p>
+                    ${technicalInfo}
+                    <h3>Try these variations:</h3>
+                    ${suggestions}
+                </div>`);
+        }
+    } catch (error) {
+        output.textContent = 'Error generating ASCII art. Please try again.';
+        console.error('Error:', error);
+    } finally {
+        output.classList.remove('loading');
+    }
+}
+
+function addToGallery(art, prompt) {
+    const galleryDiv = document.getElementById('gallery');
+    const galleryItem = document.createElement('div');
+    galleryItem.className = 'gallery-item';
+    galleryItem.innerHTML = `
+        <pre style="color: ${currentColor}">${art}</pre>
+        <p>"${prompt}"</p>
+        <button class="download-btn" onclick="event.stopPropagation(); downloadAsImage(this.previousElementSibling.previousElementSibling, '${prompt.replace(/[^a-z0-9]/gi, '-')}.png')">⬇️</button>
+    `;
+    galleryItem.onclick = () => {
+        document.getElementById('output').textContent = art;
+        document.getElementById('output').style.color = currentColor;
+    };
+    gallery.push({art, prompt});
+    galleryDiv.insertBefore(galleryItem, galleryDiv.firstChild);
+}
+
+function setPrompt(prompt) {
+    document.getElementById('prompt').value = prompt;
+    generateAscii();
+}
+
+document.getElementById('prompt').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        generateAscii();
+    }
+});
+</script>
+</body></html>
