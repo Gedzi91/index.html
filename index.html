@@ -1,0 +1,492 @@
+<html><head><base href="https://klasky-csupo-simulator.example.com" />
+<title>Klasky Csupo Splaat TTS Simulator - Overpowered Edition</title>
+<style>
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+}
+#websim-frame {
+  width: 100%;
+  height: 100%;
+  border: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: all 0.5s ease;
+}
+#controls {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.7);
+  padding: 10px;
+  border-radius: 10px;
+  z-index: 1000;
+}
+button {
+  background-color: #ff6600;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  margin: 5px;
+}
+#textInput {
+  padding: 10px;
+  font-size: 16px;
+  width: 200px;
+}
+#voiceInfo {
+  color: #fff;
+  margin-top: 10px;
+  font-style: italic;
+}
+.overpowered {
+  background-color: #ff0000;
+  font-weight: bold;
+}
+</style>
+</head>
+<body>
+<iframe id="websim-frame" src="about:blank"></iframe>
+<div id="controls">
+  <input type="text" id="textInput" placeholder="Enter text to speak">
+  <button onclick="speak()">Speak</button>
+  <div>
+    <select id="effectSelect" onchange="applyEffect(this.value)">
+      <option value="none">No Effect</option>
+      <option value="gMajor4">G Major 4</option>
+      <option value="confusion">Confusion</option>
+      <option value="iKilledX">I Killed X</option>
+      <option value="random">Random Effect</option>
+      <option value="deepFried">Deep Fried</option>
+      <option value="vaporwave">Vaporwave</option>
+      <option value="glitch">Glitch</option>
+      <option value="underwater">Underwater</option>
+      <option value="gMajor4OP">G Major 4 OP</option>
+      <option value="deepFriedOP">Deep Fried OP</option>
+      <option value="glitchOP">Glitch OP</option>
+      <option value="gMajor783377">G Major 783377</option>
+      <option value="gMajor783377OP">G Major 783377 OP</option>
+    </select>
+  </div>
+  <div id="voiceInfo"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
+<script>
+let speech = new SpeechSynthesisUtterance();
+let audioContext = new (window.AudioContext || window.webkitAudioContext)();
+let source;
+let currentEffect = null;
+let isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+function initWebsim() {
+  const websimFrame = document.getElementById('websim-frame');
+  websimFrame.srcdoc = `
+    <html>
+    <head>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          background-color: #000;
+          color: #fff;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          margin: 0;
+          transition: all 0.5s ease;
+        }
+        #splaat {
+          width: 200px;
+          height: 200px;
+          transition: all 0.5s ease;
+        }
+      </style>
+    </head>
+    <body>
+      <svg id="splaat" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="45" fill="#ff6600" />
+        <circle cx="35" cy="40" r="10" fill="#fff" />
+        <circle cx="65" cy="40" r="10" fill="#fff" />
+        <path d="M 30 70 Q 50 80 70 70" stroke="#fff" stroke-width="5" fill="none" />
+      </svg>
+    </body>
+    </html>
+  `;
+}
+
+function initVoices() {
+  let voices = speechSynthesis.getVoices();
+  if (isIOS) {
+    let boingVoice = voices.find(voice => voice.name === 'Samantha (Enhanced)' || voice.name.includes('Boing'));
+    if (boingVoice) {
+      speech.voice = boingVoice;
+      document.getElementById('voiceInfo').textContent = "Using iOS Boing voice: " + boingVoice.name;
+    } else {
+      document.getElementById('voiceInfo').textContent = "iOS Boing voice not found. Using default voice.";
+    }
+  } else {
+    document.getElementById('voiceInfo').textContent = "Using default system voice.";
+  }
+}
+
+if (speechSynthesis.onvoiceschanged !== undefined) {
+  speechSynthesis.onvoiceschanged = initVoices;
+}
+
+function speak() {
+  const text = document.getElementById('textInput').value;
+  speech.text = currentEffect === 'confusion' ? text.split('').reverse().join('') : text;
+  speech.rate = 1;
+  speech.pitch = 1;
+  speech.volume = 1;
+  
+  switch(currentEffect) {
+    case 'gMajor4':
+      speakWithGMajor4();
+      break;
+    case 'gMajor4OP':
+      speakWithGMajor4OP();
+      break;
+    case 'gMajor783377':
+      speakWithGMajor783377();
+      break;
+    case 'gMajor783377OP':
+      speakWithGMajor783377OP();
+      break;
+    case 'iKilledX':
+      speech.pitch = 0.5;
+      window.speechSynthesis.speak(speech);
+      break;
+    case 'deepFried':
+      speech.pitch = 2;
+      speech.rate = 1.5;
+      window.speechSynthesis.speak(speech);
+      break;
+    case 'deepFriedOP':
+      speakWithDeepFriedOP();
+      break;
+    case 'vaporwave':
+      speech.pitch = 0.8;
+      speech.rate = 0.8;
+      window.speechSynthesis.speak(speech);
+      break;
+    case 'glitch':
+      speakWithGlitch();
+      break;
+    case 'glitchOP':
+      speakWithGlitchOP();
+      break;
+    case 'underwater':
+      speech.pitch = 0.7;
+      speech.rate = 0.8;
+      window.speechSynthesis.speak(speech);
+      break;
+    default:
+      window.speechSynthesis.speak(speech);
+  }
+
+  animateSplaat();
+}
+
+function speakWithGMajor4() {
+  const text = document.getElementById('textInput').value;
+  const speech1 = new SpeechSynthesisUtterance(text);
+  const speech2 = new SpeechSynthesisUtterance(text);
+
+  speech1.pitch = 0.5; // -3 semitones
+  speech2.pitch = 1.25; // +4 semitones
+
+  window.speechSynthesis.speak(speech1);
+  window.speechSynthesis.speak(speech2);
+}
+
+function speakWithGMajor4OP() {
+  const text = document.getElementById('textInput').value;
+  const speech1 = new SpeechSynthesisUtterance(text);
+  const speech2 = new SpeechSynthesisUtterance(text);
+  const speech3 = new SpeechSynthesisUtterance(text);
+
+  speech1.pitch = 0.25; // -6 semitones
+  speech2.pitch = 1; // normal pitch
+  speech3.pitch = 2; // +12 semitones (one octave up)
+
+  window.speechSynthesis.speak(speech1);
+  window.speechSynthesis.speak(speech2);
+  window.speechSynthesis.speak(speech3);
+}
+
+function speakWithGMajor783377() {
+  const text = document.getElementById('textInput').value;
+  const speech1 = new SpeechSynthesisUtterance(text);
+  const speech2 = new SpeechSynthesisUtterance(text);
+  const speech3 = new SpeechSynthesisUtterance(text);
+  const speech4 = new SpeechSynthesisUtterance(text);
+
+  speech1.pitch = 0.5; // G Major 4 low
+  speech2.pitch = 1.25; // G Major 4 high
+  speech3.pitch = 2; // Deep Fried
+  speech3.rate = 1.5; // Deep Fried
+  speech4.pitch = 0.7; // Underwater
+  speech4.rate = 0.8; // Underwater
+
+  window.speechSynthesis.speak(speech1);
+  window.speechSynthesis.speak(speech2);
+  window.speechSynthesis.speak(speech3);
+  window.speechSynthesis.speak(speech4);
+
+  speakWithGlitch(); // Add glitch effect
+}
+
+function speakWithGMajor783377OP() {
+  const text = document.getElementById('textInput').value;
+  const speech1 = new SpeechSynthesisUtterance(text);
+  const speech2 = new SpeechSynthesisUtterance(text);
+  const speech3 = new SpeechSynthesisUtterance(text);
+  const speech4 = new SpeechSynthesisUtterance(text);
+
+  speech1.pitch = 0.25; // G Major 4 OP low
+  speech2.pitch = 2; // G Major 4 OP high
+  speech3.pitch = 3; // Deep Fried OP
+  speech3.rate = 2; // Deep Fried OP
+  speech4.pitch = 0.5; // Underwater (more extreme)
+  speech4.rate = 0.6; // Underwater (more extreme)
+
+  window.speechSynthesis.speak(speech1);
+  window.speechSynthesis.speak(speech2);
+  window.speechSynthesis.speak(speech3);
+  window.speechSynthesis.speak(speech4);
+
+  speakWithGlitchOP(); // Add glitch OP effect
+}
+
+function speakWithGlitch() {
+  const words = speech.text.split(' ');
+  words.forEach((word, index) => {
+    setTimeout(() => {
+      speech.text = word;
+      speech.pitch = Math.random() * 2 + 0.5;
+      speech.rate = Math.random() * 1.5 + 0.5;
+      window.speechSynthesis.speak(speech);
+    }, index * 500);
+  });
+}
+
+function speakWithGlitchOP() {
+  const words = speech.text.split(' ');
+  words.forEach((word, index) => {
+    setTimeout(() => {
+      const glitchSpeech1 = new SpeechSynthesisUtterance(word);
+      const glitchSpeech2 = new SpeechSynthesisUtterance(word);
+      const glitchSpeech3 = new SpeechSynthesisUtterance(word);
+
+      glitchSpeech1.pitch = Math.random() * 3 + 0.2;
+      glitchSpeech1.rate = Math.random() * 2 + 0.5;
+
+      glitchSpeech2.pitch = Math.random() * 3 + 0.2;
+      glitchSpeech2.rate = Math.random() * 2 + 0.5;
+
+      glitchSpeech3.pitch = Math.random() * 3 + 0.2;
+      glitchSpeech3.rate = Math.random() * 2 + 0.5;
+
+      window.speechSynthesis.speak(glitchSpeech1);
+      window.speechSynthesis.speak(glitchSpeech2);
+      window.speechSynthesis.speak(glitchSpeech3);
+    }, index * 300);
+  });
+}
+
+function speakWithDeepFriedOP() {
+  const text = document.getElementById('textInput').value;
+  const speech1 = new SpeechSynthesisUtterance(text);
+  const speech2 = new SpeechSynthesisUtterance(text);
+
+  speech1.pitch = 3;
+  speech1.rate = 2;
+
+  speech2.pitch = 0.3;
+  speech2.rate = 1.5;
+
+  window.speechSynthesis.speak(speech1);
+  setTimeout(() => window.speechSynthesis.speak(speech2), 100);
+}
+
+function animateSplaat() {
+  const websimFrame = document.getElementById('websim-frame');
+  const splaat = websimFrame.contentDocument.getElementById('splaat');
+  splaat.style.animation = 'shake 0.5s infinite';
+  setTimeout(() => {
+    splaat.style.animation = '';
+  }, 2000);
+}
+
+function applyEffect(effect) {
+  currentEffect = effect;
+  applyVisualEffect(effect);
+}
+
+function applyVisualEffect(effect) {
+  const websimFrame = document.getElementById('websim-frame');
+  const body = websimFrame.contentDocument.body;
+  const splaat = websimFrame.contentDocument.getElementById('splaat');
+  
+  // Reset all effects
+  body.style.filter = '';
+  body.style.background = '#000';
+  body.style.transform = '';
+  splaat.style.filter = '';
+  websimFrame.style.filter = '';
+  websimFrame.style.transform = '';
+
+  switch(effect) {
+    case 'gMajor4':
+      websimFrame.style.filter = 'invert(1)';
+      break;
+    case 'gMajor4OP':
+      websimFrame.style.filter = 'invert(1) hue-rotate(180deg) contrast(200%)';
+      websimFrame.style.transform = 'scale(1.2) rotate(5deg)';
+      break;
+    case 'gMajor783377':
+      websimFrame.style.filter = 'invert(1) hue-rotate(180deg) contrast(200%) blur(1px) brightness(80%)';
+      body.style.background = 'linear-gradient(to bottom, #000066, #0000ff)';
+      applyGlitchEffect();
+      break;
+    case 'gMajor783377OP':
+      websimFrame.style.filter = 'invert(1) hue-rotate(360deg) contrast(400%) blur(2px) brightness(60%)';
+      body.style.background = 'linear-gradient(to bottom, #000033, #0000cc)';
+      applyGlitchEffectOP();
+      break;
+    case 'confusion':
+      body.style.background = '#afeeee';
+      websimFrame.style.transform = 'scaleX(-1)';
+      websimFrame.style.filter = 'invert(1)';
+      splaat.style.filter = 'invert(1)';
+      break;
+    case 'iKilledX':
+      websimFrame.style.filter = 'hue-rotate(40deg) perspective(500px) rotateY(5deg)';
+      break;
+    case 'deepFried':
+      websimFrame.style.filter = 'contrast(200%) brightness(150%) saturate(200%)';
+      break;
+    case 'deepFriedOP':
+      websimFrame.style.filter = 'contrast(400%) brightness(200%) saturate(400%) hue-rotate(90deg)';
+      websimFrame.style.transform = 'scale(1.1) skew(5deg, 5deg)';
+      break;
+    case 'vaporwave':
+      websimFrame.style.filter = 'hue-rotate(180deg) saturate(200%) brightness(110%)';
+      body.style.background = 'linear-gradient(to bottom, #ff00ff, #00ffff)';
+      break;
+    case 'glitch':
+      applyGlitchEffect();
+      break;
+    case 'glitchOP':
+      applyGlitchEffectOP();
+      break;
+    case 'underwater':
+      websimFrame.style.filter = 'blur(1px) hue-rotate(180deg) brightness(80%)';
+      body.style.background = 'linear-gradient(to bottom, #000066, #0000ff)';
+      break;
+    case 'random':
+      applyRandomEffect();
+      break;
+  }
+}
+
+function applyGlitchEffect() {
+  const websimFrame = document.getElementById('websim-frame');
+  let glitchInterval = setInterval(() => {
+    websimFrame.style.filter = `
+      hue-rotate(${Math.random() * 360}deg)
+      saturate(${Math.random() * 10 + 1})
+      contrast(${Math.random() * 10 + 1})
+      blur(${Math.random() * 10}px)
+    `;
+    websimFrame.style.transform = `translate(${Math.random() * 10 - 5}px, ${Math.random() * 10 - 5}px)`;
+  }, 100);
+
+  setTimeout(() => clearInterval(glitchInterval), 2000);
+}
+
+function applyGlitchEffectOP() {
+  const websimFrame = document.getElementById('websim-frame');
+  const splaat = websimFrame.contentDocument.getElementById('splaat');
+  
+  let glitchInterval = setInterval(() => {
+    websimFrame.style.filter = `
+      hue-rotate(${Math.random() * 720 - 360}deg)
+      saturate(${Math.random() * 20 + 1})
+      contrast(${Math.random() * 20 + 1})
+      blur(${Math.random() * 20}px)
+      brightness(${Math.random() * 3 + 0.5})
+    `;
+    websimFrame.style.transform = `
+      translate(${Math.random() * 30 - 15}px, ${Math.random() * 30 - 15}px)
+      scale(${Math.random() * 0.5 + 0.75})
+      rotate(${Math.random() * 20 - 10}deg)
+      skew(${Math.random() * 20 - 10}deg, ${Math.random() * 20 - 10}deg)
+    `;
+    splaat.style.transform = `
+      scale(${Math.random() * 1.5 + 0.5})
+      rotate(${Math.random() * 360}deg)
+    `;
+  }, 50);
+
+  setTimeout(() => clearInterval(glitchInterval), 3000);
+}
+
+function applyRandomEffect() {
+  const effects = ['gMajor4', 'confusion', 'iKilledX', 'deepFried', 'vaporwave', 'glitch', 'underwater', 'custom', 'gMajor4OP', 'deepFriedOP', 'glitchOP', 'gMajor783377', 'gMajor783377OP'];
+  const randomEffect = effects[Math.floor(Math.random() * effects.length)];
+  
+  if (randomEffect === 'custom') {
+    const websimFrame = document.getElementById('websim-frame');
+    const randomHue = Math.floor(Math.random() * 360);
+    const randomScale = Math.random() * 0.5 + 0.75;
+    const randomRotate = Math.random() * 360;
+    websimFrame.style.filter = `hue-rotate(${randomHue}deg) scale(${randomScale}) rotate(${randomRotate}deg)`;
+  } else {
+    applyVisualEffect(randomEffect);
+  }
+
+  // Apply random audio effect
+  speech.rate = Math.random() * 0.5 + 0.75;
+  speech.pitch = Math.random() * 2 - 1;
+}
+
+// Add CSS animations to the websim frame
+function addWebsimAnimations() {
+  const websimFrame = document.getElementById('websim-frame');
+  const style = websimFrame.contentDocument.createElement('style');
+  style.textContent = `
+    @keyframes shake {
+      0% { transform: translate(1px, 1px) rotate(0deg); }
+      10% { transform: translate(-1px, -2px) rotate(-1deg); }
+      20% { transform: translate(-3px, 0px) rotate(1deg); }
+      30% { transform: translate(3px, 2px) rotate(0deg); }
+      40% { transform: translate(1px, -1px) rotate(1deg); }
+      50% { transform: translate(-1px, 2px) rotate(-1deg); }
+      60% { transform: translate(-3px, 1px) rotate(0deg); }
+      70% { transform: translate(3px, 1px) rotate(-1deg); }
+      80% { transform: translate(-1px, -1px) rotate(1deg); }
+      90% { transform: translate(1px, 2px) rotate(0deg); }
+      100% { transform: translate(1px, -2px) rotate(-1deg); }
+    }
+  `;
+  websimFrame.contentDocument.head.appendChild(style);
+}
+
+// Initialize
+window.onload = () => {
+  initWebsim();
+  initVoices();
+  setTimeout(addWebsimAnimations, 100); // Wait for iframe to load
+};
+</script>
+</body>
+</html>
