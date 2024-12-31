@@ -1,0 +1,318 @@
+<html><head><base href="/">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    background: #1a1a1a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+    color: white;
+}
+
+.game-container {
+    text-align: center;
+}
+
+#clickable {
+    width: 200px;
+    height: 200px;
+    cursor: pointer;
+    transition: transform 0.1s;
+    border-radius: 10px;
+    margin: 20px;
+}
+
+#clickable:hover {
+    transform: scale(1.05);
+}
+
+#clickable:active {
+    transform: scale(0.95);
+}
+
+.stats {
+    background: rgba(255,255,255,0.1);
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+.coin {
+    color: gold;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.floating-coin {
+    position: absolute;
+    color: gold;
+    font-size: 24px;
+    pointer-events: none;
+    animation: floatUp 1s ease-out forwards;
+}
+
+@keyframes floatUp {
+    0% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-100px);
+        opacity: 0;
+    }
+}
+
+.upgrade {
+    background: #333;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    margin: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.upgrade:hover {
+    background: #444;
+}
+
+.upgrade:disabled {
+    background: #222;
+    cursor: not-allowed;
+}
+
+.news-ticker {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(0,0,0,0.8);
+    padding: 10px;
+    color: #fff;
+    font-size: 16px;
+    text-align: center;
+    animation: slide 20s linear infinite;
+}
+
+.shop-container {
+    position: fixed;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.8);
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 300px;
+}
+
+.shop-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.shop-header img {
+    width: 50px;
+    height: 50px;
+    border-radius: 25px;
+    margin-right: 10px;
+}
+
+.shop-items {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.shop-item {
+    background: #333;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.shop-item:hover {
+    background: #444;
+}
+
+.shop-item:disabled {
+    background: #222;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+@keyframes slide {
+    0% {
+        transform: translateX(100%);
+    }
+    100% {
+        transform: translateX(-100%);
+    }
+}
+</style>
+</head>
+<body>
+<div id="newsTicker" class="news-ticker">Welcome to Clicker Game! Click the image to earn coins!</div>
+<div class="game-container">
+    <img id="clickable" src="deepfried_1733621714699.jpg" alt="Clickable Image">
+    <div class="stats">
+        <p>Coins: <span id="coins" class="coin">0</span></p>
+        <p>Coins per Click: <span id="cpc">1</span></p>
+    </div>
+    <div class="upgrades">
+        <button class="upgrade" id="cpcUpgrade">
+            Upgrade Click Power (Cost: 10 coins)
+        </button>
+    </div>
+</div>
+
+<div class="shop-container">
+    <div class="shop-header">
+        <img src="Connie_Render.png" alt="Connie">
+        <h2>Connie Shop</h2>
+    </div>
+    <div class="shop-items">
+        <button class="shop-item" id="autoClickerUpgrade">
+            Auto Clicker (Cost: 50 coins)<br>
+            <small>Clicks automatically every second</small>
+        </button>
+        <button class="shop-item" id="multiplierUpgrade">
+            Coin Multiplier (Cost: 100 coins)<br>
+            <small>Doubles your coins per click</small>
+        </button>
+        <button class="shop-item" id="luckyBonus">
+            Lucky Bonus (Cost: 75 coins)<br>
+            <small>Chance to get bonus coins on click</small>
+        </button>
+    </div>
+</div>
+
+<audio id="explodeSound" src="explode.mp3"></audio>
+
+<script>
+let coins = 0;
+let coinsPerClick = 1;
+let cpcUpgradeCost = 10;
+let hasAutoClicker = false;
+let hasLuckyBonus = false;
+let multiplierLevel = 1;
+
+const clickable = document.getElementById('clickable');
+const coinsDisplay = document.getElementById('coins');
+const cpcDisplay = document.getElementById('cpc');
+const cpcUpgradeBtn = document.getElementById('cpcUpgrade');
+const autoClickerBtn = document.getElementById('autoClickerUpgrade');
+const multiplierBtn = document.getElementById('multiplierUpgrade');
+const luckyBonusBtn = document.getElementById('luckyBonus');
+const explodeSound = document.getElementById('explodeSound');
+const newsTicker = document.getElementById('newsTicker');
+
+const newsMessages = [
+    "Welcome to Clicker Game! Click the image to earn coins!",
+    "Pro tip: Upgrade your click power to earn more coins!",
+    "Breaking news: Local player becomes clicking sensation!",
+    "Weather forecast: It's raining coins!",
+    "Click fever spreads across the nation!",
+    "New study shows clicking images is highly addictive!",
+    "Connie's Shop now open for business!"
+];
+
+let currentNewsIndex = 0;
+
+function updateNews() {
+    currentNewsIndex = (currentNewsIndex + 1) % newsMessages.length;
+    newsTicker.style.animation = 'none';
+    newsTicker.offsetHeight;
+    newsTicker.style.animation = 'slide 20s linear infinite';
+    newsTicker.textContent = newsMessages[currentNewsIndex];
+}
+
+setInterval(updateNews, 20000);
+
+function updateDisplays() {
+    coinsDisplay.textContent = Math.floor(coins);
+    cpcDisplay.textContent = coinsPerClick;
+    cpcUpgradeBtn.textContent = `Upgrade Click Power (Cost: ${cpcUpgradeCost} coins)`;
+    cpcUpgradeBtn.disabled = coins < cpcUpgradeCost;
+    autoClickerBtn.disabled = coins < 50 || hasAutoClicker;
+    multiplierBtn.disabled = coins < 100;
+    luckyBonusBtn.disabled = coins < 75 || hasLuckyBonus;
+}
+
+function createFloatingCoin(x, y, amount) {
+    const coin = document.createElement('div');
+    coin.className = 'floating-coin';
+    coin.textContent = '+' + amount;
+    coin.style.left = x + 'px';
+    coin.style.top = y + 'px';
+    document.body.appendChild(coin);
+    
+    setTimeout(() => {
+        coin.remove();
+    }, 1000);
+}
+
+function handleClick(e, isAuto = false) {
+    let earnedCoins = coinsPerClick;
+    
+    if (hasLuckyBonus && Math.random() < 0.1) {
+        earnedCoins *= 3;
+    }
+    
+    coins += earnedCoins;
+    
+    if (!isAuto) {
+        explodeSound.currentTime = 0;
+        explodeSound.play();
+        createFloatingCoin(e.pageX, e.pageY, earnedCoins);
+    }
+    
+    updateDisplays();
+}
+
+clickable.addEventListener('click', (e) => handleClick(e));
+
+cpcUpgradeBtn.addEventListener('click', () => {
+    if (coins >= cpcUpgradeCost) {
+        coins -= cpcUpgradeCost;
+        coinsPerClick++;
+        cpcUpgradeCost = Math.floor(cpcUpgradeCost * 1.5);
+        updateDisplays();
+    }
+});
+
+autoClickerBtn.addEventListener('click', () => {
+    if (coins >= 50 && !hasAutoClicker) {
+        coins -= 50;
+        hasAutoClicker = true;
+        setInterval(() => {
+            handleClick({ pageX: clickable.offsetLeft + clickable.width/2, pageY: clickable.offsetTop + clickable.height/2 }, true);
+        }, 1000);
+        updateDisplays();
+    }
+});
+
+multiplierBtn.addEventListener('click', () => {
+    if (coins >= 100) {
+        coins -= 100;
+        coinsPerClick *= 2;
+        multiplierLevel++;
+        updateDisplays();
+    }
+});
+
+luckyBonusBtn.addEventListener('click', () => {
+    if (coins >= 75 && !hasLuckyBonus) {
+        coins -= 75;
+        hasLuckyBonus = true;
+        updateDisplays();
+    }
+});
+
+updateDisplays();
+</script>
+</body></html>
