@@ -1,0 +1,326 @@
+<html><head><base href="http://example.com">
+<title>Tux vs Robot - The Ultimate Showdown</title>
+<style>
+body {
+  background: #1a1a1a;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+  font-family: Arial;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.scene {
+  position: relative;
+  width: 400px;
+  height: 400px;
+  background: rgba(0,0,0,0.8);
+  border-radius: 10px;
+  border: 2px solid #4a90e2;
+  overflow: hidden;
+}
+
+@keyframes explode {
+  0% { transform: scale(1) rotate(0deg); opacity: 1; }
+  50% { transform: scale(1.5) rotate(180deg); opacity: 0.5; }
+  100% { transform: scale(2) rotate(360deg); opacity: 0; }
+}
+
+@keyframes attack {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(200px); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes superPunch {
+  0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+  25% { transform: translate(100px, -50px) rotate(45deg) scale(1.2); }
+  50% { transform: translate(150px, 0) rotate(0deg) scale(1.4); }
+  75% { transform: translate(50px, 50px) rotate(-45deg) scale(1.2); }
+  100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+}
+
+@keyframes ultraRage {
+  0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+  20% { transform: translate(150px, -100px) rotate(90deg) scale(1.5); }
+  40% { transform: translate(-150px, 100px) rotate(-90deg) scale(2); }
+  60% { transform: translate(200px, 0) rotate(180deg) scale(2.5); }
+  80% { transform: translate(-100px, -100px) rotate(-180deg) scale(3); }
+  100% { transform: translate(0, 0) rotate(360deg) scale(1); }
+}
+
+@keyframes punch {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(50px, 0) rotate(20deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+@keyframes shake {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(5px, 5px) rotate(5deg); }
+  50% { transform: translate(-5px, -5px) rotate(-5deg); }
+  75% { transform: translate(5px, -5px) rotate(5deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+@keyframes flyIn {
+  0% { transform: translateX(-500px); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+.mascot {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  display: none;
+  animation: flyIn 1s forwards;
+}
+
+.mascot.attacking {
+  animation: attack 1s infinite;
+}
+
+.freddie { left: 10px; top: 200px; }
+.sonny { left: 70px; top: 200px; }
+.napoleroad { left: 130px; top: 200px; }
+
+.tux {
+  position: absolute;
+  left: 50px;
+  top: 100px;
+  animation: punch 1s infinite;
+}
+
+.tux.rage {
+  animation: superPunch 0.5s infinite;
+}
+
+.tux.ultraRage {
+  animation: ultraRage 0.3s infinite;
+}
+
+.robot {
+  position: absolute;
+  right: 50px;
+  top: 100px;
+  animation: shake 0.5s infinite;
+}
+
+.robot.dying {
+  animation: explode 2s forwards;
+}
+
+.speech-bubble, .google-bubble {
+  position: absolute;
+  right: 40px;
+  background: white;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.speech-bubble {
+  top: 50px;
+}
+
+.google-bubble {
+  top: 10px;
+  right: 80px;
+  background: #4285f4;
+  color: white;
+}
+
+.speech-bubble:after, .google-bubble:after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  right: 20px;
+  border-width: 10px 10px 0;
+  border-style: solid;
+}
+
+.speech-bubble:after {
+  border-color: white transparent;
+}
+
+.google-bubble:after {
+  border-color: #4285f4 transparent;
+}
+
+.google-bubble.dying {
+  animation: explode 2s forwards;
+}
+
+.tux-bubble {
+  position: absolute;
+  left: 40px;
+  top: 50px;
+  background: white;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.tux-bubble:after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 20px;
+  border-width: 10px 10px 0;
+  border-style: solid;
+  border-color: white transparent;
+}
+
+.rage-button {
+  padding: 15px 30px;
+  font-size: 18px;
+  background: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.rage-button:hover {
+  transform: scale(1.1);
+  background: #ff0000;
+}
+</style>
+</head>
+<body>
+
+<div class="scene">
+  <div class="google-bubble">Translated from Binary: "You are a female penguin"</div>
+  <div class="speech-bubble">You're a female, Tux! *beep boop*</div>
+  <div class="tux-bubble" id="tuxBubble">WHAT DID YOU CALL ME!?</div>
+  
+  <!-- Mascots -->
+  <svg class="mascot freddie" viewBox="0 0 50 50">
+    <circle cx="25" cy="25" r="20" fill="red"/>
+    <text x="25" y="30" text-anchor="middle" fill="white" font-size="8">Fresh</text>
+  </svg>
+  
+  <svg class="mascot sonny" viewBox="0 0 50 50">
+    <circle cx="25" cy="25" r="20" fill="yellow"/>
+    <text x="25" y="30" text-anchor="middle" fill="black" font-size="8">Sonny</text>
+  </svg>
+  
+  <svg class="mascot napoleroad" viewBox="0 0 50 50">
+    <circle cx="25" cy="25" r="20" fill="orange"/>
+    <text x="25" y="30" text-anchor="middle" fill="white" font-size="8">Road</text>
+  </svg>
+
+  <svg class="tux" width="200" height="200" viewBox="0 0 100 100">
+    <!-- Tux body -->
+    <ellipse cx="50" cy="60" rx="30" ry="35" fill="black"/>
+    <ellipse cx="50" cy="50" rx="25" ry="25" fill="white"/>
+    <!-- Flippers -->
+    <path d="M20 70 Q30 90 40 70" fill="orange"/>
+    <path d="M60 70 Q70 90 80 70" fill="orange"/>
+    <!-- Angry eyes -->
+    <circle cx="40" cy="40" r="3" fill="red"/>
+    <circle cx="60" cy="40" r="3" fill="red"/>
+    <line x1="35" y1="35" x2="45" y2="38" stroke="black" stroke-width="2"/>
+    <line x1="55" y1="38" x2="65" y2="35" stroke="black" stroke-width="2"/>
+    <!-- Beak -->
+    <path d="M45 50 Q50 55 55 50" fill="none" stroke="orange" stroke-width="2"/>
+  </svg>
+
+  <svg class="robot" width="200" height="200" viewBox="0 0 100 100">
+    <!-- Robot head -->
+    <rect x="35" y="20" width="30" height="30" rx="5" fill="#4a90e2"/>
+    <!-- Robot body -->
+    <rect x="30" y="50" width="40" height="40" rx="5" fill="#4a90e2"/>
+    <!-- Robot eyes -->
+    <circle cx="45" cy="35" r="3" fill="white"/>
+    <circle cx="55" cy="35" r="3" fill="white"/>
+    <!-- Robot mouth -->
+    <line x1="40" y1="42" x2="60" y2="42" stroke="white" stroke-width="2"/>
+    <!-- Robot arms -->
+    <rect x="20" y="55" width="10" height="30" rx="2" fill="#4a90e2"/>
+    <rect x="70" y="55" width="10" height="30" rx="2" fill="#4a90e2"/>
+  </svg>
+</div>
+
+<button class="rage-button" onclick="increaseRage()">ACTIVATE TUX RAGE MODE!</button>
+
+<script>
+let rageLevel = 0;
+const rageMessages = [
+    "I'LL SHOW YOU WHO'S FEMALE!",
+    "I'LL CALL FRESH UP FREDDIE ON YOU!",
+    "WAIT TILL SONNY THE CUCKOO HEARS ABOUT THIS!",
+    "NAPOLEROAD THE ROADRUNNER IS GONNA GET YOU!",
+    "COCA-COLA MASCOTS, ASSEMBLEEEE!"
+];
+
+function increaseRage() {
+    const tux = document.querySelector('.tux');
+    const tuxBubble = document.getElementById('tuxBubble');
+    const robot = document.querySelector('.robot');
+    const speechBubble = document.querySelector('.speech-bubble');
+    const googleBubble = document.querySelector('.google-bubble');
+    
+    rageLevel++;
+    
+    if (rageLevel === 1) {
+        tux.classList.add('rage');
+    } else if (rageLevel >= 2) {
+        tux.classList.remove('rage');
+        tux.classList.add('ultraRage');
+    }
+    
+    if (rageLevel <= rageMessages.length) {
+        tuxBubble.textContent = rageMessages[rageLevel - 1];
+        
+        if (rageLevel === 2) {
+            const freddie = document.querySelector('.freddie');
+            freddie.style.display = 'block';
+            freddie.classList.add('attacking');
+        } else if (rageLevel === 3) {
+            const sonny = document.querySelector('.sonny');
+            sonny.style.display = 'block';
+            sonny.classList.add('attacking');
+        } else if (rageLevel === 4) {
+            const napoleroad = document.querySelector('.napoleroad');
+            napoleroad.style.display = 'block';
+            napoleroad.classList.add('attacking');
+        } else if (rageLevel === 5) {
+            robot.classList.add('dying');
+            googleBubble.classList.add('dying');
+            speechBubble.textContent = "SYSTEM MALFUNCTION... SHUTTING DOWN... *beep*";
+            googleBubble.textContent = "ERROR 404: TRANSLATION SERVICE DESTROYED";
+            setTimeout(() => {
+                robot.style.display = 'none';
+                speechBubble.style.display = 'none';
+                googleBubble.style.display = 'none';
+            }, 2000);
+        }
+    }
+    
+    if (rageLevel > rageMessages.length) {
+        rageLevel = 1;
+        tux.classList.remove('ultraRage');
+        tux.classList.add('rage');
+        tuxBubble.textContent = rageMessages[0];
+        // Reset everything
+        document.querySelectorAll('.mascot').forEach(mascot => {
+            mascot.style.display = 'none';
+            mascot.classList.remove('attacking');
+        });
+        robot.style.display = 'block';
+        robot.classList.remove('dying');
+        speechBubble.style.display = 'block';
+        googleBubble.style.display = 'block';
+        googleBubble.classList.remove('dying');
+        speechBubble.textContent = "You're a female, Tux! *beep boop*";
+        googleBubble.textContent = "Translated from Binary: 'You are a female penguin'";
+    }
+}
+</script>
+
+</body></html>
