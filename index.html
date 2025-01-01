@@ -1,0 +1,436 @@
+<html><head><base href="." />
+<style>
+body {
+  background: #800080;
+  color: white;
+  font-family: "Times New Roman", serif;
+  margin: 0;
+  padding: 20px;
+  background-image: repeating-linear-gradient(45deg, #800080 0%, #9900cc 10%, #800080 20%);
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  background: #660099;
+  border: 5px ridge #ff00ff;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 0 20px #ff00ff;
+}
+
+.logo {
+  font-size: 72px;
+  font-weight: bold;
+  font-family: "Arial Black", sans-serif;
+  background: linear-gradient(to right, #ff00ff, #ffff00, #00ffff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+  margin: 20px;
+}
+
+.mascot {
+  width: 300px;
+  height: 300px;
+  margin: 20px auto;
+  filter: drop-shadow(0 0 10px #ff00ff);
+}
+
+.download-box {
+  background: linear-gradient(to bottom, #990099, #660066);
+  border: 3px ridge #ff00ff;
+  padding: 20px;
+  margin: 20px;
+  box-shadow: inset 0 0 20px #ff00ff;
+}
+
+.blink {
+  animation: blink 0.5s infinite;
+  font-size: 36px;
+  text-shadow: 0 0 10px #ff00ff;
+}
+
+.button-3d {
+  background: linear-gradient(to bottom, #ff00ff, #cc00cc);
+  border: 5px outset #ff00ff;
+  color: white;
+  padding: 15px 40px;
+  font-size: 32px;
+  font-weight: bold;
+  cursor: pointer;
+  text-shadow: 2px 2px #000000;
+  margin: 20px;
+  box-shadow: 0 0 20px #ff00ff;
+  transition: all 0.2s;
+}
+
+.button-3d:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 30px #ff00ff;
+}
+
+.button-3d:active {
+  border-style: inset;
+  transform: scale(0.95);
+}
+
+marquee {
+  background: linear-gradient(to right, #ff00ff, #9900cc);
+  color: white;
+  padding: 15px;
+  margin: 20px 0;
+  font-size: 24px;
+  font-weight: bold;
+  text-shadow: 2px 2px #000000;
+}
+
+.features {
+  text-align: left;
+  background: rgba(77, 0, 77, 0.8);
+  border: 3px ridge #ff00ff;
+  padding: 20px;
+  margin: 20px;
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.counter {
+  font-family: "VT323", monospace;
+  background: #000000;
+  padding: 10px;
+  border: 2px inset #ff00ff;
+  display: inline-block;
+  font-size: 24px;
+  color: #00ff00;
+  text-shadow: 0 0 5px #00ff00;
+}
+
+.best-viewed {
+  animation: rainbow 3s infinite;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+@keyframes rainbow {
+  0% { color: #ff00ff; }
+  33% { color: #ffff00; }
+  66% { color: #00ffff; }
+  100% { color: #ff00ff; }
+}
+
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.7);
+  z-index: 1000;
+}
+
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #c0c0c0;
+  border: 2px outset #fff;
+  padding: 2px;
+  font-family: "Microsoft Sans Serif", Arial, sans-serif;
+  color: black;
+  width: 400px;
+}
+
+.modal-title {
+  background: linear-gradient(to right, #000080, #1084d0);
+  color: white;
+  padding: 4px;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-content {
+  padding: 15px;
+  background: #f0f0f0;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 20px;
+  border: 2px inset #fff;
+  background: white;
+  margin: 10px 0;
+}
+
+.progress-fill {
+  width: 0%;
+  height: 100%;
+  background: #000080;
+  transition: width 0.5s;
+}
+
+.button-win2k {
+  background: #c0c0c0;
+  border: 2px outset #fff;
+  padding: 4px 15px;
+  margin: 5px;
+  cursor: pointer;
+}
+
+.button-win2k:active {
+  border-style: inset;
+}
+
+.bonzi-character {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  right: 20px;
+  width: 200px;
+  height: 200px;
+  z-index: 2000;
+}
+
+.speech-bubble {
+  display: none;
+  position: fixed;
+  bottom: 220px;
+  right: 230px;
+  background: white;
+  border: 2px solid #000080;
+  border-radius: 10px;
+  padding: 15px;
+  width: 300px;
+  color: black;
+  z-index: 2000;
+}
+
+.speech-bubble:after {
+  content: '';
+  position: absolute;
+  bottom: -20px;
+  right: 40px;
+  border: 10px solid transparent;
+  border-top-color: white;
+}
+
+.bsod {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #0000aa;
+  color: white;
+  font-family: "Lucida Console", Monaco, monospace;
+  padding: 50px;
+  z-index: 3000;
+  white-space: pre-line;
+}
+</style>
+</head><body>
+
+<div class="container">
+  <div class="logo">BONZI BUDDY</div>
+  
+  <marquee scrollamount="10" behavior="alternate">🌟 FREE! FREE! FREE! Download BONZI BUDDY - Your BEST Internet Friend! NO SPYWARE! 100% SAFE! 🌟</marquee>
+
+  <svg class="mascot" viewBox="0 0 100 100">
+    <defs>
+      <radialGradient id="fur" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+        <stop offset="0%" style="stop-color:#b088ff"/>
+        <stop offset="100%" style="stop-color:#9966cc"/>
+      </radialGradient>
+    </defs>
+    <ellipse cx="50" cy="50" rx="35" ry="40" fill="url(#fur)"/>
+    <circle cx="35" cy="40" r="5" fill="#000"/>
+    <circle cx="35" cy="40" r="1" fill="#fff"/>
+    <circle cx="65" cy="40" r="5" fill="#000"/>
+    <circle cx="65" cy="40" r="1" fill="#fff"/>
+    <path d="M 40 60 Q 50 70 60 60" stroke="black" fill="none" stroke-width="3"/>
+    <path d="M 20 30 Q 30 20 40 30" stroke="black" fill="none" stroke-width="3"/>
+    <path d="M 60 30 Q 70 20 80 30" stroke="black" fill="none" stroke-width="3"/>
+  </svg>
+
+  <div class="download-box">
+    <h2 class="blink">💥 DOWNLOAD BONZI BUDDY NOW! 💥</h2>
+    <p style="font-size: 24px;">🦍 Your Personal Internet Assistant - FREE FOREVER! 🦍</p>
+    <button class="button-3d" onclick="startInstall()">DOWNLOAD NOW!</button>
+    <p>⚡ FAST DOWNLOAD: 2.5MB ⚡<br>Works with Windows 95/98/2000/ME</p>
+  </div>
+
+  <div class="features">
+    <h3>🌟 INCREDIBLE FEATURES 🌟</h3>
+    <ul>
+      <li>💜 Your very own PURPLE GORILLA companion!</li>
+      <li>🌐 Advanced Internet navigation assistance!</li>
+      <li>🎤 Listen to BONZI sing your favorite songs!</li>
+      <li>😂 Endless jokes and entertainment!</li>
+      <li>📧 Email reading with fun voice effects!</li>
+      <li>🎮 Interactive games and activities!</li>
+      <li>🖼️ EXCLUSIVE animated screensaver!</li>
+      <li>🎯 Smart Internet search helper!</li>
+    </ul>
+  </div>
+
+  <div class="counter">
+    👥 VISITORS: 1,337,420
+  </div>
+
+  <marquee scrollamount="3" direction="right">💫 OVER 1 MILLION HAPPY USERS! JOIN THE BONZI REVOLUTION TODAY! 💫</marquee>
+
+  <p class="best-viewed">
+    ⭐ Best viewed with Microsoft Internet Explorer 5.0 or Netscape Navigator 4.0 ⭐<br>
+    Copyright © 2000 BONZI BUDDY Corporation. All Rights Reserved.
+  </p>
+</div>
+
+<div class="bonzi-character">
+  <svg viewBox="0 0 100 100">
+    <defs>
+      <radialGradient id="fur2" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+        <stop offset="0%" style="stop-color:#b088ff"/>
+        <stop offset="100%" style="stop-color:#9966cc"/>
+      </radialGradient>
+    </defs>
+    <ellipse cx="50" cy="50" rx="35" ry="40" fill="url(#fur2)"/>
+    <circle cx="35" cy="40" r="5" fill="#000"/>
+    <circle cx="35" cy="40" r="1" fill="#fff"/>
+    <circle cx="65" cy="40" r="5" fill="#000"/>
+    <circle cx="65" cy="40" r="1" fill="#fff"/>
+    <path d="M 40 60 Q 50 70 60 60" stroke="black" fill="none" stroke-width="3"/>
+    <path d="M 20 30 Q 30 20 40 30" stroke="black" fill="none" stroke-width="3"/>
+    <path d="M 60 30 Q 70 20 80 30" stroke="black" fill="none" stroke-width="3"/>
+  </svg>
+</div>
+
+<div class="speech-bubble">
+  Hello friend! I'm so happy to be on your computer!
+</div>
+
+<div class="bsod">
+A problem has been detected and Windows has been shut down to prevent damage to your computer.
+
+SYSTEM_THREAD_EXCEPTION_NOT_HANDLED
+
+If this is the first time you've seen this stop error screen, restart your computer. If this screen appears again, follow these steps:
+
+Check to make sure any new hardware or software is properly installed. If this is a new installation, ask your hardware or software manufacturer for any Windows updates you might need.
+
+Technical information:
+
+*** STOP: 0x0000007E (0xC0000005, 0xF86B5D89, 0xF86B5E89, 0xF86B5D89)
+
+Beginning dump of physical memory
+Physical memory dump complete.
+Contact your system administrator or technical support group for further assistance.
+</div>
+
+<div class="modal-overlay" id="installModal">
+  <div class="modal">
+    <div class="modal-title">
+      <span>BONZI BUDDY Setup</span>
+      <span style="cursor:pointer" onclick="closeInstall()">✕</span>
+    </div>
+    <div class="modal-content">
+      <div id="installText">Preparing to install BONZI BUDDY...</div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressBar"></div>
+      </div>
+      <div style="text-align:center">
+        <button class="button-win2k" onclick="closeInstall()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const installSteps = [
+  "Preparing to install BONZI BUDDY...",
+  "Copying files...",
+  "Registering components...",
+  "Installing BONZI services...",
+  "Creating desktop shortcuts...",
+  "BONZI is almost ready to be your friend!",
+  "Installation complete! BONZI BUDDY will start automatically."
+];
+
+let currentStep = 0;
+let progressInterval;
+
+const bonziDialogs = [
+  "Hello friend! I'm BONZI BUDDY, your new internet companion!",
+  "I'm so excited to help you explore the web together!",
+  "Did you know I can sing? 🎵 Daisy, Daisy, give me your answer do... 🎵",
+  "I'll be collecting- I mean, helping you with all your internet activities!",
+  "Oops! Looks like something went wrong... *nervous laugh*"
+];
+
+function startInstall() {
+  document.getElementById('installModal').style.display = 'block';
+  progressInterval = setInterval(updateProgress, 800);
+}
+
+function updateProgress() {
+  const progress = document.getElementById('progressBar');
+  const text = document.getElementById('installText');
+  currentStep++;
+  
+  progress.style.width = `${(currentStep / installSteps.length) * 100}%`;
+  text.textContent = installSteps[Math.min(currentStep - 1, installSteps.length - 1)];
+  
+  if(currentStep >= installSteps.length) {
+    clearInterval(progressInterval);
+    setTimeout(() => {
+      closeInstall();
+      showBonzi();
+    }, 1000);
+  }
+}
+
+function closeInstall() {
+  document.getElementById('installModal').style.display = 'none';
+  clearInterval(progressInterval);
+  currentStep = 0;
+  document.getElementById('progressBar').style.width = '0%';
+  document.getElementById('installText').textContent = installSteps[0];
+}
+
+function showBonzi() {
+  const bonzi = document.querySelector('.bonzi-character');
+  const bubble = document.querySelector('.speech-bubble');
+  const bsod = document.querySelector('.bsod');
+  let dialogIndex = 0;
+
+  bonzi.style.display = 'block';
+  bubble.style.display = 'block';
+
+  const dialogInterval = setInterval(() => {
+    if (dialogIndex < bonziDialogs.length) {
+      bubble.textContent = bonziDialogs[dialogIndex];
+      dialogIndex++;
+    }
+  }, 8000);
+
+  setTimeout(() => {
+    clearInterval(dialogInterval);
+    bonzi.style.display = 'none';
+    bubble.style.display = 'none';
+    bsod.style.display = 'block';
+  }, 120000);
+}
+
+document.querySelector('.button-3d').onclick = startInstall;
+</script>
+
+</body></html>
