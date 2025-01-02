@@ -1,0 +1,2288 @@
+<html>
+<head>
+<base href="simulator://fractalgates.umbra">
+<title>The Fractal Gates</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
+<style>
+body {
+  margin: 0;
+  padding: 0;
+  background: #000;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+}
+
+.gateway {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  margin: 20px;
+  cursor: pointer;
+  transition: transform 0.3s;
+  filter: drop-shadow(0 0 10px currentColor);
+  transform-origin: center;
+  animation: gateFloat 4s ease-in-out infinite;
+}
+
+.gateway:hover {
+  transform: scale(1.1);
+  animation: gateActive 1s ease-in-out infinite;
+  filter: drop-shadow(0 0 20px currentColor) brightness(1.5);
+}
+
+.gateway:active {
+  transform: scale(0.95);
+  filter: brightness(1.3) drop-shadow(0 0 30px currentColor);
+}
+
+@keyframes gateFloat {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-10px) scale(1.05); }
+}
+
+@keyframes gateActive {
+  0%, 100% { transform: scale(1.1) rotate(0deg); }
+  50% { transform: scale(1.15) rotate(5deg); }
+}
+
+.gateway svg {
+  width: 100%;
+  height: 100%;
+}
+
+.gateway svg polygon, .gateway svg circle, .gateway svg path {
+  transition: stroke-width 0.3s, stroke 0.3s, transform 0.3s;
+}
+
+.gateway:hover svg polygon {
+  animation: morphShape 2s infinite ease-in-out;
+}
+
+@keyframes morphShape {
+  0% { points: 50,5 95,50 50,95 5,50; }
+  50% { points: 25,25 75,25 75,75 25,75; }
+  100% { points: 50,5 95,50 50,95 5,50; }
+}
+
+.gateway:hover svg circle {
+  animation: pulseGlow 1s infinite ease-in-out;
+}
+
+@keyframes pulseGlow {
+  0% { filter: drop-shadow(0 0 5px currentColor); }
+  50% { filter: drop-shadow(0 0 15px currentColor); }
+  100% { filter: drop-shadow(0 0 5px currentColor); }
+}
+
+.gateway-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 800px;
+}
+
+.fractal-world {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  display: none;
+  z-index: 100;
+}
+
+.back-button, .submit-answer, .dive-button {
+  position: fixed;
+  padding: 10px 20px;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  z-index: 101;
+  position: relative;
+  overflow: hidden;
+}
+
+.dive-button {
+  bottom: 20px;
+  right: 20px;
+  display: none;
+}
+
+.back-button {
+  top: 20px;
+  left: 20px;
+  display: none;
+}
+
+.back-button:hover, .submit-answer:hover, .dive-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.depth-indicator {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  color: white;
+  font-size: 1.2em;
+  z-index: 101;
+  background: rgba(0,0,0,0.5);
+  padding: 10px;
+  border-radius: 5px;
+  display: none;
+}
+
+.encounter {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0,0,0,0.8);
+  padding: 20px;
+  border-radius: 10px;
+  color: white;
+  text-align: center;
+  z-index: 102;
+  display: none;
+  max-width: 400px;
+}
+
+.encounter-options button {
+  margin: 10px;
+  padding: 8px 16px;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.encounter-options button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.riddle-container {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.8);
+  padding: 20px;
+  border-radius: 10px;
+  color: white;
+  text-align: center;
+  z-index: 101;
+  display: none;
+}
+
+.riddle-input {
+  margin: 10px 0;
+  padding: 5px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: white;
+  border-radius: 3px;
+}
+
+.submit-answer {
+  margin-top: 10px;
+}
+
+.submit-answer:hover {
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.insight-message {
+  position: fixed;
+  bottom: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.8);
+  color: white;
+  padding: 15px;
+  border-radius: 8px;
+  z-index: 103;
+  text-align: center;
+  max-width: 400px;
+  display: none;
+}
+
+.achievements-panel {
+  position: fixed;
+  top: 50%;
+  right: -300px;
+  transform: translateY(-50%);
+  width: 280px;
+  background: rgba(0,0,0,0.8);
+  color: white;
+  padding: 20px;
+  border-radius: 10px 0 0 10px;
+  transition: right 0.3s;
+  z-index: 103;
+}
+
+.achievements-panel.show {
+  right: 0;
+}
+
+.achievement {
+  margin: 10px 0;
+  padding: 10px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 5px;
+}
+
+.achievement.unlocked {
+  background: rgba(0,255,0,0.2);
+}
+
+.achievement-toggle {
+  position: fixed;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%) rotate(-90deg);
+  transform-origin: right;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  color: white;
+  padding: 10px;
+  border-radius: 5px 5px 0 0;
+  cursor: pointer;
+  z-index: 104;
+}
+
+.achievement-toggle:hover {
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.experimental-message {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0,0,0,0.9);
+  color: #0ff;
+  padding: 20px;
+  border-radius: 10px;
+  z-index: 105;
+  text-align: center;
+  display: none;
+  text-shadow: 0 0 10px #0ff;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 20px #0ff; }
+  50% { box-shadow: 0 0 40px #0ff; }
+  100% { box-shadow: 0 0 20px #0ff; }
+}
+
+.reality-glitch {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  mix-blend-mode: difference;
+  opacity: 0;
+  z-index: 102;
+  background: linear-gradient(45deg, #ff00ff, #00ffff);
+  animation: glitch-fade 2s ease-in-out infinite;
+}
+
+@keyframes glitch-fade {
+  0%, 100% { opacity: 0; transform: scale(1); }
+  50% { opacity: 0.3; transform: scale(1.1); }
+}
+
+.artifacts-panel {
+  position: fixed;
+  top: 50%;
+  left: -300px;
+  transform: translateY(-50%);
+  width: 280px;
+  background: rgba(0,0,0,0.8);
+  color: white;
+  padding: 20px;
+  border-radius: 0 10px 10px 0;
+  transition: left 0.3s;
+  z-index: 103;
+}
+
+.artifacts-panel.show {
+  left: 0;
+}
+
+.artifact {
+  margin: 10px 0;
+  padding: 15px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 5px;
+  position: relative;
+  overflow: hidden;
+}
+
+.artifact.resonating {
+  animation: resonance 2s infinite;
+}
+
+.artifact-icon {
+  width: 30px;
+  height: 30px;
+  margin-right: 10px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.artifacts-toggle {
+  position: fixed;
+  top: 40%;
+  left: 0;
+  transform: rotate(90deg);
+  transform-origin: left bottom;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  color: white;
+  padding: 10px;
+  border-radius: 5px 5px 0 0;
+  cursor: pointer;
+  z-index: 104;
+}
+
+.artifacts-toggle:hover {
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+@keyframes resonance {
+  0% { box-shadow: 0 0 10px currentColor; }
+  50% { box-shadow: 0 0 25px currentColor; }
+  100% { box-shadow: 0 0 10px currentColor; }
+}
+
+.artifact-vault {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  max-width: 800px;
+  height: 80vh;
+  background: rgba(0,0,0,0.95);
+  border: 2px solid rgba(255,255,255,0.2);
+  border-radius: 15px;
+  padding: 20px;
+  color: white;
+  display: none;
+  z-index: 200;
+  overflow-y: auto;
+}
+
+.vault-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+.vault-close {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.vault-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.vault-item {
+  background: rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 15px;
+  transition: transform 0.3s;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.vault-item:hover {
+  transform: scale(1.05);
+}
+
+.vault-item-details {
+  margin-top: 10px;
+  font-size: 0.9em;
+  opacity: 0.8;
+}
+
+.vault-stats {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.vault-stat {
+  background: rgba(255,255,255,0.1);
+  padding: 10px;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.analyze-button {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  z-index: 101;
+  display: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.analyze-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.codex-panel {
+  position: fixed;
+  top: 50%;
+  right: -400px;
+  transform: translateY(-50%);
+  width: 380px;
+  background: rgba(0,0,0,0.9);
+  color: white;
+  padding: 20px;
+  border-radius: 10px 0 0 10px;
+  transition: right 0.3s;
+  z-index: 103;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.codex-panel.show {
+  right: 0;
+}
+
+.codex-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.codex-tab {
+  background: rgba(255,255,255,0.1);
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.codex-tab.active {
+  background: rgba(255,255,255,0.3);
+}
+
+.codex-section {
+  display: none;
+  padding: 10px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 5px;
+}
+
+.codex-section.active {
+  display: block;
+}
+
+.codex-entry {
+  margin: 15px 0;
+  padding: 10px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 5px;
+  font-size: 0.9em;
+}
+
+.codex-entry-title {
+  color: #0ff;
+  margin-bottom: 5px;
+}
+
+.codex-entry-meta {
+  font-size: 0.8em;
+  color: rgba(255,255,255,0.6);
+  margin-top: 5px;
+}
+
+.codex-toggle {
+  position: fixed;
+  top: 60%;
+  right: 0;
+  transform: rotate(-90deg);
+  transform-origin: right;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  color: white;
+  padding: 10px;
+  border-radius: 5px 5px 0 0;
+  cursor: pointer;
+  z-index: 104;
+}
+
+.codex-toggle:hover {
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.context-ui {
+  position: fixed;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 15px;
+  color: white;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+.context-ui::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1));
+  pointer-events: none;
+}
+
+.context-menu {
+  position: fixed;
+  display: none;
+  z-index: 1000;
+}
+
+.context-menu.show {
+  display: block;
+  animation: fadeScale 0.3s ease;
+}
+
+@keyframes fadeScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.context-menu-item {
+  padding: 8px 15px;
+  cursor: pointer;
+  transition: background 0.2s;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.context-menu-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.context-menu-item svg {
+  width: 20px;
+  height: 20px;
+}
+
+.progress-path {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 50;
+}
+
+.progress-indicator {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  height: 200px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+  z-index: 51;
+}
+
+.progress-indicator.show {
+  opacity: 1;
+}
+
+@keyframes symbolRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.evolving-symbol {
+  position: fixed;
+  width: 40px;
+  height: 40px;
+  pointer-events: none;
+  animation: symbolRotate 4s linear infinite;
+  z-index: 52;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.evolving-symbol.show {
+  opacity: 0.8;
+}
+
+.resonance-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  opacity: 0;
+  transition: opacity 0.5s;
+  z-index: 49;
+  background: radial-gradient(circle at center, transparent, rgba(255,255,255,0.1));
+}
+
+.resonance-overlay.active {
+  opacity: 1;
+}
+
+button:hover::before, .codex-tab:hover::before, .vault-item:hover::before, .artifact:hover::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 300%;
+  height: 300%;
+  background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 50%);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+button:active::after, .codex-tab:active::after, .vault-item:active::after, .artifact:active::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 50%);
+  transform: translate(-50%, -50%) scale(0);
+  pointer-events: none;
+  animation: ripple 0.5s linear;
+}
+
+@keyframes ripple {
+  to {
+    transform: translate(-50%, -50%) scale(4);
+    opacity: 0;
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+.fade-out {
+  animation: fadeOut 0.5s ease-out;
+}
+
+.zoom-in {
+  animation: zoomIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.zoom-out {
+  animation: zoomOut 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.rotate-in {
+  animation: rotateIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes zoomIn {
+  from { transform: scale(0.5); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes zoomOut {
+  from { transform: scale(1); opacity: 1; }
+  to { transform: scale(1.5); opacity: 0; }
+}
+
+@keyframes rotateIn {
+  from { transform: rotate(-180deg) scale(0.3); opacity: 0; }
+  to { transform: rotate(0) scale(1); opacity: 1; }
+}
+
+.loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  font-family: Arial, sans-serif;
+}
+
+.loading-title {
+  font-size: 3em;
+  margin-bottom: 30px;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 1s ease forwards;
+}
+
+.loading-progress {
+  width: 300px;
+  height: 2px;
+  background: rgba(255,255,255,0.1);
+  position: relative;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #00ffff, #ff00ff);
+  transition: width 0.3s ease;
+}
+
+.loading-fractal {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 30px;
+  opacity: 0;
+  transform: scale(0.8);
+  animation: fadeInScale 1s ease forwards;
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInScale {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+</style>
+</head>
+<body>
+<div class="loading-screen">
+  <svg class="loading-fractal" viewBox="0 0 100 100">
+    <polygon points="50,5 95,50 50,95 5,50" fill="none" stroke="white" stroke-width="2">
+      <animateTransform attributeName="transform" attributeType="XML" type="rotate" from="0 50 50" to="360 50 50" dur="3s" repeatCount="indefinite"/>
+    </polygon>
+    <circle cx="50" cy="50" r="30" fill="none" stroke="white" stroke-width="1.5" opacity="0.5">
+      <animate attributeName="r" values="30;35;30" dur="2s" repeatCount="indefinite"/>
+    </circle>
+  </svg>
+  <h1 class="loading-title">The Fractal Gates</h1>
+  <div class="loading-progress">
+    <div class="progress-bar"></div>
+  </div>
+</div>
+<div class="gateway-container"></div>
+<button class="back-button">Return</button>
+<button class="dive-button">Dive Deeper</button>
+<div class="depth-indicator">Depth: 1</div>
+<div class="riddle-container">
+  <div class="riddle-text"></div>
+  <input type="text" class="riddle-input" placeholder="Your answer...">
+  <button class="submit-answer">Submit</button>
+</div>
+<div class="encounter">
+  <div class="encounter-text"></div>
+  <div class="encounter-options"></div>
+</div>
+<div class="insight-message"></div>
+<div class="achievements-panel">
+  <h3>Achievements</h3>
+  <div class="achievements-list"></div>
+</div>
+<div class="achievement-toggle">Achievements</div>
+<div class="experimental-message"></div>
+<div class="artifacts-panel">
+  <h3>Fractal Artifacts</h3>
+  <div class="artifacts-list"></div>
+</div>
+<div class="artifacts-toggle">Artifacts</div>
+<div class="artifact-vault">
+  <div class="vault-header">
+    <h2>Personal Artifact Vault</h2>
+    <button class="vault-close">&#xd7;</button>
+  </div>
+  <div class="vault-stats">
+    <div class="vault-stat">
+      <div>Total Artifacts</div>
+      <div class="total-count">0</div>
+    </div>
+    <div class="vault-stat">
+      <div>Resonating</div>
+      <div class="resonating-count">0</div>
+    </div>
+    <div class="vault-stat">
+      <div>Power Level</div>
+      <div class="power-level">0</div>
+    </div>
+  </div>
+  <div class="vault-grid"></div>
+</div>
+<button class="analyze-button">Analyze Artifacts</button>
+<div class="codex-panel">
+  <h3>Fractal Knowledge Codex</h3>
+  <div class="codex-tabs">
+    <button class="codex-tab active" data-tab="writings">Writings</button>
+    <button class="codex-tab" data-tab="logs">User Logs</button>
+    <button class="codex-tab" data-tab="insights">Insights</button>
+  </div>
+  <div class="codex-content">
+    <div class="codex-section writings active"></div>
+    <div class="codex-section logs"></div>
+    <div class="codex-section insights"></div>
+  </div>
+</div>
+<div class="codex-toggle">Codex</div>
+<div class="progress-path"></div>
+<div class="progress-indicator"></div>
+<div class="resonance-overlay"></div>
+<script>function simulateLoading() {
+  const progressBar = document.querySelector('.progress-bar');
+  const loadingScreen = document.querySelector('.loading-screen');
+  let progress = 0;
+  const interval = setInterval(() => {
+    progress += Math.random() * 15;
+    if (progress > 100) {
+      progress = 100;
+      clearInterval(interval);
+      setTimeout(() => {
+        loadingScreen.style.opacity = 0;
+        loadingScreen.style.pointerEvents = 'none';
+        setTimeout(() => loadingScreen.remove(), 1000);
+      }, 500);
+    }
+    progressBar.style.width = `${progress}%`;
+  }, 200);
+}
+window.addEventListener('load', simulateLoading);
+class FractalWorld {
+  constructor(container) {
+    this.container = container;
+    this.depth = 1;
+    this.maxDepth = 7;
+    this.encounterChance = 0.3;
+    this.userProgress = new UserProgress();
+    this.progressElements = {
+      path: document.querySelector('.progress-path'),
+      indicator: document.querySelector('.progress-indicator'),
+      overlay: document.querySelector('.resonance-overlay'),
+      symbols: []
+    };
+    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    this.soundEffects = {
+      oscillator: null,
+      gain: this.audioContext.createGain()
+    };
+    this.soundEffects.gain.connect(this.audioContext.destination);
+    this.init();
+    this.animate = this.animate.bind(this);
+    this.isExperimental = false;
+    this.experimentalUnlocked = false;
+    this.distortionLevel = 0;
+    this.realityDistortions = {
+      active: false,
+      intensity: 0,
+      glitchInterval: null,
+      lastShift: Date.now()
+    };
+    this.artifactSystem = window.artifactSystem;
+    this.artifactCleanup = null;
+    this.contextMenus = {
+      active: false,
+      currentMenu: null
+    };
+    window.addEventListener('resize', () => this.onWindowResize());
+    document.querySelector('.analyze-button').style.display = 'block';
+    this.hideUI = function () {
+      document.querySelector('.analyze-button').style.display = 'none';
+      document.querySelector('.artifact-vault').style.display = 'none';
+    };
+    this.initializeContextMenus();
+  }
+  init() {
+    this.scene = new THREE.Scene();
+    this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    this.renderer = new THREE.WebGLRenderer({
+      antialias: true
+    });
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.container.appendChild(this.renderer.domElement);
+    this.camera.position.z = 4;
+    this.complexity = 1;
+    this.fractals = [];
+    this.lights = [];
+  }
+  generate(seed) {
+    this.seed = seed;
+    this.createFractalGeometry();
+    this.createLights();
+    if (this.artifactCleanup) {
+      this.artifactCleanup();
+    }
+    this.artifactCleanup = window.artifactSystem.applyArtifactEffects(this, this.scene, this.depth);
+    this.animate();
+    this.updateDepthIndicator();
+  }
+  createFractalGeometry() {
+    this.fractals.forEach(f => this.scene.remove(f));
+    this.fractals = [];
+    const geometry = new THREE.IcosahedronGeometry(1, this.complexity);
+    const material = new THREE.MeshPhongMaterial({
+      color: new THREE.Color().setHSL((this.seed * 0.1 + this.depth * 0.2) % 1, 0.7, 0.5),
+      shininess: 100,
+      specular: 0xffffff,
+      wireframe: true
+    });
+    const numFractals = this.complexity + this.depth + 1;
+    for (let i = 0; i < numFractals; i++) {
+      const fractal = new THREE.Mesh(geometry, material.clone());
+      fractal.rotation.x = Math.random() * Math.PI;
+      fractal.rotation.y = Math.random() * Math.PI;
+      fractal.scale.setScalar(1 / (1 + i * 0.2));
+      this.fractals.push(fractal);
+      this.scene.add(fractal);
+    }
+  }
+  createLights() {
+    this.lights.forEach(l => this.scene.remove(l));
+    this.lights = [];
+    const ambientLight = new THREE.AmbientLight(0x404040);
+    this.scene.add(ambientLight);
+    for (let i = 0; i < 3 + this.depth; i++) {
+      const light = new THREE.PointLight(0xffffff, 1, 100);
+      light.position.set(Math.sin(i * Math.PI * 2 / 3) * 3, Math.cos(i * Math.PI * 2 / 3) * 3, 2);
+      this.lights.push(light);
+      this.scene.add(light);
+    }
+  }
+  dive() {
+    this.showProgressEffect();
+    this.playProgressSound();
+    if (this.depth < this.maxDepth) {
+      const currentFractals = this.fractals.slice();
+      currentFractals.forEach(fractal => {
+        fractal.scale.multiplyScalar(1.5);
+        fractal.material.opacity = 0;
+        fractal.material.transparent = true;
+        fractal.material.opacity = 0;
+      });
+      this.depth++;
+      this.complexity++;
+      setTimeout(() => {
+        this.createFractalGeometry();
+        this.fractals.forEach(fractal => {
+          fractal.material.opacity = 0;
+          fractal.material.transparent = true;
+          fractal.material.opacity = 1;
+        });
+      }, 500);
+      if (Math.random() < 0.2) {
+        const philosophy = window.philosophySystem.generatePhilosophy(this.userProgress);
+        const insightElement = document.querySelector('.insight-message');
+        insightElement.textContent = philosophy;
+        insightElement.style.display = 'block';
+        setTimeout(() => {
+          insightElement.style.display = 'none';
+        }, 6000);
+      }
+      if (this.depth >= 5 && !this.experimentalUnlocked) {
+        this.experimentalUnlocked = true;
+        this.showExperimentalUnlock();
+      }
+      const artifact = this.artifactSystem.generateRandomArtifact(this.depth);
+      if (artifact) {
+        this.artifactSystem.addArtifact(artifact);
+        const effect = this.artifactSystem.getEffect(artifact.type);
+        if (effect) effect(this);
+      }
+      if (this.artifactCleanup) {
+        this.artifactCleanup();
+      }
+      this.artifactCleanup = window.artifactSystem.applyArtifactEffects(this, this.scene, this.depth);
+      if (this.isExperimental) {
+        this.distortionLevel += 0.2;
+        this.createExperimentalGeometry();
+      } else {
+        this.createFractalGeometry();
+      }
+      this.createLights();
+      this.updateDepthIndicator();
+      if (Math.random() < this.encounterChance) {
+        this.triggerEncounter();
+      }
+      if (this.depth > 3) {
+        this.realityDistortions.active = true;
+        this.realityDistortions.intensity = (this.depth - 3) * 0.2;
+        this.initializeRealityBreaking();
+      }
+      const targetZ = Math.max(4 - this.depth * 0.5, 2);
+      const currentZ = this.camera.position.z;
+      const steps = 60;
+      let step = 0;
+      const animate = () => {
+        if (step < steps) {
+          this.camera.position.z = currentZ + (targetZ - currentZ) * (step / steps);
+          step++;
+          requestAnimationFrame(animate);
+        }
+      };
+      animate();
+      window.achievementSystem.checkAchievement('depth', this.depth);
+      window.codexSystem.addEntry('logs', `Depth ${this.depth} Reached`, `Traversed to a new layer of fractal complexity. Reality distortion: ${this.distortionLevel.toFixed(2)}`, {
+        depth: this.depth,
+        experimental: this.isExperimental
+      });
+    }
+  }
+  triggerEncounter() {
+    const encounters = [{
+      type: 'guide',
+      text: "A luminous being manifests before you, offering guidance.",
+      options: [{
+        text: "Seek wisdom",
+        effect: () => {
+          this.userProgress.recordDecision('seekWisdom');
+          this.increaseComplexity();
+          return "The being shares ancient knowledge, increasing your understanding.";
+        }
+      }, {
+        text: "Decline",
+        effect: () => {
+          this.userProgress.recordDecision('avoidance');
+          return "The being fades away, leaving you to your journey.";
+        }
+      }]
+    }, {
+      type: 'challenge',
+      text: "A swirling vortex of geometric patterns blocks your path.",
+      options: [{
+        text: "Attempt to harmonize",
+        effect: () => {
+          this.userProgress.recordDecision('harmonize');
+          if (Math.random() > 0.5) {
+            this.increaseComplexity();
+            return "You successfully align with the patterns, gaining deeper insight.";
+          }
+          return "The patterns remain mysterious, but you learn from the attempt.";
+        }
+      }, {
+        text: "Find another way",
+        effect: () => {
+          this.userProgress.recordDecision('avoidance');
+          return "You choose to explore a different path.";
+        }
+      }]
+    }, {
+      type: 'phenomenon',
+      text: "A fractal echo reveals multiple versions of reality.",
+      options: [{
+        text: "Explore divergence",
+        effect: () => {
+          this.userProgress.recordDecision('exploreReality');
+          this.createFractalGeometry();
+          return "The boundaries between realities blur, revealing new patterns.";
+        }
+      }, {
+        text: "Maintain focus",
+        effect: () => {
+          this.userProgress.recordDecision('avoidance');
+          return "You center yourself, maintaining your current path.";
+        }
+      }]
+    }];
+    const encounter = encounters[Math.floor(Math.random() * encounters.length)];
+    const encounterEl = document.querySelector('.encounter');
+    const textEl = document.querySelector('.encounter-text');
+    const optionsEl = document.querySelector('.encounter-options');
+    textEl.textContent = encounter.text;
+    optionsEl.innerHTML = '';
+    encounter.options.forEach(option => {
+      const button = document.createElement('button');
+      button.textContent = option.text;
+      button.onclick = () => {
+        const result = option.effect();
+        textEl.textContent = result;
+        setTimeout(() => {
+          encounterEl.style.display = 'none';
+        }, 2000);
+      };
+      optionsEl.appendChild(button);
+    });
+    encounterEl.style.display = 'block';
+    window.codexSystem.addEntry('logs', `Fractal Encounter`, `Encountered ${encounter.type} phenomenon in the fractal depths.`, {
+      encounterType: encounter.type,
+      depth: this.depth
+    });
+  }
+  increaseComplexity() {
+    this.complexity++;
+    this.createFractalGeometry();
+  }
+  updateDepthIndicator() {
+    const indicator = document.querySelector('.depth-indicator');
+    indicator.style.display = 'block';
+    indicator.textContent = `Depth: ${this.depth}`;
+    const diveButton = document.querySelector('.dive-button');
+    diveButton.style.display = this.depth < this.maxDepth ? 'block' : 'none';
+  }
+  showExperimentalUnlock() {
+    const msgEl = document.querySelector('.experimental-message');
+    msgEl.textContent = "Experimental depths unlocked! Dive deeper to explore surreal realms...";
+    msgEl.style.display = 'block';
+    setTimeout(() => {
+      msgEl.style.display = 'none';
+      this.isExperimental = true;
+    }, 3000);
+  }
+  createExperimentalGeometry() {
+    this.fractals.forEach(f => this.scene.remove(f));
+    this.fractals = [];
+    const geometries = [new THREE.TorusKnotGeometry(1, 0.3, 100, 16), new THREE.DodecahedronGeometry(1, this.complexity), new THREE.OctahedronGeometry(1, this.complexity)];
+    const material = new THREE.MeshPhongMaterial({
+      color: new THREE.Color().setHSL((Math.sin(Date.now() * 0.001) + 1) / 2, 0.8, 0.5),
+      wireframe: true,
+      envMap: null,
+      flatShading: true
+    });
+    const numFractals = this.complexity + Math.floor(this.distortionLevel);
+    for (let i = 0; i < numFractals; i++) {
+      const geometry = geometries[i % geometries.length];
+      const fractal = new THREE.Mesh(geometry, material.clone());
+      fractal.rotation.x = Math.sin(Date.now() * 0.001) * Math.PI;
+      fractal.rotation.y = Math.cos(Date.now() * 0.001) * Math.PI;
+      fractal.scale.setScalar(1 / (1 + i * 0.2));
+      const vertices = fractal.geometry.vertices || fractal.geometry.attributes.position.array;
+      if (Array.isArray(vertices)) {
+        for (let j = 0; j < vertices.length; j++) {
+          vertices[j] += Math.sin(j + this.distortionLevel) * 0.1;
+        }
+      }
+      this.fractals.push(fractal);
+      this.scene.add(fractal);
+    }
+  }
+  initializeRealityBreaking() {
+    if (!document.querySelector('.reality-glitch')) {
+      const glitch = document.createElement('div');
+      glitch.className = 'reality-glitch';
+      document.body.appendChild(glitch);
+    }
+    if (this.realityDistortions.glitchInterval) {
+      clearInterval(this.realityDistortions.glitchInterval);
+    }
+    this.realityDistortions.glitchInterval = setInterval(() => {
+      if (Math.random() < this.realityDistortions.intensity) {
+        this.triggerRealityShift();
+      }
+    }, 5000);
+  }
+  triggerRealityShift() {
+    const now = Date.now();
+    if (now - this.realityDistortions.lastShift < 2000) return;
+    this.realityDistortions.lastShift = now;
+    const effects = [() => {
+      this.fractals.forEach(f => {
+        f.rotation.x *= -1;
+        f.rotation.y *= -1;
+      });
+    }, () => {
+      this.fractals.forEach(f => {
+        f.scale.multiplyScalar(0.5 + Math.random());
+      });
+    }, () => {
+      this.fractals.forEach(f => {
+        if (f.material) {
+          f.material.color.setHSL(Math.random(), 0.8, 0.5);
+        }
+      });
+    }, () => {
+      this.camera.fov = 75 + Math.sin(Date.now() * 0.001) * 30;
+      this.camera.updateProjectionMatrix();
+    }, () => {
+      if (this.isExperimental) {
+        this.distortionLevel += Math.random() * 0.5;
+        this.createExperimentalGeometry();
+      }
+    }];
+    const effect = effects[Math.floor(Math.random() * effects.length)];
+    effect();
+    const glitch = document.querySelector('.reality-glitch');
+    glitch.style.opacity = 0.5;
+    setTimeout(() => {
+      glitch.style.opacity = 0;
+    }, 200);
+  }
+  animate() {
+    requestAnimationFrame(this.animate);
+    TWEEN.update();
+    this.fractals.forEach((fractal, i) => {
+      if (this.isExperimental) {
+        fractal.rotation.x += 0.002 * Math.sin(Date.now() * 0.001) * (i + 1);
+        fractal.rotation.y += 0.003 * Math.cos(Date.now() * 0.001) * (i + 1);
+        fractal.scale.setScalar((1 + 0.2 * Math.sin(Date.now() * 0.002 + i)) / (1 + i * 0.2 + this.distortionLevel * 0.1));
+      } else {
+        fractal.rotation.x += 0.001 * (i + 1) / this.depth;
+        fractal.rotation.y += 0.002 * (i + 1) / this.depth;
+        fractal.scale.setScalar((1 + 0.1 * Math.sin(Date.now() * 0.001 + i)) / (1 + i * 0.2));
+      }
+    });
+    this.lights.forEach((light, i) => {
+      if (this.isExperimental) {
+        light.intensity = 0.5 + Math.sin(Date.now() * 0.002 + i) * 0.5;
+        light.color.setHSL(Math.sin(Date.now() * 0.001 + i), 0.8, 0.5);
+      }
+      light.position.x = Math.sin(Date.now() * 0.001 + i * Math.PI * 2 / 3) * 3;
+      light.position.y = Math.cos(Date.now() * 0.001 + i * Math.PI * 2 / 3) * 3;
+    });
+    if (this.realityDistortions.active) {
+      const timeFactor = Date.now() * 0.001;
+      this.camera.position.x = Math.sin(timeFactor) * this.realityDistortions.intensity;
+      this.camera.position.y = Math.cos(timeFactor) * this.realityDistortions.intensity;
+      this.scene.rotation.z = Math.sin(timeFactor * 0.5) * this.realityDistortions.intensity * 0.1;
+    }
+    if (this.contextMenus.active) {
+      const menu = this.contextMenus.currentMenu;
+      const rect = menu.getBoundingClientRect();
+      const hue = Date.now() * 0.05 % 360;
+      menu.style.borderColor = `hsla(${hue}, 70%, 50%, 0.3)`;
+      menu.style.boxShadow = `0 0 20px hsla(${hue}, 70%, 50%, 0.2)`;
+    }
+    this.renderer.render(this.scene, this.camera);
+  }
+  onWindowResize() {
+    this.camera.aspect = window.innerWidth / window.innerHeight;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+  slowTimeFor(duration) {
+    const originalSpeed = this.fractals[0].rotation.x;
+    this.fractals.forEach(f => {
+      f.rotation.x *= 0.2;
+      f.rotation.y *= 0.2;
+    });
+    setTimeout(() => {
+      this.fractals.forEach(f => {
+        f.rotation.x = originalSpeed;
+        f.rotation.y = originalSpeed * 2;
+      });
+    }, duration);
+  }
+  enhanceVisualsFor(duration) {
+    this.scene.fog = new THREE.FogExp2(0x000000, 0.01);
+    this.fractals.forEach(f => {
+      if (f.material) {
+        f.material.wireframe = false;
+        f.material.opacity = 0.7;
+        f.material.transparent = true;
+        f.material.metalness = 0.8;
+        f.material.roughness = 0.2;
+      }
+    });
+    setTimeout(() => {
+      this.scene.fog = null;
+      this.fractals.forEach(f => {
+        if (f.material) {
+          f.material.wireframe = true;
+          f.material.opacity = 1;
+          f.material.transparent = false;
+        }
+      });
+    }, duration);
+  }
+  createVoidField() {
+    const geometry = new THREE.SphereGeometry(20, 32, 32);
+    const material = new THREE.MeshBasicMaterial({
+      color: 0x000000,
+      side: THREE.BackSide,
+      transparent: true,
+      opacity: 0.5
+    });
+    const voidField = new THREE.Mesh(geometry, material);
+    this.scene.add(voidField);
+    setTimeout(() => {
+      this.scene.remove(voidField);
+    }, 8000);
+  }
+  hideUI() {
+    document.querySelector('.analyze-button').style.display = 'none';
+    document.querySelector('.artifact-vault').style.display = 'none';
+  }
+  initializeContextMenus() {
+    const menu = document.createElement('div');
+    menu.className = 'context-menu context-ui';
+    document.body.appendChild(menu);
+    this.container.addEventListener('contextmenu', e => {
+      e.preventDefault();
+      const menuItems = this.getContextMenuItems();
+      if (menuItems.length === 0) return;
+      menu.innerHTML = menuItems.map(item => `
+        <div class="context-menu-item">
+          ${item.icon}
+          ${item.label}
+        </div>
+      `).join('');
+      menu.style.left = `${e.clientX}px`;
+      menu.style.top = `${e.clientY}px`;
+      menu.classList.add('show');
+      const items = menu.querySelectorAll('.context-menu-item');
+      items.forEach((item, i) => {
+        item.addEventListener('click', () => {
+          menuItems[i].action();
+          menu.classList.remove('show');
+        });
+      });
+      this.contextMenus.active = true;
+      this.contextMenus.currentMenu = menu;
+    });
+    document.addEventListener('click', () => {
+      if (this.contextMenus.active) {
+        this.contextMenus.currentMenu.classList.remove('show');
+        this.contextMenus.active = false;
+      }
+    });
+  }
+  getContextMenuItems() {
+    const items = [];
+    if (this.depth < this.maxDepth) {
+      items.push({
+        label: 'Dive Deeper',
+        icon: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 15.5l-4-4h8l-4 4z"/></svg>',
+        action: () => this.dive()
+      });
+    }
+    if (window.artifactSystem.artifacts.length > 0) {
+      items.push({
+        label: 'Analyze Artifacts',
+        icon: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2L2 7l10 5 10-5-10-5z"/></svg>',
+        action: () => window.artifactSystem.openVault()
+      });
+    }
+    return items;
+  }
+  showProgressEffect() {
+    const symbol = document.createElement('div');
+    symbol.className = 'evolving-symbol';
+    symbol.innerHTML = `<svg viewBox="0 0 100 100">
+      <path d="M50 10 L90 50 L50 90 L10 50Z" 
+            fill="none" 
+            stroke="rgba(255,255,255,0.8)" 
+            stroke-width="2">
+        <animate attributeName="d" 
+                 dur="4s"
+                 repeatCount="indefinite"
+                 values="M50 10 L90 50 L50 90 L10 50Z;
+                         M10 10 L90 10 L90 90 L10 90Z;
+                         M50 10 L90 50 L50 90 L10 50Z"/>
+      </path>
+    </svg>`;
+    symbol.style.left = `${Math.random() * window.innerWidth}px`;
+    symbol.style.top = `${Math.random() * window.innerHeight}px`;
+    document.body.appendChild(symbol);
+    setTimeout(() => symbol.classList.add('show'), 100);
+    this.progressElements.symbols.push(symbol);
+    setTimeout(() => {
+      symbol.classList.remove('show');
+      setTimeout(() => symbol.remove(), 300);
+      this.progressElements.symbols = this.progressElements.symbols.filter(s => s !== symbol);
+    }, 4000);
+    this.progressElements.overlay.classList.add('active');
+    setTimeout(() => this.progressElements.overlay.classList.remove('active'), 2000);
+  }
+  playProgressSound() {
+    if (this.soundEffects.oscillator) {
+      this.soundEffects.oscillator.stop();
+    }
+    this.soundEffects.oscillator = this.audioContext.createOscillator();
+    this.soundEffects.oscillator.type = 'sine';
+    this.soundEffects.oscillator.frequency.setValueAtTime(220 + this.depth * 55, this.audioContext.currentTime);
+    this.soundEffects.oscillator.connect(this.soundEffects.gain);
+    this.soundEffects.gain.gain.setValueAtTime(0, this.audioContext.currentTime);
+    this.soundEffects.gain.gain.linearRampToValueAtTime(0.2, this.audioContext.currentTime + 0.1);
+    this.soundEffects.gain.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 2);
+    this.soundEffects.oscillator.start();
+    setTimeout(() => {
+      if (this.soundEffects.oscillator) {
+        this.soundEffects.oscillator.stop();
+        this.soundEffects.oscillator = null;
+      }
+    }, 2000);
+  }
+}
+class Gateway {
+  constructor(seed) {
+    this.seed = seed;
+    this.element = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    this.element.classList.add('gateway');
+    this.element.setAttribute('viewBox', '0 0 100 100');
+    this.riddles = [{
+      question: "What has no beginning, end, or middle?",
+      answer: "circle"
+    }, {
+      question: "I am not alive, but I grow; I don't have lungs, but I need air; I don't have a mouth, but water kills me. What am I?",
+      answer: "fire"
+    }, {
+      question: "What belongs to you but others use it more than you do?",
+      answer: "name"
+    }];
+    this.currentRiddleIndex = 0;
+    this.init();
+  }
+  init() {
+    const hue = this.seed * 137.5 % 360;
+    this.element.innerHTML = `
+      <defs>
+        <filter id="glow${this.seed}">
+          <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+          <feMerge>
+            <feMergeNode in="coloredBlur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
+      <g filter="url(#glow${this.seed})">
+        <polygon points="50,5 95,50 50,95 5,50" 
+                 fill="none" 
+                 stroke="hsl(${hue}, 70%, 60%)" 
+                 stroke-width="2" 
+                 data-original-width="2">
+          <animate attributeName="stroke-dasharray" 
+                   from="0,300" to="300,0" 
+                   dur="2s" 
+                   repeatCount="indefinite"/>
+        </polygon>
+        <circle cx="50" cy="50" r="30" 
+                fill="none" 
+                stroke="hsl(${hue}, 70%, 60%)" 
+                stroke-width="1.5" 
+                opacity="0.5" 
+                data-original-width="1.5">
+          <animate attributeName="r" 
+                   values="30;35;30" 
+                   dur="3s" 
+                   repeatCount="indefinite"/>
+          <animate attributeName="opacity" 
+                   values="0.5;0.2;0.5" 
+                   dur="3s" 
+                   repeatCount="indefinite"/>
+        </circle>
+        <path d="M50,20 L80,50 L50,80 L20,50 Z" 
+              fill="none" 
+              stroke="hsl(${hue}, 70%, 80%)" 
+              stroke-width="1" 
+              opacity="0.3" 
+              data-original-width="1">
+          <animate attributeName="stroke-dasharray" 
+                   from="0,200" to="200,0" 
+                   dur="4s" 
+                   repeatCount="indefinite"/>
+          <animate attributeName="transform" 
+                   type="rotate" 
+                   from="0 50 50" 
+                   to="360 50 50" 
+                   dur="10s" 
+                   repeatCount="indefinite"/>
+        </path>
+      </g>
+    `;
+    this.element.addEventListener('mouseover', () => this.onHover());
+    this.element.addEventListener('mouseout', () => this.onHoverEnd());
+    this.element.addEventListener('click', () => this.enter());
+    this.element.addEventListener('click', e => {
+      const ripple = document.createElement('div');
+      ripple.style.position = 'absolute';
+      ripple.style.width = '100px';
+      ripple.style.height = '100px';
+      ripple.style.left = e.offsetX - 50 + 'px';
+      ripple.style.top = e.offsetY - 50 + 'px';
+      ripple.style.background = 'radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 50%)';
+      ripple.style.transform = 'scale(0)';
+      ripple.style.animation = 'ripple 0.5s linear';
+      ripple.addEventListener('animationend', () => ripple.remove());
+      this.element.appendChild(ripple);
+    });
+    this.element.addEventListener('contextmenu', e => {
+      e.preventDefault();
+      const hue = this.seed * 137.5 % 360;
+      const menu = document.createElement('div');
+      menu.className = 'context-menu context-ui';
+      menu.innerHTML = `
+        <div class="context-menu-item">
+          <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2L2 7l10 5 10-5-10-5z"/></svg>
+          Enter Gateway
+        </div>
+      `;
+      menu.style.left = `${e.clientX}px`;
+      menu.style.top = `${e.clientY}px`;
+      menu.style.borderColor = `hsla(${hue}, 70%, 50%, 0.3)`;
+      document.body.appendChild(menu);
+      menu.querySelector('.context-menu-item').addEventListener('click', () => {
+        this.enter();
+        menu.remove();
+      });
+      document.addEventListener('click', function hideMenu() {
+        menu.remove();
+        document.removeEventListener('click', hideMenu);
+      });
+    });
+  }
+  onHover() {
+    const hue = this.seed * 137.5 % 360;
+    const paths = this.element.querySelectorAll('polygon, circle, path');
+    paths.forEach(path => {
+      path.style.strokeWidth = parseFloat(path.getAttribute('stroke-width')) * 1.5 + '';
+      path.style.stroke = `hsl(${hue}, 90%, 70%)`;
+      const animate = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+      animate.setAttribute("attributeName", "stroke");
+      animate.setAttribute("values", `hsl(${hue}, 90%, 70%);hsl(${(hue + 60) % 360}, 90%, 70%);hsl(${hue}, 90%, 70%)`);
+      animate.setAttribute("dur", "2s");
+      animate.setAttribute("repeatCount", "indefinite");
+      path.appendChild(animate);
+      animate.beginElement();
+    });
+  }
+  onHoverEnd() {
+    const hue = this.seed * 137.5 % 360;
+    const paths = this.element.querySelectorAll('polygon, circle, path');
+    paths.forEach(path => {
+      path.style.strokeWidth = path.getAttribute('data-original-width') || '2';
+      path.style.stroke = `hsl(${hue}, 70%, 60%)`;
+      const animates = path.querySelectorAll('animate[attributeName="stroke"]');
+      animates.forEach(animate => animate.remove());
+    });
+  }
+  enter() {
+    const paths = this.element.querySelectorAll('polygon, circle, path');
+    paths.forEach(path => {
+      path.style.transition = 'all 0.5s ease';
+      const animate = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+      animate.setAttribute("attributeName", "opacity");
+      animate.setAttribute("values", "1;0");
+      animate.setAttribute("dur", "1s");
+      animate.setAttribute("begin", "indefinite");
+      path.appendChild(animate);
+      animate.beginElement();
+    });
+    window.artifactSystem.applyGateEffects(this);
+    const fractalWorld = document.createElement('div');
+    fractalWorld.classList.add('fractal-world');
+    fractalWorld.classList.add('fade-in');
+    document.body.appendChild(fractalWorld);
+    this.world = new FractalWorld(fractalWorld);
+    fractalWorld.style.display = 'block';
+    const backButton = document.querySelector('.back-button');
+    const diveButton = document.querySelector('.dive-button');
+    backButton.classList.add('fade-in');
+    diveButton.classList.add('fade-in');
+    backButton.style.display = 'block';
+    diveButton.style.display = 'block';
+    const pathEffect = document.createElement('div');
+    pathEffect.className = 'progress-path';
+    pathEffect.innerHTML = `<svg width="100%" height="100%">
+      <filter id="glow">
+        <feGaussianBlur stdDeviation="5" result="coloredBlur"/>
+        <feMerge>
+          <feMergeNode in="coloredBlur"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+      <path d="M${this.element.offsetLeft + 75} ${this.element.offsetTop + 75} L${window.innerWidth / 2} ${window.innerHeight / 2}"
+            stroke="white"
+            stroke-width="2"
+            filter="url(#glow)">
+        <animate attributeName="stroke-dasharray"
+                 values="0,1000;1000,0"
+                 dur="1s"
+                 fill="freeze"/>
+      </path>
+    </svg>`;
+    document.body.appendChild(pathEffect);
+    setTimeout(() => pathEffect.remove(), 1000);
+    this.world.generate(this.seed);
+    this.showRiddle();
+    document.querySelector('.dive-button').onclick = () => this.world.dive();
+    if (this.seed === 5) {
+      this.world.realityDistortions.active = true;
+      this.world.realityDistortions.intensity = 0.3;
+      this.world.initializeRealityBreaking();
+    }
+  }
+  showRiddle() {
+    const riddleContainer = document.querySelector('.riddle-container');
+    const riddleText = document.querySelector('.riddle-text');
+    const riddleInput = document.querySelector('.riddle-input');
+    riddleText.textContent = this.riddles[this.currentRiddleIndex].question;
+    riddleContainer.style.display = 'block';
+    riddleInput.value = '';
+    document.querySelector('.submit-answer').onclick = () => this.checkAnswer(riddleInput.value.toLowerCase());
+  }
+  checkAnswer(answer) {
+    if (answer === this.riddles[this.currentRiddleIndex].answer) {
+      this.world.userProgress.recordDecision('seekWisdom');
+      this.world.increaseComplexity();
+      this.currentRiddleIndex = (this.currentRiddleIndex + 1) % this.riddles.length;
+      window.achievementSystem.checkAchievement('riddles', this.world.userProgress.decisions.seekWisdom);
+      if (this.currentRiddleIndex === 0) {
+        document.querySelector('.riddle-container').style.display = 'none';
+      } else {
+        this.showRiddle();
+      }
+    }
+  }
+}
+class UserProgress {
+  constructor() {
+    this.decisions = {
+      seekWisdom: 0,
+      exploreReality: 0,
+      harmonize: 0,
+      avoidance: 0
+    };
+    this.insights = [{
+      threshold: 3,
+      type: 'seekWisdom',
+      message: 'Your pursuit of wisdom reveals deeper universal patterns'
+    }, {
+      threshold: 3,
+      type: 'exploreReality',
+      message: 'Reality bends to your exploratory nature'
+    }, {
+      threshold: 3,
+      type: 'harmonize',
+      message: 'Your harmonious approach unlocks hidden symmetries'
+    }, {
+      threshold: 3,
+      type: 'avoidance',
+      message: 'Your cautious path reveals different perspectives'
+    }];
+    this.loadProgress();
+  }
+  recordDecision(type) {
+    this.decisions[type]++;
+    window.achievementSystem.checkAchievement(type, this.decisions[type]);
+    this.checkInsights();
+    this.saveProgress();
+    if (type === 'seekWisdom') {
+      window.codexSystem.addEntry('insights', 'Wisdom Revelation', 'A moment of clarity through seeking wisdom in the fractal depths.', {
+        seekWisdomCount: this.decisions[type]
+      });
+    }
+    if (Math.random() < 0.3) {
+      const philosophy = window.philosophySystem.generatePhilosophy(this);
+      window.codexSystem.addEntry('insights', 'Philosophical Revelation', philosophy, {
+        source: type,
+        decisions: this.decisions
+      });
+    }
+  }
+  checkInsights() {
+    const insightElement = document.querySelector('.insight-message');
+    this.insights.forEach(insight => {
+      if (this.decisions[insight.type] === insight.threshold) {
+        insightElement.textContent = insight.message;
+        insightElement.style.display = 'block';
+        setTimeout(() => {
+          insightElement.style.display = 'none';
+        }, 4000);
+      }
+    });
+  }
+  saveProgress() {
+    localStorage.setItem('fractalGatesProgress', JSON.stringify(this.decisions));
+  }
+  loadProgress() {
+    const saved = localStorage.getItem('fractalGatesProgress');
+    if (saved) {
+      this.decisions = JSON.parse(saved);
+    }
+  }
+}
+const container = document.querySelector('.gateway-container');
+for (let i = 0; i < 6; i++) {
+  const gateway = new Gateway(i);
+  container.appendChild(gateway.element);
+}
+class AchievementSystem {
+  constructor() {
+    this.achievements = [{
+      id: 'depth3',
+      title: 'Depth Explorer',
+      description: 'Reach depth level 3',
+      unlocked: false
+    }, {
+      id: 'depth5',
+      title: 'Deep Diver',
+      description: 'Reach depth level 5',
+      unlocked: false
+    }, {
+      id: 'depth7',
+      title: 'Abyss Walker',
+      description: 'Reach maximum depth',
+      unlocked: false
+    }, {
+      id: 'riddles3',
+      title: 'Riddle Master',
+      description: 'Solve 3 different riddles',
+      unlocked: false
+    }, {
+      id: 'wisdomSeeker',
+      title: 'Wisdom Seeker',
+      description: 'Seek wisdom 5 times',
+      unlocked: false
+    }, {
+      id: 'harmonizer',
+      title: 'Great Harmonizer',
+      description: 'Successfully harmonize 3 times',
+      unlocked: false
+    }, {
+      id: 'explorer',
+      title: 'Reality Explorer',
+      description: 'Explore divergent realities 3 times',
+      unlocked: false
+    }];
+    this.loadAchievements();
+    this.initializeUI();
+  }
+  initializeUI() {
+    const panel = document.querySelector('.achievements-panel');
+    const toggle = document.querySelector('.achievement-toggle');
+    const list = document.querySelector('.achievements-list');
+    toggle.addEventListener('click', () => {
+      panel.classList.toggle('show');
+    });
+    this.achievements.forEach(achievement => {
+      const div = document.createElement('div');
+      div.className = `achievement ${achievement.unlocked ? 'unlocked' : ''}`;
+      div.id = `achievement-${achievement.id}`;
+      div.innerHTML = `
+        <h4>${achievement.title}</h4>
+        <p>${achievement.description}</p>
+      `;
+      list.appendChild(div);
+    });
+  }
+  checkAchievement(type, value) {
+    let unlocked = false;
+    switch (type) {
+      case 'depth':
+        if (value >= 3) this.unlock('depth3');
+        if (value >= 5) this.unlock('depth5');
+        if (value >= 7) this.unlock('depth7');
+        break;
+      case 'riddles':
+        if (value >= 3) this.unlock('riddles3');
+        break;
+      case 'seekWisdom':
+        if (value >= 5) this.unlock('wisdomSeeker');
+        break;
+      case 'harmonize':
+        if (value >= 3) this.unlock('harmonizer');
+        break;
+      case 'exploreReality':
+        if (value >= 3) this.unlock('explorer');
+        break;
+    }
+  }
+  unlock(achievementId) {
+    const achievement = this.achievements.find(a => a.id === achievementId);
+    if (achievement && !achievement.unlocked) {
+      achievement.unlocked = true;
+      this.saveAchievements();
+      this.displayUnlock(achievement);
+      document.getElementById(`achievement-${achievementId}`).classList.add('unlocked');
+    }
+  }
+  displayUnlock(achievement) {
+    const insightElement = document.querySelector('.insight-message');
+    insightElement.textContent = `Achievement Unlocked: ${achievement.title}`;
+    insightElement.style.display = 'block';
+    setTimeout(() => {
+      insightElement.style.display = 'none';
+    }, 4000);
+  }
+  saveAchievements() {
+    localStorage.setItem('fractalGatesAchievements', JSON.stringify(this.achievements));
+  }
+  loadAchievements() {
+    const saved = localStorage.getItem('fractalGatesAchievements');
+    if (saved) {
+      const loadedAchievements = JSON.parse(saved);
+      this.achievements.forEach(achievement => {
+        const savedAchievement = loadedAchievements.find(a => a.id === achievement.id);
+        if (savedAchievement) {
+          achievement.unlocked = savedAchievement.unlocked;
+        }
+      });
+    }
+  }
+}
+window.achievementSystem = new AchievementSystem();
+class ArtifactSystem {
+  constructor() {
+    this.artifacts = [];
+    this.artifactTypes = [{
+      id: 'timeShard',
+      name: 'Time Shard',
+      description: 'A crystallized moment of fractal time',
+      color: '#00ffff',
+      minDepth: 3,
+      effect: world => {
+        world.slowTimeFor(5000);
+      },
+      gateEffect: gate => {
+        gate.element.style.animationDuration = '4s';
+        setTimeout(() => gate.element.style.animationDuration = '2s', 5000);
+      },
+      realmEffect: (scene, depth) => {
+        scene.fog = new THREE.FogExp2(0x000066, 0.1);
+        return () => scene.fog = null;
+      }
+    }, {
+      id: 'realityLens',
+      name: 'Reality Lens',
+      description: 'Reveals hidden fractal dimensions',
+      color: '#ff00ff',
+      minDepth: 4,
+      effect: world => {
+        world.enhanceVisualsFor(10000);
+      },
+      gateEffect: gate => {
+        gate.element.style.filter = 'hue-rotate(90deg)';
+        setTimeout(() => gate.element.style.filter = '', 5000);
+      },
+      realmEffect: (scene, depth) => {
+        const ambientLight = new THREE.AmbientLight(0xff00ff, 0.2);
+        scene.add(ambientLight);
+        return () => scene.remove(ambientLight);
+      }
+    }, {
+      id: 'voidEssence',
+      name: 'Void Essence',
+      description: 'Pure concentrated nothingness',
+      color: '#000000',
+      minDepth: 5,
+      effect: world => {
+        world.createVoidField();
+      },
+      gateEffect: gate => {
+        gate.element.style.opacity = '0.5';
+        setTimeout(() => gate.element.style.opacity = '1', 3000);
+      },
+      realmEffect: (scene, depth) => {
+        const blackHole = new THREE.Mesh(new THREE.SphereGeometry(depth * 0.5, 32, 32), new THREE.MeshBasicMaterial({
+          color: 0x000000
+        }));
+        scene.add(blackHole);
+        return () => scene.remove(blackHole);
+      }
+    }];
+    this.vaultUI = {
+      container: document.querySelector('.artifact-vault'),
+      grid: document.querySelector('.vault-grid'),
+      closeBtn: document.querySelector('.vault-close'),
+      analyzeBtn: document.querySelector('.analyze-button'),
+      stats: {
+        total: document.querySelector('.total-count'),
+        resonating: document.querySelector('.resonating-count'),
+        power: document.querySelector('.power-level')
+      }
+    };
+    this.initializeUI();
+    this.loadArtifacts();
+  }
+  initializeUI() {
+    this.panel = document.querySelector('.artifacts-panel');
+    const toggle = document.querySelector('.artifacts-toggle');
+    this.list = document.querySelector('.artifacts-list');
+    toggle.addEventListener('click', () => {
+      this.panel.classList.toggle('show');
+    });
+    this.vaultUI.closeBtn.addEventListener('click', () => {
+      this.vaultUI.container.style.display = 'none';
+    });
+    this.vaultUI.analyzeBtn.addEventListener('click', () => {
+      this.openVault();
+    });
+    this.initializeVaultUI();
+  }
+  initializeVaultUI() {}
+  generateRandomArtifact(depth) {
+    const possible = this.artifactTypes.filter(t => t.minDepth <= depth);
+    if (possible.length === 0 || Math.random() > 0.3) return null;
+    const type = possible[Math.floor(Math.random() * possible.length)];
+    return {
+      id: type.id + '_' + Date.now(),
+      type: type.id,
+      name: type.name,
+      description: type.description,
+      color: type.color,
+      resonance: Math.random(),
+      discovered: Date.now()
+    };
+  }
+  addArtifact(artifact) {
+    this.artifacts.push(artifact);
+    this.displayArtifact(artifact);
+    this.saveArtifacts();
+  }
+  displayArtifact(artifact) {
+    const div = document.createElement('div');
+    div.className = `artifact ${artifact.resonance > 0.7 ? 'resonating' : ''}`;
+    div.id = artifact.id;
+    div.style.color = artifact.color;
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute('class', 'artifact-icon');
+    svg.setAttribute('viewBox', '0 0 100 100');
+    svg.innerHTML = `
+      <polygon points="50,10 90,50 50,90 10,50" 
+               fill="none" 
+               stroke="currentColor" 
+               stroke-width="4">
+        <animate attributeName="stroke-dasharray" 
+                 from="0,250" to="250,0" 
+                 dur="${1 + artifact.resonance * 2}s" 
+                 repeatCount="indefinite"/>
+      </polygon>
+    `;
+    div.innerHTML = `
+      ${svg.outerHTML}
+      <h4>${artifact.name}</h4>
+      <p>${artifact.description}</p>
+    `;
+    this.list.appendChild(div);
+  }
+  saveArtifacts() {
+    localStorage.setItem('fractalGatesArtifacts', JSON.stringify(this.artifacts));
+  }
+  loadArtifacts() {
+    const saved = localStorage.getItem('fractalGatesArtifacts');
+    if (saved) {
+      this.artifacts = JSON.parse(saved);
+      this.artifacts.forEach(a => this.displayArtifact(a));
+    }
+  }
+  getEffect(artifactType) {
+    return this.artifactTypes.find(t => t.id === artifactType)?.effect;
+  }
+  applyArtifactEffects(world, scene, depth) {
+    const cleanupFunctions = [];
+    this.artifacts.forEach(artifact => {
+      const type = this.artifactTypes.find(t => t.id === artifact.type);
+      if (type && type.realmEffect) {
+        const cleanup = type.realmEffect(scene, depth);
+        if (cleanup) cleanupFunctions.push(cleanup);
+      }
+    });
+    return () => cleanupFunctions.forEach(fn => fn());
+  }
+  applyGateEffects(gate) {
+    this.artifacts.forEach(artifact => {
+      const type = this.artifactTypes.find(t => t.id === artifact.type);
+      if (type && type.gateEffect) {
+        type.gateEffect(gate);
+      }
+    });
+  }
+  openVault() {
+    this.vaultUI.container.classList.add('zoom-in');
+    this.vaultUI.container.style.display = 'block';
+    this.updateVaultStats();
+    this.renderVaultGrid();
+    setTimeout(() => {
+      const items = this.vaultUI.grid.querySelectorAll('.vault-item');
+      items.forEach((item, index) => {
+        item.style.opacity = '0';
+        item.classList.add('fade-in');
+        setTimeout(() => {
+          item.style.opacity = '1';
+        }, index * 50);
+      });
+    }, 100);
+  }
+  updateVaultStats() {
+    const resonating = this.artifacts.filter(a => a.resonance > 0.7).length;
+    const powerLevel = Math.floor(this.artifacts.reduce((sum, a) => sum + a.resonance, 0) * 10);
+    this.vaultUI.stats.total.textContent = this.artifacts.length;
+    this.vaultUI.stats.resonating.textContent = resonating;
+    this.vaultUI.stats.power.textContent = powerLevel;
+  }
+  renderVaultGrid() {
+    this.vaultUI.grid.innerHTML = '';
+    this.artifacts.forEach(artifact => {
+      const div = document.createElement('div');
+      div.className = `vault-item ${artifact.resonance > 0.7 ? 'resonating' : ''}`;
+      div.style.borderColor = artifact.color;
+      div.style.boxShadow = `0 0 10px ${artifact.color}`;
+      div.innerHTML = `
+        <h4>${artifact.name}</h4>
+        <p>${artifact.description}</p>
+        <div class="vault-item-details">
+          <div>Resonance: ${(artifact.resonance * 100).toFixed(1)}%</div>
+          <div>Discovered: ${new Date(artifact.discovered).toLocaleDateString()}</div>
+        </div>
+      `;
+      div.addEventListener('click', () => this.analyzeArtifact(artifact));
+      this.vaultUI.grid.appendChild(div);
+    });
+  }
+  analyzeArtifact(artifact) {
+    const type = this.artifactTypes.find(t => t.id === artifact.type);
+    if (type) {
+      this.playAnalysisSound(artifact.resonance);
+      const insightElement = document.querySelector('.insight-message');
+      insightElement.textContent = `Analysis: This ${artifact.name.toLowerCase()} resonates with ${(artifact.resonance * 100).toFixed(1)}% power. It was discovered in the fractal depths on ${new Date(artifact.discovered).toLocaleDateString()}.`;
+      insightElement.style.display = 'block';
+      setTimeout(() => {
+        insightElement.style.display = 'none';
+      }, 5000);
+      setTimeout(() => {
+        if (Math.random() < 0.4) {
+          const philosophy = window.philosophySystem.generatePhilosophy({
+            decisions: {
+              seekWisdom: 1
+            }
+          });
+          window.codexSystem.addEntry('writings', `Philosophical Resonance with ${artifact.name}`, philosophy, {
+            artifactId: artifact.id,
+            resonance: artifact.resonance
+          });
+        }
+      }, 5000);
+    }
+    window.codexSystem.addEntry('writings', `Analysis of ${artifact.name}`, `A detailed study of the ${artifact.name.toLowerCase()} reveals its resonance patterns and metaphysical properties.`, {
+      resonance: artifact.resonance,
+      discoveryDate: new Date(artifact.discovered).toLocaleDateString()
+    });
+  }
+  playAnalysisSound(resonance) {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(440 * (1 + resonance), audioContext.currentTime);
+    gain.gain.setValueAtTime(0, audioContext.currentTime);
+    gain.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.1);
+    gain.gain.linearRampToValueAtTime(0, audioContext.currentTime + 1.5);
+    oscillator.connect(gain);
+    gain.connect(audioContext.destination);
+    oscillator.start();
+    setTimeout(() => oscillator.stop(), 1500);
+  }
+}
+window.artifactSystem = new ArtifactSystem();
+document.querySelector('.back-button').addEventListener('click', () => {
+  const fractalWorld = document.querySelector('.fractal-world');
+  const riddleContainer = document.querySelector('.riddle-container');
+  const depthIndicator = document.querySelector('.depth-indicator');
+  const diveButton = document.querySelector('.dive-button');
+  if (fractalWorld) {
+    fractalWorld.remove();
+    document.querySelector('.back-button').style.display = 'none';
+    riddleContainer.style.display = 'none';
+    depthIndicator.style.display = 'none';
+    diveButton.style.display = 'none';
+    document.querySelector('.analyze-button').style.display = 'none';
+    document.querySelector('.artifact-vault').style.display = 'none';
+  }
+});
+class CodexSystem {
+  constructor() {
+    this.entries = {
+      writings: [],
+      logs: [],
+      insights: []
+    };
+    this.initializeUI();
+    this.loadEntries();
+  }
+  initializeUI() {
+    const panel = document.querySelector('.codex-panel');
+    const toggle = document.querySelector('.codex-toggle');
+    const tabs = document.querySelectorAll('.codex-tab');
+    toggle.addEventListener('click', () => {
+      panel.classList.toggle('show');
+    });
+    tabs.forEach(tab => {
+      tab.addEventListener('click', e => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        document.querySelectorAll('.codex-section').forEach(s => s.classList.remove('active'));
+        document.querySelector(`.codex-section.${tab.dataset.tab}`).classList.add('active');
+      });
+    });
+  }
+  addEntry(type, title, content, metadata = {}) {
+    const entry = {
+      id: Date.now(),
+      title,
+      content,
+      timestamp: new Date(),
+      metadata
+    };
+    this.entries[type].push(entry);
+    this.displayEntry(type, entry);
+    this.saveEntries();
+  }
+  displayEntry(type, entry) {
+    const section = document.querySelector(`.codex-section.${type}`);
+    const div = document.createElement('div');
+    div.className = 'codex-entry rotate-in';
+    div.innerHTML = `
+      <div class="codex-entry-title">${entry.title}</div>
+      <div class="codex-entry-content">${entry.content}</div>
+      <div class="codex-entry-meta">
+        Recorded: ${entry.timestamp.toLocaleString()}
+        ${Object.entries(entry.metadata).map(([key, value]) => `<br>${key}: ${value}`).join('')}
+      </div>
+    `;
+    section.insertBefore(div, section.firstChild);
+  }
+  saveEntries() {
+    localStorage.setItem('fractalCodexEntries', JSON.stringify(this.entries));
+  }
+  loadEntries() {
+    const saved = localStorage.getItem('fractalCodexEntries');
+    if (saved) {
+      const loaded = JSON.parse(saved);
+      Object.keys(loaded).forEach(type => {
+        loaded[type].forEach(entry => {
+          entry.timestamp = new Date(entry.timestamp);
+          this.entries[type].push(entry);
+          this.displayEntry(type, entry);
+        });
+      });
+    }
+  }
+}
+window.codexSystem = new CodexSystem();
+class PhilosophyGenerator {
+  constructor() {
+    this.concepts = ['infinity', 'consciousness', 'reality', 'truth', 'existence', 'patterns', 'cycles'];
+    this.verbs = ['transcends', 'reflects', 'embodies', 'manifests', 'reveals', 'conceals', 'transforms'];
+    this.insights = ['understanding', 'perception', 'knowledge', 'wisdom', 'awareness', 'insight', 'revelation'];
+  }
+  generatePhilosophy(userProgress) {
+    const primaryConcept = this.concepts[Math.floor(Math.random() * this.concepts.length)];
+    const secondaryConcept = this.concepts[Math.floor(Math.random() * this.concepts.length)];
+    const verb = this.verbs[Math.floor(Math.random() * this.verbs.length)];
+    const insight = this.insights[Math.floor(Math.random() * this.insights.length)];
+    const templates = [`The ${primaryConcept} of fractal realms ${verb} our ${insight} of ${secondaryConcept}.`, `Through ${primaryConcept}, we discover that ${secondaryConcept} ${verb} the nature of ${insight}.`, `The deeper truth of ${primaryConcept} lies in how it ${verb} the ${secondaryConcept} within our ${insight}.`];
+    let philosophy = templates[Math.floor(Math.random() * templates.length)];
+    if (userProgress.decisions.seekWisdom > 3) {
+      philosophy += ` The seeker of wisdom finds that truth multiplies like fractals.`;
+    }
+    if (userProgress.decisions.exploreReality > 3) {
+      philosophy += ` Reality itself is but one branch of infinite possibility.`;
+    }
+    return philosophy;
+  }
+}
+window.philosophySystem = new PhilosophyGenerator();</script>
+</body>
+</html>
