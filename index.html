@@ -1,0 +1,3877 @@
+<meta charset="UTF-8">
+<style>
+@font-face {
+  font-family: 'PixelBody';
+  src: url('/Body - Font - Pixelated.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'PixelTitle';
+  src: url('/Title - Font - Thick  Smooth Pixel.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'PixelBlurb';
+  src: url('/Blurb - Font - In Italics.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'CatPaw';
+  src: url('/CatPaw-zr0OG[1].otf') format('opentype');
+}
+body {
+  font-family: 'PixelBody', sans-serif;
+  background: 
+      linear-gradient(45deg, #111 25%, transparent 25%) -10px 0,
+      linear-gradient(-45deg, #111 25%, transparent 25%) -10px 0,
+      linear-gradient(45deg, transparent 75%, #111 75%) -10px 0,
+      linear-gradient(-45deg, transparent 75%, #111 75%) -10px 0;
+  background-color: #1a1a1a;
+  background-size: 20px 20px;
+  color: #e0e0e0;
+  display: flex;
+  min-height: 100vh;
+  margin: 0;
+  padding: 20px;
+}
+h1 {
+  font-family: 'PixelTitle', sans-serif;
+  color: #ff3333;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  font-size: 1.5em;
+  margin-top: 0;
+  text-align: center;
+}
+.library-section {
+  width: 300px;
+  padding: 20px;
+  background: #1a1a1a;
+  border-right: 2px solid #ff3333;
+  overflow-y: auto;
+  height: calc(100vh - 40px);
+  box-shadow: 2px 0 10px rgba(0,0,0,0.3);
+  display: flex;
+  flex-direction: column;
+}
+.main-section {
+  flex: 1;
+  padding: 20px;
+  margin-left: 20px;
+  margin-right: 60px;
+}
+.input-section {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 15px;
+  align-items: start;
+  background: #222;
+  padding: 30px;  
+  border-radius: 10px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  border: 1px solid #333;
+}
+.input-section button {
+  grid-column: 2;
+  justify-self: end;
+  margin-top: 10px;
+}
+input[type="text"] {
+  width: 100%;
+  padding: 10px;
+  font-family: 'PixelBody';
+  background: #2a2a2a;
+  border: 2px solid #ff3333;
+  color: white;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  transition: all 0.3s ease;
+}
+.input-section input[type="text"] {
+  margin-bottom: 0;
+}
+input[type="text"]:focus {
+  outline: none;
+  border-color: #ff5555;
+  box-shadow: 0 0 5px rgba(255,51,51,0.5);
+}
+select {
+  font-family: 'PixelBody';
+  background: #2a2a2a;
+  border: 2px solid #ff3333;
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  margin-right: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+select:focus {
+  outline: none;
+  border-color: #ff5555;
+  box-shadow: 0 0 5px rgba(255,51,51,0.5);
+}
+button {
+  font-family: 'PixelBody';
+  background: #ff3333;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+button:hover {
+  transform: scale(1.05);
+  background: #ff4444;
+  box-shadow: 0 2px 8px rgba(255,51,51,0.4);
+}
+.delete-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #992222;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+.delete-btn:hover {
+  background: #cc2222;
+}
+.delete-all-btn {
+  display: none;
+}
+.weapon-list-item {
+  padding: 10px;
+  margin-bottom: 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.weapon-list-item:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+.weapon-card {
+  padding: 30px;  
+  margin-bottom: 20px; 
+  padding-bottom: 50px; 
+  min-height: 300px; 
+  position: relative;
+  background: #1a1a1a;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+.weapon-card .number {
+  color: #ffcc00;
+  font-weight: bold;
+}
+.weapon-card h3 { 
+  color: white !important;
+}
+.weapon-card .flavor-blurb {
+  font-family: 'PixelBlurb', sans-serif;
+  font-style: italic;
+  margin: 5px 0 15px 0;
+  font-size: 1.3em;
+  line-height: 1.4;
+  opacity: 1;
+  color: white;
+}
+.weapon-card .flavor-blurb::before,
+.weapon-card .flavor-blurb::after {
+  font-size: 1.95em;
+  line-height: 0;
+  vertical-align: -0.1em;
+}
+.weapon-card .flavor-blurb::before {
+  content: """; 
+}
+.weapon-card .flavor-blurb::after { 
+  content: """;
+}
+/* Rarity styles for weapon cards */
+.weapon-card.rarity-Common {
+  background: linear-gradient(45deg, #404040, #606060);
+  border: 2px solid #a0a0a0;
+}
+.weapon-card.rarity-Uncommon {
+  background: linear-gradient(45deg, #1a4a1c, #2a6e2c);
+  border: 2px solid #4CAF50;
+}
+.weapon-card.rarity-Rare {
+  background: linear-gradient(45deg, #0d47a1, #1565c0);
+  border: 2px solid #2196F3;
+}
+.weapon-card.rarity-Epic {
+  background: linear-gradient(45deg, #4a148c, #6a1b9a);
+  border: 2px solid #9C27B0;
+}
+.weapon-card.rarity-Legendary {
+  background: linear-gradient(45deg, #FFD700, #FFDF00);
+  border: 2px solid #FFD700;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+}
+.weapon-card.rarity-Super-Epic {
+  background: linear-gradient(45deg, #ff00ff, #ffd700);
+  border: 2px solid #ff69b4;
+  animation: borderShimmer 2s linear infinite;
+}
+.weapon-card.rarity-Mythical {
+  background: linear-gradient(45deg, #8B0000, #FF0000);
+  border: 2px solid #FF0000;
+  box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+}
+/* Rarity styles for list items */
+.rarity-Common { 
+  background: #a0a0a0;
+  color: #000;
+}
+.rarity-Uncommon { 
+  background: #4CAF50;
+  color: #fff;
+}
+.rarity-Rare { 
+  background: #2196F3;
+  color: #fff;
+}
+.rarity-Epic { 
+  background: #9C27B0;
+  color: #fff;
+}
+.rarity-Legendary { 
+  background: linear-gradient(45deg, #FFD700, #FFDF00);
+  color: #000;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+}
+.rarity-Super-Epic { 
+  background: linear-gradient(45deg, #ff00ff, #ffd700);
+  color: #fff;
+  text-shadow: 1px 1px 2px black;
+}
+.rarity-Mythical { 
+  background: linear-gradient(45deg, #8B0000, #FF0000);
+  color: #fff;
+  text-shadow: 1px 1px 2px black;
+  box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+}
+/* Element styles */
+.element-None { color: #ffffff; }
+.element-Fire { color: #ff4444; }
+.element-Ice { color: #00ffff; }
+.element-Water { color: #4444ff; }
+.element-Plant { color: #44ff44; }
+.element-Electric { color: #ffff44; }
+.element-Darkness { color: #4b0082; }
+.element-Light { color: #ffff80; }
+.element-Earth { color: #8b4513; }
+.element-Wind { color: #008080; }
+.element-Poison { color: #800080; }
+.element-Cute { color: #FFB6C1; }
+.element-Noble { color: #9370DB; }
+.element-Undead { color: #808000; }
+.element-Arcane { color: #8B008B; }
+.element-Transformation { color: #B8860B; }
+.element-Reality { color: #FF1493; }
+.element-Spirit { color: #98FB98; }
+.element-Inanimate { color: #00008B; }
+.element-Metal { color: #4A4A4A; }
+.element-Animal { color: #654321; }
+/* Theme styles */
+body.theme-cat {
+  background: url('/pink-background.gif') !important;
+  font-family: 'CatPaw', sans-serif;
+}
+body.theme-cat .input-section,
+body.theme-cat .weapon-card,
+body.theme-cat .chat-container,
+body.theme-cat .suggestions-box,
+body.theme-cat .battle-logs-box,
+body.theme-cat .admin-box,
+body.theme-cat .codes-box {
+  background: rgba(255,182,193,0.3);
+}
+body.theme-cat h1 {
+  font-family: 'CatPaw', sans-serif;
+  color: #FFB6C1;
+}
+body.theme-cat .input-label {
+  color: #FFB6C1;
+}
+body.theme-cat button {
+  font-family: 'CatPaw', sans-serif;
+  background: #FFB6C1;
+}
+body.theme-cat button:hover {
+  background: #FFC0CB;
+}
+body.theme-cat input[type="text"],
+body.theme-cat select,
+body.theme-cat textarea {
+  font-family: 'CatPaw', sans-serif;
+  border-color: #FFB6C1;
+}
+body.theme-cat .chat-container {
+  border-color: #FFB6C1;
+}
+body.theme-cat .chat-message .username {
+  color: #FFB6C1;
+}
+/* Add color overrides for rarity styles */
+body.theme-cat .rarity-Common { 
+  background: #FFE4E1;
+  color: #FFB6C1;
+}
+body.theme-cat .rarity-Uncommon { 
+  background: #FFC0CB;
+  color: #fff;
+}
+body.theme-cat .rarity-Rare { 
+  background: #FFB6C1;
+  color: #fff;
+}
+body.theme-cat .rarity-Epic { 
+  background: #FF69B4;
+  color: #fff;
+}
+body.theme-cat .rarity-Super-Epic { 
+  background: linear-gradient(45deg, #FFC0CB, #FFB6C1);
+  color: #fff;
+}
+body.theme-cat .rarity-Legendary { 
+  background: linear-gradient(45deg, #FFB6C1, #FFC0CB);
+  color: #fff;
+}
+body.theme-cat .rarity-Mythical { 
+  background: linear-gradient(45deg, #FF69B4, #FFB6C1);
+  color: #fff;
+}
+/* Add color overrides for element styles */
+body.theme-cat .element-None { color: #FFE4E1; }
+body.theme-cat .element-Fire { color: #FFB6C1; }
+body.theme-cat .element-Ice { color: #E0FFFF; }
+body.theme-cat .element-Water { color: #F0F8FF; }
+body.theme-cat .element-Plant { color: #FFE4E1; }
+body.theme-cat .element-Electric { color: #FFF0F5; }
+body.theme-cat .element-Darkness { color: #FF69B4; }
+body.theme-cat .element-Light { color: #FFF0F5; }
+body.theme-cat .element-Earth { color: #FFE4E1; }
+body.theme-cat .element-Wind { color: #FFF0F5; }
+body.theme-cat .element-Poison { color: #FFC0CB; }
+body.theme-cat .element-Cute { color: #FFB6C1; }
+body.theme-cat .element-Noble { color: #FFC0CB; }
+body.theme-cat .element-Undead { color: #FFE4E1; }
+body.theme-cat .element-Arcane { color: #FF69B4; }
+body.theme-cat .element-Transformation { color: #FFB6C1; }
+body.theme-cat .element-Reality { color: #FFC0CB; }
+body.theme-cat .element-Spirit { color: #FFE4E1; }
+body.theme-cat .element-Inanimate { color: #FFF0F5; }
+body.theme-cat .element-Metal { color: #FFE4E1; }
+body.theme-cat .element-Animal { color: #FFB6C1; }
+/* Theme styles for emo mode */
+body.theme-emo {
+  filter: grayscale(100%);
+  font-family: "Viafont", monospace;
+}
+body.theme-emo h1,
+body.theme-emo button,
+body.theme-emo input[type="text"],
+body.theme-emo select,
+body.theme-emo textarea,
+body.theme-emo .input-label {
+  font-family: "Viafont", monospace;
+}
+#weaponRarity option[value="Super-Epic"] {
+  background: #ff00ff !important;
+  color: #fff;
+}
+#weaponRarity option[value="Legendary"] {
+  background: #FFD700 !important; 
+  color: #000;
+}
+#weaponRarity option[value="Mythical"] {
+  background: #FF0000 !important; 
+  color: #fff;
+}
+#teamAlpha1 option.rarity-Legendary,
+#teamAlpha2 option.rarity-Legendary,
+#teamAlpha3 option.rarity-Legendary,
+#teamOmega1 option.rarity-Legendary,
+#teamOmega2 option.rarity-Legendary,
+#teamOmega3 option.rarity-Legendary,
+[id^="team"] option.rarity-Legendary {
+  background: #FFD700 !important;
+  color: #000;
+}
+#teamAlpha1 option.rarity-Mythical,
+#teamAlpha2 option.rarity-Mythical,
+#teamAlpha3 option.rarity-Mythical,
+#teamOmega1 option.rarity-Mythical,
+#teamOmega2 option.rarity-Mythical,
+#teamOmega3 option.rarity-Mythical,
+[id^="team"] option.rarity-Mythical {
+  background: #FF0000 !important;
+  color: #fff;
+}
+#weapon1 option.rarity-Legendary, #weapon2 option.rarity-Legendary {
+  background: #FFD700;
+  color: #000;
+}
+#weapon1 option.rarity-Mythical, #weapon2 option.rarity-Mythical {
+  background: #FF0000;
+  color: #fff;
+}
+#mergeWeapon1 option.rarity-Common, #mergeWeapon2 option.rarity-Common {
+  background: #a0a0a0;
+  color: #000;
+}
+#mergeWeapon1 option.rarity-Uncommon, #mergeWeapon2 option.rarity-Uncommon {  
+  background: #4CAF50;
+  color: #fff;
+}
+#mergeWeapon1 option.rarity-Rare, #mergeWeapon2 option.rarity-Rare {
+  background: #2196F3;  
+  color: #fff;
+}
+#mergeWeapon1 option.rarity-Epic, #mergeWeapon2 option.rarity-Epic {
+  background: #9C27B0;
+  color: #fff;  
+}
+#mergeWeapon1 option.rarity-Super-Epic, #mergeWeapon2 option.rarity-Super-Epic {
+  background: #ff00ff;
+  color: #fff;
+}
+#mergeWeapon1 option.rarity-Legendary, #mergeWeapon2 option.rarity-Legendary {
+  background: #FFD700;
+  color: #000;
+}
+#mergeWeapon1 option.rarity-Mythical, #mergeWeapon2 option.rarity-Mythical {
+  background: #FF0000;
+  color: #fff;
+}
+#specificWeapon option.rarity-Common {
+  background: #a0a0a0;
+  color: #000;
+}
+#specificWeapon option.rarity-Uncommon {  
+  background: #4CAF50;
+  color: #fff;
+}
+#specificWeapon option.rarity-Rare {
+  background: #2196F3;  
+  color: #fff;
+}
+#specificWeapon option.rarity-Epic {
+  background: #9C27B0;
+  color: #fff;  
+}
+#specificWeapon option.rarity-Super-Epic {
+  background: #ff00ff;
+  color: #fff;
+}
+#specificWeapon option.rarity-Legendary {
+  background: #FFD700;
+  color: #000;
+}
+#specificWeapon option.rarity-Mythical {
+  background: #FF0000;
+  color: #fff;
+}
+.merge-section {
+  display: none;
+  flex-direction: column;
+  gap: 15px;
+  padding: 20px;
+  background: #222;
+  border-radius: 10px;
+  margin-top: 20px;
+}
+.merge-result {
+  margin-top: 20px;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+}
+.loading {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0,0,0,0.9);
+  padding: 20px;
+  border-radius: 10px;
+  display: none;
+  box-shadow: 0 0 20px rgba(255,51,51,0.3);
+  border: 1px solid #ff3333;
+}
+.input-label {
+  color: #ff3333;
+  font-size: 1.1em;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+.input-group {
+  display: flex;
+  align-items: start;
+  width: 100%;
+}
+.mode-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.admin-dropdown {
+  position: relative;
+  display: inline-block;
+}
+.admin-dropdown-content {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #222;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+  border-radius: 5px;
+  padding: 5px;
+}
+.admin-dropdown-content button {
+  width: 100%;
+  text-align: left;
+  margin: 2px 0;
+}
+.admin-dropdown-content.show {
+  display: block;
+}
+.admin-toggle {
+  background: #9C27B0;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1.2em;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+.admin-toggle:hover {
+  transform: scale(1.05);
+  background: #7B1FA2;
+  box-shadow: 0 2px 8px rgba(156,39,176,0.4);
+}
+.forge-mode-btn {
+  background: #ff3333;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1.2em;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+.forge-mode-btn:hover {
+  transform: scale(1.05);
+  background: #ff4444;
+  box-shadow: 0 2px 8px rgba(255,51,51,0.4);
+}
+.arena-mode-btn {
+  background: #ffd700;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1.2em;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: black;
+  text-shadow: 1px 1px 2px rgba(255,255,255,0.3);
+}
+.arena-mode-btn:hover {
+  transform: scale(1.05);
+  background: #ffed4a;
+  box-shadow: 0 2px 8px rgba(255,215,0,0.4);
+}
+.suggestions-mode-btn {
+  background: #4CAF50;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1.2em;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+.suggestions-mode-btn:hover {
+  transform: scale(1.05);
+  background: #45a049;
+  box-shadow: 0 2px 8px rgba(76,175,80,0.4);
+}
+.admin-mode-btn {
+  background: #9C27B0;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1.2em;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+  display: none; /* Hidden by default */
+}
+.admin-mode-btn:hover {
+  transform: scale(1.05);
+  background: #7B1FA2;
+  box-shadow: 0 2px 8px rgba(156,39,176,0.4);
+}
+.battle-section {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 20px;
+}
+.battle-section h2 {
+  margin-bottom: 10px;
+}
+.battle-label {
+  display: block;
+  margin-bottom: 8px;
+}
+#goreIntensity,
+#weapon1,
+#weapon2 {
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 15px;
+}
+.battle-description {
+  margin-top: 20px;
+  padding: 25px;
+}
+.team-mode-container .battle-description {
+  margin-top: 20px;
+  padding: 25px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+  white-space: pre-line;
+  line-height: 1.6;
+}
+.reveal-winner-btn {
+  display: block;
+  margin: 25px auto;
+  width: fit-content;
+}
+.battle-stats {
+  display: none;
+}
+.winner-announcement {
+  text-align: center;
+  margin-top: 20px;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all 0.5s ease-out;
+}
+.winner-announcement.revealed {
+  opacity: 1;
+  transform: scale(1);
+}
+.winner-announcement span {
+  font-size: 1.5em;
+  font-weight: bold;
+  padding: 10px;
+}
+.winner-announcement small {
+  font-size: 0.9em;
+  color: #999;
+  display: block;
+  margin-top: 10px;
+  font-style: italic;
+}
+.battle-loading {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0,0,0,0.9);
+  padding: 20px;
+  border-radius: 10px;
+  display: none;
+  box-shadow: 0 0 20px rgba(255,51,51,0.3);
+  border: 1px solid #ff3333;
+}
+#battleDescription {
+  white-space: pre-line;
+  line-height: 1.6;
+}
+#weapon1 option, #weapon2 option {
+  padding: 8px;
+}
+#weapon1 option[value=""], #weapon2 option[value=""] {
+  background: #333;
+  color: #fff;
+}
+#weapon1 option.rarity-Common, #weapon2 option.rarity-Common {
+  background: #a0a0a0;
+  color: #000;
+}
+#weapon1 option.rarity-Uncommon, #weapon2 option.rarity-Uncommon {  
+  background: #4CAF50;
+  color: #fff;
+}
+#weapon1 option.rarity-Rare, #weapon2 option.rarity-Rare {
+  background: #2196F3;  
+  color: #fff;
+}
+#weapon1 option.rarity-Epic, #weapon2 option.rarity-Epic {
+  background: #9C27B0;
+  color: #fff;  
+}
+#weapon1 option.rarity-Super-Epic, #weapon2 option.rarity-Super-Epic {
+  background: #ff00ff;
+  color: #fff;
+}
+#weapon1 option.rarity-Legendary, #weapon2 option.rarity-Legendary {
+  background: #FFD700;
+  color: #000;
+}
+#weapon1 option.rarity-Mythical, #weapon2 option.rarity-Mythical {
+  background: #FF0000;
+  color: #fff;
+}
+.weapon-search {
+  display: block;
+  width: 100%;
+  padding: 8px;
+  border: 2px solid #ff3333;
+  border-radius: 5px;
+  background: #2a2a2a;
+  color: white;
+  margin-bottom: 5px;
+}
+.weapon-search:focus {
+  outline: none;
+  border-color: #ff5555;
+  box-shadow: 0 0 5px rgba(255,51,51,0.5);
+}
+.team-toggle {
+  margin-bottom: 20px;
+}
+.team-mode-container {
+  display: none;
+  margin-top: 20px;
+}
+.team-section {
+  border: 1px solid #ffd700;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.2);
+}
+.team-weapons {
+  display: block;
+}
+.team-section select {
+  width: 100%;
+  padding: 10px;
+  font-family: 'PixelBody';
+  background: #2a2a2a;
+  border: 2px solid #ffd700;
+  color: white;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  transition: all 0.3s ease;
+}
+.team-section select:focus {
+  outline: none;
+  border-color: #ffed4a;
+  box-shadow: 0 0 5px rgba(255,215,0,0.5);
+}
+.team-section h3 {
+  font-size: 1.1em;
+  margin: 0 0 10px 0;
+}
+.battle-input {
+  width: 100%;
+  max-width: 400px;
+  padding: 10px;
+  font-family: 'PixelBody';
+  background: #2a2a2a;
+  border: 2px solid #ffd700;
+  color: white;
+  border-radius: 5px;
+  margin-bottom: 15px;
+}
+.team-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.add-team-btn, .add-fighter-btn, .remove-fighter-btn, .remove-team-btn {
+  padding: 5px 10px;
+  font-size: 0.9em;
+}
+.remove-fighter-btn {
+  background: #992222;
+  margin-left: 10px;
+}
+.remove-team-btn {
+  background: #992222;
+  margin-top: 10px;
+}
+.teams-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.team-name-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.team-name-edit {
+  background: #2a2a2a;
+  border: 2px solid #ffd700;
+  color: white;
+  padding: 5px;
+  font-family: 'PixelBody';
+  border-radius: 5px;
+  width: 150px;
+}
+.team-name-edit:focus {
+  outline: none;
+  border-color: #ffed4a;
+  box-shadow: 0 0 5px rgba(255,215,0,0.5);
+}
+.default-weapon-select {
+  width: 100%;
+  margin-bottom: 15px;
+  padding: 10px;
+  font-family: 'PixelBody';
+  background: #2a2a2a;
+  border: 2px solid #ffd700;
+  color: white;
+  border-radius: 5px;
+}
+.function-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.function-selector select {
+  width: 100%;
+}
+.main-selector {
+  grid-column: 1 / -1;
+}
+.optional-selector {
+  font-size: 0.9em;
+}
+.element-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.element-selector select {
+  width: 100%;
+}
+textarea {
+  width: 100%;
+  padding: 10px;
+  font-family: 'PixelBody';
+  background: #2a2a2a;
+  border: 2px solid #ff3333;
+  color: white;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  transition: all 0.3s ease;
+  resize: vertical;
+}
+textarea:focus {
+  outline: none;
+  border-color: #ff5555;
+  box-shadow: 0 0 5px rgba(255,51,51,0.5);
+}
+.arena-mode textarea {
+  border-color: var(--primary-color);
+}
+.suggestions-mode textarea {
+  border-color: var(--primary-color);
+}
+.context-input {
+  width: 100%;
+  padding: 10px;
+  font-family: 'PixelBody';
+  background: #2a2a2a;
+  border: 2px solid #ff3333;
+  color: white;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  transition: all 0.3s ease;
+  resize: vertical;
+}
+.context-input:focus {
+  outline: none;
+  border-color: #ff5555;
+  box-shadow: 0 0 5px rgba(255,51,51,0.5);
+}
+.chat-container {
+  position: fixed;
+  right: -400px; /* Hidden by default */
+  top: 0;
+  width: 400px;
+  height: 100vh;
+  background: #222;
+  transition: right 0.3s ease;
+  z-index: 100;
+  border-left: 2px solid #ff3333;
+}
+.chat-container.visible {
+  right: 0;
+}
+.chat-toggle {
+  position: fixed;
+  right: 20px;
+  top: 20px;
+  z-index: 101;
+  padding: 10px;
+  background: #ff3333;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  color: white;
+}
+.chat-toggle:hover {
+  background: #ff4444;
+}
+.chat-messages {
+  height: 300px;
+  overflow-y: auto;
+  margin-bottom: 10px;
+  padding: 10px;
+  background: #2a2a2a;
+  border: 2px solid #ff3333;
+  border-radius: 5px;
+}
+.chat-input-container {
+  display: flex;
+  gap: 10px;
+}
+.chat-input {
+  flex: 1;
+  padding: 10px;
+  font-family: 'PixelBody';
+  background: #2a2a2a;
+  border: 2px solid #ff3333;
+  color: white;
+  border-radius: 5px;
+}
+.chat-message {
+  margin-bottom: 10px;
+  padding: 5px;
+}
+.chat-message .username {
+  color: #ff3333;
+  font-weight: bold;
+}
+.chat-message .timestamp {
+  color: #666;
+  font-size: 0.8em;
+  margin-left: 5px;
+}
+#teamAlpha1 option.rarity-Common, 
+#teamAlpha2 option.rarity-Common, 
+#teamAlpha3 option.rarity-Common,
+#teamOmega1 option.rarity-Common,
+#teamOmega2 option.rarity-Common,
+#teamOmega3 option.rarity-Common,
+[id^="team"] option.rarity-Common {
+  background: #a0a0a0;
+  color: #000;
+}
+#teamAlpha1 option.rarity-Uncommon,
+#teamAlpha2 option.rarity-Uncommon,
+#teamAlpha3 option.rarity-Uncommon,
+#teamOmega1 option.rarity-Uncommon,
+#teamOmega2 option.rarity-Uncommon,
+#teamOmega3 option.rarity-Uncommon,
+[id^="team"] option.rarity-Uncommon {
+  background: #4CAF50;
+  color: #fff;
+}
+#teamAlpha1 option.rarity-Rare,
+#teamAlpha2 option.rarity-Rare,
+#teamAlpha3 option.rarity-Rare,
+#teamOmega1 option.rarity-Rare,
+#teamOmega2 option.rarity-Rare,
+#teamOmega3 option.rarity-Rare,
+[id^="team"] option.rarity-Rare {
+  background: #2196F3;
+  color: #fff;
+}
+#teamAlpha1 option.rarity-Epic,
+#teamAlpha2 option.rarity-Epic,
+#teamAlpha3 option.rarity-Epic,
+#teamOmega1 option.rarity-Epic,
+#teamOmega2 option.rarity-Epic,
+#teamOmega3 option.rarity-Epic,
+[id^="team"] option.rarity-Epic {
+  background: #9C27B0;
+  color: #fff;
+}
+#teamAlpha1 option.rarity-Super-Epic,
+#teamAlpha2 option.rarity-Super-Epic,
+#teamAlpha3 option.rarity-Super-Epic,
+#teamOmega1 option.rarity-Super-Epic,
+#teamOmega2 option.rarity-Super-Epic,
+#teamOmega3 option.rarity-Super-Epic,
+[id^="team"] option.rarity-Super-Epic {
+  background: #ff00ff;
+  color: #fff;
+}
+#teamAlpha1 option.rarity-Legendary,
+#teamAlpha2 option.rarity-Legendary,
+#teamAlpha3 option.rarity-Legendary,
+#teamOmega1 option.rarity-Legendary,
+#teamOmega2 option.rarity-Legendary,
+#teamOmega3 option.rarity-Legendary,
+[id^="team"] option.rarity-Legendary {
+  background: #FFD700;
+  color: #000;
+}
+#teamAlpha1 option.rarity-Mythical,
+#teamAlpha2 option.rarity-Mythical,
+#teamAlpha3 option.rarity-Mythical,
+#teamOmega1 option.rarity-Mythical,
+#teamOmega2 option.rarity-Mythical,
+#teamOmega3 option.rarity-Mythical,
+[id^="team"] option.rarity-Mythical {
+  background: #FF0000;
+  color: #fff;
+}
+.suggestions-box {
+  display: none;
+  margin-top: 20px;
+  padding: 20px;
+  background: #222;
+  border-radius: 10px;
+  border: 1px solid #4CAF50;
+}
+.suggestions-box textarea {
+  border-color: #4CAF50;
+}
+.suggestions-box button {
+  background: #4CAF50;
+  color: white;
+}
+.suggestions-box button:hover {
+  background: #45a049;
+}
+.admin-box {
+  display: none;
+  margin-top: 20px;
+  padding: 20px;
+  background: #222;
+  border-radius: 10px;
+  border: 1px solid #9C27B0;
+}
+.admin-box textarea {
+  border-color: #9C27B0;
+}
+.admin-box button {
+  background: #9C27B0;
+  color: white;
+}
+.admin-box button:hover {
+  background: #7B1FA2;
+}
+.admin-section {
+  margin-bottom: 20px;
+  padding: 15px;
+  border: 1px solid #9C27B0;
+  border-radius: 5px;
+}
+.privacy-toggle {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+.privacy-toggle input[type="checkbox"] {
+  margin-right: 10px;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+.privacy-label {
+  color: #e0e0e0;
+  font-size: 0.9em;
+}
+.weapon-list-item.private {
+  opacity: 0.5;
+  position: relative;
+}
+.weapon-list-item.private::after {
+  content: "";
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.edit-btn {
+  position: absolute;
+  top: 10px;
+  right: 50px; 
+  background: #4CAF50;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+.edit-btn:hover {
+  background: #45a049;
+}
+.suggestion-item {
+  background: rgba(76,175,80,0.1);
+  border: 1px solid #4CAF50;
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  position: relative;
+}
+.suggestion-item small {
+  display: block;
+  color: #666;
+  margin-top: 5px;
+}
+.suggestions-list {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 15px;
+}
+.battle-logs-mode-btn {
+  background: #2196F3;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1.2em;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+.battle-logs-mode-btn:hover {
+  transform: scale(1.05);
+  background: #1976D2;
+  box-shadow: 0 2px 8px rgba(33,150,243,0.4);
+}
+.battle-logs-box {
+  display: none;
+  margin-top: 20px;
+  padding: 20px;
+  background: #222;
+  border-radius: 10px;
+  border: 1px solid #2196F3;
+}
+.battle-logs-box button {
+  background: #2196F3;
+  color: white;
+}
+.battle-logs-box button:hover {
+  background: #1976D2;
+}
+.battle-log-item {
+  background: rgba(33,150,243,0.1);
+  border: 1px solid #2196F3;
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  white-space: pre-line;
+}
+.battle-log-item small {
+  display: block;
+  color: #666;
+  margin-top: 5px;
+}
+.battle-logs-list {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 15px;
+}
+.suggestion-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.8em;
+  margin-right: 5px;
+  color: white;
+}
+.tag-Duplicate {
+  background: #ff4444;
+}
+.tag-Accepted {
+  background: #4CAF50; 
+}
+.tag-Declined {
+  background: #757575;
+}
+.tag-BeingConsidered {
+  background: #2196F3;
+}
+.suggestion-tag-buttons {
+  margin-top: 5px;
+  display: flex;
+  gap: 5px;
+}
+.suggestion-tag-button {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.8em;
+  cursor: pointer;
+  border: none;
+}
+.chat-notification {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 12px;
+  height: 12px;
+  background-color: #4CAF50;
+  border-radius: 50%;
+  display: none;
+}
+.codes-mode-btn {
+  background: #9C27B0;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1.2em;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+.codes-mode-btn:hover {
+  transform: scale(1.05);
+  background: #7B1FA2;
+  box-shadow: 0 2px 8px rgba(156,39,176,0.4);
+}
+.codes-box {
+  display: none;
+  margin-top: 20px;
+  padding: 20px;
+  background: #222;
+  border-radius: 10px;
+  border: 1px solid #9C27B0;
+}
+.codes-box button {
+  background: #9C27B0;
+  color: white;
+}
+.codes-box button:hover {
+  background: #7B1FA2;
+}
+.merge-mode-btn {
+  background: #9c27b0;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1.2em;
+  border-radius: 5px;
+  cursor: pointer; 
+  transition: all 0.2s;
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+
+.merge-mode-btn:hover {
+  transform: scale(1.05);
+  background: #7b1fa2;
+  box-shadow: 0 2px 8px rgba(156,39,176,0.4);
+}
+
+.merge-section {
+  display: none;
+  flex-direction: column;
+  gap: 15px;
+  padding: 20px;
+  background: #222;
+  border-radius: 10px;
+  margin-top: 20px;
+}
+
+.merge-section select {
+  width: 100%;
+  padding: 10px;
+  font-family: 'PixelBody';
+  background: #2a2a2a;
+  border: 2px solid #9c27b0;
+  color: white;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  transition: all 0.3s ease;
+}
+
+.merge-section select:focus {
+  outline: none;
+  border-color: #7b1fa2;
+  box-shadow: 0 0 5px rgba(156,39,176,0.5);
+}
+
+.merge-section option[value=""] {
+  background: #333;
+  color: #fff;
+}
+
+.library-controls {
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.weapon-search {
+  width: 100%;
+  padding: 8px;
+  border: 2px solid #ff3333;
+  border-radius: 5px;
+  background: #2a2a2a;
+  color: white;
+  margin-bottom: 5px;
+  display: block;
+}
+
+.weapon-search:focus {
+  outline: none;
+  border-color: #ff5555;
+  box-shadow: 0 0 5px rgba(255,51,51,0.5);
+}
+
+.sort-controls select {
+  width: 100%;
+  padding: 8px;
+  border: 2px solid #ff3333;
+  border-radius: 5px;
+  background: #2a2a2a;
+  color: white;
+  cursor: pointer;
+}
+
+.sort-controls select:focus {
+  outline: none;
+  border-color: #ff5555;
+}
+.owner-badge {
+  background: #ffd700;
+  color: black;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  margin-left: 5px;
+}
+.suggestion-item {
+  position: relative;
+}
+.suggestion-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+.suggestion-likes {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.like-count {
+  font-weight: bold;
+}
+.like-btn {
+  padding: 5px 10px;
+  background: #4CAF50;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+}
+.like-btn:hover {
+  background: #45a049;
+}
+.suggestion-comments {
+  margin-top: 10px;
+  padding: 10px;
+  background: rgba(0,0,0,0.1);
+  border-radius: 5px;
+}
+.comment-input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #4CAF50;
+  border-radius: 5px;
+  background: rgba(255,255,255,0.1);
+  color: white;
+}
+.comment {
+  margin-bottom: 8px;
+  padding: 8px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 5px;
+}
+.comment-username {
+  font-weight: bold;
+  margin-right: 5px;
+}
+.comment-timestamp {
+  font-size: 0.8em;
+  color: #666;
+}
+.comment-text {
+  margin-top: 5px;
+}
+.tag-remove {
+  margin-left: 5px;
+  cursor: pointer;
+  opacity: 0.7;
+}
+.tag-remove:hover {
+  opacity: 1;
+}
+.weapon-comments {
+  margin-top: 10px;
+  padding: 10px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 5px;
+}
+
+.weapon-comment-input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ff3333;
+  border-radius: 5px;
+  background: rgba(255,255,255,0.1);
+  color: white;
+}
+
+.weapon-comment {
+  margin-bottom: 8px;
+  padding: 8px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 5px;
+}
+
+.weapon-comment-username {
+  font-weight: bold;
+  margin-right: 5px;
+}
+
+.weapon-comment-timestamp {
+  font-size: 0.8em;
+  color: #666;
+}
+
+.weapon-comment-text {
+  margin-top: 5px;
+}
+/* RPG mode styles */
+.rpg-mode-btn {
+  background: #8e44ad;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1.2em;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+
+.rpg-mode-btn:hover {
+  transform: scale(1.05);
+  background: #7d3c98;
+  box-shadow: 0 2px 8px rgba(142,68,173,0.4); 
+}
+
+.rpg-box {
+  display: none;
+  margin-top: 20px;
+  padding: 20px;
+  background: #222;
+  border-radius: 10px;
+  border: 1px solid #8e44ad;
+}
+
+.rpg-box button {
+  background: #8e44ad;
+  color: white;
+}
+
+.rpg-box button:hover {
+  background: #7d3c98;
+}
+
+.adventure-text {
+  white-space: pre-line;
+  line-height: 1.6;
+  margin: 20px 0;
+  padding: 15px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 5px;
+}
+
+.choice-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.choice-btn {
+  padding: 10px;
+  text-align: left;
+  background: rgba(142,68,173,0.2);
+}
+
+.choice-btn:hover {
+  background: rgba(142,68,173,0.4);
+}
+
+.inventory {
+  margin: 20px 0;
+  padding: 15px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 5px;
+}
+
+.inventory h3 {
+  margin-top: 0;
+  color: #8e44ad;
+}
+
+.starting-weapon {
+  margin-bottom: 15px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.starting-weapon .adventure-location {
+  flex: 0.5;
+  margin-top: 0;
+}
+
+.adventure-location {
+  padding: 8px;
+  background: #2a2a2a;
+  border: 2px solid #8e44ad;
+  color: white;
+  border-radius: 5px;
+  margin-right: 10px;
+  width: 200px;
+}
+
+.action-input {
+  margin: 15px 0;
+  display: flex;
+  gap: 10px;
+  order: 2;
+}
+
+.action-input input {
+  flex: 1;
+  padding: 8px;
+  background: #2a2a2a;
+  border: 2px solid #8e44ad;
+  color: white;
+  border-radius: 5px;
+}
+.action-processing {
+  color: #8e44ad;
+  font-style: italic;
+  margin-top: 10px;
+}
+.adventure-ended {
+  color: #e74c3c;
+  font-weight: bold;
+  margin-top: 20px;
+  padding: 10px;
+  background: rgba(231, 76, 60, 0.1);
+  border-radius: 5px;
+}
+.inventory-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.inventory-item {
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.inventory-item:hover {
+  transform: scale(1.02);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.weapon-stats {
+  background: rgba(0,0,0,0.2);
+  padding: 15px;
+  border-radius: 5px;
+  margin-top: 10px;
+  display: none;
+}
+
+.weapon-stats.visible {
+  display: block;
+}
+
+.weapon-stats .delete-btn {
+  display: none;
+}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Viafont&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/confetti-js"></script>
+</head>
+<body>
+<div class="library-section">
+  <h1>Weapon Library</h1>
+  <div class="library-controls">
+    <input type="text" id="weaponSearch" placeholder="Search weapons by name, description, abilities..." class="weapon-search">
+    <div class="sort-controls">
+      <select id="sortBy">
+        <option value="rarity-desc">Rarity (High to Low)</option>
+        <option value="rarity-asc">Rarity (Low to High)</option>
+        <option value="name">Name (A-Z)</option>
+        <option value="name-desc">Name (Z-A)</option>
+        <option value="newest">Newest First</option>
+        <option value="oldest">Oldest First</option>
+        <option value="damage-desc">Damage (High to Low)</option>
+        <option value="damage-asc">Damage (Low to High)</option>
+      </select>
+    </div>
+  </div>
+  <div id="weaponLibrary"></div>
+</div>
+<div class="main-section">
+  <h1>&#x1f5e1; Magical Weapon Generator &#x1f5e1;</h1>
+  <div class="mode-buttons">
+    <button class="forge-mode-btn" onclick="switchMode(&apos;forge&apos;)">Forge Mode</button>
+    <button class="arena-mode-btn" onclick="switchMode(&apos;arena&apos;)">Arena Mode</button>
+    <button class="suggestions-mode-btn" onclick="switchMode(&apos;suggestions&apos;)">Suggestions</button>
+    <button class="admin-mode-btn" onclick="switchMode(&apos;admin&apos;)">Admin Mode</button>
+    <div class="admin-dropdown">
+      <button class="admin-toggle" onclick="toggleAdminDropdown()">More Options &#x25bc;</button>
+      <div class="admin-dropdown-content">
+        <button class="battle-logs-mode-btn" onclick="switchMode(&apos;battle-logs&apos;)">Battle Logs</button>
+        <button class="codes-mode-btn" onclick="switchMode(&apos;codes&apos;)">Codes</button>
+        <button class="merge-mode-btn" onclick="switchMode(&apos;merge&apos;)">Merge Mode</button>
+        <button class="rpg-mode-btn" onclick="switchMode(&apos;rpg&apos;)">RPG Mode</button>
+      </div>
+    </div>
+  </div>
+  <div class="input-section">
+    <span class="input-label">Context:</span>
+    <div class="input-group">
+      <textarea id="weaponContext" class="context-input" placeholder="Add some context about your weapon (optional)..." rows="2"></textarea>
+    </div>
+    <span class="input-label">Name:</span>
+    <div class="input-group">
+      <input type="text" id="weaponName" placeholder="Enter weapon name...">
+    </div>
+    <span class="input-label">Description:</span>
+    <div class="input-group">
+      <textarea id="weaponDescription" placeholder="Describe your weapon&apos;s abilities and characteristics..." rows="3"></textarea>
+    </div>
+    <span class="input-label">Function:</span>
+    <div class="function-selector">
+      <select id="weaponType" class="main-selector">
+        <option value="Generic">Generic</option>
+        <option value="Melee">Melee</option>
+        <option value="Ranged">Ranged</option>
+        <option value="Defense">Defense</option>
+        <option value="Throwable">Throwable</option>
+        <option value="Area of Effect">Area of Effect</option>
+        <option value="Damage over Time">Damage over Time</option>
+        <option value="Magic">Magic</option>
+        <option value="Summon Ally">Summon Ally</option>
+        <option value="Healing">Healing</option>
+        <option value="Support">Support</option>
+        <option value="Debuff">Debuff</option>
+        <option value="Siege">Siege</option>
+        <option value="Single Use">Single Use</option>
+        <option value="Ambush">Ambush</option>
+        <option value="Backfire">Backfire</option>
+        <option value="Charisma">Charisma</option>
+        <option value="Peaceful">Peaceful</option>
+        <option value="Transformation">Transformation</option>
+        <option value="Mind Control">Mind Control</option>
+        <option value="Time Manipulation">Time Manipulation</option>
+      </select>
+      <select id="optionalWeaponType1" class="optional-selector">
+        <option value>Optional Function 1</option>
+        <option value="Generic">Generic</option>
+        <option value="Melee">Melee</option>
+        <option value="Ranged">Ranged</option>
+        <option value="Defense">Defense</option>
+        <option value="Throwable">Throwable</option>
+        <option value="Area of Effect">Area of Effect</option>
+        <option value="Damage over Time">Damage over Time</option>
+        <option value="Magic">Magic</option>
+        <option value="Summon Ally">Summon Ally</option>
+        <option value="Healing">Healing</option>
+        <option value="Support">Support</option>
+        <option value="Debuff">Debuff</option>
+        <option value="Siege">Siege</option>
+        <option value="Single Use">Single Use</option>
+        <option value="Ambush">Ambush</option>
+        <option value="Backfire">Backfire</option>
+        <option value="Charisma">Charisma</option>
+        <option value="Peaceful">Peaceful</option>
+        <option value="Transformation">Transformation</option>
+        <option value="Mind Control">Mind Control</option>
+        <option value="Time Manipulation">Time Manipulation</option>
+      </select>
+      <select id="optionalWeaponType2" class="optional-selector">
+        <option value>Optional Function 2</option>
+        <option value="Generic">Generic</option>
+        <option value="Melee">Melee</option>
+        <option value="Ranged">Ranged</option>
+        <option value="Defense">Defense</option>
+        <option value="Throwable">Throwable</option>
+        <option value="Area of Effect">Area of Effect</option>
+        <option value="Damage over Time">Damage over Time</option>
+        <option value="Magic">Magic</option>
+        <option value="Summon Ally">Summon Ally</option>
+        <option value="Healing">Healing</option>
+        <option value="Support">Support</option>
+        <option value="Debuff">Debuff</option>
+        <option value="Siege">Siege</option>
+        <option value="Single Use">Single Use</option>
+        <option value="Ambush">Ambush</option>
+        <option value="Backfire">Backfire</option>
+        <option value="Charisma">Charisma</option>
+        <option value="Peaceful">Peaceful</option>
+        <option value="Transformation">Transformation</option>
+        <option value="Mind Control">Mind Control</option>
+        <option value="Time Manipulation">Time Manipulation</option>
+      </select>
+    </div>
+    <span class="input-label">Rarity:</span>
+    <div class="input-group">
+      <select id="weaponRarity">
+        <option value>Choose For Me</option>
+        <option value="Common" style="background: #a0a0a0; color: #000">Common</option>
+        <option value="Uncommon" style="background: #4CAF50; color: #fff">Uncommon</option>
+        <option value="Rare" style="background: #2196F3; color: #fff">Rare</option>
+        <option value="Epic" style="background: #9C27B0; color: #fff">Epic</option>
+        <option value="Super-Epic" style="background: linear-gradient(45deg, #ff00ff, #ffd700); color: #fff">Super-Epic</option>
+        <option value="Legendary" style="background: #FFD700; color: #000">Legendary</option>
+        <option value="Mythical" style="background: #FF0000; color: #fff">Mythical</option>
+      </select>
+    </div>
+    <span class="input-label">Privacy:</span>
+    <div class="input-group">
+      <label class="privacy-toggle">
+        <input type="checkbox" id="weaponPrivacy">
+        <span class="privacy-label">Make weapon private</span>
+      </label>
+    </div>
+    <span class="input-label">Element:</span>
+    <div class="element-selector">
+      <select id="weaponElement" class="main-selector">
+        <option value>Choose For Me</option>
+        <option value="None" style="color: #ffffff">&#x2b1c; None</option>
+        <option value="Fire" style="color: #ff4444">&#x1f525; Fire</option>
+        <option value="Ice" style="color: #00ffff">&#x2744;&#xfe0f; Ice</option>
+        <option value="Water" style="color: #4444ff">&#x1f4a7; Water</option>
+        <option value="Plant" style="color: #44ff44">&#x1f33f; Plant</option>
+        <option value="Electric" style="color: #ffff44">&#x26a1; Electric</option>
+        <option value="Darkness" style="color: #4b0082">&#x1f311; Darkness</option>
+        <option value="Light" style="color: #ffff80">&#x1f506; Light</option>
+        <option value="Earth" style="color: #8b4513">&#x26f0;&#xfe0f; Earth</option>
+        <option value="Wind" style="color: #008080">&#x1f32a;&#xfe0f; Wind</option>
+        <option value="Noble" style="color: #9370DB">&#x1f451; Noble</option>
+        <option value="Poison" style="color: #800080">&#x2620;&#xfe0f; Poison</option>
+        <option value="Cute" style="color: #FFB6C1">&#x1fa77; Cute</option>
+        <option value="Undead" style="color: #808000">&#x1f5b0; Undead</option>
+        <option value="Arcane" style="color: #8B008B">&#x2728; Arcane</option>
+        <option value="Transformation" style="color: #B8860B">&#x2725; Transformation</option>
+        <option value="Reality" style="color: #FF1493">&#x1f30d; Reality</option>
+        <option value="Spirit" style="color: #98FB98">&#x1f38d; Spirit</option>
+        <option value="Inanimate" style="color: #00008B">&#x1f5e6; Inanimate</option>
+        <option value="Metal" style="color: #4A4A4A">&#x1f528; Metal</option>
+        <option value="Animal" style="color: #654321">&#x1f98b; Animal</option>
+      </select>
+      <select id="optionalElement1" class="optional-selector">
+        <option value>Optional Element 1</option>
+        <option value="None" style="color: #ffffff">&#x2b1c; None</option>
+        <option value="Fire" style="color: #ff4444">&#x1f525; Fire</option>
+        <option value="Ice" style="color: #00ffff">&#x2744;&#xfe0f; Ice</option>
+        <option value="Water" style="color: #4444ff">&#x1f4a7; Water</option>
+        <option value="Plant" style="color: #44ff44">&#x1f33f; Plant</option>
+        <option value="Electric" style="color: #ffff44">&#x26a1; Electric</option>
+        <option value="Darkness" style="color: #4b0082">&#x1f311; Darkness</option>
+        <option value="Light" style="color: #ffff80">&#x1f506; Light</option>
+        <option value="Earth" style="color: #8b4513">&#x26f0;&#xfe0f; Earth</option>
+        <option value="Wind" style="color: #008080">&#x1f32a;&#xfe0f; Wind</option>
+        <option value="Noble" style="color: #9370DB">&#x1f451; Noble</option>
+        <option value="Poison" style="color: #800080">&#x2620;&#xfe0f; Poison</option>
+        <option value="Cute" style="color: #FFB6C1">&#x1fa77; Cute</option>
+        <option value="Undead" style="color: #808000">&#x1f5b0; Undead</option>
+        <option value="Arcane" style="color: #8B008B">&#x2728; Arcane</option>
+        <option value="Transformation" style="color: #B8860B">&#x2725; Transformation</option>
+        <option value="Reality" style="color: #FF1493">&#x1f30d; Reality</option>
+        <option value="Spirit" style="color: #98FB98">&#x1f38d; Spirit</option>
+        <option value="Inanimate" style="color: #00008B">&#x1f5e6; Inanimate</option>
+        <option value="Metal" style="color: #4A4A4A">&#x1f528; Metal</option>
+        <option value="Animal" style="color: #654321">&#x1f98b; Animal</option>
+      </select>
+      <select id="optionalElement2" class="optional-selector">
+        <option value>Optional Element 2</option>
+        <option value="None" style="color: #ffffff">&#x2b1c; None</option>
+        <option value="Fire" style="color: #ff4444">&#x1f525; Fire</option>
+        <option value="Ice" style="color: #00ffff">&#x2744;&#xfe0f; Ice</option>
+        <option value="Water" style="color: #4444ff">&#x1f4a7; Water</option>
+        <option value="Plant" style="color: #44ff44">&#x1f33f; Plant</option>
+        <option value="Electric" style="color: #ffff44">&#x26a1; Electric</option>
+        <option value="Darkness" style="color: #4b0082">&#x1f311; Darkness</option>
+        <option value="Light" style="color: #ffff80">&#x1f506; Light</option>
+        <option value="Earth" style="color: #8b4513">&#x26f0;&#xfe0f; Earth</option>
+        <option value="Wind" style="color: #008080">&#x1f32a;&#xfe0f; Wind</option>
+        <option value="Noble" style="color: #9370DB">&#x1f451; Noble</option>
+        <option value="Poison" style="color: #800080">&#x2620;&#xfe0f; Poison</option>
+        <option value="Cute" style="color: #FFB6C1">&#x1fa77; Cute</option>
+        <option value="Undead" style="color: #808000">&#x1f5b0; Undead</option>
+        <option value="Arcane" style="color: #8B008B">&#x2728; Arcane</option>
+        <option value="Transformation" style="color: #B8860B">&#x2725; Transformation</option>
+        <option value="Reality" style="color: #FF1493">&#x1f30d; Reality</option>
+        <option value="Spirit" style="color: #98FB98">&#x1f38d; Spirit</option>
+        <option value="Inanimate" style="color: #00008B">&#x1f5e6; Inanimate</option>
+        <option value="Metal" style="color: #4A4A4A">&#x1f528; Metal</option>
+        <option value="Animal" style="color: #654321">&#x1f98b; Animal</option>
+      </select>
+    </div>
+    <span class="input-label"></span>
+    <div class="input-group">
+      <button onclick="generateWeapon()">Generate Weapon</button>
+    </div>
+  </div>
+  <div class="battle-section" style="display: none;">
+    <div class="team-toggle">
+      <button class="battle-mode-btn active" onclick="toggleBattleMode(&apos;duel&apos;)">Duel Mode</button>
+      <button class="battle-mode-btn" onclick="toggleBattleMode(&apos;team&apos;)">Team Mode</button>
+    </div>
+    <div id="duelMode">
+      <h2>Choose Your Weapons</h2>
+      <label class="battle-label">Gore Intensity:</label>
+      <select id="goreIntensity" class="gore-select">
+        <option value="Tame">Tame</option>
+        <option value="Violent">Violent</option> 
+        <option value="Bloodbath">Bloodbath</option>
+      </select>
+      <label class="battle-label">Location:</label>
+      <input type="text" id="battleLocation" placeholder="Arena" class="battle-input">
+      <label class="battle-label">Weapon 1:</label>
+      <select id="weapon1" onchange="validateWeaponSelection()">
+        <option value>Select First Weapon</option>
+      </select>
+      <label class="battle-label">Weapon 2:</label>  
+      <select id="weapon2" onchange="validateWeaponSelection()">
+        <option value>Select Second Weapon</option>
+      </select>
+      <button onclick="startBattle()">Begin Battle</button>
+      <div id="battleDescription" class="battle-description"></div>
+      <div id="winnerAnnouncement" class="winner-announcement"></div>
+    </div>
+    <div id="teamMode" class="team-mode-container">
+      <div class="team-controls">
+        <button onclick="addTeam()">Add Team</button>
+      </div>
+      <div id="teamsContainer" class="teams-container">
+        <!-- Teams will be added here dynamically -->
+      </div>
+      <label class="battle-label">Location:</label>
+      <input type="text" id="teamBattleLocation" placeholder="Arena" class="battle-input">
+      <button onclick="startTeamBattle()">Begin Team Battle</button>
+      <div id="teamBattleDescription" class="battle-description"></div>
+    </div>
+  </div>
+  <div class="merge-section">
+    <h2>Merge Weapons</h2>
+    <label class="battle-label">First Weapon:</label>
+    <select id="mergeWeapon1" onchange="validateMergeSelection()">
+      <option value>Select First Weapon</option>
+    </select>
+    <label class="battle-label">Second Weapon:</label>
+    <select id="mergeWeapon2" onchange="validateMergeSelection()">
+      <option value>Select Second Weapon</option>  
+    </select>
+    <button onclick="mergeWeapons()">Merge Weapons</button>
+    <div id="mergeResult" class="merge-result"></div>
+  </div>
+  <div id="selectedWeapon"></div>
+  <div class="chat-toggle" onclick="toggleChat()">&#x1f4ac;</div>
+  <div class="chat-container">
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-input-container">
+      <input type="text" class="chat-input" id="chatInput" placeholder="Type a message...">
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+  <div class="suggestions-box">
+    <h2 style="color: #4CAF50; margin-top: 0;">Suggestions Box</h2>
+    <div class="suggestions-list" id="suggestionsList"></div>
+    <textarea class="suggestions-input" id="suggestionInput" placeholder="Share your ideas for improving the weapon forge..."></textarea>
+    <button class="submit-suggestion" onclick="submitSuggestion()">Submit Suggestion</button>  
+  </div>
+  <div class="battle-logs-box">
+    <h2 style="color: #2196F3; margin-top: 0;">Battle Logs</h2>
+    <div class="battle-logs-list" id="battleLogsList"></div>
+  </div>
+  <div class="admin-box">
+    <h2 style="color: #9C27B0; margin-top: 0;">Admin Controls</h2>
+    <div class="admin-section">
+      <h3>Add New Element</h3>
+      <input type="text" id="newElementName" placeholder="Element name...">
+      <input type="text" id="newElementColor" placeholder="Color (hex or name)...">
+      <input type="text" id="newElementEmoji" placeholder="Element emoji...">
+      <button onclick="addNewElement()">Add Element</button>
+    </div>
+    <div class="admin-section">
+      <h3>Add New Function</h3>
+      <input type="text" id="newFunctionName" placeholder="Function name...">
+      <button onclick="addNewFunction()">Add Function</button>
+    </div>
+    <div class="admin-section">
+      <h3>Remove Element</h3>
+      <select id="elementToRemove">
+        <option value>Select Element to Remove</option>
+      </select>
+      <button onclick="removeElement()">Remove Element</button>
+    </div>
+    <div class="admin-section">
+      <h3>Remove Function</h3>
+      <select id="functionToRemove">
+        <option value>Select Function to Remove</option>
+      </select>
+      <button onclick="removeFunction()">Remove Function</button>
+    </div>
+    <div class="admin-section">
+      <h3>Update Publisher</h3>
+      <p>This will redirect all users to the latest version</p>
+      <button onclick="publishUpdate()">Publish Update</button>
+    </div>
+  </div>
+  <div class="codes-box">
+    <h2 style="color: #9C27B0; margin-top: 0;">Secret Codes</h2>
+    <input type="text" id="codeInput" placeholder="Enter code...">
+    <button onclick="submitCode()">Submit Code</button>
+  </div>
+  <div class="rpg-box">
+    <h2 style="color: #8e44ad; margin-top: 0;">Text RPG Adventure</h2>
+    <div class="starting-weapon">
+      <label>Starting Weapon:</label>
+      <select id="startingWeaponChoice">
+        <option value="random">Random Weapon</option>
+        <option value="choose">Choose Weapon</option>
+      </select>
+      <select id="specificWeapon" style="display: none;">
+        <option value>Select a Weapon</option>
+      </select>
+      <input type="text" id="adventureLocation" placeholder="Enter starting location..." class="adventure-location">
+    </div>
+    <button onclick="startNewAdventure()">Start New Adventure</button>
+    <div id="adventureText" class="adventure-text"></div>
+    <div id="choiceButtons" class="choice-buttons"></div>
+    <div class="action-input">
+      <input type="text" id="customAction" placeholder="Type your action..." disabled>
+      <button onclick="submitCustomAction()" id="submitActionBtn" disabled>Submit Action</button>
+      <div id="actionProcessing" style="display: none;">Processing action...</div>
+    </div>
+    <div id="inventory" class="inventory">
+      <h3>Inventory</h3>
+      <div id="inventoryList" class="inventory-list"></div>
+      <div id="selectedWeaponStats" class="weapon-stats"></div>
+    </div>
+  </div>
+</div>
+<div class="loading" id="loading">
+  Forging your weapon... 
+</div>
+<div class="battle-loading" id="battleLoading">
+  Duel in progress...
+</div>
+<script>const room = new WebsimSocket();
+async function generateWeapon() {
+  const weaponName = document.getElementById('weaponName').value;
+  const weaponDescription = document.getElementById('weaponDescription').value || '';
+  const weaponContext = document.getElementById('weaponContext').value || '';
+  const weaponType = document.getElementById('weaponType').value;
+  const optionalType1 = document.getElementById('optionalWeaponType1').value;
+  const optionalType2 = document.getElementById('optionalWeaponType2').value;
+  const weaponElement = document.getElementById('weaponElement').value;
+  const optionalElement1 = document.getElementById('optionalElement1').value;
+  const optionalElement2 = document.getElementById('optionalElement2').value;
+  const weaponRarity = document.getElementById('weaponRarity').value;
+  const allTypes = [weaponType, optionalType1, optionalType2].filter(t => t).join(' + ');
+  const allElements = [weaponElement, optionalElement1, optionalElement2].filter(e => e).join(' + ');
+  if (!weaponName) {
+    alert('Please provide a name for your weapon!');
+    return;
+  }
+  document.getElementById('loading').style.display = 'block';
+  try {
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Request timed out. Please try again.')), 30000);
+    });
+    const fetchPromise = fetch('/api/ai_completion', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        prompt: `Generate detailed weapon stats for a ${allTypes} weapon named "${weaponName}"
+          ${weaponDescription ? ` with the following description: ${weaponDescription}` : ''}
+          ${allElements ? ` with ${allElements} element` : ''}
+          ${weaponRarity ? ` with ${weaponRarity} rarity` : ''}
+          ${weaponContext ? `\nAdditional context: ${weaponContext}` : ''}.
+          Include damage, element (${allElements ? `must be ${allElements}` : `from: None, Fire, Ice, Water, Plant, Electric, Darkness, Light, Earth, Wind, Noble, Poison, Cute, Undead, Arcane, Transformation, Reality, Spirit, Inanimate, Metal, Animal`}), 
+          regular attack (REQUIRED for ALL weapons), passive effects (only for Uncommon+ weapons), appearance, rarity (${weaponRarity ? `must be exactly ${weaponRarity}` : 'from: Common, Uncommon, Rare, Epic, Super-Epic, Legendary, Mythical'}), price in gold, and a short, impactful flavor blurb.
+          The weapon's name and abilities should be thematically aligned with the provided description if one was given.
+          The flavor blurb should be a brief, memorable line focused on the weapon's characteristics - its element, appearance, function and overall theme - rather than its specific name. Make it charming, funny, somber, or empowering based on these traits.${weaponContext ? '\nEnsure the weapon aligns with the provided context.' : ''}
+          
+          ${weaponRarity ? 'Important: The rarity MUST be exactly ' + weaponRarity : ''}
+          ${allElements ? 'Important: The element(s) MUST be exactly ' + allElements : ''}
+          
+          interface WeaponStats {
+              damage: number;
+              element: string;
+              specialAbility: string;  // Regular attack for ALL rarities
+              passiveEffects: string;
+              appearance: string;
+              rarity: string;
+              price: number;
+              flavorBlurb: string;
+          }`,
+        data: {
+          name: weaponName,
+          description: weaponDescription,
+          context: weaponContext
+        }
+      })
+    });
+    const response = await Promise.race([fetchPromise, timeoutPromise]);
+    const weaponStats = await response.json();
+    const isPrivate = document.getElementById('weaponPrivacy').checked;
+    await room.collection('weapons').create({
+      name: weaponName,
+      description: weaponDescription,
+      context: weaponContext,
+      isPrivate,
+      creatorId: room.party.client.id,
+      ...weaponStats
+    });
+    document.getElementById('weaponName').value = '';
+    document.getElementById('weaponDescription').value = '';
+    document.getElementById('weaponContext').value = '';
+  } catch (error) {
+    console.error('Error:', error);
+    alert(error.message || 'Failed to generate weapon. Please try again.');
+  } finally {
+    document.getElementById('loading').style.display = 'none';
+  }
+}
+function createWeaponCard(weapon, detailed = false) {
+  let html = `
+    <h3>${weapon.name}</h3>
+    <div class="flavor-blurb">${weapon.flavorBlurb}</div>
+    ${weapon.description ? `<p>Description: ${weapon.description}</p>` : ''}
+    <p>Damage: <span class="number">${weapon.damage}</span></p>
+    <p class="rarity-${weapon.rarity}">Rarity: ${weapon.rarity}</p>
+    <p>Price: <span class="number">${weapon.price}</span> gold</p>
+    <p class="element-${weapon.element}">Element: ${getElementEmoji(weapon.element)} ${weapon.element}</p>
+    <p>Appearance: ${weapon.appearance}</p>
+    <p>Regular Attack: ${weapon.specialAbility}</p>
+  `;
+  if (weapon.rarity !== 'Common' && weapon.passiveEffects) {
+    html += `<p>Passive: ${weapon.passiveEffects}</p>`;
+  }
+  if (weapon.additionalAbilities) {
+    weapon.additionalAbilities.forEach(ability => {
+      html += `<p>Additional Ability: ${ability}</p>`;
+    });
+  }
+  if (weapon.specialZones) {
+    weapon.specialZones.forEach(zone => {
+      html += `<p>Special Zone: ${zone}</p>`;
+    });
+  }
+  if (weapon.uniqueTraits) {
+    weapon.uniqueTraits.forEach(trait => {
+      html += `<p>Unique Trait: ${trait}</p>`;
+    });
+  }
+  html += `
+    <button class="edit-btn" onclick="editWeapon('${weapon.id}')">✎</button>
+    <button class="delete-btn" onclick="deleteWeapon('${weapon.id}')">×</button>
+    <div class="weapon-comments" data-weapon-id="${weapon.id}">
+      <input type="text" 
+        class="weapon-comment-input"
+        placeholder="Add a comment..."
+        onkeypress="if(event.key === 'Enter') addWeaponComment('${weapon.id}')"
+      >
+    </div>
+  `;
+  return html;
+}
+function displayWeapons(weapons) {
+  const library = document.getElementById('weaponLibrary');
+  library.innerHTML = '';
+  let visibleWeapons = weapons.filter(weapon => {
+    return !weapon.isPrivate || weapon.creatorId === room.party.client.id;
+  });
+  const searchText = document.getElementById('weaponSearch')?.value.toLowerCase();
+  if (searchText) {
+    visibleWeapons = visibleWeapons.filter(weapon => {
+      return weapon?.name?.toLowerCase().includes(searchText) || weapon?.description?.toLowerCase().includes(searchText) || weapon?.element?.toLowerCase().includes(searchText) || weapon?.rarity?.toLowerCase().includes(searchText) || weapon?.passiveEffects?.toLowerCase().includes(searchText) || weapon?.specialAbility?.toLowerCase().includes(searchText) || weapon?.appearance?.toLowerCase().includes(searchText) || weapon?.flavorBlurb?.toLowerCase().includes(searchText) || weapon?.additionalAbilities?.some(ability => ability.toLowerCase().includes(searchText)) || weapon?.specialZones?.some(zone => zone.toLowerCase().includes(searchText)) || weapon?.uniqueTraits?.some(trait => trait.toLowerCase().includes(searchText));
+    });
+  }
+  const sortBy = document.getElementById('sortBy')?.value;
+  const rarityOrder = {
+    'Common': 0,
+    'Uncommon': 1,
+    'Rare': 2,
+    'Epic': 3,
+    'Super-Epic': 4,
+    'Legendary': 5,
+    'Mythical': 6
+  };
+  visibleWeapons.sort((a, b) => {
+    switch (sortBy) {
+      case 'rarity-desc':
+        return (rarityOrder[b?.rarity || 'Common'] || 0) - (rarityOrder[a?.rarity || 'Common'] || 0);
+      case 'rarity-asc':
+        return (rarityOrder[a?.rarity || 'Common'] || 0) - (rarityOrder[b?.rarity || 'Common'] || 0);
+      case 'name':
+        return (a?.name || '').localeCompare(b?.name || '');
+      case 'name-desc':
+        return (b?.name || '').localeCompare(a?.name || '');
+      case 'newest':
+        return new Date(b?.created_at || 0) - new Date(a?.created_at || 0);
+      case 'oldest':
+        return new Date(a?.created_at || 0) - new Date(b?.created_at || 0);
+      case 'damage-desc':
+        return (b?.damage || 0) - (a?.damage || 0);
+      case 'damage-asc':
+        return (a?.damage || 0) - (b?.damage || 0);
+      default:
+        const rarityDiff = (rarityOrder[b?.rarity || 'Common'] || 0) - (rarityOrder[a?.rarity || 'Common'] || 0);
+        if (rarityDiff === 0) {
+          return new Date(b?.created_at || 0) - new Date(a?.created_at || 0);
+        }
+        return rarityDiff;
+    }
+  });
+  visibleWeapons.forEach(weapon => {
+    const item = document.createElement('div');
+    item.className = `weapon-list-item rarity-${weapon?.rarity || 'Common'}`;
+    if (weapon.isPrivate) {
+      item.classList.add('private');
+    }
+    item.textContent = weapon?.name || 'Unnamed Weapon';
+    item.onclick = () => {
+      const selectedSection = document.getElementById('selectedWeapon');
+      const detailedCard = document.createElement('div');
+      detailedCard.className = `weapon-card rarity-${weapon?.rarity || 'Common'}`;
+      detailedCard.innerHTML = createWeaponCard(weapon, true);
+      selectedSection.innerHTML = '';
+      selectedSection.appendChild(detailedCard);
+    };
+    library.appendChild(item);
+  });
+}
+room.collection('weapons').subscribe(weapons => {
+  displayWeapons(weapons);
+  if (document.querySelector('.battle-section').style.display === 'block') {
+    updateWeaponSelects();
+    updateTeamWeaponSelects();
+  }
+  if (document.getElementById('loading').style.display === 'none' && document.activeElement !== document.getElementById('weaponName') && document.activeElement !== document.getElementById('weaponDescription') && document.activeElement !== document.getElementById('weaponContext')) {
+    document.getElementById('weaponName').value = '';
+    document.getElementById('weaponDescription').value = '';
+    document.getElementById('weaponContext').value = '';
+  }
+});
+function updateWeaponSelects() {
+  const weapons = room.collection('weapons').getList();
+  const visibleWeapons = weapons.filter(weapon => {
+    return !weapon.isPrivate || weapon.creatorId === room.party.client.id;
+  });
+  const selects = [document.getElementById('weapon1'), document.getElementById('weapon2')];
+  selects.forEach(select => {
+    select.value = '';
+    select.innerHTML = '<option value="">Select a Weapon</option>';
+    visibleWeapons.forEach(weapon => {
+      const option = document.createElement('option');
+      option.value = weapon.id;
+      option.className = `rarity-${weapon.rarity}`;
+      option.textContent = weapon.name;
+      select.appendChild(option);
+    });
+  });
+}
+function validateWeaponSelection() {
+  const weapon1 = document.getElementById('weapon1').value;
+  const weapon2 = document.getElementById('weapon2').value;
+  if (weapon1 && weapon2 && weapon1 === weapon2) {
+    alert('You cannot select the same weapon twice!');
+    document.getElementById('weapon2').value = '';
+  }
+}
+function toggleBattleMode(mode) {
+  const duelMode = document.getElementById('duelMode');
+  const teamMode = document.getElementById('teamMode');
+  const buttons = document.querySelectorAll('.battle-mode-btn');
+  buttons.forEach(btn => btn.classList.remove('active'));
+  if (mode === 'duel') {
+    duelMode.style.display = 'block';
+    teamMode.style.display = 'none';
+    buttons[0].classList.add('active');
+    const teamBattleDesc = document.querySelector('.team-mode-container .battle-description');
+    if (teamBattleDesc) teamBattleDesc.innerHTML = '';
+    const teamAnnouncement = document.querySelector('.team-mode-container .winner-announcement');
+    if (teamAnnouncement) teamAnnouncement.innerHTML = '';
+  } else {
+    duelMode.style.display = 'none';
+    teamMode.style.display = 'block';
+    buttons[1].classList.add('active');
+    renderTeams();
+    const weapons = room.collection('weapons').getList();
+    teams.forEach(team => {
+      const defaultSelect = document.getElementById(`default-${team.id}`);
+      if (defaultSelect) {
+        defaultSelect.innerHTML = '<option value="">Select Default Weapon</option>';
+        weapons.forEach(weapon => {
+          const option = document.createElement('option');
+          option.value = weapon.id;
+          option.className = `rarity-${weapon.rarity}`;
+          option.textContent = weapon.name;
+          defaultSelect.appendChild(option);
+        });
+        if (team.defaultWeapon) {
+          defaultSelect.value = team.defaultWeapon;
+        }
+      }
+    });
+  }
+  if (mode === 'team') {
+    updateTeamWeaponSelects();
+  }
+}
+function updateTeamWeaponSelects() {
+  const weapons = room.collection('weapons').getList();
+  const visibleWeapons = weapons.filter(weapon => {
+    return !weapon.isPrivate || weapon.creatorId === room.party.client.id;
+  });
+  teams.forEach(team => {
+    const defaultSelect = document.getElementById(`default-${team.id}`);
+    if (defaultSelect) {
+      defaultSelect.value = '';
+      defaultSelect.innerHTML = '<option value="">Select Default Weapon</option>';
+      visibleWeapons.forEach(weapon => {
+        const option = document.createElement('option');
+        option.value = weapon.id;
+        option.className = `rarity-${weapon.rarity}`;
+        option.textContent = weapon.name;
+        defaultSelect.appendChild(option);
+      });
+    }
+    team.fighters.forEach((_, i) => {
+      const select = document.getElementById(`${team.id}${i + 1}`);
+      if (select) {
+        select.value = '';
+        select.innerHTML = '<option value="">Select a Weapon</option>';
+        visibleWeapons.forEach(weapon => {
+          const option = document.createElement('option');
+          option.value = weapon.id;
+          option.className = `rarity-${weapon.rarity}`;
+          option.textContent = weapon.name;
+          select.appendChild(option);
+        });
+      }
+    });
+  });
+}
+function validateTeamWeaponSelection(changedSelectId) {
+  return;
+}
+async function startBattle() {
+  const weapon1Id = document.getElementById('weapon1').value;
+  const weapon2Id = document.getElementById('weapon2').value;
+  const goreLevel = document.getElementById('goreIntensity').value;
+  const location = document.getElementById('battleLocation').value || 'Arena';
+  if (!weapon1Id || !weapon2Id) {
+    alert('Please select two weapons!');
+    return;
+  }
+  document.getElementById('battleLoading').style.display = 'block';
+  document.getElementById('winnerAnnouncement').style.display = 'none';
+  const revealBtn = document.createElement('button');
+  revealBtn.className = 'reveal-winner-btn';
+  revealBtn.textContent = 'Reveal Outcome';
+  const weapons = room.collection('weapons').getList();
+  const weapon1 = weapons.find(w => w.id === weapon1Id);
+  const weapon2 = weapons.find(w => w.id === weapon2Id);
+  const colorize = (text, weapons) => {
+    let colorized = text;
+    weapons.forEach(weapon => {
+      const regex = new RegExp(weapon.name, 'g');
+      colorized = colorized.replace(regex, `<span class="element-${weapon.element}" style="color: var(--${weapon.rarity.toLowerCase()}-color)">${weapon.name}</span>`);
+    });
+    return colorized;
+  };
+  try {
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Battle generation timed out. Please try again.')), 30000);
+    });
+    const fetchPromise = fetch('/api/ai_completion', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        prompt: `Create an epic battle scene between two fighters wielding these weapons in the ${location}:
+        
+        Weapon 1: ${JSON.stringify(weapon1)}
+        Weapon 2: ${JSON.stringify(weapon2)}
+        
+        Gore Level: ${goreLevel}
+        Gore Guidelines:
+        - Tame: Blood, bruises and small cuts only
+        - Violent: Deep cuts, massive bleeding, and bone breaks
+        - Bloodbath: [Extremely graphic] Intense dismemberment, visceral gore, guttural screams, sadistic enjoyment, brutal psychological elements${goreLevel === 'Bloodbath' ? '. Make it extremely dark and disturbing, with vivid descriptions and dialogue showing the characters\' descent into madness' : ''}
+        
+        Generate a dramatic battle scene with two named fighters.
+        The battle can end in a decisive victory for either fighter, or a tie if both are equally matched.
+        Include plenty of character dialogue to show their personalities and reactions.
+        Consider the weapons' elements, abilities, and characteristics in the fight.
+        Match the gore level specified.
+        Use more line breaks between paragraphs and dialogue.
+        
+        You must assess who is in a better state at the end of the battle to determine the winner.
+        A tie is only possible if both fighters are in a nearly identical state.
+
+        Format the response as:
+        {
+          "battleDescription": "Multi-paragraph battle description with dialogue", 
+          "outcome": {
+            "winner": "weapon1Id|weapon2Id|tie",
+            "finalState": "Description of both fighters' conditions at the end"
+          }
+        }`,
+        data: {
+          weapon1,
+          weapon2,
+          goreLevel
+        }
+      })
+    });
+    const response = await Promise.race([fetchPromise, timeoutPromise]);
+    const result = await response.json();
+    if (result.outcome.winner === 'tie') {
+      const finalStateDesc = result.outcome.finalState.toLowerCase();
+      const hasSignificantDifference = finalStateDesc.includes('slightly') || finalStateDesc.includes('somewhat') || finalStateDesc.includes('more injured');
+      if (hasSignificantDifference) {
+        const favoredWeapon = finalStateDesc.includes(weapon1.name.toLowerCase()) ? weapon2 : weapon1;
+        result.outcome.winner = favoredWeapon.id;
+      }
+    }
+    const battleDesc = document.getElementById('battleDescription');
+    battleDesc.innerHTML = colorize(result.battleDescription, [weapon1, weapon2]);
+    const announcement = document.getElementById('winnerAnnouncement');
+    announcement.innerHTML = '';
+    announcement.style.display = 'none';
+    revealBtn.onclick = () => {
+      announcement.style.display = 'block';
+      if (result.outcome.winner === 'tie') {
+        announcement.innerHTML = `The battle ends in a draw! Both fighters are equally matched.`;
+      } else {
+        const winner = weapons.find(w => w.id === result.outcome.winner);
+        announcement.innerHTML = `The victor wields: <span style="color: var(--${winner.rarity.toLowerCase()}-color)">${winner.name}</span>!`;
+      }
+      announcement.innerHTML += `<br><br><small>${result.outcome.finalState}</small>`;
+      announcement.classList.add('revealed');
+    };
+    battleDesc.appendChild(revealBtn);
+    const publishBtn = document.createElement('button');
+    publishBtn.textContent = 'Publish Battle Log';
+    publishBtn.style.marginLeft = '10px';
+    publishBtn.onclick = () => publishBattleLog(result.battleDescription, result.outcome.winner === 'tie' ? 'Draw' : weapons.find(w => w.id === result.outcome.winner).name);
+    battleDesc.appendChild(publishBtn);
+  } catch (error) {
+    console.error('Battle generation error:', error);
+    alert(error.message || 'Failed to generate battle. Please try again.');
+  } finally {
+    document.getElementById('battleLoading').style.display = 'none';
+  }
+}
+function getRarityColor(rarity) {
+  const colors = {
+    'Common': '#a0a0a0',
+    'Uncommon': '#4CAF50',
+    'Rare': '#2196F3',
+    'Epic': '#9C27B0',
+    'Super-Epic': '#ff00ff',
+    'Legendary': '#FFD700',
+    'Mythical': '#FF0000'
+  };
+  return colors[rarity];
+}
+async function startTeamBattle() {
+  const invalidTeams = teams.filter(team => team.fighters.length === 0);
+  if (invalidTeams.length > 0) {
+    alert('Each team must have at least one fighter!');
+    return;
+  }
+  const teamWeapons = teams.map(team => {
+    return team.fighters.map((_, i) => {
+      const select = document.getElementById(`${team.id}${i + 1}`);
+      return select ? select.value : null;
+    });
+  });
+  if (teamWeapons.flat().some(w => !w)) {
+    alert('Please select weapons for all fighters!');
+    return;
+  }
+  document.getElementById('battleLoading').style.display = 'block';
+  document.getElementById('winnerAnnouncement').style.display = 'none';
+  const weapons = room.collection('weapons').getList();
+  const teamFighters = teamWeapons.map(team => team.map(id => weapons.find(w => w.id === id)));
+  const calcTeamPower = team => team.reduce((sum, w) => {
+    const rarityValues = {
+      'Common': 1,
+      'Uncommon': 2,
+      'Rare': 3,
+      'Epic': 4,
+      'Super-Epic': 5,
+      'Legendary': 6,
+      'Mythical': 7
+    };
+    return sum + rarityValues[w.rarity];
+  }, 0);
+  const teamPowers = teamFighters.map(calcTeamPower);
+  const totalPower = teamPowers.reduce((a, b) => a + b, 0);
+  const random = Math.random() * totalPower;
+  let accumulator = 0;
+  let winningTeamIndex = 0;
+  for (let i = 0; i < teamPowers.length; i++) {
+    accumulator += teamPowers[i];
+    if (random <= accumulator) {
+      winningTeamIndex = i;
+      break;
+    }
+  }
+  const location = document.getElementById('teamBattleLocation').value || 'Arena';
+  const goreLevel = document.getElementById('goreIntensity').value;
+  try {
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Team battle generation timed out. Please try again.')), 30000);
+    });
+    const fetchPromise = fetch('/api/ai_completion', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        prompt: `Create an epic team battle scene in the ${location} between these ${teams.length} teams:\n\n` + `Teams involved in this battle:\n` + teams.map(t => `- ${t.name}`).join('\n') + `\n\nDetailed team compositions:\n\n` + teams.map((team, i) => {
+          return `${team.name}:\n` + teamFighters[i].map((weapon, j) => `Fighter ${j + 1}: A warrior wielding ${JSON.stringify(weapon)}`).join('\n');
+        }).join('\n\n') + `\n\nGore Level: ${goreLevel}\nGore Guidelines:\n` + `- Tame: Blood, bruises and small cuts only\n` + `- Violent: Deep cuts, massive bleeding, and bone breaks\n` + `- Bloodbath: [Extremely graphic] Intense dismemberment, visceral gore, guttural screams, sadistic enjoyment, brutal psychological elements${goreLevel === 'Bloodbath' ? '. Make it extremely dark and disturbing, with vivid descriptions and dialogue showing the characters\' descent into madness' : ''}
+        
+        Generate a dramatic team battle with fighters wielding their assigned weapons.
+        The battle can end in a decisive victory for any team, or a tie if all teams are equally matched.
+        Include plenty of character dialogue to show their personalities and reactions.
+        Consider each team's overall state at the end to determine the winner.
+        All teams should be mentioned and involved in the battle.
+        Use more line breaks between paragraphs and dialogue.
+        
+        You must assess who is in a better state at the end of the battle to determine the winner.
+        A tie is only possible if all teams are in a nearly identical state.
+
+        Format the response as:
+        {
+          "battleDescription": "Multi-paragraph team battle description with dialogue", 
+          "outcome": {
+            "winningTeam": "${teams[winningTeamIndex].name}",
+            "finalState": "Description of each team's condition at the end"
+          }
+        }`,
+        data: {
+          teams,
+          teamFighters,
+          goreLevel,
+          winningTeam: teams[winningTeamIndex].name
+        }
+      })
+    });
+    const response = await Promise.race([fetchPromise, timeoutPromise]);
+    const result = await response.json();
+    if (result.outcome.winningTeam === 'tie') {
+      const finalStateDesc = result.outcome.finalState.toLowerCase();
+      const teamStates = teams.map(t => {
+        const mention = finalStateDesc.toLowerCase().indexOf(t.name.toLowerCase());
+        const contextEnd = finalStateDesc.indexOf('.', mention);
+        return {
+          team: t,
+          state: finalStateDesc.substring(mention, contextEnd)
+        };
+      });
+      const hasSignificantDifference = teamStates.some(t => t.state.includes('slightly') || t.state.includes('somewhat') || t.state.includes('more injured'));
+      if (hasSignificantDifference) {
+        const bestTeam = teamStates.reduce((prev, curr) => {
+          const prevBad = prev.state.includes('severely') || prev.state.includes('heavily');
+          const currBad = curr.state.includes('severely') || curr.state.includes('heavily');
+          return prevBad && !currBad ? curr : prev;
+        });
+        result.outcome.winningTeam = bestTeam.team.name;
+      }
+    }
+    const winningTeamFighters = teamFighters[teams.findIndex(t => t.name === result.outcome.winningTeam)];
+    if (result.outcome.winningTeam !== 'tie') {
+      const battleDesc = document.querySelector('.team-mode-container .battle-description');
+      if (!battleDesc) {
+        const battleDescDiv = document.createElement('div');
+        battleDescDiv.id = 'battleDescription';
+        battleDescDiv.className = 'battle-description';
+        document.querySelector('.team-mode-container').appendChild(battleDescDiv);
+      }
+      const battleDescUpdated = document.querySelector('.team-mode-container .battle-description');
+      battleDescUpdated.innerHTML = colorize(result.battleDescription, teamFighters.flat());
+      const announcement = document.createElement('div');
+      announcement.id = 'winnerAnnouncement';
+      announcement.className = 'winner-announcement';
+      document.querySelector('.team-mode-container').appendChild(announcement);
+      const revealBtn = document.createElement('button');
+      revealBtn.className = 'reveal-winner-btn';
+      revealBtn.textContent = 'Reveal Winners';
+      revealBtn.onclick = () => {
+        announcement.style.display = 'block';
+        announcement.innerHTML = `${result.outcome.winningTeam.toUpperCase()} is victorious with: ${winningTeamFighters.map(w => `<span style="color: var(--${w.rarity.toLowerCase()}-color)">${w.name}</span>`).join(' and ')}!<br><br><small>${result.outcome.finalState}</small>`;
+        announcement.classList.add('revealed');
+      };
+      const publishBtn = document.createElement('button');
+      publishBtn.textContent = 'Publish Battle Log';
+      publishBtn.style.marginLeft = '10px';
+      publishBtn.onclick = () => publishBattleLog(result.battleDescription, result.outcome.winningTeam, teams);
+      battleDescUpdated.appendChild(revealBtn);
+      battleDescUpdated.appendChild(publishBtn);
+    }
+  } catch (error) {
+    console.error('Team battle generation error:', error);
+    alert(error.message || 'Failed to generate team battle. Please try again.');
+  } finally {
+    document.getElementById('battleLoading').style.display = 'none';
+  }
+}
+function colorize(text, weapons) {
+  let colorized = text;
+  weapons.forEach(weapon => {
+    const regex = new RegExp(weapon.name, 'g');
+    colorized = colorized.replace(regex, `<span class="element-${weapon.element}" style="color: var(--${weapon.rarity.toLowerCase()}-color)">${weapon.name}</span>`);
+  });
+  return colorized;
+}
+let teams = [{
+  id: 'alpha',
+  name: 'Alpha',
+  fighters: [null, null, null],
+  defaultWeapon: null
+}, {
+  id: 'omega',
+  name: 'Omega',
+  fighters: [null, null, null],
+  defaultWeapon: null
+}];
+function setDefaultWeapon(teamId, weaponId) {
+  const team = teams.find(t => t.id === teamId);
+  if (team) {
+    team.defaultWeapon = weaponId;
+    team.fighters = team.fighters.map(() => weaponId);
+    renderTeams();
+  }
+}
+function createTeamElement(team, index, savedSelections) {
+  const teamDiv = document.createElement('div');
+  teamDiv.className = 'team-section';
+  teamDiv.id = `team-${team.id}`;
+  const savedTeam = savedSelections?.find(t => t.id === team.id);
+  teamDiv.innerHTML = `
+    <div class="default-weapon-container">
+      <label class="battle-label">Default Weapon:</label>
+      <select class="default-weapon-select" id="default-${team.id}" onchange="setDefaultWeapon('${team.id}', this.value)">
+        <option value="">Select Default Weapon</option>
+      </select>
+    </div>
+    <div class="team-name-container">
+      <input type="text" 
+        class="team-name-edit" 
+        value="${team.name}"
+        onchange="renameTeam('${team.id}', this.value)"
+        placeholder="Team Name">
+    </div>
+    <div class="team-weapons">
+      ${team.fighters.map((_, i) => `
+        <div>
+          <div class="input-group">
+            <label class="battle-label">Fighter ${i + 1}:</label>
+            <select id="${team.id}${i + 1}" 
+              onchange="validateTeamWeaponSelection('${team.id}${i + 1}')"
+              data-selected="${savedTeam?.weapons[i] || ''}">
+              <option value="">Select Weapon</option>
+            </select>
+            <button class="remove-fighter-btn" onclick="removeFighter('${team.id}', ${i})">×</button>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+    <button class="add-fighter-btn" onclick="addFighter('${team.id}')">Add Fighter</button>
+    ${index > 1 ? `<button class="remove-team-btn" onclick="removeTeam='${team.id}'">Remove Team</button>` : ''}
+  `;
+  return teamDiv;
+}
+function renderTeams() {
+  const savedSelections = getTeamWeaponSelections();
+  const container = document.getElementById('teamsContainer');
+  container.innerHTML = '';
+  teams.forEach((team, index) => {
+    container.appendChild(createTeamElement(team, index, savedSelections));
+  });
+  updateTeamWeaponSelects();
+  savedSelections.forEach(team => {
+    team.weapons.forEach((weaponId, i) => {
+      const select = document.getElementById(`${team.id}${i + 1}`);
+      if (select && weaponId) {
+        select.value = weaponId;
+      }
+    });
+  });
+}
+function addTeam() {
+  const id = `team${teams.length + 1}`;
+  teams.push({
+    id,
+    name: `Team ${teams.length + 1}`,
+    fighters: [null, null, null],
+    defaultWeapon: null
+  });
+  renderTeams();
+}
+function removeTeam(teamId) {
+  teams = teams.filter(team => team.id !== teamId);
+  renderTeams();
+}
+function addFighter(teamId) {
+  const team = teams.find(t => t.id === teamId);
+  if (team) {
+    team.fighters.push(team.defaultWeapon || null);
+    renderTeams();
+  }
+}
+function removeFighter(teamId, fighterIndex) {
+  const team = teams.find(t => t.id === teamId);
+  if (team && team.fighters.length > 1) {
+    team.fighters.splice(fighterIndex, 1);
+    renderTeams();
+  }
+}
+function renameTeam(teamId, newName) {
+  const team = teams.find(t => t.id === teamId);
+  if (team) {
+    team.name = newName.trim() || `Team ${teams.indexOf(team) + 1}`;
+    renderTeams();
+  }
+}
+function getTeamWeaponSelections() {
+  return teams.map(team => ({
+    id: team.id,
+    name: team.name,
+    weapons: team.fighters.map((_, i) => {
+      const select = document.getElementById(`${team.id}${i + 1}`);
+      return select ? select.value : null;
+    })
+  }));
+}
+async function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const message = input.value.trim();
+  if (message) {
+    try {
+      await room.collection('chat').create({
+        message: message,
+        timestamp: new Date().toISOString()
+      });
+      input.value = '';
+      lastReadMessageTime = new Date();
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
+  }
+}
+let lastReadMessageTime = new Date();
+let chatVisible = false;
+room.collection('chat').subscribe(messages => {
+  const chatMessages = document.getElementById('chatMessages');
+  if (!chatMessages) return;
+  const sortedMessages = messages.filter(msg => msg.message && msg.username).sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+  chatMessages.innerHTML = sortedMessages.map(msg => `
+    <div class="chat-message">
+      <span class="username">${msg.username}${msg.username === 'lak04171' ? '<span class="owner-badge">👑 Owner</span>' : ''}</span>
+      <span class="message">${msg.message}</span>
+      <span class="timestamp">${new Date(msg.created_at).toLocaleTimeString()}</span>
+    </div>
+  `).join('');
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+  if (!chatVisible && messages.length > 0) {
+    const latestMessage = sortedMessages[sortedMessages.length - 1];
+    if (latestMessage && new Date(latestMessage.created_at) > lastReadMessageTime) {
+      let notification = document.querySelector('.chat-notification');
+      if (!notification) {
+        notification = document.createElement('div');
+        notification.className = 'chat-notification';
+        document.querySelector('.chat-toggle').appendChild(notification);
+      }
+      notification.style.display = 'block';
+    }
+  }
+});
+document.getElementById('chatInput').addEventListener('keypress', e => {
+  if (e.key === 'Enter') {
+    sendMessage();
+  }
+});
+async function deleteWeapon(weaponId) {
+  if (confirm('Are you sure you want to delete this weapon?')) {
+    try {
+      await room.collection('weapons').delete(weaponId);
+      document.getElementById('selectedWeapon').innerHTML = '';
+    } catch (error) {
+      console.error('Error deleting weapon:', error);
+    }
+  }
+}
+function getElementEmoji(element) {
+  const elementMap = {
+    'None': '',
+    'Fire': '',
+    'Ice': '',
+    'Water': '',
+    'Plant': '',
+    'Electric': '',
+    'Darkness': '',
+    'Light': '',
+    'Earth': '',
+    'Wind': '',
+    'Poison': '',
+    'Cute': '',
+    'Noble': '',
+    'Undead': '',
+    'Arcane': '',
+    'Transformation': '',
+    'Reality': '',
+    'Spirit': '',
+    'Inanimate': '',
+    'Metal': '',
+    'Animal': ''
+  };
+  const customElements = {};
+  room.collection('elements').getList().forEach(elem => {
+    customElements[elem.name] = elem.emoji;
+    const styleSheet = document.createElement('style');
+    styleSheet.textContent = `.element-${elem.name} { color: ${elem.color}; }`;
+    document.head.appendChild(styleSheet);
+  });
+  return customElements[element] || elementMap[element] || '';
+}
+let customElements = {};
+let customFunctions = new Set();
+async function addNewElement() {
+  if (room.party.client.username !== 'lak04171') return;
+  const name = document.getElementById('newElementName').value.trim();
+  const color = document.getElementById('newElementColor').value.trim();
+  const emoji = document.getElementById('newElementEmoji').value.trim();
+  if (!name || !color || !emoji) {
+    alert('Please fill in all element fields');
+    return;
+  }
+  await room.collection('elements').create({
+    name,
+    color,
+    emoji
+  });
+  document.getElementById('newElementName').value = '';
+  document.getElementById('newElementColor').value = '';
+  document.getElementById('newElementEmoji').value = '';
+}
+async function addNewFunction() {
+  if (room.party.client.username !== 'lak04171') return;
+  const name = document.getElementById('newFunctionName').value.trim();
+  if (!name) {
+    alert('Please enter a function name');
+    return;
+  }
+  await room.collection('functions').create({
+    name
+  });
+  document.getElementById('newFunctionName').value = '';
+}
+room.collection('elements').subscribe(elements => {
+  elements.forEach(elem => {
+    customElements[elem.name] = elem.emoji;
+    const styleSheet = document.createElement('style');
+    styleSheet.textContent = `.element-${elem.name} { color: ${elem.color}; }`;
+    document.head.appendChild(styleSheet);
+  });
+  updateElementSelects();
+  const removeSelect = document.getElementById('elementToRemove');
+  if (removeSelect) {
+    removeSelect.innerHTML = '<option value="">Select Element to Remove</option>';
+    elements.forEach(elem => {
+      const option = document.createElement('option');
+      option.value = elem.id;
+      option.textContent = `${elem.emoji} ${elem.name}`;
+      option.style.color = elem.color;
+      removeSelect.appendChild(option);
+    });
+  }
+});
+room.collection('functions').subscribe(functions => {
+  functions.forEach(func => {
+    customFunctions.add(func.name);
+  });
+  updateFunctionSelects();
+  const removeSelect = document.getElementById('functionToRemove');
+  if (removeSelect) {
+    removeSelect.innerHTML = '<option value="">Select Function to Remove</option>';
+    functions.forEach(func => {
+      const option = document.createElement('option');
+      option.value = func.id;
+      option.textContent = func.name;
+      removeSelect.appendChild(option);
+    });
+  }
+});
+function updateElementSelects() {
+  const elementSelects = [document.getElementById('weaponElement'), document.getElementById('optionalElement1'), document.getElementById('optionalElement2')];
+  elementSelects.forEach(select => {
+    if (!select) return;
+    const currentValue = select.value;
+    select.innerHTML = '';
+    const emptyOption = document.createElement('option');
+    emptyOption.value = '';
+    emptyOption.textContent = select.id === 'weaponElement' ? 'Choose For Me' : 'Optional Element';
+    select.appendChild(emptyOption);
+    const standardElements = [{
+      value: 'None',
+      text: ' None',
+      color: '#ffffff'
+    }, {
+      value: 'Fire',
+      text: ' Fire',
+      color: '#ff4444'
+    }, {
+      value: 'Ice',
+      text: ' Ice',
+      color: '#00ffff'
+    }, {
+      value: 'Water',
+      text: ' Water',
+      color: '#4444ff'
+    }, {
+      value: 'Plant',
+      text: ' Plant',
+      color: '#44ff44'
+    }, {
+      value: 'Electric',
+      text: ' Electric',
+      color: '#ffff44'
+    }, {
+      value: 'Darkness',
+      text: ' Darkness',
+      color: '#4b0082'
+    }, {
+      value: 'Light',
+      text: ' Light',
+      color: '#ffff80'
+    }, {
+      value: 'Earth',
+      text: ' Earth',
+      color: '#8b4513'
+    }, {
+      value: 'Wind',
+      text: ' Wind',
+      color: '#008080'
+    }, {
+      value: 'Poison',
+      text: ' Poison',
+      color: '#800080'
+    }, {
+      value: 'Cute',
+      text: ' Cute',
+      color: '#FFB6C1'
+    }, {
+      value: 'Noble',
+      text: ' Noble',
+      color: '#9370DB'
+    }, {
+      value: 'Undead',
+      text: ' Undead',
+      color: '#808000'
+    }, {
+      value: 'Arcane',
+      text: ' Arcane',
+      color: '#8B008B'
+    }, {
+      value: 'Transformation',
+      text: ' Transformation',
+      color: '#B8860B'
+    }, {
+      value: 'Reality',
+      text: ' Reality',
+      color: '#FF1493'
+    }, {
+      value: 'Spirit',
+      text: ' Spirit',
+      color: '#98FB98'
+    }, {
+      value: 'Inanimate',
+      text: ' Inanimate',
+      color: '#00008B'
+    }, {
+      value: 'Metal',
+      text: ' Metal',
+      color: '#4A4A4A'
+    }, {
+      value: 'Animal',
+      text: ' Animal',
+      color: '#654321'
+    }];
+    standardElements.forEach(elem => {
+      const option = document.createElement('option');
+      option.value = elem.value;
+      option.style.color = elem.color;
+      option.textContent = elem.text;
+      select.appendChild(option);
+    });
+    room.collection('elements').getList().forEach(elem => {
+      const option = document.createElement('option');
+      option.value = elem.name;
+      option.style.color = elem.color;
+      option.textContent = `${elem.emoji} ${elem.name}`;
+      select.appendChild(option);
+    });
+    if (currentValue && Array.from(select.options).some(opt => opt.value === currentValue)) {
+      select.value = currentValue;
+    }
+  });
+}
+function updateFunctionSelects() {
+  const functionSelects = [document.getElementById('weaponType'), document.getElementById('optionalWeaponType1'), document.getElementById('optionalWeaponType2')];
+  functionSelects.forEach(select => {
+    if (!select) return;
+    const currentValue = select.value;
+    select.innerHTML = '';
+    const emptyOption = document.createElement('option');
+    emptyOption.value = '';
+    emptyOption.textContent = select.id === 'weaponType' ? 'Generic' : 'Optional Function';
+    select.appendChild(emptyOption);
+    const standardFunctions = ['Melee', 'Ranged', 'Defense', 'Throwable', 'Area of Effect', 'Damage over Time', 'Magic', 'Summon Ally', 'Healing', 'Support', 'Debuff', 'Siege', 'Single Use', 'Ambush', 'Backfire', 'Charisma', 'Peaceful', 'Transformation', 'Mind Control', 'Time Manipulation'];
+    standardFunctions.forEach(func => {
+      const option = document.createElement('option');
+      option.value = func;
+      option.textContent = func;
+      select.appendChild(option);
+    });
+    room.collection('functions').getList().forEach(func => {
+      const option = document.createElement('option');
+      option.value = func.name;
+      option.textContent = func.name;
+      select.appendChild(option);
+    });
+    if (currentValue && Array.from(select.options).some(opt => opt.value === currentValue)) {
+      select.value = currentValue;
+    }
+  });
+}
+function showAdminButton() {
+  const adminBtn = document.querySelector('.admin-mode-btn');
+  const adminToggle = document.querySelector('.admin-toggle');
+  room.party.subscribe(peers => {
+    if (room.party.client.username === 'lak04171') {
+      adminBtn.style.display = 'block';
+      adminToggle.style.display = 'block';
+    } else {
+      adminBtn.style.display = 'none';
+      if (document.body.classList.contains('admin-mode')) {
+        switchMode('forge');
+      }
+    }
+  });
+}
+function toggleChat() {
+  const chatContainer = document.querySelector('.chat-container');
+  const chatToggle = document.querySelector('.chat-toggle');
+  chatContainer.classList.toggle('visible');
+  const chatVisible = chatContainer.classList.contains('visible');
+  chatToggle.textContent = chatVisible ? '×' : '';
+  if (chatVisible) {
+    const notification = document.querySelector('.chat-notification');
+    if (notification) {
+      notification.style.display = 'none';
+    }
+    const lastReadMessageTime = new Date();
+  }
+}
+async function removeElement() {
+  if (room.party.client.username !== 'lak04171') return;
+  const elementSelect = document.getElementById('elementToRemove');
+  const elementId = elementSelect.value;
+  if (!elementId) {
+    alert('Please select an element to remove');
+    return;
+  }
+  try {
+    await room.collection('elements').delete(elementId);
+    elementSelect.value = '';
+    alert('Element removed successfully');
+  } catch (error) {
+    console.error('Error removing element:', error);
+    alert('Failed to remove element');
+  }
+}
+async function submitSuggestion() {
+  const input = document.getElementById('suggestionInput');
+  const suggestion = input.value.trim();
+  if (suggestion) {
+    await room.collection('suggestions').create({
+      text: suggestion,
+      timestamp: new Date().toISOString()
+    });
+    input.value = '';
+  }
+}
+async function removeFunction() {
+  if (room.party.client.username !== 'lak04171') return;
+  const functionSelect = document.getElementById('functionToRemove');
+  const functionId = functionSelect.value;
+  if (!functionId) {
+    alert('Please select a function to remove');
+    return;
+  }
+  try {
+    await room.collection('functions').delete(functionId);
+    functionSelect.value = '';
+    alert('Function removed successfully');
+  } catch (error) {
+    console.error('Error removing function:', error);
+    alert('Failed to remove function');
+  }
+}
+function toggleAdminDropdown() {
+  const dropdownContent = document.querySelector('.admin-dropdown-content');
+  dropdownContent.classList.toggle('show');
+  window.onclick = function (event) {
+    if (!event.target.matches('.admin-toggle')) {
+      const dropdowns = document.getElementsByClassName('admin-dropdown-content');
+      for (let dropdown of dropdowns) {
+        if (dropdown.classList.contains('show')) {
+          dropdown.classList.remove('show');
+        }
+      }
+    }
+  };
+}
+showAdminButton();
+function editWeapon(weaponId) {
+  const weapons = room.collection('weapons').getList();
+  const weapon = weapons.find(w => w.id === weaponId);
+  if (!weapon) return;
+  document.getElementById('weaponName').value = weapon.name;
+  document.getElementById('weaponDescription').value = weapon.description || '';
+  document.getElementById('weaponContext').value = weapon.context || '';
+  document.getElementById('weaponType').value = weapon.type || 'Generic';
+  document.getElementById('optionalWeaponType1').value = weapon.optionalType1 || '';
+  document.getElementById('optionalWeaponType2').value = weapon.optionalType2 || '';
+  document.getElementById('weaponElement').value = weapon.element || '';
+  document.getElementById('optionalElement1').value = weapon.optionalElement1 || '';
+  document.getElementById('optionalElement2').value = weapon.optionalElement2 || '';
+  document.getElementById('weaponRarity').value = weapon.rarity || '';
+  document.getElementById('weaponPrivacy').checked = weapon.isPrivate || false;
+  if (!document.querySelector('.input-section').style.display === 'grid') {
+    switchMode('forge');
+  }
+  document.querySelector('.input-section').scrollIntoView({
+    behavior: 'smooth'
+  });
+}
+room.collection('suggestions').subscribe(suggestions => {
+  displaySuggestions(suggestions);
+  suggestions.forEach(suggestion => {
+    if (suggestion.tags) {
+      const tags = [...suggestion.tags];
+      room.collection('suggestions').subscribe(() => {
+        const updatedSuggestion = room.collection('suggestions').getList().find(s => s.id === suggestion.id);
+        if (updatedSuggestion && !arraysEqual(tags, updatedSuggestion.tags || [])) {
+          displaySuggestions(room.collection('suggestions').getList());
+        }
+      });
+    }
+  });
+});
+function arraysEqual(a, b) {
+  if (a === b) return true;
+  if (a == null || b == null) return false;
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+}
+async function addSuggestionTag(suggestionId, tag) {
+  if (room.party.client.username !== 'lak04171') return;
+  const suggestion = room.collection('suggestions').getList().find(s => s.id === suggestionId);
+  if (!suggestion) return;
+  const tags = suggestion.tags || [];
+  if (!tags.includes(tag)) {
+    tags.push(tag);
+    await room.collection('suggestions').update(suggestionId, {
+      tags
+    });
+    const suggestions = room.collection('suggestions').getList();
+    displaySuggestions(suggestions);
+  }
+}
+async function removeSuggestionTag(suggestionId, tag) {
+  if (room.party.client.username !== 'lak04171') return;
+  const suggestion = room.collection('suggestions').getList().find(s => s.id === suggestionId);
+  if (!suggestion) return;
+  const tags = suggestion.tags || [];
+  const index = tags.indexOf(tag);
+  if (index > -1) {
+    tags.splice(index, 1);
+    await room.collection('suggestions').update(suggestionId, {
+      tags
+    });
+    const suggestions = room.collection('suggestions').getList();
+    displaySuggestions(suggestions);
+  }
+}
+function displaySuggestions(suggestions) {
+  const suggestionsList = document.getElementById('suggestionsList');
+  if (!suggestionsList) return;
+  const likes = room.collection('suggestion-likes').getList();
+  const comments = room.collection('suggestion-comments').getList();
+  suggestions.sort((a, b) => {
+    const aLikes = likes.filter(l => l.suggestionId === a.id).length;
+    const bLikes = likes.filter(l => l.suggestionId === b.id).length;
+    return bLikes - aLikes;
+  });
+  suggestionsList.innerHTML = suggestions.filter(suggestion => suggestion.text && suggestion.username).map(suggestion => {
+    const suggestionLikes = likes.filter(l => l.suggestionId === suggestion.id);
+    const suggestionComments = comments.filter(c => c.suggestionId === suggestion.id).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    const hasLiked = suggestionLikes.some(l => l.username === room.party.client.username);
+    return `
+        <div class="suggestion-item">
+          <p>${suggestion.text}</p>
+          <div>
+            ${(suggestion.tags || []).map(tag => `<span class="suggestion-tag tag-${tag}">
+                ${tag}
+                ${room.party.client.username === 'lak04171' ? `<span class="tag-remove" onclick="removeSuggestionTag('${suggestion.id}', '${tag}')">×</span>` : ''}
+              </span>`).join('')}
+          </div>
+          ${room.party.client.username === 'lak04171' ? `
+            <div class="suggestion-tag-buttons">
+              <button class="suggestion-tag-button tag-Duplicate" onclick="addSuggestionTag('${suggestion.id}', 'Duplicate')">Duplicate</button>
+              <button class="suggestion-tag-button tag-Accepted" onclick="addSuggestionTag('${suggestion.id}', 'Accepted')">Accepted</button>
+              <button class="suggestion-tag-button tag-Declined" onclick="addSuggestionTag('${suggestion.id}', 'Declined')">Declined</button>
+              <button class="suggestion-tag-button tag-BeingConsidered" onclick="addSuggestionTag('${suggestion.id}', 'BeingConsidered')">Being Considered</button>
+            </div>
+          ` : ''}
+          <div class="suggestion-actions">
+            <div class="suggestion-likes">
+              <button class="like-btn" onclick="toggleLike('${suggestion.id}')">
+                ${hasLiked ? '❤️' : '🤍'} 
+                <span class="like-count">${suggestionLikes.length}</span>
+              </button>
+            </div>
+          </div>
+          <div class="suggestion-comments">
+            <input type="text" 
+              id="comment-${suggestion.id}" 
+              class="comment-input" 
+              placeholder="Add a comment..."
+              onkeypress="if(event.key === 'Enter') addComment('${suggestion.id}')"
+            >
+            ${suggestionComments.map(comment => `
+              <div class="comment">
+                <span class="comment-username">${comment.username}</span>
+                <span class="comment-timestamp">${new Date(comment.created_at).toLocaleString()}</span>
+                <div class="comment-text">${comment.text}</div>
+              </div>
+            `).join('')}
+          </div>
+          <small>By ${suggestion.username} at ${new Date(suggestion.created_at).toLocaleString()}</small>
+        </div>
+      `;
+  }).join('');
+}
+room.collection('suggestion-likes').subscribe(() => {
+  const suggestions = room.collection('suggestions').getList();
+  const suggestionsList = document.getElementById('suggestionsList');
+  if (suggestionsList && suggestions.length) {
+    const currentSuggestions = suggestions.map(s => ({
+      ...s
+    }));
+    room.collection('suggestions').subscribe(() => {
+      displaySuggestions(currentSuggestions);
+    });
+  }
+});
+room.collection('suggestion-comments').subscribe(() => {
+  const suggestions = room.collection('suggestions').getList();
+  const suggestionsList = document.getElementById('suggestionsList');
+  if (suggestionsList && suggestions.length) {
+    const currentSuggestions = suggestions.map(s => ({
+      ...s
+    }));
+    room.collection('suggestions').subscribe(() => {
+      displaySuggestions(currentSuggestions);
+    });
+  }
+});
+async function publishUpdate() {
+  if (room.party.client.username !== 'lak04171') return;
+  const formState = {
+    weaponName: document.getElementById('weaponName').value,
+    weaponDescription: document.getElementById('weaponDescription').value,
+    weaponContext: document.getElementById('weaponContext').value,
+    weaponType: document.getElementById('weaponType').value,
+    optionalType1: document.getElementById('optionalWeaponType1').value,
+    optionalType2: document.getElementById('optionalWeaponType2').value,
+    weaponElement: document.getElementById('weaponElement').value,
+    optionalElement1: document.getElementById('optionalElement1').value,
+    optionalElement2: document.getElementById('optionalElement2').value,
+    weaponRarity: document.getElementById('weaponRarity').value,
+    weaponPrivacy: document.getElementById('weaponPrivacy').checked
+  };
+  localStorage.setItem('weaponForgeState', JSON.stringify(formState));
+  await room.collection('updates').create({
+    type: 'redirect',
+    url: 'https://websim.ai/p/bwkafqvj9rnx8oeljz73',
+    timestamp: new Date().toISOString()
+  });
+  window.location.href = 'https://websim.ai/p/bwkafqvj9rnx8oeljz73';
+}
+room.collection('updates').subscribe(updates => {
+  const latestUpdate = updates[updates.length - 1];
+  if (latestUpdate?.type === 'redirect' && latestUpdate.timestamp > localStorage.getItem('lastUpdateTimestamp')) {
+    localStorage.setItem('lastUpdateTimestamp', latestUpdate.timestamp);
+    const formState = {
+      weaponName: document.getElementById('weaponName').value,
+      weaponDescription: document.getElementById('weaponDescription').value,
+      weaponContext: document.getElementById('weaponContext').value,
+      weaponType: document.getElementById('weaponType').value,
+      optionalType1: document.getElementById('optionalWeaponType1').value,
+      optionalType2: document.getElementById('optionalWeaponType2').value,
+      weaponElement: document.getElementById('weaponElement').value,
+      optionalElement1: document.getElementById('optionalElement1').value,
+      optionalElement2: document.getElementById('optionalElement2').value,
+      weaponRarity: document.getElementById('weaponRarity').value,
+      weaponPrivacy: document.getElementById('weaponPrivacy').checked
+    };
+    localStorage.setItem('weaponForgeState', JSON.stringify(formState));
+    window.location.href = latestUpdate.url;
+  }
+});
+async function publishBattleLog(battleDesc, winner, teams = null) {
+  const location = teams ? document.getElementById('teamBattleLocation').value : document.getElementById('battleLocation').value;
+  const goreLevel = document.getElementById('goreIntensity').value;
+  await room.collection('battle-logs').create({
+    description: battleDesc,
+    winner: winner,
+    location: location || 'Arena',
+    goreLevel,
+    timestamp: new Date().toISOString(),
+    isTeamBattle: !!teams,
+    teams: teams
+  });
+}
+room.collection('battle-logs').subscribe(logs => {
+  const battleLogsList = document.getElementById('battleLogsList');
+  battleLogsList.innerHTML = logs.sort((a, b) => new Date(a.created_at) - new Date(b.created_at)).map(log => `
+      <div class="battle-log-item">
+        <p>${log.isTeamBattle ? 'Team Battle' : 'Duel'} at ${log.location} (${log.goreLevel})</p>
+        <p>Winner: ${log.winner}</p>
+        ${log.description}
+        <small>By ${log.username} at ${new Date(log.created_at).toLocaleString()}</small>
+      </div>
+    `).join('');
+});
+document.addEventListener('DOMContentLoaded', () => {
+  const searchInput = document.getElementById('weaponSearch');
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      const weapons = room.collection('weapons').getList();
+      displayWeapons(weapons);
+    });
+  }
+  const sortSelect = document.getElementById('sortBy');
+  if (sortSelect) {
+    sortSelect.addEventListener('change', () => {
+      const weapons = room.collection('weapons').getList();
+      displayWeapons(weapons);
+    });
+  }
+});
+async function addComment(suggestionId) {
+  const input = document.getElementById(`comment-${suggestionId}`);
+  const text = input.value.trim();
+  if (text) {
+    await room.collection('suggestion-comments').create({
+      suggestionId,
+      text,
+      timestamp: new Date().toISOString(),
+      username: room.party.client.username
+    });
+    input.value = '';
+  }
+}
+async function toggleLike(suggestionId) {
+  const existingLike = room.collection('suggestion-likes').getList().find(l => l.suggestionId === suggestionId && l.username === room.party.client.username);
+  if (existingLike) {
+    await room.collection('suggestion-likes').delete(existingLike.id);
+  } else {
+    await room.collection('suggestion-likes').create({
+      suggestionId,
+      timestamp: new Date().toISOString(),
+      username: room.party.client.username
+    });
+  }
+}
+async function submitCode() {
+  const code = document.getElementById('codeInput').value.trim().toLowerCase();
+  switch (code) {
+    case 'emo':
+      document.body.classList.remove('theme-cat');
+      document.body.classList.add('theme-emo');
+      document.querySelectorAll('*').forEach(el => {
+        if (getComputedStyle(el).fontFamily.includes('PixelBody') || getComputedStyle(el).fontFamily.includes('PixelTitle') || getComputedStyle(el).fontFamily.includes('PixelBlurb') || getComputedStyle(el).fontFamily.includes('CatPaw')) {
+          el.style.fontFamily = "Viafont, monospace";
+        }
+      });
+      break;
+    case ':3':
+      document.body.classList.remove('theme-emo');
+      document.body.classList.add('theme-cat');
+      document.querySelectorAll('*').forEach(el => {
+        if (getComputedStyle(el).fontFamily.includes('PixelBody') || getComputedStyle(el).fontFamily.includes('PixelTitle') || getComputedStyle(el).fontFamily.includes('PixelBlurb') || getComputedStyle(el).fontFamily.includes('Viafont')) {
+          el.style.fontFamily = "CatPaw, sans-serif";
+        }
+      });
+      break;
+    default:
+      alert('Invalid code!');
+  }
+  document.getElementById('codeInput').value = '';
+}
+window.addEventListener('unhandledrejection', function (event) {
+  console.error('Unhandled promise rejection:', event.reason);
+  if (event.reason.message && event.reason.message.includes('timed out')) {
+    alert(event.reason.message);
+  }
+});
+function viewWeaponStats(index) {
+  const statsDiv = document.getElementById('selectedWeaponStats');
+  const weapon = playerInventory[index];
+  if (statsDiv.dataset.currentIndex === index.toString()) {
+    statsDiv.classList.toggle('visible');
+    statsDiv.dataset.currentIndex = statsDiv.classList.contains('visible') ? index : '';
+    return;
+  }
+  if (!weapon) {
+    statsDiv.classList.remove('visible');
+    statsDiv.dataset.currentIndex = '';
+    return;
+  }
+  let html = createWeaponCard(weapon, true);
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = html;
+  const deleteBtn = tempDiv.querySelector('.delete-btn');
+  if (deleteBtn) deleteBtn.remove();
+  statsDiv.innerHTML = tempDiv.innerHTML;
+  statsDiv.classList.add('visible');
+  statsDiv.dataset.currentIndex = index;
+}
+async function startNewAdventure() {
+  document.getElementById('adventureText').innerHTML = 'Starting adventure...';
+  document.getElementById('customAction').disabled = false;
+  document.getElementById('submitActionBtn').disabled = false;
+  playerInventory = [];
+  adventureState = {
+    startTime: new Date().toISOString(),
+    actionsPerformed: 0,
+    battlesWon: 0,
+    weaponsFound: 0,
+    isEnded: false,
+    difficultyMultiplier: 1.5
+  };
+  const startingWeaponChoice = document.getElementById('startingWeaponChoice').value;
+  const specificWeaponSelect = document.getElementById('specificWeapon');
+  const adventureLocation = document.getElementById('adventureLocation').value;
+  specificWeaponSelect.style.display = startingWeaponChoice === 'choose' ? 'inline-block' : 'none';
+  try {
+    const weapons = room.collection('weapons').getList().filter(w => !w.isPrivate || w.creatorId === room.party.client.id);
+    let startingWeapon;
+    if (startingWeaponChoice === 'choose' && specificWeaponSelect.value) {
+      startingWeapon = weapons.find(w => w.id === specificWeaponSelect.value);
+    } else {
+      const commonWeapons = weapons.filter(w => w.rarity === 'Common');
+      const rareWeapons = weapons.filter(w => w.rarity !== 'Common');
+      startingWeapon = Math.random() < 0.75 && commonWeapons.length > 0 ? commonWeapons[Math.floor(Math.random() * commonWeapons.length)] : rareWeapons[Math.floor(Math.random() * rareWeapons.length)];
+    }
+    const response = await fetch('/api/ai_completion', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        prompt: `Generate an initial scene for a text RPG adventure.
+                Player starts with: ${JSON.stringify(startingWeapon)}
+                ${adventureLocation ? `Location: ${adventureLocation}` : 'Generate an interesting location'}
+                Available weapons to potentially find: ${weapons.map(w => w.name).join(', ')}
+                
+                Create a rich opening scene that:
+                - Takes place in ${adventureLocation || 'a generated location'} 
+                - Balances danger with exploration and discovery
+                - Includes opportunities for peaceful interaction
+                - Creates interesting story hooks
+                - Gives clear environmental details
+                - Mixes combat with non-combat encounters
+                
+                Format as:
+                {
+                  "scene": {
+                    "location": string,
+                    "description": string
+                  }
+                }`
+      })
+    });
+    const data = await response.json();
+    if (startingWeapon) {
+      playerInventory.push(startingWeapon);
+    }
+    currentLocation = adventureLocation || data.scene.location;
+    document.getElementById('adventureText').innerHTML = data.scene.description;
+    updateInventory();
+  } catch (error) {
+    console.error('Error starting adventure:', error);
+    document.getElementById('adventureText').innerHTML = 'Error starting adventure. Please try again.';
+  }
+}
+document.getElementById('startingWeaponChoice')?.addEventListener('change', e => {
+  const specificWeaponSelect = document.getElementById('specificWeapon');
+  specificWeaponSelect.style.display = e.target.value === 'choose' ? 'inline-block' : 'none';
+  if (e.target.value === 'choose') {
+    specificWeaponSelect.innerHTML = '<option value="">Select a Weapon</option>';
+    const weapons = room.collection('weapons').getList();
+    weapons.forEach(weapon => {
+      const option = document.createElement('option');
+      option.value = weapon.id;
+      option.textContent = weapon.name;
+      option.className = `rarity-${weapon.rarity}`;
+      specificWeaponSelect.appendChild(option);
+    });
+  }
+});
+function updateInventory() {
+  const inventoryDiv = document.getElementById('inventoryList');
+  inventoryDiv.innerHTML = playerInventory.map((weapon, index) => `
+    <div class="inventory-item weapon-list-item rarity-${weapon.rarity}" onclick="viewWeaponStats(${index})">
+      ${weapon.name}
+    </div>
+  `).join('');
+  document.getElementById('selectedWeaponStats').classList.remove('visible');
+}
+async function submitCustomAction() {
+  const actionInput = document.getElementById('customAction');
+  const submitBtn = document.getElementById('submitActionBtn');
+  const processingDiv = document.getElementById('actionProcessing');
+  const action = actionInput.value.trim();
+  if (!action || adventureState.isEnded) return;
+  actionInput.disabled = true;
+  submitBtn.disabled = true;
+  processingDiv.style.display = 'block';
+  actionInput.value = '';
+  try {
+    const availableWeapons = room.collection('weapons').getList().filter(w => !w.isPrivate || w.creatorId === room.party.client.id);
+    const response = await fetch('/api/ai_completion', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        prompt: `Continue the RPG adventure based on player's custom action.
+                Current location: ${currentLocation}
+                Player inventory: ${playerInventory.map(w => w.name).join(', ')}
+                Player's action: "${action}"
+                Adventure state: ${JSON.stringify(adventureState)}
+                Difficulty multiplier: ${adventureState.difficultyMultiplier}
+                
+                Important guidelines:
+                - STRICTLY interpret and follow the player's exact action word for word if physically possible
+                - If the action is physically impossible, explain why and let the player try again
+                - Do not auto-complete or assume additional actions beyond what was typed
+                - Balance combat with exploration and interaction 
+                - Include peaceful solutions when possible
+                - Add descriptive breaks between intense moments
+                - Create meaningful non-combat encounters
+                - Mix puzzles and social interactions with combat
+                - When player gathers/finds/picks up items, generate a relevant thematic weapon 
+                - If player finds an item that could be used as a weapon, create a weapon based on it
+                - If required weapon doesn't exist, generate stats for it including its regular attack
+                - Consider current location and inventory for item-based weapons
+                - Keep consistent with previous context
+                - Allow permanent death/failure
+                
+                Format as:
+                {
+                  "scene": {
+                    "location": string,
+                    "description": string
+                  },
+                  "requiredWeaponName": null | string,
+                  "newWeaponId": null | string, 
+                  "weaponReason": null | string,
+                  "actionOutcome": string,
+                  "isValidAction": boolean,
+                  "invalidReason"?: string,
+                  "adventureEnded": boolean,
+                  "endReason"?: string,
+                  "generateWeaponFromItem"?: {
+                    name: string,
+                    description: string,
+                    element: string,
+                    rarity: string,
+                    damage: number,
+                    specialAbility: string,
+                    passiveEffects?: string,
+                    appearance: string,
+                    price: number,
+                    flavorBlurb: string
+                  }
+                }`
+      })
+    });
+    const data = await response.json();
+    if (!data.isValidAction) {
+      document.getElementById('adventureText').innerHTML = `That action isn't possible here: ${data.invalidReason}\n\nCurrent situation:\n${data.scene.description}`;
+      return;
+    }
+    currentLocation = data.scene.location;
+    adventureState = {
+      ...adventureState,
+      lastAction: action,
+      lastActionOutcome: data.actionOutcome,
+      currentLocation: data.scene.location,
+      actionsPerformed: adventureState.actionsPerformed + 1,
+      isEnded: data.adventureEnded,
+      difficultyMultiplier: Math.min(adventureState.difficultyMultiplier * 1.1, 3.0)
+    };
+    let output = `${data.actionOutcome}\n\n${data.scene.description}`;
+    if (data.requiredWeaponName) {
+      let newWeapon;
+      const existingWeapon = availableWeapons.find(w => w.name === data.requiredWeaponName);
+      if (existingWeapon) {
+        newWeapon = existingWeapon;
+      } else if (data.newWeaponId) {
+        newWeapon = availableWeapons.find(w => w.id === data.newWeaponId);
+      }
+      if (newWeapon && data.weaponReason) {
+        playerInventory.push(newWeapon);
+        adventureState.weaponsFound++;
+        output += `\n\nYou obtained ${newWeapon.name}! ${data.weaponReason}`;
+        updateInventory();
+      }
+    }
+    if (data.generateWeaponFromItem) {
+      const weaponFromItem = data.generateWeaponFromItem;
+      const newWeapon = await room.collection('weapons').create({
+        ...weaponFromItem,
+        creatorId: room.party.client.id,
+        isPrivate: false
+      });
+      playerInventory.push(newWeapon);
+      adventureState.weaponsFound++;
+      output += `\n\nYou fashioned ${weaponFromItem.name} from your findings! ${weaponFromItem.flavorBlurb}`;
+      updateInventory();
+    }
+    if (data.adventureEnded) {
+      output += `\n\n<div class="adventure-ended">Adventure Ended: ${data.endReason}</div>`;
+      actionInput.disabled = true;
+      submitBtn.disabled = true;
+    }
+    document.getElementById('adventureText').innerHTML = output;
+  } catch (error) {
+    console.error('Error processing custom action:', error);
+    document.getElementById('adventureText').innerHTML += '\n\nError processing your action. Please try again.';
+  } finally {
+    if (!adventureState.isEnded) {
+      actionInput.disabled = false;
+      submitBtn.disabled = false;
+    }
+    processingDiv.style.display = 'none';
+    document.getElementById('selectedWeaponStats').classList.remove('visible');
+  }
+}
+function updateMergeWeaponSelects() {
+  const weapons = room.collection('weapons').getList();
+  const visibleWeapons = weapons.filter(weapon => {
+    return !weapon.isPrivate || weapon.creatorId === room.party.client.id;
+  });
+  const selects = [document.getElementById('mergeWeapon1'), document.getElementById('mergeWeapon2')];
+  selects.forEach(select => {
+    if (!select) return;
+    select.value = '';
+    select.innerHTML = '<option value="">Select a Weapon</option>';
+    visibleWeapons.forEach(weapon => {
+      const option = document.createElement('option');
+      option.value = weapon.id;
+      option.className = `rarity-${weapon.rarity}`;
+      option.textContent = weapon.name;
+      select.appendChild(option);
+    });
+  });
+}
+function switchMode(mode) {
+  const body = document.body;
+  const inputSection = document.querySelector('.input-section');
+  const battleSection = document.querySelector('.battle-section');
+  const selectedWeapon = document.getElementById('selectedWeapon');
+  const suggestionsBox = document.querySelector('.suggestions-box');
+  const adminBox = document.querySelector('.admin-box');
+  const battleLogsBox = document.querySelector('.battle-logs-box');
+  body.classList.remove('arena-mode', 'suggestions-mode', 'admin-mode', 'battle-logs-mode', 'codes-mode', 'rpg-mode');
+  inputSection.style.display = 'none';
+  battleSection.style.display = 'none';
+  selectedWeapon.style.display = 'none';
+  suggestionsBox.style.display = 'none';
+  adminBox.style.display = 'none';
+  battleLogsBox.style.display = 'none';
+  document.querySelector('.codes-box').style.display = 'none';
+  document.querySelector('.rpg-box').style.display = 'none';
+  document.querySelector('.admin-dropdown-content').classList.remove('show');
+  document.querySelector('.merge-section').style.display = 'none';
+  if (mode === 'forge') {
+    document.getElementById('weaponPrivacy').checked = false;
+    document.getElementById('weaponType').value = '';
+    document.getElementById('optionalWeaponType1').value = '';
+    document.getElementById('optionalWeaponType2').value = '';
+    document.getElementById('weaponElement').value = '';
+    document.getElementById('optionalElement1').value = '';
+    document.getElementById('optionalElement2').value = '';
+    document.getElementById('weaponRarity').value = '';
+  }
+  switch (mode) {
+    case 'arena':
+      body.classList.add('arena-mode');
+      battleSection.style.display = 'block';
+      updateWeaponSelects();
+      break;
+    case 'suggestions':
+      body.classList.add('suggestions-mode');
+      suggestionsBox.style.display = 'block';
+      break;
+    case 'admin':
+      if (room.party.client.username !== 'lak04171') {
+        return;
+      }
+      body.classList.add('admin-mode');
+      adminBox.style.display = 'block';
+      break;
+    case 'battle-logs':
+      body.classList.add('battle-logs-mode');
+      battleLogsBox.style.display = 'block';
+      break;
+    case 'codes':
+      body.classList.add('codes-mode');
+      document.querySelector('.codes-box').style.display = 'block';
+      break;
+    case 'merge':
+      document.querySelector('.merge-section').style.display = 'flex';
+      document.getElementById('selectedWeapon').style.display = 'none';
+      document.querySelector('.input-section').style.display = 'none';
+      if (typeof updateMergeWeaponSelects === 'function') {
+        updateMergeWeaponSelects();
+      }
+      break;
+    case 'rpg':
+      body.classList.add('rpg-mode');
+      document.querySelector('.rpg-box').style.display = 'block';
+      break;
+    default:
+      inputSection.style.display = 'grid';
+      selectedWeapon.style.display = 'block';
+      break;
+  }
+}
+let playerInventory = [];
+let currentLocation = '';
+let adventureState = {
+  startTime: null,
+  actionsPerformed: 0,
+  battlesWon: 0,
+  weaponsFound: 0,
+  isEnded: false
+};
+function validateMergeSelection() {
+  const weapon1 = document.getElementById('mergeWeapon1').value;
+  const weapon2 = document.getElementById('mergeWeapon2').value;
+  if (weapon1 && weapon2 && weapon1 === weapon2) {
+    alert('You cannot select the same weapon twice for merging!');
+    document.getElementById('mergeWeapon2').value = '';
+  }
+}
+async function mergeWeapons() {
+  const weapon1Id = document.getElementById('mergeWeapon1').value;
+  const weapon2Id = document.getElementById('mergeWeapon2').value;
+  if (!weapon1Id || !weapon2Id) {
+    alert('Please select two weapons to merge!');
+    return;
+  }
+  const weapons = room.collection('weapons').getList();
+  const weapon1 = weapons.find(w => w.id === weapon1Id);
+  const weapon2 = weapons.find(w => w.id === weapon2Id);
+  document.getElementById('loading').style.display = 'block';
+  try {
+    const response = await fetch('/api/ai_completion', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        prompt: `Create a new weapon by merging these two weapons:
+                
+                Weapon 1: ${JSON.stringify(weapon1)}
+                Weapon 2: ${JSON.stringify(weapon2)}
+                
+                Rules for merging:
+                - Combine elements and functions in a creative way
+                - New rarity should be one level higher than highest input rarity
+                - Damage should be higher than either input weapon
+                - Incorporate abilities from both weapons
+                - Price should exceed both original weapons
+                - Include a regular attack ability 
+                
+                Format as:
+                {
+                  "result": {
+                    "name": string,
+                    "damage": number,
+                    "element": string,
+                    "rarity": string,
+                    "specialAbility": string,
+                    "passiveEffects": string,
+                    "appearance": string,
+                    "price": number,
+                    "flavorBlurb": string
+                  }
+                }`,
+        data: {
+          weapon1,
+          weapon2
+        }
+      })
+    });
+    const result = await response.json();
+    await room.collection('weapons').create({
+      ...result.result,
+      creatorId: room.party.client.id,
+      isPrivate: false
+    });
+    const mergeResult = document.getElementById('mergeResult');
+    const newWeaponCard = document.createElement('div');
+    newWeaponCard.className = `weapon-card rarity-${result.result.rarity}`;
+    newWeaponCard.innerHTML = createWeaponCard(result.result);
+    mergeResult.innerHTML = '<h3>Merged Result:</h3>';
+    mergeResult.appendChild(newWeaponCard);
+    document.getElementById('mergeWeapon1').value = '';
+    document.getElementById('mergeWeapon2').value = '';
+  } catch (error) {
+    console.error('Error merging weapons:', error);
+    alert(error.message || 'Failed to merge weapons. Please try again.');
+  } finally {
+    document.getElementById('loading').style.display = 'none';
+  }
+}
+room.collection('weapon-comments').subscribe(comments => {
+  const weapons = room.collection('weapons').getList();
+  const selectedWeapon = document.getElementById('selectedWeapon');
+  if (selectedWeapon && selectedWeapon.children.length) {
+    const weaponCard = selectedWeapon.children[0];
+    const weaponId = weaponCard.dataset.weaponId;
+    if (weaponId) {
+      updateWeaponComments(weaponId, comments);
+    }
+  }
+});
+function updateWeaponComments(weaponId, comments) {
+  const weaponComments = document.querySelector(`.weapon-comments[data-weapon-id="${weaponId}"]`);
+  if (!weaponComments) return;
+  const relevantComments = comments.filter(c => c.weaponId === weaponId).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  weaponComments.innerHTML = `
+    <input type="text"
+      class="weapon-comment-input"
+      placeholder="Add a comment..."
+      onkeypress="if(event.key === 'Enter') addWeaponComment('${weaponId}')"
+    >
+    ${relevantComments.map(comment => `
+      <div class="weapon-comment">
+        <span class="weapon-comment-username">${comment.username}</span>
+        <span class="weapon-comment-timestamp">${new Date(comment.created_at).toLocaleString()}</span>
+        <div class="weapon-comment-text">${comment.text}</div>
+      </div>
+    `).join('')}
+  `;
+}
+async function addWeaponComment(weaponId) {
+  const input = document.querySelector(`.weapon-comments[data-weapon-id="${weaponId}"] .weapon-comment-input`);
+  const text = input.value.trim();
+  if (text) {
+    await room.collection('weapon-comments').create({
+      weaponId,
+      text,
+      timestamp: new Date().toISOString()
+    });
+    input.value = '';
+  }
+}</script>
+</body>
+</html>
