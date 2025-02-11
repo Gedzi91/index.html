@@ -1,0 +1,340 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCP Article Generator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <button id="infoToggle" class="info-toggle">Show Information</button>
+    <div id="infoBox" class="info-box hidden">
+        <button class="info-close">&times;</button>
+        <h3>SCP Documentation Guidelines</h3>
+        
+        <div class="info-section">
+            <h4>Item Number</h4>
+            <p>Format: SCP-XXXX where X is a number.</p>
+            <p>Used for unique identification and cataloging of anomalous entities within the Foundation database.</p>
+        </div>
+
+        <div class="info-section">
+            <h4>Object Class</h4>
+            <p>Safe: Easily contained, predictable</p>
+            <p>Euclid: Unpredictable, requires more resources</p>
+            <p>Keter: Hostile, difficult to contain</p>
+            <p>Thaumiel: Used to contain other SCPs</p>
+            <p>Apollyon: Uncontainable, world-ending</p>
+            <p>Neutralized: No longer anomalous</p>
+            <p>Archon: Better uncontained</p>
+            <p>Cernunnos: Nature-based anomaly</p>
+            <p>Decommissioned: Terminated</p>
+            <p>Explained: Scientific explanation found</p>
+            <p>Hiemal: Cyclical containment</p>
+            <p>Pending: Under evaluation</p>
+            <p>Tiamat: Self-containing</p>
+            <p>Ticonderoga: Reality anchor</p>
+            <p>Uncontained: Active breach status</p>
+            <p>Esoteric: Custom classification</p>
+        </div>
+
+        <div class="info-section">
+            <h4>Disruption Class</h4>
+            <p>Dark: Individual impact</p>
+            <p>Vlam: Small group impact</p>
+            <p>Keneq: City-wide impact</p>
+            <p>Ehki: National impact</p>
+            <p>Amidia: Global/Universal impact</p>
+        </div>
+
+        <div class="info-section">
+            <h4>Risk Class</h4>
+            <p>Notice: Minimal threat level</p>
+            <p>Caution: Low threat level</p>
+            <p>Warning: Moderate threat level</p>
+            <p>Danger: High threat level</p>
+            <p>Critical: Maximum threat level</p>
+        </div>
+
+        <div class="info-section">
+            <h4>Clearance Level</h4>
+            <p>Level 1: Standard personnel access</p>
+            <p>Level 2: Research staff access</p>
+            <p>Level 3: Senior research access</p>
+            <p>Level 4: Site director access</p>
+            <p>Level 5: Regional director access</p>
+            <p>Level 6: O5 Council only</p>
+        </div>
+
+        <div class="info-section">
+            <h4>Optional Sections</h4>
+            <p>Incident Reports: Notable containment breaches or events</p>
+            <p>Test Logs: Documented experiments</p>
+            <p>Interview Logs: Subject interrogations</p>
+            <p>Addenda: Supplementary information</p>
+            <p>Recovery: Initial containment details</p>
+            <p>Personnel: Staff requirements</p>
+            <p>Analysis: Detailed anomaly study</p>
+            <p>Revisions: Documentation changes</p>
+            <p>Related Anomalies: Cross-SCP testing</p>
+            <p>Associated Media: Related files/evidence</p>
+        </div>
+    </div>
+    <button id="changelogToggle" class="changelog-toggle">Show Changelog</button>
+    <div id="changelogBox" class="changelog-box hidden">
+        <button class="changelog-close">&times;</button>
+        <h3>SCP Article Generator Changelog</h3>
+        
+        <div class="changelog-entry">
+            <h4>Current Version - 2.0.0</h4>
+            <ul>
+                <li>Major Classification System Update:
+                    <ul>
+                        <li>Added Disruption Classification System:
+                            <ul>
+                                <li>Dark (Individual Impact) - Green</li>
+                                <li>Vlam (Small Group Impact) - Blue</li>
+                                <li>Keneq (City Impact) - Yellow</li>
+                                <li>Ehki (National Impact) - Orange</li>
+                                <li>Amidia (Universal Impact) - Red</li>
+                            </ul>
+                        </li>
+                        <li>Added Risk Classification System:
+                            <ul>
+                                <li>Notice (Minimal Effects)</li>
+                                <li>Caution (Mild Effects)</li>
+                                <li>Warning (Moderate Effects)</li>
+                                <li>Danger (Severe Effects)</li>
+                                <li>Critical (Extreme Effects)</li>
+                            </ul>
+                        </li>
+                        <li>Added Clearance Level System:
+                            <ul>
+                                <li>Level 1: Unrestricted Access</li>
+                                <li>Level 2: Restricted Access</li>
+                                <li>Level 3: Confidential Access</li>
+                                <li>Level 4: Secret Access</li>
+                                <li>Level 5: Top Secret Access</li>
+                                <li>Level 6: Cosmic Top Secret (O5 Only)</li>
+                            </ul>
+                        </li>
+                        <li>Expanded Object Classes:
+                            <ul>
+                                <li>Added Archon, Cernunnos, Decommissioned</li>
+                                <li>Added Explained, Hiemal, Pending</li>
+                                <li>Added Tiamat, Ticonderoga, Uncontained</li>
+                                <li>Replaced Custom with Esoteric classification</li>
+                                <li>Updated color-coding for all classes</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li>UI/UX Improvements:
+                    <ul>
+                        <li>Added comprehensive Info Box system</li>
+                        <li>Added VFX toggle control</li>
+                        <li>Added this changelog system</li>
+                        <li>Enhanced visual effects and animations</li>
+                        <li>Improved overall website polish and performance</li>
+                    </ul>
+                </li>
+                <li>Community Features:
+                    <ul>
+                        <li>Added Community Feed system</li>
+                        <li>Added ability to share SCPs</li>
+                        <li>Added like functionality</li>
+                        <li>Added post management features</li>
+                        <li>Improved post display format</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <audio id="bgMusic" loop>
+        <source src="SCP Soundtrack- Menu Ambience extended 4.mp3" type="audio/mp3">
+    </audio>
+    <div class="crt"></div>
+    <div class="scanlines"></div>
+    <div class="vignette"></div>
+    <div class="container">
+        <div class="header">
+            <div class="announcement">
+                <span class="redacted">███████</span> you managed to get this on the hot page on websim <span class="redacted">████</span>
+            </div>
+            <div class="title-container">
+                <img src="Slungie.webp" alt="Cute bunny" class="header-bunny" id="headerBunny">
+                <div class="title-text">
+                    <h1>SCP Foundation</h1>
+                    <h2>Secure. Contain. Protect.</h2>
+                    <a href="https://websim.ai/@geat/backrooms-level-generator" class="subtitle-link" target="_blank">BACKROOMS GENERATOR OUT!</a>
+                </div>
+                <img src="QJoRQPn.png" alt="SCP Logo" class="header-logo">
+            </div>
+        </div>
+        
+        <div class="input-section">
+            <h3>Customization Options</h3>
+            <div class="options-grid">
+                <div class="option-group">
+                    <label for="itemNumber">Item Number:</label>
+                    <input type="text" id="itemNumber" placeholder="e.g. SCP-7391" pattern="SCP-\d+" title="Format: SCP-#### (numbers only)">
+                </div>
+                
+                <div class="option-group">
+                    <label for="objectClass">Object Class:</label>
+                    <select id="objectClass">
+                        <option value="">Auto-generate</option>
+                        <option value="Safe">Safe</option>
+                        <option value="Euclid">Euclid</option>
+                        <option value="Keter">Keter</option>
+                        <option value="Thaumiel">Thaumiel</option>
+                        <option value="Apollyon">Apollyon</option>
+                        <option value="Neutralized">Neutralized</option>
+                        <option value="Archon">Archon</option>
+                        <option value="Cernunnos">Cernunnos</option>
+                        <option value="Decommissioned">Decommissioned</option>
+                        <option value="Explained">Explained</option>
+                        <option value="Hiemal">Hiemal</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Tiamat">Tiamat</option>
+                        <option value="Ticonderoga">Ticonderoga</option>
+                        <option value="Uncontained">Uncontained</option>
+                        <option value="Esoteric">Esoteric...</option>
+                    </select>
+                    <div id="customObjectClassFields" class="hidden">
+                        <input type="text" id="customObjectClassName" placeholder="Name of esoteric object class" class="custom-input">
+                        <textarea id="customObjectClassDescription" placeholder="Generalized description of esoteric object class" class="custom-input"></textarea>
+                    </div>
+                    <div class="disclaimer">HIGHER OBJECT CLASS DOESN'T EQUAL DEADLY. IT ONLY MEANS HOW DIFFICULT IT IS TO CONTAIN.</div>
+                </div>
+
+                <div class="option-group">
+                    <label for="disruptionClass">Disruption Class:</label>
+                    <select id="disruptionClass">
+                        <option value="">Auto-detect</option>
+                        <option value="Dark">Dark (Individual)</option>
+                        <option value="Vlam">Vlam (Few People)</option>
+                        <option value="Keneq">Keneq (City-Level)</option>
+                        <option value="Ehki">Ehki (Country-Level)</option>
+                        <option value="Amidia">Amidia (Universal)</option>
+                    </select>
+                    <div class="disclaimer">DETERMINES THE SCALE OF THE SCP'S EFFECTS ON REALITY</div>
+                </div>
+
+                <div class="option-group">
+                    <label for="riskClass">Risk Class:</label>
+                    <select id="riskClass">
+                        <option value="">Auto-detect</option>
+                        <option value="Notice">Notice (No/Minimal Effects)</option>
+                        <option value="Caution">Caution (Mild Effects)</option>
+                        <option value="Warning">Warning (Moderate Effects)</option>
+                        <option value="Danger">Danger (Severe Effects)</option>
+                        <option value="Critical">Critical (Extreme Effects)</option>
+                    </select>
+                    <div class="disclaimer">DETERMINES THE SEVERITY AND DANGER LEVEL OF THE SCP</div>
+                </div>
+
+                <div class="option-group">
+                    <label for="clearanceLevel">Clearance Level:</label>
+                    <select id="clearanceLevel">
+                        <option value="">Auto-detect</option>
+                        <option value="Level 1">Level 1 - Unrestricted</option>
+                        <option value="Level 2">Level 2 - Restricted</option>
+                        <option value="Level 3">Level 3 - Confidential</option>
+                        <option value="Level 4">Level 4 - Secret</option>
+                        <option value="Level 5">Level 5 - Top Secret</option>
+                        <option value="Level 6">Level 6 - Cosmic Top Secret</option>
+                    </select>
+                    <div class="disclaimer">DETERMINES WHO CAN ACCESS THIS INFORMATION</div>
+                </div>
+
+                <div class="option-group">
+                    <label for="articleLength">Article Length:</label>
+                    <select id="articleLength">
+                        <option value="100">Brief (≈100 words)</option>
+                        <option value="500" selected>Standard (≈500 words)</option>
+                        <option value="1000">Detailed (≈1000 words)</option>
+                        <option value="2500">Extended (≈2500 words)</option>
+                        <option value="5000">Comprehensive (≈5000 words)</option>
+                        <option value="7500">Extensive (≈7500 words) ⚠️ MAY TAKE A WHILE TO GENERATE</option>
+                        <option value="10000">Complete (≈10000 words) ⚠️ MAY TAKE A WHILE TO GENERATE</option>
+                        <option value="custom">Custom...</option>
+                    </select>
+                    <div id="customLengthField" class="hidden">
+                        <input type="number" 
+                               id="customWordCount" 
+                               min="1" 
+                               max="100000000" 
+                               placeholder="Enter word count (1-100,000,000)"
+                               class="custom-input">
+                        <div class="disclaimer">⚠️ High word counts may take a very long time to generate.</div>
+                    </div>
+                </div>
+
+                <div class="option-group">
+                    <label>Extra Details:</label>
+                    <div class="toggle-buttons">
+                        <button class="toggle-button" data-detail="incidents">Incident Reports</button>
+                        <button class="toggle-button" data-detail="testing">Test Logs</button>
+                        <button class="toggle-button" data-detail="interviews">Interview Logs</button>
+                        <button class="toggle-button" data-detail="addenda">Addenda</button>
+                        <button class="toggle-button" data-detail="recovery">Recovery Details</button>
+                        <button class="toggle-button" data-detail="personnel">Personnel Details</button>
+                        <button class="toggle-button" data-detail="analysis">Properties Analysis</button>
+                        <button class="toggle-button" data-detail="revisions">Document History</button>
+                        <button class="toggle-button" data-detail="crosslinks">Related Anomalies</button>
+                        <button class="toggle-button" data-detail="media">Associated Media</button>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Input Subject Details</h3>
+            <div class="input-controls">
+                <button id="randomPromptButton" class="secondary-button">Generate Random Prompt</button>
+            </div>
+            <textarea id="inputText" placeholder="Describe the anomalous entity/object you want to document..."></textarea>
+            <div class="button-group">
+                <button id="generateButton">Generate SCP Article</button>
+                <button id="saveButton" class="secondary-button" disabled>Save Generated Text</button>
+                <button id="viewSavedButton" class="secondary-button">View Saved Articles</button>
+                <button id="shareButton" class="secondary-button" disabled>Share to Community</button>
+                <button id="toggleFeedButton" class="secondary-button">Show Community Feed</button>
+            </div>
+        </div>
+
+        <div id="communityFeed" class="community-feed hidden">
+            <h3>Community SCPs</h3>
+            <div class="feed-controls">
+                <select id="feedSort">
+                    <option value="newest">Newest First</option>
+                    <option value="popular">Most Popular</option>
+                </select>
+            </div>
+            <div id="feedContent" class="feed-content"></div>
+        </div>
+
+        <div class="output-section" id="outputSection">
+            <div id="loadingIndicator" class="hidden">
+                <div class="spinner"></div>
+                <p>Processing anomalous data...</p>
+            </div>
+            <div id="articleOutput"></div>
+        </div>
+
+        <!-- Add modal for saved articles -->
+        <div id="savedArticlesModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Saved SCP Articles</h2>
+                    <button class="close-button">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div id="savedArticlesList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <button id="musicToggleBtn" class="music-toggle active">🔊 Disable Music</button>
+    <button id="vfxToggleBtn" class="vfx-toggle active">🖥️ Disable VFX</button>
+    <script type="module" src="script.js"></script>
+</body>
+</html>
